@@ -1,0 +1,9 @@
+{
+  "themes": {
+    "precio por asiento": ["per seat", "per-seat", "por asiento", "seat price", "expensive", "caro", "cara"],
+    "sin recordatorio sms": ["sms", "text reminder", "no reminder", "recordatorio"],
+    "confusion de zona horaria": ["time zone", "timezone", "zona horaria", "wrong time", "hora equivocada"],
+    "interfaz lenta": ["slow", "lag", "lent", "tarda"],
+    "cancelar es dificil": ["cancel", "refund", "reembolso", "baja"]
+  }
+}

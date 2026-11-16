@@ -1,0 +1,18 @@
+{
+  "platform": "both",
+  "avoid": ["Ejemplo App", "ejemplo.com"],
+  "ios": {
+    "title": "Hueco - Reservas en equipo",
+    "subtitle": "Precio plano, no por asiento",
+    "promotional_text": "Precio plano, recordatorios por SMS y zona horaria confirmada.",
+    "keywords": "calendario,citas,agenda,booking,scheduling",
+    "description": "Comparte un enlace y deja que reserven. Precio plano por equipo, recordatorios por SMS y confirmacion de zona horaria.",
+    "screenshots": 5
+  },
+  "android": {
+    "title": "Hueco - Reservas en equipo",
+    "short_description": "Enlaces de reserva con precio plano, no por asiento.",
+    "full_description": "Comparte un enlace y deja que reserven. Precio plano por equipo, recordatorios por SMS y confirmacion de zona horaria.",
+    "screenshots": 6
+  }
+}

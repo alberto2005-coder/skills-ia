@@ -1,0 +1,13 @@
+id,area,priority,feature,status,notes
+recon-01,reservas,must,Ver huecos libres en el calendario,done,
+recon-02,reservas,must,Reservar un hueco como invitado,done,
+recon-03,reservas,must,Reprogramar y cancelar con enlace,done,sin email de aviso aun
+recon-04,reservas,should,Recordatorio por email,done,Resend
+recon-05,reservas,should,Recordatorio por SMS,missing,Solo si el plan lo paga
+recon-06,reservas,must,Evitar doble reserva del mismo hueco,done,unique index
+recon-07,host,must,Definir disponibilidad semanal,done,
+recon-08,host,should,Round-robin para equipos,out_of_scope,No en v1
+recon-09,host,could,Embed del calendario en web,missing,
+recon-10,cuenta,must,Registro y login,done,
+recon-11,cuenta,must,Stripe para reservas de pago,missing,
+recon-12,cuenta,should,Zona horaria del invitado,partial,detecta pero no confirma

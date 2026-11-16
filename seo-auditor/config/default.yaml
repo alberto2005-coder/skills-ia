@@ -1,0 +1,25 @@
+# Configuración documentada; el CLI también ofrece flags equivalentes.
+max_pages: 30
+max_depth: 3
+timeout_seconds: 10
+max_response_bytes: 2000000
+user_agent: "SEOAuditor/1.0 (+authorized SEO audit)"
+respect_robots_txt: true
+exclude_dirs:
+  - .git
+  - node_modules
+  - vendor
+  - dist
+  - build
+  - coverage
+  - .next
+  - .nuxt
+  - .venv
+  - venv
+  - __pycache__
+exclude_files:
+  - .env
+  - .env.local
+  - id_rsa
+  - id_ed25519
+  - credentials.json
