@@ -192,8 +192,22 @@ def validate_payload(payload: object, ledger_units: set[str] | None = None) -> l
 
     allowed_finding = set(schema["definitions"]["finding"]["properties"])
     seen: set[str] = set()
+    seen_fingerprints: dict[str, str] = {}
     for position, item in enumerate(findings, start=1):
         found_id = _check_finding(item, allowed_finding, position, ledger_units, errors)
+
+        label = found_id or f"findings[{position}]"
+        stored = item.get("fingerprint") if isinstance(item, dict) else None
+        if isinstance(stored, str) and FINGERPRINT_RE.match(stored):
+            previous = seen_fingerprints.get(stored)
+            if previous is not None:
+                errors.append(
+                    f"{label}: fingerprint duplicado (ya usado por {previous}); "
+                    "la huella deduplica entre pasadas, así que es el mismo hallazgo"
+                )
+            else:
+                seen_fingerprints[stored] = label
+
         if found_id is None:
             continue
         if found_id in seen:

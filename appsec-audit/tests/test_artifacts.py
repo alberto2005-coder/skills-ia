@@ -228,6 +228,24 @@ class TestValidateFindings(ArtifactTest):
         self.assertEqual(result.returncode, 1)
         self.assertIn("duplicado", result.stdout)
 
+    def test_duplicate_fingerprints_are_rejected(self):
+        second = confirmed(id="F-002", location={"file": "app/api.py", "line": 77})
+        result = run("validate_findings.py", self.write_json(payload(confirmed(), second)))
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("fingerprint duplicado", result.stdout)
+        self.assertIn("F-001", result.stdout)
+
+    def test_distinct_root_causes_are_not_duplicates(self):
+        other = confirmed(
+            id="F-002",
+            root_cause="otra causa distinta",
+            fingerprint=FINDINGS("CWE-89", "app/api.py", "otra causa distinta"),
+        )
+        result = run("validate_findings.py", self.write_json(payload(confirmed(), other)))
+
+        self.assertEqual(result.returncode, 0, result.stdout)
+
     def test_tampered_fingerprint_is_rejected(self):
         item = confirmed(root_cause="otra causa distinta")
         result = run("validate_findings.py", self.write_json(payload(item)))
