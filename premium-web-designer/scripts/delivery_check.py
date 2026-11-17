@@ -24,6 +24,8 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 MUST, SHOULD, NICE = "must", "should", "nice"
+
+HEADER_FILES = ("_headers", "netlify.toml", "vercel.json")
 SKIP_DIRS = {"node_modules", ".git", "dist", "build", ".cache", "vendor"}
 
 TITLE_RANGE = (15, 65)
@@ -379,6 +381,48 @@ def check_files(root: Path, result: Result, public: bool = False) -> None:
     result.add("FILE-004", NICE, llms.is_file(), "llms.txt para superficies de IA", "ausente" if not llms.is_file() else "")
 
 
+def check_headers(root: Path, result: Result, public: bool = False) -> None:
+    """Cabeceras de seguridad declaradas por el hosting. Solo en modo --public."""
+    if not public:
+        return
+
+    files = [root / name for name in HEADER_FILES if (root / name).is_file()]
+    text = "\n".join(read_text(path) for path in files).lower()
+    declared = ", ".join(path.name for path in files) or "ninguno"
+
+    result.add(
+        "HDR-001",
+        SHOULD,
+        bool(files),
+        "Fichero de cabeceras del sitio (_headers, netlify.toml o vercel.json)",
+        declared,
+    )
+
+    csp = "content-security-policy" in text
+    result.add(
+        "HDR-002",
+        SHOULD,
+        csp,
+        "Content-Security-Policy declarada",
+        "presente" if csp else "ausente",
+    )
+
+    hsts = "strict-transport-security" in text
+    if not hsts:
+        detail = "ausente"
+    elif "max-age" not in text:
+        detail = "sin max-age"
+    else:
+        detail = "presente"
+    result.add(
+        "HDR-003",
+        SHOULD,
+        hsts and "max-age" in text,
+        "Strict-Transport-Security con max-age",
+        detail,
+    )
+
+
 def render(root: Path, result: Result, public: bool = False) -> str:
     icons = {True: "OK  ", False: "FALLA"}
     mode = "sitio publicado" if public else "prototipo local (usa --public al publicar)"
@@ -427,6 +471,7 @@ def main(argv: list[str] | None = None) -> int:
     check_page(root, result, public=args.public)
     check_css(root, result)
     check_files(root, result, public=args.public)
+    check_headers(root, result, public=args.public)
 
     if args.json:
         print(

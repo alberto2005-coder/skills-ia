@@ -32,6 +32,8 @@ Static hosting does not fix these for you. Ship a headers file or configure the 
 - `X-Content-Type-Options: nosniff`, `Referrer-Policy` and `Permissions-Policy`.
 - Compression (brotli or gzip) enabled by the host; verify with the response headers.
 
+`delivery_check.py --public` looks for `_headers`, `netlify.toml` or `vercel.json`, reads the CSP and HSTS declarations and warns when either is missing or HSTS lacks `max-age`.
+
 ## CONTENT
 
 Avoid duplicate titles, empty metadata, keyword stuffing, misleading structured data and automatically generated meaningless copy.

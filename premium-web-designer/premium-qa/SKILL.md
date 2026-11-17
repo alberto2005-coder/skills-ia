@@ -46,6 +46,8 @@ Cubre `lang`, título, descripción, canonical, Open Graph, un solo `h1`, orden 
 
 **`--public` cuando la carpeta va a publicarse.** Sin esa bandera la puerta asume prototipo local y deja en aviso canonical, Open Graph con imagen, `robots.txt` y `sitemap.xml`. Con ella, esos cuatro son `must` y bloquean la entrega: úsala en el gate de salida de una web real, no en un borrador sin dominio.
 
+`--public` revisa además las cabeceras del hosting: busca `_headers`, `netlify.toml` o `vercel.json` y avisa si no declaran `Content-Security-Policy` o `Strict-Transport-Security` con `max-age`.
+
 ### 3. Medición en navegador
 
 Para cada ancho (360, 390, 768, 1024, 1440) ejecuta el snippet de `../references/qa-metrics.md` y anota: desbordamiento, líneas del `h1`, tamaño de los controles, posición de las anclas bajo la cabecera y elementos que se solapan.

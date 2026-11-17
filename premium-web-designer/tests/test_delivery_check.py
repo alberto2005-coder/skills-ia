@@ -1,7 +1,10 @@
 import contextlib
 import io
+import json
+import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -19,6 +22,7 @@ def run(target: Path, public: bool = False) -> dc.Result:
     dc.check_page(target, result, public=public)
     dc.check_css(target, result)
     dc.check_files(target, result, public=public)
+    dc.check_headers(target, result, public=public)
     return result
 
 
@@ -107,6 +111,81 @@ class TestDeliveryCheck(unittest.TestCase):
         public = execute("--public")
         self.assertEqual(public.returncode, 1, public.stdout)
         self.assertIn("HTML-007", public.stdout)
+
+    def test_headers_are_ignored_outside_public_mode(self):
+        ids = {item["id"] for item in run(FIXTURES / "site_ok").items}
+
+        self.assertFalse({check for check in ids if check.startswith("HDR-")})
+
+    def test_public_site_without_headers_is_flagged(self):
+        result = run(FIXTURES / "site_ok", public=True)
+        failed = {item["id"] for item in result.failures}
+
+        self.assertTrue({"HDR-001", "HDR-002", "HDR-003"} <= failed, failed)
+        self.assertEqual([item["id"] for item in result.must_failures()], [])
+
+    def test_public_site_with_headers_is_clean(self):
+        result = run(FIXTURES / "site_public", public=True)
+        failed = {item["id"] for item in result.failures}
+
+        self.assertEqual([item["id"] for item in result.must_failures()], [])
+        self.assertNotIn("HDR-002", failed)
+        self.assertNotIn("HDR-003", failed)
+
+    def test_headers_file_formats_are_detected(self):
+        formats = {
+            "_headers": """/*
+  Content-Security-Policy: default-src 'self'
+  Strict-Transport-Security: max-age=31536000
+""",
+            "netlify.toml": """[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'"
+    Strict-Transport-Security = "max-age=31536000"
+""",
+            "vercel.json": json.dumps(
+                {
+                    "headers": [
+                        {
+                            "source": "/(.*)",
+                            "headers": [
+                                {"key": "Content-Security-Policy", "value": "default-src 'self'"},
+                                {"key": "Strict-Transport-Security", "value": "max-age=31536000"},
+                            ],
+                        }
+                    ]
+                }
+            ),
+        }
+
+        for name, body in formats.items():
+            with self.subTest(format=name), tempfile.TemporaryDirectory() as tmp:
+                site = Path(tmp) / "site"
+                shutil.copytree(FIXTURES / "site_local", site)
+                (site / name).write_text(body, encoding="utf-8")
+
+                result = run(site, public=True)
+                failed = {item["id"] for item in result.failures}
+                self.assertNotIn("HDR-001", failed)
+                self.assertNotIn("HDR-002", failed)
+                self.assertNotIn("HDR-003", failed)
+
+    def test_hsts_without_max_age_is_flagged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            site = Path(tmp) / "site"
+            shutil.copytree(FIXTURES / "site_local", site)
+            (site / "_headers").write_text(
+                """/*
+  Strict-Transport-Security: includeSubDomains
+""",
+                encoding="utf-8",
+            )
+
+            result = run(site, public=True)
+            detail = {item["id"]: item["detail"] for item in result.failures}
+
+            self.assertEqual(detail.get("HDR-003"), "sin max-age")
 
     def test_report_is_readable(self):
         text = dc.render(FIXTURES / "site_bad", run(FIXTURES / "site_bad"))

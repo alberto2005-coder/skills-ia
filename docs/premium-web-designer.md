@@ -46,7 +46,7 @@ La parte estática se comprueba antes, sin navegador:
 py premium-web-designer/scripts/delivery_check.py <carpeta-del-sitio>
 ```
 
-Revisa `lang`, título, descripción, canonical, Open Graph, un solo `h1`, orden de encabezados, `alt`, JSON-LD, `:focus-visible`, `prefers-reduced-motion`, compensación de cabecera pegajosa, versión en CSS/JS, `robots.txt`, `sitemap.xml` y `llms.txt`. Sale con código 1 si falla una comprobación `must`. Añade `--public` cuando la carpeta vaya a publicarse: entonces canonical, Open Graph con imagen, `robots.txt` y `sitemap.xml` pasan a `must` y bloquean la entrega.
+Revisa `lang`, título, descripción, canonical, Open Graph, un solo `h1`, orden de encabezados, `alt`, JSON-LD, `:focus-visible`, `prefers-reduced-motion`, compensación de cabecera pegajosa, versión en CSS/JS, `robots.txt`, `sitemap.xml` y `llms.txt`. Sale con código 1 si falla una comprobación `must`. Añade `--public` cuando la carpeta vaya a publicarse: entonces canonical, Open Graph con imagen, `robots.txt` y `sitemap.xml` pasan a `must` y bloquean la entrega, y se revisan las cabeceras del hosting (`_headers`, `netlify.toml`, `vercel.json`) para avisar si falta CSP o HSTS.
 
 ### SEO mínimo
 Cada página pública entrega `lang`, título único de 15–65 caracteres, descripción de 70–165, canonical, Open Graph con imagen, Twitter card, un `h1`, JSON-LD que coincide con lo visible, `robots.txt` con `Sitemap:`, `sitemap.xml` y `llms.txt` cuando el sitio responde a superficies de IA. Las cabeceras de seguridad y la compresión se configuran en el despliegue (CSP, HSTS, `nosniff`, brotli/gzip). La auditoría SEO profunda sigue perteneciendo a `seo-auditor`.
@@ -110,7 +110,7 @@ The static half is checked before that, without a browser:
 py premium-web-designer/scripts/delivery_check.py <site-folder>
 ```
 
-It covers `lang`, title, description, canonical, Open Graph, a single `h1`, heading order, `alt`, JSON-LD, `:focus-visible`, `prefers-reduced-motion`, sticky-header offset, CSS/JS versioning, `robots.txt`, `sitemap.xml` and `llms.txt`, and exits 1 when any `must` check fails. Pass `--public` when the folder is going live: canonical, Open Graph with image, `robots.txt` and `sitemap.xml` become `must` and block delivery.
+It covers `lang`, title, description, canonical, Open Graph, a single `h1`, heading order, `alt`, JSON-LD, `:focus-visible`, `prefers-reduced-motion`, sticky-header offset, CSS/JS versioning, `robots.txt`, `sitemap.xml` and `llms.txt`, and exits 1 when any `must` check fails. Pass `--public` when the folder is going live: canonical, Open Graph with image, `robots.txt` and `sitemap.xml` become `must` and block delivery, and the hosting headers (`_headers`, `netlify.toml`, `vercel.json`) are inspected to warn about a missing CSP or HSTS.
 
 ### SEO Minimum
 Every public page ships `lang`, a unique 15–65 character title, a 70–165 description, canonical, Open Graph with image, Twitter card, one `h1`, JSON-LD matching visible content, `robots.txt` with `Sitemap:`, `sitemap.xml` and `llms.txt` when the site answers AI surfaces. Security headers and compression belong to the deployment (CSP, HSTS, `nosniff`, brotli/gzip). Deep SEO audits stay in `seo-auditor`.
