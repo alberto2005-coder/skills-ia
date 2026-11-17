@@ -243,12 +243,14 @@ def main() -> int:
     print(f"skills indexadas: {len(router.skills)}")
 
     failures = 0
+    threshold = datasets["threshold"]
     for skill_name, entries in datasets["skills"].items():
         for phrase in entries.get("positives", []):
             top = router.ranking(phrase)[:2]
-            ok = top[0][0] == skill_name
+            value = router.score(phrase, skill_name)
+            ok = top[0][0] == skill_name and value >= threshold
             failures += 0 if ok else 1
-            print(f"{'ok ' if ok else 'FALLO'} + {skill_name:24} -> {top}")
+            print(f"{'ok ' if ok else 'FALLO'} + {skill_name:24} -> {top} ({value:.2f})")
         for negative in entries.get("negatives", []):
             phrase, winner = negative["phrase"], negative["winner"]
             top = router.ranking(phrase)[:2]
@@ -256,7 +258,6 @@ def main() -> int:
             failures += 0 if ok else 1
             print(f"{'ok ' if ok else 'FALLO'} - {skill_name:24} -> {top} (esperado {winner})")
 
-    threshold = datasets["threshold"]
     for phrase in datasets["out_of_domain"]:
         name, value = router.best(phrase)
         ok = value < threshold

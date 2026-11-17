@@ -1,6 +1,6 @@
 ---
 name: seo-compare
-description: Compara dos auditorías SEO y clasifica cada comprobación en mejorado, empeorado, nuevo o resuelto, con delta de puntuación y aviso de nuevos fallos must. Úsala para medir el efecto de un deploy, monitorizar una web en el tiempo o demostrar que un cambio mejoró de verdad. English: diff two audits and classify improved, worse, new and resolved checks.
+description: Compara dos auditorías SEO y clasifica cada comprobación en mejorado, empeorado, nuevo o resuelto, con delta de puntuación (score) y aviso de nuevos fallos must. Úsala para medir el efecto de un deploy, monitorizar una web en el tiempo o demostrar que un cambio mejoró de verdad. English: measure the effect of a deploy with the score delta, and diff two audits to classify improved, worse, new and resolved checks.
 ---
 
 # SEO Auditor · Compare y monitorización

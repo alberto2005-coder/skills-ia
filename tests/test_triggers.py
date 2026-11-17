@@ -117,6 +117,23 @@ class PositiveTriggerTest(TriggerTest):
                                     f"«{phrase}» empata con {sorted(ties - allowed)}; top3: {self.top(phrase)}")
 
 
+
+
+class ThresholdTest(TriggerTest):
+    """Una frase positiva debe superar el umbral, no solo ganar el ranking."""
+
+    def test_positive_phrases_clear_the_threshold(self) -> None:
+        threshold = self.data["threshold"]
+        for name, entry in self.skills.items():
+            for phrase in entry["positives"]:
+                with self.subTest(skill=name, phrase=phrase):
+                    value = self.router.score(phrase, name)
+                    self.assertGreaterEqual(
+                        value,
+                        threshold,
+                        f"«{phrase}» puntúa {value:.2f} en {name}, por debajo del umbral {threshold}",
+                    )
+
 class NegativeTriggerTest(TriggerTest):
     """Una frase de otra función no debe activar la skill equivocada."""
 
