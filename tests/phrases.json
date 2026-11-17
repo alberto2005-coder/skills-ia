@@ -7,7 +7,7 @@
         "ejecuta el pipeline replica completo con aprobación en cada fase",
         "orquesta la réplica de una app de principio a fin y guarda el progreso",
         "usa el comando maestro /replica para retomar donde lo dejamos",
-        "run the clean-room replica pipeline and resume it from progress.md",
+        "run the clean-room replica pipeline and continue it from progress.md",
         "ask for approval before each phase of the replica pipeline"
       ],
       "negatives": [
@@ -344,6 +344,7 @@
     "hazme una tortilla de patatas",
     "traduce este párrafo al inglés",
     "ordena esta lista de la compra",
-    "cuál es la capital de Australia"
+    "cuál es la capital de Australia",
+    "resume este artículo"
   ]
 }
