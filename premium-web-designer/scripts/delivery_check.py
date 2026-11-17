@@ -450,7 +450,16 @@ def render(root: Path, result: Result, public: bool = False) -> str:
     return "\n".join(lines)
 
 
+def _force_utf8_output() -> None:
+    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
+
+
 def main(argv: list[str] | None = None) -> int:
+    _force_utf8_output()
     parser = argparse.ArgumentParser(description="Puerta de entrega para una web estática.")
     parser.add_argument("target", help="Carpeta del sitio")
     parser.add_argument(

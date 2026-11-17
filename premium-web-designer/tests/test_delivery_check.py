@@ -104,7 +104,7 @@ class TestDeliveryCheck(unittest.TestCase):
                 [sys.executable, str(script), str(FIXTURES / "site_local"), *extra],
                 capture_output=True,
                 text=True,
-                encoding="utf-8",
+                encoding="utf-8", errors="replace",
             )
 
         self.assertEqual(execute().returncode, 0, execute().stdout)
@@ -163,7 +163,7 @@ class TestDeliveryCheck(unittest.TestCase):
             with self.subTest(format=name), tempfile.TemporaryDirectory() as tmp:
                 site = Path(tmp) / "site"
                 shutil.copytree(FIXTURES / "site_local", site)
-                (site / name).write_text(body, encoding="utf-8")
+                (site / name).write_text(body, encoding="utf-8", errors="replace")
 
                 result = run(site, public=True)
                 failed = {item["id"] for item in result.failures}
@@ -179,7 +179,7 @@ class TestDeliveryCheck(unittest.TestCase):
                 """/*
   Strict-Transport-Security: includeSubDomains
 """,
-                encoding="utf-8",
+                encoding="utf-8", errors="replace",
             )
 
             result = run(site, public=True)
@@ -201,19 +201,19 @@ class TestDeliveryCheck(unittest.TestCase):
             [sys.executable, str(script), str(FIXTURES / "site_ok")],
             capture_output=True,
             text=True,
-            encoding="utf-8",
+            encoding="utf-8", errors="replace",
         )
         bad = subprocess.run(
             [sys.executable, str(script), str(FIXTURES / "site_bad")],
             capture_output=True,
             text=True,
-            encoding="utf-8",
+            encoding="utf-8", errors="replace",
         )
         missing = subprocess.run(
             [sys.executable, str(script), str(FIXTURES / "no-existe")],
             capture_output=True,
             text=True,
-            encoding="utf-8",
+            encoding="utf-8", errors="replace",
         )
 
         self.assertEqual(good.returncode, 0, good.stdout)
@@ -226,7 +226,7 @@ class TestDeliveryCheck(unittest.TestCase):
             [sys.executable, str(script), str(FIXTURES / "site_ok"), "--json"],
             capture_output=True,
             text=True,
-            encoding="utf-8",
+            encoding="utf-8", errors="replace",
         )
 
         import json

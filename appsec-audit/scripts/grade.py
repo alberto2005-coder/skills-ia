@@ -77,7 +77,16 @@ def grade_findings(findings: list[dict]) -> dict:
     }
 
 
+def _force_utf8_output() -> None:
+    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
+
+
 def main(argv: list[str] | None = None) -> int:
+    _force_utf8_output()
     parser = argparse.ArgumentParser(description="Nota A-F desde hallazgos validados.")
     parser.add_argument("findings", help="JSON con hallazgos")
     parser.add_argument("--json", action="store_true", help="Salida JSON")

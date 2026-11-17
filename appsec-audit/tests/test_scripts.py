@@ -37,14 +37,14 @@ class TestScanSecrets(unittest.TestCase):
 
     def test_clean_directory_reports_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:
-            (Path(tmp) / "app.py").write_text("print('hola')\n", encoding="utf-8")
+            (Path(tmp) / "app.py").write_text("print('hola')\n", encoding="utf-8", errors="replace")
 
             self.assertEqual(scan_secrets.scan(Path(tmp)), [])
 
     def test_cli_strict_exit_code(self):
         result = subprocess.run(
             [sys.executable, str(SCRIPT_DIR / "scan_secrets.py"), str(FIXTURES / "vuln_app"), "--strict"],
-            capture_output=True, text=True, encoding="utf-8",
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
         )
 
         self.assertEqual(result.returncode, 1)
@@ -64,14 +64,14 @@ class TestMapFlows(unittest.TestCase):
     def test_sink_without_source_is_not_a_candidate(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "clean.py"
-            path.write_text("def f():\n    print('ok')\n", encoding="utf-8")
+            path.write_text("def f():\n    print('ok')\n", encoding="utf-8", errors="replace")
 
             self.assertEqual(map_flows.scan(path), [])
 
     def test_cli_reports_counts(self):
         result = subprocess.run(
             [sys.executable, str(SCRIPT_DIR / "map_flows.py"), str(FIXTURES / "vuln_app"), "--json"],
-            capture_output=True, text=True, encoding="utf-8",
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
         )
         payload = json.loads(result.stdout)
 
@@ -116,14 +116,14 @@ class TestGrade(unittest.TestCase):
     def test_cli_exit_codes(self):
         with tempfile.TemporaryDirectory() as tmp:
             good = Path(tmp) / "ok.json"
-            good.write_text(json.dumps({"findings": [{"severity": "baja", "confidence": 9}]}), encoding="utf-8")
+            good.write_text(json.dumps({"findings": [{"severity": "baja", "confidence": 9}]}), encoding="utf-8", errors="replace")
             broken = Path(tmp) / "broken.json"
-            broken.write_text("{no json", encoding="utf-8")
+            broken.write_text("{no json", encoding="utf-8", errors="replace")
 
             ok = subprocess.run([sys.executable, str(SCRIPT_DIR / "grade.py"), str(good)],
-                                capture_output=True, text=True, encoding="utf-8")
+                                capture_output=True, text=True, encoding="utf-8", errors="replace")
             bad = subprocess.run([sys.executable, str(SCRIPT_DIR / "grade.py"), str(broken)],
-                                 capture_output=True, text=True, encoding="utf-8")
+                                 capture_output=True, text=True, encoding="utf-8", errors="replace")
 
         self.assertEqual(ok.returncode, 0)
         self.assertIn("Nota: A", ok.stdout)

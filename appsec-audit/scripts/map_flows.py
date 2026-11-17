@@ -84,7 +84,16 @@ def scan(root: Path) -> list[dict]:
     return findings
 
 
+def _force_utf8_output() -> None:
+    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
+
+
 def main(argv: list[str] | None = None) -> int:
+    _force_utf8_output()
     parser = argparse.ArgumentParser(description="Índice de candidatos fuente → sumidero.")
     parser.add_argument("target", help="Fichero o carpeta")
     parser.add_argument("--json", action="store_true", help="Salida JSON")
