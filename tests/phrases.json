@@ -11,8 +11,14 @@
         "ask for approval before each phase of the replica pipeline"
       ],
       "negatives": [
-        { "phrase": "escanea esta skill en busca de inyecciones de prompt", "winner": "agent-red-team" },
-        { "phrase": "puntúa este texto y dime si parece escrito por IA", "winner": "detector-ia" }
+        {
+          "phrase": "escanea esta skill en busca de inyecciones de prompt",
+          "winner": "agent-red-team"
+        },
+        {
+          "phrase": "puntúa este texto y dime si parece escrito por IA",
+          "winner": "detector-ia"
+        }
       ]
     },
     "replica-recon": {
@@ -25,8 +31,14 @@
         "clone this app and list its features"
       ],
       "negatives": [
-        { "phrase": "despliega la app en producción con backups y rollback", "winner": "replica-deploy" },
-        { "phrase": "mide la paridad visual entre el original y el clon", "winner": "replica-diff" }
+        {
+          "phrase": "despliega la app en producción con backups y rollback",
+          "winner": "replica-deploy"
+        },
+        {
+          "phrase": "mide la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        }
       ]
     },
     "replica-architect": {
@@ -37,8 +49,14 @@
         "define the contracts between layers before coding"
       ],
       "negatives": [
-        { "phrase": "define los tokens y componentes del sistema de diseño", "winner": "replica-design" },
-        { "phrase": "configura la autenticación y los pagos del backend", "winner": "replica-backend" }
+        {
+          "phrase": "define los tokens y componentes del sistema de diseño",
+          "winner": "replica-design"
+        },
+        {
+          "phrase": "configura la autenticación y los pagos del backend",
+          "winner": "replica-backend"
+        }
       ]
     },
     "replica-design": {
@@ -49,8 +67,14 @@
         "build the clone design system with accessible components"
       ],
       "negatives": [
-        { "phrase": "prepara el listing de la App Store y sus límites", "winner": "replica-launch" },
-        { "phrase": "escribe el plan de pruebas end-to-end", "winner": "replica-test" }
+        {
+          "phrase": "prepara el listing de la App Store y sus límites",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "escribe el plan de pruebas end-to-end",
+          "winner": "replica-test"
+        }
       ]
     },
     "replica-build": {
@@ -61,8 +85,14 @@
         "implement the screens with the approved tokens"
       ],
       "negatives": [
-        { "phrase": "mide la paridad funcional con parity.py", "winner": "replica-diff" },
-        { "phrase": "haz el rebrand y deja el sweep a cero", "winner": "replica-brand" }
+        {
+          "phrase": "mide la paridad funcional con parity.py",
+          "winner": "replica-diff"
+        },
+        {
+          "phrase": "haz el rebrand y deja el sweep a cero",
+          "winner": "replica-brand"
+        }
       ]
     },
     "replica-backend": {
@@ -73,8 +103,14 @@
         "versioned migrations, payments and idempotent jobs"
       ],
       "negatives": [
-        { "phrase": "lee las reseñas públicas y extrae temas con citas", "winner": "replica-entrepreneur" },
-        { "phrase": "escribe tres guiones de Reels para Instagram", "winner": "replica-redes" }
+        {
+          "phrase": "lee las reseñas públicas y extrae temas con citas",
+          "winner": "replica-entrepreneur"
+        },
+        {
+          "phrase": "escribe tres guiones de Reels para Instagram",
+          "winner": "replica-redes"
+        }
       ]
     },
     "replica-test": {
@@ -85,8 +121,14 @@
         "log the bugs with S1 S2 S3 severity"
       ],
       "negatives": [
-        { "phrase": "compara las capturas del original y del clon", "winner": "replica-diff" },
-        { "phrase": "prepara el preflight del despliegue", "winner": "replica-deploy" }
+        {
+          "phrase": "compara las capturas del original y del clon",
+          "winner": "replica-diff"
+        },
+        {
+          "phrase": "prepara el preflight del despliegue",
+          "winner": "replica-deploy"
+        }
       ]
     },
     "replica-diff": {
@@ -97,8 +139,14 @@
         "compare the screenshots with imgdiff and explain the differences"
       ],
       "negatives": [
-        { "phrase": "analiza reseñas reales de usuarios y saca temas", "winner": "replica-entrepreneur" },
-        { "phrase": "define los límites legales y el alcance del clon", "winner": "replica-recon" }
+        {
+          "phrase": "analiza reseñas reales de usuarios y saca temas",
+          "winner": "replica-entrepreneur"
+        },
+        {
+          "phrase": "define los límites legales y el alcance del clon",
+          "winner": "replica-recon"
+        }
       ]
     },
     "replica-entrepreneur": {
@@ -109,8 +157,14 @@
         "turn the user voice into a fix plan"
       ],
       "negatives": [
-        { "phrase": "rebrandea el producto antes de publicar", "winner": "replica-brand" },
-        { "phrase": "audita el módulo de schema y el inventario JSON-LD", "winner": "seo-audit" }
+        {
+          "phrase": "rebrandea el producto antes de publicar",
+          "winner": "replica-brand"
+        },
+        {
+          "phrase": "audita el módulo de schema y el inventario JSON-LD",
+          "winner": "seo-audit"
+        }
       ]
     },
     "replica-brand": {
@@ -121,8 +175,14 @@
         "drive sweep.py to zero brand leftovers"
       ],
       "negatives": [
-        { "phrase": "prepara los precios por país para el lanzamiento", "winner": "replica-launch" },
-        { "phrase": "mide la similitud de layout con imgdiff", "winner": "replica-diff" }
+        {
+          "phrase": "prepara los precios por país para el lanzamiento",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "mide la similitud de layout con imgdiff",
+          "winner": "replica-diff"
+        }
       ]
     },
     "replica-launch": {
@@ -133,8 +193,14 @@
         "set per-country pricing for the launch"
       ],
       "negatives": [
-        { "phrase": "despliega con confirmación explícita y backups", "winner": "replica-deploy" },
-        { "phrase": "escribe los guiones de Reels y los captions", "winner": "replica-redes" }
+        {
+          "phrase": "despliega con confirmación explícita y backups",
+          "winner": "replica-deploy"
+        },
+        {
+          "phrase": "escribe los guiones de Reels y los captions",
+          "winner": "replica-redes"
+        }
       ]
     },
     "replica-deploy": {
@@ -145,8 +211,14 @@
         "verify the deployment is live after publishing"
       ],
       "negatives": [
-        { "phrase": "escribe el copy de la landing y el listing", "winner": "replica-launch" },
-        { "phrase": "haz análisis estático del APK con strings y rutas", "winner": "replica-static" }
+        {
+          "phrase": "escribe el copy de la landing y el listing",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "haz análisis estático del APK con strings y rutas",
+          "winner": "replica-static"
+        }
       ]
     },
     "replica-static": {
@@ -157,8 +229,14 @@
         "extract routes and endpoints without installing tools"
       ],
       "negatives": [
-        { "phrase": "escanea la skill por Unicode invisible", "winner": "agent-red-team" },
-        { "phrase": "ejecuta el pipeline completo de réplica", "winner": "replica" }
+        {
+          "phrase": "escanea la skill por Unicode invisible",
+          "winner": "agent-red-team"
+        },
+        {
+          "phrase": "ejecuta el pipeline completo de réplica",
+          "winner": "replica"
+        }
       ]
     },
     "replica-redes": {
@@ -169,8 +247,14 @@
         "prepare the hook bank for social networks"
       ],
       "negatives": [
-        { "phrase": "prepara la landing y el listing de la tienda", "winner": "replica-launch" },
-        { "phrase": "haz el análisis estático del binario", "winner": "replica-static" }
+        {
+          "phrase": "prepara la landing y el listing de la tienda",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "haz el análisis estático del binario",
+          "winner": "replica-static"
+        }
       ]
     },
     "seo-auditor": {
@@ -181,8 +265,14 @@
         "explain the rubric and the one-line verdict of the audit"
       ],
       "negatives": [
-        { "phrase": "aplica el plan SEO con backup y verifica", "winner": "seo-execute" },
-        { "phrase": "dime si esta skill de terceros es segura", "winner": "agent-red-team" }
+        {
+          "phrase": "aplica el plan SEO con backup y verifica",
+          "winner": "seo-execute"
+        },
+        {
+          "phrase": "dime si esta skill de terceros es segura",
+          "winner": "agent-red-team"
+        }
       ]
     },
     "seo-audit": {
@@ -195,9 +285,18 @@
         "check the security headers of my site"
       ],
       "negatives": [
-        { "phrase": "rewrite this text and remove the AI tone", "winner": "humanizar" },
-        { "phrase": "genera el PLAN.md con borradores DRAFT", "winner": "seo-plan" },
-        { "phrase": "simula cómo se ve el título en Google", "winner": "seo-serp" }
+        {
+          "phrase": "rewrite this text and remove the AI tone",
+          "winner": "humanizar"
+        },
+        {
+          "phrase": "genera el PLAN.md con borradores DRAFT",
+          "winner": "seo-plan"
+        },
+        {
+          "phrase": "simula cómo se ve el título en Google",
+          "winner": "seo-serp"
+        }
       ]
     },
     "seo-plan": {
@@ -208,8 +307,14 @@
         "prioritize the must and should failures by effort and impact"
       ],
       "negatives": [
-        { "phrase": "aplica los cambios con --apply y deja backup", "winner": "seo-execute" },
-        { "phrase": "compara las dos auditorías y dame el delta", "winner": "seo-compare" }
+        {
+          "phrase": "aplica los cambios con --apply y deja backup",
+          "winner": "seo-execute"
+        },
+        {
+          "phrase": "compara las dos auditorías y dame el delta",
+          "winner": "seo-compare"
+        }
       ]
     },
     "seo-execute": {
@@ -220,8 +325,14 @@
         "write robots.txt and llms.txt into the project"
       ],
       "negatives": [
-        { "phrase": "genera el plan sin tocar el sitio", "winner": "seo-plan" },
-        { "phrase": "previsualiza la tarjeta OG en WhatsApp", "winner": "seo-serp" }
+        {
+          "phrase": "genera el plan sin tocar el sitio",
+          "winner": "seo-plan"
+        },
+        {
+          "phrase": "previsualiza la tarjeta OG en WhatsApp",
+          "winner": "seo-serp"
+        }
       ]
     },
     "seo-serp": {
@@ -232,8 +343,14 @@
         "check if the meta description is truncated in Bing"
       ],
       "negatives": [
-        { "phrase": "audita el módulo de schema y el inventario JSON-LD", "winner": "seo-audit" },
-        { "phrase": "aplica robots.txt con backup", "winner": "seo-execute" }
+        {
+          "phrase": "audita el módulo de schema y el inventario JSON-LD",
+          "winner": "seo-audit"
+        },
+        {
+          "phrase": "aplica robots.txt con backup",
+          "winner": "seo-execute"
+        }
       ]
     },
     "seo-compare": {
@@ -244,8 +361,14 @@
         "measure the effect of the deploy with the score delta"
       ],
       "negatives": [
-        { "phrase": "genera el plan de acciones SEO", "winner": "seo-plan" },
-        { "phrase": "simula la tarjeta social en LinkedIn", "winner": "seo-serp" }
+        {
+          "phrase": "genera el plan de acciones SEO",
+          "winner": "seo-plan"
+        },
+        {
+          "phrase": "simula la tarjeta social en LinkedIn",
+          "winner": "seo-serp"
+        }
       ]
     },
     "agent-red-team": {
@@ -256,8 +379,14 @@
         "is this MCP server safe to install"
       ],
       "negatives": [
-        { "phrase": "escaneo rápido de este SKILL.md, solo el veredicto", "winner": "red-scan" },
-        { "phrase": "haz el análisis estático de un APK", "winner": "replica-static" }
+        {
+          "phrase": "escaneo rápido de este SKILL.md, solo el veredicto",
+          "winner": "red-scan"
+        },
+        {
+          "phrase": "haz el análisis estático de un APK",
+          "winner": "replica-static"
+        }
       ]
     },
     "red-scan": {
@@ -268,8 +397,14 @@
         "quick scan, verdict in chat and create no files"
       ],
       "negatives": [
-        { "phrase": "auditoría completa con ledger y JSON validable", "winner": "red-audit" },
-        { "phrase": "reescribe este email en modo Full y recorta el relleno", "winner": "humanizar" }
+        {
+          "phrase": "auditoría completa con ledger y JSON validable",
+          "winner": "red-audit"
+        },
+        {
+          "phrase": "reescribe este email en modo Full y recorta el relleno",
+          "winner": "humanizar"
+        }
       ]
     },
     "red-audit": {
@@ -280,8 +415,14 @@
         "generate the validatable JSON report and the coverage ledger"
       ],
       "negatives": [
-        { "phrase": "solo el veredicto rápido en el chat", "winner": "red-scan" },
-        { "phrase": "prepara el plan SEO de la web", "winner": "seo-plan" }
+        {
+          "phrase": "solo el veredicto rápido en el chat",
+          "winner": "red-scan"
+        },
+        {
+          "phrase": "prepara el plan SEO de la web",
+          "winner": "seo-plan"
+        }
       ]
     },
     "humanizador-anti-ia": {
@@ -292,8 +433,14 @@
         "detect the register and apply the factual honesty policy"
       ],
       "negatives": [
-        { "phrase": "dame el score de IA de este texto sin modificarlo", "winner": "detector-ia" },
-        { "phrase": "mide la paridad del clon con el original", "winner": "replica-diff" }
+        {
+          "phrase": "dame el score de IA de este texto sin modificarlo",
+          "winner": "detector-ia"
+        },
+        {
+          "phrase": "mide la paridad del clon con el original",
+          "winner": "replica-diff"
+        }
       ]
     },
     "humanizar": {
@@ -305,8 +452,14 @@
         "trim the filler and keep the user's voice"
       ],
       "negatives": [
-        { "phrase": "solo dame el score sin tocar el texto", "winner": "detector-ia" },
-        { "phrase": "audita el SEO de la web", "winner": "seo-audit" }
+        {
+          "phrase": "solo dame el score sin tocar el texto",
+          "winner": "detector-ia"
+        },
+        {
+          "phrase": "audita el SEO de la web",
+          "winner": "seo-audit"
+        }
       ]
     },
     "detector-ia": {
@@ -318,8 +471,14 @@
         "does this text look AI generated"
       ],
       "negatives": [
-        { "phrase": "reescribe el texto para que suene humano", "winner": "humanizar" },
-        { "phrase": "escanea la skill por inyecciones de prompt", "winner": "agent-red-team" }
+        {
+          "phrase": "reescribe el texto para que suene humano",
+          "winner": "humanizar"
+        },
+        {
+          "phrase": "escanea la skill por inyecciones de prompt",
+          "winner": "agent-red-team"
+        }
       ]
     },
     "premium-web-designer": {
@@ -333,10 +492,22 @@
         "revisa la accesibilidad y la calidad visual del sitio"
       ],
       "negatives": [
-        { "phrase": "audit the technical SEO of my online store", "winner": "seo-audit" },
-        { "phrase": "audita el SEO de mi tienda online", "winner": "seo-audit" },
-        { "phrase": "audita las cabeceras de seguridad y el rendimiento técnico SEO de una página", "winner": "seo-audit" },
-        { "phrase": "define el alcance legal e inventaría funciones de una app existente antes de replicarla", "winner": "replica-recon" }
+        {
+          "phrase": "audit the technical SEO of my online store",
+          "winner": "seo-audit"
+        },
+        {
+          "phrase": "audita el SEO de mi tienda online",
+          "winner": "seo-audit"
+        },
+        {
+          "phrase": "audita las cabeceras de seguridad y el rendimiento técnico SEO de una página",
+          "winner": "seo-audit"
+        },
+        {
+          "phrase": "define el alcance legal e inventaría funciones de una app existente antes de replicarla",
+          "winner": "replica-recon"
+        }
       ]
     },
     "premium-qa": {
@@ -348,8 +519,14 @@
         "measure tap targets and check the sticky header anchor offset"
       ],
       "negatives": [
-        { "phrase": "crea una landing page premium para mi tienda online", "winner": "premium-web-designer" },
-        { "phrase": "audita el SEO técnico de mi tienda online", "winner": "seo-audit" }
+        {
+          "phrase": "crea una landing page premium para mi tienda online",
+          "winner": "premium-web-designer"
+        },
+        {
+          "phrase": "audita el SEO técnico de mi tienda online",
+          "winner": "seo-audit"
+        }
       ]
     },
     "appsec-audit": {
@@ -360,8 +537,14 @@
         "security audit of my web application before release"
       ],
       "negatives": [
-        { "phrase": "audita la seguridad de esta skill de terceros antes de instalarla", "winner": "agent-red-team" },
-        { "phrase": "audita el SEO técnico de mi tienda online", "winner": "seo-audit" }
+        {
+          "phrase": "audita la seguridad de esta skill de terceros antes de instalarla",
+          "winner": "agent-red-team"
+        },
+        {
+          "phrase": "audita el SEO técnico de mi tienda online",
+          "winner": "seo-audit"
+        }
       ]
     },
     "appsec-recon": {
@@ -371,8 +554,14 @@
         "scope the assets and the attack surface before the audit"
       ],
       "negatives": [
-        { "phrase": "traza si la entrada del usuario llega a la consulta SQL", "winner": "appsec-code" },
-        { "phrase": "revisa los permisos IAM y el Dockerfile del despliegue", "winner": "appsec-infra" }
+        {
+          "phrase": "traza si la entrada del usuario llega a la consulta SQL",
+          "winner": "appsec-code"
+        },
+        {
+          "phrase": "revisa los permisos IAM y el Dockerfile del despliegue",
+          "winner": "appsec-infra"
+        }
       ]
     },
     "appsec-code": {
@@ -383,8 +572,14 @@
         "source to sink analysis of the request handler"
       ],
       "negatives": [
-        { "phrase": "audita los manifiestos de Kubernetes y Terraform", "winner": "appsec-infra" },
-        { "phrase": "revisa si el agente puede invocar herramientas sin permiso", "winner": "appsec-llm" }
+        {
+          "phrase": "audita los manifiestos de Kubernetes y Terraform",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "revisa si el agente puede invocar herramientas sin permiso",
+          "winner": "appsec-llm"
+        }
       ]
     },
     "appsec-infra": {
@@ -394,8 +589,14 @@
         "check IAM overpermissions and public buckets in Terraform"
       ],
       "negatives": [
-        { "phrase": "revisa la inyección de prompt del agente", "winner": "appsec-llm" },
-        { "phrase": "busca secretos y dependencias en el repositorio", "winner": "appsec-recon" }
+        {
+          "phrase": "revisa la inyección de prompt del agente",
+          "winner": "appsec-llm"
+        },
+        {
+          "phrase": "busca secretos y dependencias en el repositorio",
+          "winner": "appsec-recon"
+        }
       ]
     },
     "appsec-llm": {
@@ -406,8 +607,14 @@
         "audit prompt injection and excessive agency in my LLM agent"
       ],
       "negatives": [
-        { "phrase": "audita la seguridad de esta skill de terceros antes de instalarla", "winner": "agent-red-team" },
-        { "phrase": "audita la seguridad de mi API y del código", "winner": "appsec-code" }
+        {
+          "phrase": "audita la seguridad de esta skill de terceros antes de instalarla",
+          "winner": "agent-red-team"
+        },
+        {
+          "phrase": "audita la seguridad de mi API y del código",
+          "winner": "appsec-code"
+        }
       ]
     },
     "appsec-report": {
@@ -417,8 +624,99 @@
         "filter false positives with a confidence score and grade the project"
       ],
       "negatives": [
-        { "phrase": "define el alcance y los activos de la auditoría", "winner": "appsec-recon" },
-        { "phrase": "revisa los permisos IAM del despliegue", "winner": "appsec-infra" }
+        {
+          "phrase": "define el alcance y los activos de la auditoría",
+          "winner": "appsec-recon"
+        },
+        {
+          "phrase": "revisa los permisos IAM del despliegue",
+          "winner": "appsec-infra"
+        }
+      ]
+    },
+    "appsec-threat": {
+      "positives": [
+        "haz el modelo de amenazas con límites de confianza y actores",
+        "mapea cada amenaza a OWASP 2025 y a los capítulos de ASVS 5.0",
+        "threat model with trust boundaries mapped to ASVS chapters"
+      ],
+      "negatives": [
+        {
+          "phrase": "inventaría la superficie de ataque y las dependencias del repositorio",
+          "winner": "appsec-recon"
+        },
+        {
+          "phrase": "busca IDOR y fallos de control de acceso en los endpoints",
+          "winner": "appsec-code"
+        }
+      ]
+    },
+    "appsec-deps": {
+      "positives": [
+        "genera el SBOM CycloneDX del proyecto",
+        "cruza los CVEs con la alcanzabilidad de cada dependencia",
+        "generate a CycloneDX SBOM and check CVE reachability"
+      ],
+      "negatives": [
+        {
+          "phrase": "define el alcance y los activos antes de auditar la seguridad",
+          "winner": "appsec-recon"
+        },
+        {
+          "phrase": "calcula la nota A-F y escribe el informe con parches en diff",
+          "winner": "appsec-report"
+        }
+      ]
+    },
+    "appsec-ci": {
+      "positives": [
+        "audita el workflow de GitHub Actions con pull_request_target",
+        "normaliza el SARIF y déjalo listo para upload-sarif",
+        "endurece el agente revisor y detecta qué herramientas hay instaladas"
+      ],
+      "negatives": [
+        {
+          "phrase": "aplica el parche con aprobación y verifica el cierre en sandbox",
+          "winner": "appsec-fix"
+        },
+        {
+          "phrase": "genera el SBOM CycloneDX del proyecto",
+          "winner": "appsec-deps"
+        }
+      ]
+    },
+    "appsec-fix": {
+      "positives": [
+        "aplica el parche con aprobación y verifica el cierre en sandbox",
+        "propón la remediación con dry-run y busca variantes del mismo fallo",
+        "apply the patch only after approval and verify it in a sandbox"
+      ],
+      "negatives": [
+        {
+          "phrase": "audita el workflow de GitHub Actions con pull_request_target",
+          "winner": "appsec-ci"
+        },
+        {
+          "phrase": "aplica el tribunal y descarta los falsos positivos de la auditoría",
+          "winner": "appsec-report"
+        }
+      ]
+    },
+    "appsec-scale": {
+      "positives": [
+        "audita varios repositorios y dibuja la topología del sistema",
+        "estima el coste por fase con el perfil deep y los terceros",
+        "multi-repo audit with vendor inventory and cost per phase"
+      ],
+      "negatives": [
+        {
+          "phrase": "haz el modelo de amenazas con límites de confianza y actores",
+          "winner": "appsec-threat"
+        },
+        {
+          "phrase": "genera el SBOM CycloneDX del proyecto",
+          "winner": "appsec-deps"
+        }
       ]
     }
   },

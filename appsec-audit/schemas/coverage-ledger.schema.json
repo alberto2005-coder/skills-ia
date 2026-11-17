@@ -32,19 +32,29 @@
         "attack_class": {
           "enum": [
             "injection",
+            "deserialization",
             "auth",
+            "session",
             "access-control",
-            "crypto",
-            "logic",
-            "supply-chain",
-            "cloud-infra",
-            "cicd",
-            "llm-agent",
             "data-isolation",
+            "crypto",
+            "secrets",
+            "logic",
+            "race-condition",
+            "supply-chain",
+            "dependencies",
+            "cicd",
+            "cloud-infra",
+            "ssrf",
+            "file-handling",
+            "client-side",
+            "protocol",
+            "llm-agent",
+            "logging-monitoring",
+            "privacy",
             "availability",
             "memory-safety",
-            "protocol",
-            "client-side"
+            "webhook"
           ]
         },
         "status": {

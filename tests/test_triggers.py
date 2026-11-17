@@ -1,4 +1,4 @@
-"""Tests de activación (trigger) de las 34 skills del repositorio.
+"""Tests de activación (trigger) de las 39 skills del repositorio.
 
 Sin red y solo stdlib. Cargan los `SKILL.md`, puntúan frases reales contra sus
 descripciones y comprueban cuatro invariantes:
@@ -47,7 +47,7 @@ class CorpusTest(TriggerTest):
     """El dataset cubre exactamente las skills que existen."""
 
     def test_dataset_covers_every_skill(self) -> None:
-        self.assertEqual(len(self.router.names), 34, "el repo debe tener 34 skills")
+        self.assertEqual(len(self.router.names), 39, "el repo debe tener 39 skills")
         self.assertEqual(
             set(self.skills),
             self.router.names,

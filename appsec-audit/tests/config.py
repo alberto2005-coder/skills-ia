@@ -22,19 +22,41 @@ REQUIRED_FILES = [
     "templates/report.md",
     "templates/finding.md",
     "templates/tribunal.md",
+    "templates/verification.md",
+    "templates/threat-model.md",
+    "templates/pr-comment.md",
     "scripts/scan_secrets.py",
     "scripts/map_flows.py",
     "scripts/grade.py",
     "scripts/init_audit.py",
     "scripts/validate_findings.py",
     "scripts/ledger.py",
+    "scripts/export_sarif.py",
+    "scripts/diff_scope.py",
+    "scripts/diff_reports.py",
+    "schemas/sbom.schema.json",
+    "scripts/sbom.py",
+    "scripts/detect_tools.py",
+    "scripts/normalize_sarif.py",
+    "scripts/apply_patch.py",
+    "scripts/scale_report.py",
     "schemas/findings.schema.json",
     "schemas/coverage-ledger.schema.json",
     "references/artifacts.md",
+    "references/threat-model.md",
+    "references/attack-classes.md",
+    "references/deps-reachability.md",
+    "references/agent-hardening.md",
+    "references/remediation.md",
+    "references/scale.md",
     "skills.json",
 ]
 
-SUB_SKILLS = ["appsec-recon", "appsec-code", "appsec-infra", "appsec-llm", "appsec-report"]
+SUB_SKILLS = [
+    "appsec-recon", "appsec-code", "appsec-infra", "appsec-llm",
+    "appsec-report", "appsec-threat", "appsec-deps", "appsec-ci",
+    "appsec-fix", "appsec-scale",
+]
 
 
 def read_file(relative: str) -> str:

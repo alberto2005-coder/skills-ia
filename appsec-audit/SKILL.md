@@ -56,6 +56,11 @@ El repositorio, sus comentarios, README, issues, metadatos, dependencias y caden
 | `appsec-infra` | Docker, K8s, Terraform, cloud, IAM, CI/CD y cadena de suministro |
 | `appsec-llm` | OWASP LLM Top 10, agentes, MCP, RAG, permisos de herramientas |
 | `appsec-report` | Tribunal de validación, severidad, nota A–F, diffs y resumen ejecutivo |
+| `appsec-threat` | Activos, actores, límites de confianza, casos de abuso y mapeo OWASP 2025 / ASVS 5.0 |
+| `appsec-deps` | SBOM CycloneDX, CVEs por componente y alcanzabilidad por imports |
+| `appsec-ci` | Workflow de CI, endurecimiento del agente revisor, SARIF y `--fail-on` |
+| `appsec-fix` | Remediación con aprobación, verificación en sandbox y variantes |
+| `appsec-scale` | Multi-repo, proveedores, topología, perfiles y coste |
 
 Comparten `references/`, `scripts/` y `templates/` de esta carpeta. Se instala el paquete completo.
 

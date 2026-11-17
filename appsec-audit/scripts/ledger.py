@@ -23,9 +23,11 @@ from pathlib import Path
 SCHEMA_PATH = Path(__file__).resolve().parent.parent / "schemas" / "coverage-ledger.schema.json"
 
 ATTACK_CLASSES = (
-    "injection", "auth", "access-control", "crypto", "logic", "supply-chain",
-    "cloud-infra", "cicd", "llm-agent", "data-isolation", "availability",
-    "memory-safety", "protocol", "client-side",
+    "injection", "deserialization", "auth", "session", "access-control",
+    "data-isolation", "crypto", "secrets", "logic", "race-condition",
+    "supply-chain", "dependencies", "cicd", "cloud-infra", "ssrf",
+    "file-handling", "client-side", "protocol", "llm-agent",
+    "logging-monitoring", "privacy", "availability", "memory-safety", "webhook",
 )
 STATUSES = ("planned", "hunting", "covered", "skipped")
 GAPS = ("planned", "hunting")

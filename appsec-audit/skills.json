@@ -2,7 +2,7 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "appsec-audit",
-  "version": "1.1.0",
+  "version": "1.4.0",
   "description": "Auditoría integral de seguridad con trazado de fuentes a sumideros, tribunal de validación y nota A-F.",
   "skills": [
     {
@@ -34,6 +34,31 @@
       "name": "appsec-report",
       "path": "appsec-report/SKILL.md",
       "description": "Tribunal de validación con confianza 1-10, descarte bajo 7, nota A-F y parches en diff."
+    },
+    {
+      "name": "appsec-threat",
+      "path": "appsec-threat/SKILL.md",
+      "description": "Modelo de amenazas con activos, actores, límites de confianza, casos de abuso y mapeo OWASP 2025 / ASVS 5.0."
+    },
+    {
+      "name": "appsec-deps",
+      "path": "appsec-deps/SKILL.md",
+      "description": "SBOM CycloneDX desde los manifiestos, cruce con CVEs y alcanzabilidad real por imports."
+    },
+    {
+      "name": "appsec-ci",
+      "path": "appsec-ci/SKILL.md",
+      "description": "Auditoría del workflow de CI, endurecimiento del agente revisor, normalización de SARIF y puerta --fail-on."
+    },
+    {
+      "name": "appsec-fix",
+      "path": "appsec-fix/SKILL.md",
+      "description": "Remediación con dry-run, aprobación explícita, verificación en sandbox y análisis de variantes."
+    },
+    {
+      "name": "appsec-scale",
+      "path": "appsec-scale/SKILL.md",
+      "description": "Varios repos, inventario de proveedores, topología del sistema, perfiles y coste por fase."
     }
   ]
 }

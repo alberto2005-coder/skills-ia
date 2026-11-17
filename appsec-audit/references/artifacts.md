@@ -68,6 +68,27 @@ Comprueba estructura, campos permitidos contra el esquema, coherencia veredicto�
 
 Una pasada nueva no borra la anterior: se conserva el `findings.json`, se comparan fingerprints y solo se revalida lo que cambió de código. Lo que ya estaba `confirmed` y sigue igual no se vuelve a cazar; lo que cambió de causa raíz entra como hallazgo nuevo.
 
+## Verificación independiente
+
+`templates/verification.md` es el paquete que recibe el verificador: ubicación, CWE, patrón observado y propósito declarado. No incluye evidencia, veredicto, confianza ni parche; con el veredicto delante se confirma en lugar de comprobar. Devuelve veredicto, confianza y justificación, y quien reporta rellena `exploit` y `patch`.
+
+## SARIF
+
+```bash
+py appsec-audit/scripts/export_sarif.py <findings.json> --output appsec.sarif
+```
+
+Una regla por `CWE`; `critica` y `alta` salen como `error`, `media` como `warning` y `baja` como `note`. Solo `confirmed`; `--include-pending` añade `needs_validation` como `note`; `rejected` nunca sale. `partialFingerprints` lleva la huella del hallazgo, así que una re-ejecución actualiza el mismo resultado en vez de crear otro.
+
+## Baseline y modo diff/PR
+
+```bash
+py appsec-audit/scripts/diff_scope.py --repo . --base origin/main --findings <findings.json> --json
+py appsec-audit/scripts/diff_reports.py baseline.json <findings.json> --fail-on new
+```
+
+`diff_scope.py` convierte un parche unificado o `git diff` en rangos de líneas añadidas y marca qué hallazgos caen dentro. `diff_reports.py` clasifica por fingerprint: `new`, `fixed`, `changed` y `persisting`; con `--fail-on new` sale 1 si aparece un `confirmed` nuevo, que es la puerta útil de un PR.
+
 ## Reglas
 
 - Nada de severidad sin veredicto `confirmed`.

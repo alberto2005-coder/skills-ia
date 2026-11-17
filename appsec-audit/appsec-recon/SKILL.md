@@ -53,12 +53,23 @@ py appsec-audit/scripts/scan_secrets.py <ruta> --json
 
 Barrido determinista de secretos con redacción. No sustituye a un escáner de historial: si el repo tiene historial largo, se declara lo revisado y lo que no.
 
+## Modo diff/PR
+
+En una revisión de pull request el alcance son las líneas que cambian, no el repositorio entero:
+
+```bash
+py appsec-audit/scripts/diff_scope.py --repo <dir> --base origin/main --findings <dir>/.appsec-audit/findings.json --json
+```
+
+La salida da, por fichero, los rangos de líneas añadidas; con `--findings` separa los hallazgos que caen dentro del cambio. Se revisan esas líneas y las que consumen el dato modificado; el resto se declara fuera de alcance con su razón.
+
 ## Gate de salida
 
 - Alcance y autorización escritos, con exclusiones explícitas.
 - Inventario de activos y superficie completo para el tamaño del proyecto.
 - Dependencias y secretos revisados con evidencia por ítem.
 - Hipótesis separadas de hechos observados.
+- En modo diff/PR, los rangos revisados y lo excluido están escritos.
 
 ## Handoff
 

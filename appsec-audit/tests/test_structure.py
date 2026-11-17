@@ -59,7 +59,7 @@ class TestStructure(unittest.TestCase):
         manifest = json.loads(read_file("skills.json"))
         names = [entry["name"] for entry in manifest["skills"]]
 
-        self.assertEqual(len(names), 6)
+        self.assertEqual(len(names), 11)
         self.assertEqual(sorted(names), sorted(["appsec-audit"] + SUB_SKILLS))
 
         for entry in manifest["skills"]:

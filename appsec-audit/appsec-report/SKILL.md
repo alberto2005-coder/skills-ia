@@ -67,6 +67,19 @@ Rellenar `templates/report.md` y escribir los hallazgos en `findings.json` (esqu
 - **Descartes**: cuántos y por qué, en una línea.
 - **Límites**: qué no se pudo revisar y con qué consecuencia.
 
+## Verificación independiente
+
+Un tribunal que se autoconfirma no es un tribunal. Cada candidato pasa a un verificador nuevo con `../templates/verification.md`, que recibe solo ubicación, CWE, patrón observado y propósito declarado: sin evidencia, veredicto, confianza ni parche. Responde las cinco preguntas de refutación y devuelve el veredicto con la comprobación que lo sostiene; `exploit` y `patch` los completa quien reporta.
+
+## Entrega en CI
+
+```bash
+py appsec-audit/scripts/export_sarif.py <dir>/.appsec-audit/findings.json --output appsec.sarif
+py appsec-audit/scripts/diff_reports.py baseline.json <dir>/.appsec-audit/findings.json --fail-on new
+```
+
+SARIF lleva los hallazgos `confirmed` a GitHub Code Scanning; `--include-pending` añade los `needs_validation` como `note` y los `rejected` nunca salen. El baseline compara por fingerprint contra la pasada anterior y `--fail-on new` bloquea el PR cuando aparece un `confirmed` que antes no estaba.
+
 ## Gate de salida
 
 - Ningún hallazgo por debajo de 7 en el informe.
@@ -75,6 +88,8 @@ Rellenar `templates/report.md` y escribir los hallazgos en `findings.json` (esqu
 - Resumen ejecutivo comprensible sin leer el detalle técnico.
 - Parches en diff aplicables, sin cambios de estilo.
 - `findings.json` pasa `validate_findings.py`: sin severidad fuera de `confirmed` y sin unidades `planned` en el ledger.
+- Cada hallazgo lo revisó un verificador que no vio el informe previo.
+- En destino PR, SARIF y diff contra el baseline generados.
 
 ## Handoff
 
