@@ -6,13 +6,13 @@ FIXTURES = TEST_DIR / "fixtures"
 
 MASTER_MAX_LINES = 200
 
-REQUIRED_FILES = [
-    "SKILL.md",
-    "appsec-recon/SKILL.md",
-    "appsec-code/SKILL.md",
-    "appsec-infra/SKILL.md",
-    "appsec-llm/SKILL.md",
-    "appsec-report/SKILL.md",
+# Descubiertas del sistema de ficheros: una sub-skill nueva entra sola en los
+# tests de gate/handoff, índice del maestro, prosa duplicada y ficheros
+# obligatorios.
+SUB_SKILLS = sorted(path.parent.name for path in SKILL_ROOT.glob("*/SKILL.md"))
+
+# Assets que no son skills; las sub-skills se añaden desde SUB_SKILLS.
+REQUIRED_ASSETS = [
     "references/benchmark.md",
     "references/sources-sinks.md",
     "references/owasp-cwe.md",
@@ -52,9 +52,7 @@ REQUIRED_FILES = [
     "skills.json",
 ]
 
-# Descubiertas del sistema de ficheros: una sub-skill nueva entra sola en los
-# tests de gate/handoff, índice del maestro y prosa duplicada.
-SUB_SKILLS = sorted(path.parent.name for path in SKILL_ROOT.glob("*/SKILL.md"))
+REQUIRED_FILES = ["SKILL.md"] + [f"{name}/SKILL.md" for name in SUB_SKILLS] + REQUIRED_ASSETS
 
 
 def read_file(relative: str) -> str:
