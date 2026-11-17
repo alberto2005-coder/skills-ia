@@ -35,7 +35,7 @@ Cada proyecto recibe una dirección creativa propia. El sistema prioriza identid
 
 Flujo: **Discovery → Creative Direction → UX Architecture → Technical Planning → Development → Quality Assurance → Delivery**.
 
-Las instrucciones internas están en inglés; la skill entiende peticiones multilingües y se comunica en el idioma preferido por el usuario. El contenido del sitio se genera en el idioma solicitado.
+Las instrucciones internas están en inglés; la skill entiende peticiones multilingües y se comunica en el idioma preferido por el usuario. El contenido del sitio se genera en el idioma solicitado. La `description` del frontmatter lleva palabras clave en inglés y en español para activarse con peticiones de ambos idiomas.
 
 ### Instalación y uso
 Instala la carpeta completa en una ubicación de descubrimiento de skills compatible con el agente. Algunas plataformas requieren una ruta o configuración propia.
@@ -92,7 +92,7 @@ Every project gets a distinctive creative direction. The system prioritizes orig
 
 Workflow: **Discovery → Creative Direction → UX Architecture → Technical Planning → Development → Quality Assurance → Delivery**.
 
-Internal instructions are written in English. The skill understands multilingual requests and communicates in the user's preferred language; website content is generated in the requested language.
+Internal instructions are written in English. The skill understands multilingual requests and communicates in the user's preferred language; website content is generated in the requested language. The frontmatter `description` carries English and Spanish keywords so the skill activates from requests in either language.
 
 ### Installation and Usage
 Install the complete folder in an agent-supported skill discovery location. Some platforms require their own native path or configuration.

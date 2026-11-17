@@ -9,6 +9,9 @@ description: >
   quality assurance using a hybrid multi-agent workflow.
   Produces distinctive, responsive, accessible and production-oriented
   digital experiences with professional visual standards.
+  Also answers Spanish requests: rediseñar una web corporativa, diseñar una
+  landing page, crear una tienda con carrito y checkout o un portafolio, con
+  dirección de arte, tipografía, accesibilidad y calidad visual del sitio.
 ---
 
 # PREMIUM WEB DESIGNER & DEVELOPER

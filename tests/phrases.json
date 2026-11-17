@@ -269,9 +269,15 @@
     "premium-web-designer": {
       "positives": [
         "premium digital agency website design and development for a corporate website",
-        "create a distinctive accessible production-oriented ecommerce website using a hybrid multi-agent workflow"
+        "create a distinctive accessible production-oriented ecommerce website using a hybrid multi-agent workflow",
+        "rediseña mi web corporativa con una dirección de arte propia",
+        "diseña una landing page premium para mi tienda online",
+        "hazme un portafolio con identidad visual y tipografía propia",
+        "hazme una tienda online con carrito y checkout",
+        "revisa la accesibilidad y la calidad visual del sitio"
       ],
       "negatives": [
+        { "phrase": "audita el SEO de mi tienda online", "winner": "seo-audit" },
         { "phrase": "audita las cabeceras de seguridad y el rendimiento técnico SEO de una página", "winner": "seo-audit" },
         { "phrase": "define el alcance legal e inventaría funciones de una app existente antes de replicarla", "winner": "replica-recon" }
       ]
