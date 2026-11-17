@@ -22,18 +22,19 @@
 - [**Premium Web Designer**](premium-web-designer.md): diseño y desarrollo de sitios web premium con dirección de arte, UX/UI y QA independiente.
 
 ### Paquetes y Sub-skills
-**6 paquetes, 34 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
+**7 paquetes, 43 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
 
 | Paquete | Skills | Maestro | Sub-skills |
 |---|---:|---|---|
 | `replica` | 14 | `replica` | `replica-recon` (0-1b), `replica-architect`, `replica-design`, `replica-build`, `replica-backend`, `replica-test`, `replica-diff`, `replica-entrepreneur`, `replica-brand`, `replica-launch`, `replica-deploy`, `replica-static`, `replica-redes` |
 | `seo-auditor` | 6 | `seo-auditor` | `seo-audit`, `seo-plan`, `seo-execute`, `seo-serp`, `seo-compare` |
-| `appsec-audit` | 6 | `appsec-audit` | `appsec-recon`, `appsec-code`, `appsec-infra`, `appsec-llm`, `appsec-report` |
+| `appsec-audit` | 11 | `appsec-audit` | `appsec-recon`, `appsec-code`, `appsec-infra`, `appsec-llm`, `appsec-threat`, `appsec-deps`, `appsec-ci`, `appsec-fix`, `appsec-report`, `appsec-scale` |
 | `agent-red-team` | 3 | `agent-red-team` | `red-scan`, `red-audit` |
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
 | `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
+| `skill-evals` | 4 | `skill-evals` | `eval-design`, `eval-run`, `eval-report` |
 
-Cada maestro elige el modo, fija los límites y reparte el trabajo; `premium-web-designer` suma `premium-qa` para auditar webs ya construidas y `appsec-audit` reparte la auditoría entre reconocimiento, código, infraestructura, LLM e informe.
+Cada maestro elige el modo, fija los límites y reparte el trabajo; `premium-web-designer` suma `premium-qa` para auditar webs ya construidas y `appsec-audit` reparte la auditoría entre reconocimiento, código, infraestructura, LLM, amenazas, dependencias, CI, remediación, informe y escala, y `skill-evals` reparte el ciclo entre diseño de casos, ejecución e informe.
 
 ### Estructura de un Paquete
 ```text
@@ -58,7 +59,7 @@ uv run python run_tests.py
 ### Reglas de Seguridad y Ejecución
 1. Todas las herramientas funcionan en modo solo lectura por defecto.
 2. No se ejecutan comandos destructivos ni llamadas de red salientes no autorizadas.
-3. Compatibilidad con la librería estándar de Python 3.8+ sin `pip install`.
+3. Compatibilidad con la librería estándar de Python 3.9+ sin `pip install`.
 
 ---
 
@@ -80,18 +81,19 @@ uv run python run_tests.py
 - [**Premium Web Designer**](premium-web-designer.md): premium website design and development with art direction, UX/UI and independent QA.
 
 ### Packages and Sub-skills
-**6 packages, 34 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
+**7 packages, 43 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
 
 | Package | Skills | Master | Sub-skills |
 |---|---:|---|---|
 | `replica` | 14 | `replica` | `replica-recon` (0-1b), `replica-architect`, `replica-design`, `replica-build`, `replica-backend`, `replica-test`, `replica-diff`, `replica-entrepreneur`, `replica-brand`, `replica-launch`, `replica-deploy`, `replica-static`, `replica-redes` |
 | `seo-auditor` | 6 | `seo-auditor` | `seo-audit`, `seo-plan`, `seo-execute`, `seo-serp`, `seo-compare` |
-| `appsec-audit` | 6 | `appsec-audit` | `appsec-recon`, `appsec-code`, `appsec-infra`, `appsec-llm`, `appsec-report` |
+| `appsec-audit` | 11 | `appsec-audit` | `appsec-recon`, `appsec-code`, `appsec-infra`, `appsec-llm`, `appsec-threat`, `appsec-deps`, `appsec-ci`, `appsec-fix`, `appsec-report`, `appsec-scale` |
 | `agent-red-team` | 3 | `agent-red-team` | `red-scan`, `red-audit` |
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
 | `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
+| `skill-evals` | 4 | `skill-evals` | `eval-design`, `eval-run`, `eval-report` |
 
-Each master picks the mode, sets boundaries and splits the work; `premium-web-designer` adds `premium-qa` to audit sites that already exist and `appsec-audit` splits the audit across recon, code, infrastructure, LLM and report.
+Each master picks the mode, sets boundaries and splits the work; `premium-web-designer` adds `premium-qa` to audit sites that already exist and `appsec-audit` splits the audit across recon, code, infrastructure, LLM, threats, dependencies, CI, remediation, report and scale, while `skill-evals` splits the loop across case design, run and report.
 
 ### Package Structure
 ```text
@@ -116,4 +118,4 @@ uv run python run_tests.py
 ### Safety and Execution Guidelines
 1. All tools operate in read-only mode by default.
 2. No destructive commands or unauthorized outbound network requests are performed.
-3. Python 3.8+ standard library compatibility without `pip install`.
+3. Python 3.9+ standard library compatibility without `pip install`.

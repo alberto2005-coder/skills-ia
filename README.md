@@ -20,7 +20,7 @@
 ### Visión General
 **Skills IA** es una colección de habilidades modulares, deterministas e independientes diseñadas para ser integradas en cualquier asistente de Inteligencia Artificial (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Cada habilidad es autosuficiente y opera sin alterar paquetes globales ni requerir dependencias complejas.
 
-Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica, varias sub-skills con un corte de uso real. Se instalan juntas y comparten assets sin duplicarlos. El índice máquina-legible está en [`skills.json`](skills.json): 6 paquetes, 34 skills.
+Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica, varias sub-skills con un corte de uso real. Se instalan juntas y comparten assets sin duplicarlos. El índice máquina-legible está en [`skills.json`](skills.json): 7 paquetes, 43 skills.
 
 ### Módulos y Sub-skills
 
@@ -28,10 +28,11 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | :--- | :--- | ---: |
 | **[`replica`](replica/)** | Reconstrucción funcional *clean-room* de aplicaciones (desde SaaS hasta editores de alta complejidad). | 14 |
 | **[`seo-auditor`](seo-auditor/)** | Auditoría SEO técnica, de contenido, datos estructurados, sitemaps y GEO, con rúbrica 0–100 y evidencia reproducible. | 6 |
-| **[`appsec-audit`](appsec-audit/)** | Auditoría de ciberseguridad integral: código, APIs, infraestructura, cloud y LLM, con tribunal de validación y nota A–F. | 6 |
+| **[`appsec-audit`](appsec-audit/)** | Auditoría de ciberseguridad integral: código, APIs, infraestructura, cloud y LLM, con tribunal de validación, nota A–F, modelo de amenazas, dependencias, CI, remediación y escala. | 11 |
 | **[`agent-red-team`](agent-red-team/)** | Auditoría de seguridad de skills, MCP y carpetas de instrucciones antes de instalarlas. | 3 |
 | **[`humanizador-anti-ia`](humanizador-anti-ia/)** | Detección y reescritura de patrones de escritura de IA, con score 0–100 determinista. | 3 |
 | **[`premium-web-designer`](premium-web-designer/)** | Diseño y desarrollo de sitios web premium con dirección de arte, UX/UI y QA independiente medible. | 2 |
+| **[`skill-evals`](skill-evals/)** | Evaluación offline de skills: casos, triggers, colisiones, presupuesto de contexto y veredicto reproducible. | 4 |
 
 #### `replica` — maestro + 13 fases
 
@@ -63,7 +64,7 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | `seo-serp` | Simulador de SERP y tarjetas sociales. |
 | `seo-compare` | Diff entre auditorías y monitorización. |
 
-#### `appsec-audit` — maestro + 5 sub-skills
+#### `appsec-audit` — maestro + 10 sub-skills
 
 | Sub-skill | Qué hace |
 |---|---|
@@ -73,6 +74,20 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | `appsec-infra` | Docker, Kubernetes, Terraform, cloud, IAM y CI/CD. |
 | `appsec-llm` | OWASP LLM Top 10, agentes, MCP y RAG. |
 | `appsec-report` | Tribunal con confianza 1–10, nota A–F, diffs y resumen ejecutivo. |
+| `appsec-threat` | Modelo de amenazas, límites de confianza, OWASP 2025 y ASVS 5.0. |
+| `appsec-deps` | SBOM CycloneDX, CVEs por componente y alcanzabilidad por imports. |
+| `appsec-ci` | Workflow de CI, agente revisor, SARIF y `--fail-on`. |
+| `appsec-fix` | Remediación con aprobación, sandbox y variantes. |
+| `appsec-scale` | Multi-repo, proveedores, topología y coste. |
+
+#### `skill-evals` — maestro + 3 sub-skills
+
+| Sub-skill | Qué hace |
+|---|---|
+| `skill-evals` | Maestro: diseño de casos, ejecución, puertas, comparación e informe. |
+| `eval-design` | Casos desde `phrases.json`, límites, cobertura y split train/test. |
+| `eval-run` | Precisión, recall, MRR, colisiones, presupuesto, regresiones y puertas. |
+| `eval-report` | Informe Markdown/HTML con fallos, colisiones, presupuesto y veredicto. |
 
 #### `agent-red-team` — maestro + 2 sub-skills
 
@@ -122,11 +137,11 @@ Las guías completas de cada módulo se encuentran en la carpeta [`docs/`](docs/
 - [Premium Web Designer](docs/premium-web-designer.md)
 
 ### Requisitos y Filosofía de Cero Dependencias
-- **Python 3.8+** (utiliza únicamente la librería estándar de Python: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).
+- **Python 3.9+** (utiliza únicamente la librería estándar de Python: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).
 - Los tests usan `unittest`; las herramientas de pruebas y calidad (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) están en el grupo `dev` de `pyproject.toml` y se gestionan con [`uv`](https://docs.astral.sh/uv/).
 - Para preparar el entorno `.venv` y ejecutar todos los tests desde la raíz: `uv sync` y `uv run python run_tests.py`.
 - GitHub Actions ejecuta todas las suites en cada `push` mediante `.github/workflows/tests.yml`.
-- Tests transversales en `tests/`: activación de las 34 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
+- Tests transversales en `tests/`: activación de las 43 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
 
 ### Licencia
 Distribuido bajo la [Licencia MIT](LICENSE).
@@ -146,7 +161,7 @@ Distribuido bajo la [Licencia MIT](LICENSE).
 ### Overview
 **Skills IA** is a collection of modular, deterministic, and self-contained agent skills designed for integration with any AI assistant (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Each skill is independent and operates without modifying global packages or requiring third-party libraries.
 
-Each folder is a **package**: one master skill that orchestrates and, where applicable, sub-skills split by real usage boundaries. Packages share assets without duplication. The machine-readable index is [`skills.json`](skills.json): 6 packages, 34 skills.
+Each folder is a **package**: one master skill that orchestrates and, where applicable, sub-skills split by real usage boundaries. Packages share assets without duplication. The machine-readable index is [`skills.json`](skills.json): 7 packages, 43 skills.
 
 ### Modules and Sub-skills
 
@@ -154,10 +169,11 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | :--- | :--- | ---: |
 | **[`replica`](replica/)** | Clean-room functional reverse-engineering of software (from SaaS to complex engines like word processors). | 14 |
 | **[`seo-auditor`](seo-auditor/)** | Technical, content, structured-data, sitemap and GEO audits with a 0–100 rubric and reproducible evidence. | 6 |
-| **[`appsec-audit`](appsec-audit/)** | End-to-end security audit of code, APIs, infrastructure, cloud and LLM systems, with a validation tribunal and an A–F grade. | 6 |
+| **[`appsec-audit`](appsec-audit/)** | End-to-end security audit of code, APIs, infrastructure, cloud and LLM systems, with a validation tribunal, an A–F grade, threat modelling, dependencies, CI, remediation and scale. | 11 |
 | **[`agent-red-team`](agent-red-team/)** | Security audit of skills, MCP servers and instruction folders before installing them. | 3 |
 | **[`humanizador-anti-ia`](humanizador-anti-ia/)** | Detection and rewriting of AI writing patterns with a deterministic 0–100 score. | 3 |
 | **[`premium-web-designer`](premium-web-designer/)** | Premium website design and development with art direction, UX/UI and measurable independent QA. | 2 |
+| **[`skill-evals`](skill-evals/)** | Offline skill evaluation: cases, triggers, collisions, context budget and a reproducible verdict. | 4 |
 
 #### `replica` — master + 13 phases
 
@@ -189,7 +205,7 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | `seo-serp` | SERP and social-card simulator. |
 | `seo-compare` | Audit diff and monitoring. |
 
-#### `appsec-audit` — master + 5 sub-skills
+#### `appsec-audit` — master + 10 sub-skills
 
 | Sub-skill | Purpose |
 |---|---|
@@ -199,6 +215,20 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | `appsec-infra` | Docker, Kubernetes, Terraform, cloud, IAM and CI/CD. |
 | `appsec-llm` | OWASP LLM Top 10, agents, MCP and RAG. |
 | `appsec-report` | 1–10 confidence tribunal, A–F grade, diffs and executive summary. |
+| `appsec-threat` | Threat model, trust boundaries, OWASP 2025 and ASVS 5.0. |
+| `appsec-deps` | CycloneDX SBOM, per-component CVEs and import reachability. |
+| `appsec-ci` | CI workflow, review agent, SARIF and `--fail-on`. |
+| `appsec-fix` | Remediation with approval, sandbox and variants. |
+| `appsec-scale` | Multi-repo, vendors, topology and cost. |
+
+#### `skill-evals` — master + 3 sub-skills
+
+| Sub-skill | Purpose |
+|---|---|
+| `skill-evals` | Master: case design, run, gates, baseline comparison and report. |
+| `eval-design` | Cases from `phrases.json`, boundary cases, coverage and train/test split. |
+| `eval-run` | Precision, recall, MRR, collisions, budget, regressions and gates. |
+| `eval-report` | Markdown/HTML report with failures, collisions, budget and verdict. |
 
 #### `agent-red-team` — master + 2 sub-skills
 
@@ -248,11 +278,11 @@ Comprehensive module documentation is available in the [`docs/`](docs/) director
 - [Premium Web Designer](docs/premium-web-designer.md)
 
 ### Requirements and Zero-Dependency Philosophy
-- **Python 3.8+** (uses only standard library modules: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).
+- **Python 3.9+** (uses only standard library modules: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).
 - Tests use `unittest`; test and quality tools (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) are in the `dev` group in `pyproject.toml` and managed by [`uv`](https://docs.astral.sh/uv/).
 - Prepare `.venv` and run every test from the repository root with `uv sync` and `uv run python run_tests.py`.
 - GitHub Actions runs all suites on every `push` via `.github/workflows/tests.yml`.
-- Cross-cutting tests in `tests/`: activation for all 34 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
+- Cross-cutting tests in `tests/`: activation for all 43 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
 
 ### License
 Distributed under the [MIT License](LICENSE).
