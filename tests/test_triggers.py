@@ -1,4 +1,4 @@
-"""Tests de activación (trigger) de las 39 skills del repositorio.
+"""Tests de activación (trigger) de las skills del repositorio.
 
 Sin red y solo stdlib. Cargan los `SKILL.md`, puntúan frases reales contra sus
 descripciones y comprueban cuatro invariantes:
@@ -31,6 +31,8 @@ class TriggerTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.router = tr.Router.from_repo(ROOT)
+        index = json.loads((ROOT / "skills.json").read_text(encoding="utf-8"))
+        cls.skills_total = index["skills_total"]
         cls.data = json.loads((TESTS_DIR / "phrases.json").read_text(encoding="utf-8"))
         cls.skills = cls.data["skills"]
         cls.masters = {
@@ -47,7 +49,11 @@ class CorpusTest(TriggerTest):
     """El dataset cubre exactamente las skills que existen."""
 
     def test_dataset_covers_every_skill(self) -> None:
-        self.assertEqual(len(self.router.names), 39, "el repo debe tener 39 skills")
+        self.assertEqual(
+            len(self.router.names),
+            self.skills_total,
+            "skills_total de skills.json debe coincidir con las SKILL.md encontradas",
+        )
         self.assertEqual(
             set(self.skills),
             self.router.names,

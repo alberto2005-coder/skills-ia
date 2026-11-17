@@ -52,11 +52,9 @@ REQUIRED_FILES = [
     "skills.json",
 ]
 
-SUB_SKILLS = [
-    "appsec-recon", "appsec-code", "appsec-infra", "appsec-llm",
-    "appsec-report", "appsec-threat", "appsec-deps", "appsec-ci",
-    "appsec-fix", "appsec-scale",
-]
+# Descubiertas del sistema de ficheros: una sub-skill nueva entra sola en los
+# tests de gate/handoff, índice del maestro y prosa duplicada.
+SUB_SKILLS = sorted(path.parent.name for path in SKILL_ROOT.glob("*/SKILL.md"))
 
 
 def read_file(relative: str) -> str:

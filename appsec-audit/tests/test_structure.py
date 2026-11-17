@@ -58,9 +58,14 @@ class TestStructure(unittest.TestCase):
     def test_manifest_matches_files(self):
         manifest = json.loads(read_file("skills.json"))
         names = [entry["name"] for entry in manifest["skills"]]
+        folders = {path.parent.name for path in SKILL_ROOT.glob("*/SKILL.md")}
 
-        self.assertEqual(len(names), 11)
-        self.assertEqual(sorted(names), sorted(["appsec-audit"] + SUB_SKILLS))
+        self.assertEqual(
+            len(names),
+            len(folders) + 1,
+            "el manifiesto debe declarar el maestro y todas las SKILL.md del paquete",
+        )
+        self.assertEqual(sorted(names), sorted(folders | {"appsec-audit"}))
 
         for entry in manifest["skills"]:
             with self.subTest(skill=entry["name"]):
