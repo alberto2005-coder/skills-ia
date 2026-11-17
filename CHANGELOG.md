@@ -8,16 +8,40 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-17 · `appsec-audit` 1.4 — CI, remediación y escala
+
+#### Añadido
+- **`appsec-ci`:** `detect_tools.py` detecta herramientas por PATH y metadatos sin instalarlas ni ejecutarlas, y audita el workflow (`pull_request_target` con token de escritura, checkout del head, acciones sin pin, inyección por interpolación, secretos). `normalize_sarif.py` convierte SARIF externo en `needs_validation`, comprueba compatibilidad con `upload-sarif` y aplica `--fail-on`. Con `references/agent-hardening.md` y `templates/pr-comment.md`.
+- **`appsec-fix`:** `apply_patch.py` con dry-run por defecto, escritura solo con `--apply --yes`, copia `.orig` y verificación que exige `--sandbox` declarado; política de sandbox, reversión y análisis de variantes en `references/remediation.md`.
+- **`appsec-scale`:** `scale_report.py` consolida varios repos, dibuja la topología repo → tercero y estima horas y coste por fase según perfil y tarifa, con `references/scale.md`.
+- **Tests:** 27 pruebas nuevas (122 en el paquete) y tres sub-skills más (11 en total, 39 en el repositorio).
+
+### - 2026-11-17 · `appsec-audit` 1.3 — Threat model y dependencias
+
+#### Añadido
+- **`appsec-threat`:** activos, actores, límites de confianza, casos de abuso y mapeo de cada amenaza a OWASP Top 10 2025, ASVS 5.0 y la clase del ledger, con `templates/threat-model.md` y `references/threat-model.md`.
+- **`appsec-deps`:** `scripts/sbom.py` genera el SBOM CycloneDX 1.5 desde `package.json`, `requirements.txt`, `pyproject.toml` y `go.mod`, cruza avisos por versión y ecosistema y decide alcanzabilidad por imports (`reachable`, `test-only`, `not-imported`, `unknown`), con puerta para altas y críticas alcanzables.
+- **Catálogo ampliado:** de 14 a 24 clases de ataque en `references/attack-classes.md`, el ledger y su esquema, cada una con CWE, OWASP 2025 y capítulo ASVS.
+- **Tests:** 23 pruebas nuevas (95 en el paquete), incluida la coherencia entre catálogo y clases aceptadas por el ledger.
+
+### - 2026-11-17 · `appsec-audit` 1.2 — Fase 1
+
+#### Añadido
+- **Verificador independiente:** `templates/verification.md` entrega al revisor solo ubicación, CWE, patrón y propósito declarado, sin evidencia ni veredicto, y mapea cada veredicto a los campos que exige `findings.json`.
+- **`scripts/export_sarif.py`:** SARIF 2.1.0 con una regla por CWE, `critica`/`alta` como `error`, `media` como `warning`, `baja` como `note`, solo `confirmed`, `needs_validation` como `note` con `--include-pending` y huella en `partialFingerprints`.
+- **`scripts/diff_scope.py`:** modo diff/PR; convierte un parche o `git diff --base` en rangos de líneas añadidas y separa los hallazgos que caen dentro del cambio.
+- **`scripts/diff_reports.py`:** baseline por fingerprint con `new`, `fixed`, `changed` y `persisting`, y `--fail-on new` como puerta de PR sobre los `confirmed` nuevos.
+- **Tests:** 26 pruebas nuevas (72 en el paquete) y documentación bilingüe de los cuatro mecanismos.
+
 ### - 2026-11-17 · CI, SARIF y trazabilidad
 
 #### Añadido
 - **`agent-red-team/scripts/export_sarif.py`:** exporta el informe a SARIF 2.1.0 con una regla por categoría, mapeo `critical/high → error`, `medium → warning`, `low → note`, REJECT siempre `error` y `needs_validation` como `note` solo con `--include-pending`. Los `rejected` no se exportan. 12 tests nuevos (50 en el paquete).
 - **`tests/lint_frontmatter.py`:** lint de frontmatter (delimitadores, `name` igual a la carpeta, `description` útil) y de los manifiestos de paquete, con 6 tests propios.
 - **CI real:** `.github/workflows/tests.yml` pasa a dos jobs — lint en Ubuntu y la suite completa en **matriz Ubuntu / macOS / Windows** con Python 3.13.
-- **`docs/benchmark/README.md`:** trazabilidad completa, bilingüe, de qué proyecto viene cada funcionalidad en las seis skills, incluida la exportación SARIF y la CI.
 
 #### Cambiado
-- **`PLAN-MEJORA.md` se retira:** todas sus fases están implementadas y su contenido vive ahora en el documento de benchmark y en el CHANGELOG.
+- **`PLAN-MEJORA.md` se retira:** todas sus fases están implementadas y su contenido vive ahora en el CHANGELOG y en la guía de cada paquete.
 
 ### - 2026-11-17 · `appsec-audit` 1.1 — Fase 0
 
@@ -124,16 +148,40 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 
 All notable changes to this project are documented in this file.
 
+### - 2026-11-17 · `appsec-audit` 1.4 — CI, remediation and scale
+
+#### Added
+- **`appsec-ci`:** `detect_tools.py` finds tools through PATH and metadata without installing or running them, and audits the workflow (`pull_request_target` with a write token, PR head checkout, unpinned actions, interpolation injection, exposed secrets). `normalize_sarif.py` turns external SARIF into `needs_validation`, checks `upload-sarif` compatibility and applies `--fail-on`. Ships `references/agent-hardening.md` and `templates/pr-comment.md`.
+- **`appsec-fix`:** `apply_patch.py` defaults to dry-run, writes only with `--apply --yes`, keeps a `.orig` copy and requires a declared `--sandbox` for verification; sandbox, rollback and variant analysis policy in `references/remediation.md`.
+- **`appsec-scale`:** `scale_report.py` consolidates several repos, draws the repo → vendor topology and estimates hours and cost per phase from profile and rate, documented in `references/scale.md`.
+- **Tests:** 27 new tests (122 in the package) and three more sub-skills (11 total, 39 across the repository).
+
+### - 2026-11-17 · `appsec-audit` 1.3 — Threat model and dependencies
+
+#### Added
+- **`appsec-threat`:** assets, actors, trust boundaries and abuse cases, with every threat mapped to OWASP Top 10 2025, ASVS 5.0 and its ledger class, plus `templates/threat-model.md` and `references/threat-model.md`.
+- **`appsec-deps`:** `scripts/sbom.py` builds a CycloneDX 1.5 SBOM from `package.json`, `requirements.txt`, `pyproject.toml` and `go.mod`, matches advisories by version and ecosystem and decides reachability from imports (`reachable`, `test-only`, `not-imported`, `unknown`), gating on reachable high and critical findings.
+- **Expanded catalog:** 14 to 24 attack classes in `references/attack-classes.md`, the ledger and its schema, each with CWE, OWASP 2025 and ASVS chapter.
+- **Tests:** 23 new tests (95 in the package), including catalogue-versus-ledger class consistency.
+
+### - 2026-11-17 · `appsec-audit` 1.2 — Phase 1
+
+#### Added
+- **Independent verifier:** `templates/verification.md` hands the reviewer only location, CWE, pattern and declared purpose, with no evidence or verdict, and maps each verdict to the fields `findings.json` requires.
+- **`scripts/export_sarif.py`:** SARIF 2.1.0 with one rule per CWE, `critica`/`alta` as `error`, `media` as `warning`, `baja` as `note`, `confirmed` only, `needs_validation` as `note` with `--include-pending`, and the fingerprint in `partialFingerprints`.
+- **`scripts/diff_scope.py`:** diff/PR mode; turns a patch or `git diff --base` into added-line ranges and separates findings that fall inside the change.
+- **`scripts/diff_reports.py`:** fingerprint baseline with `new`, `fixed`, `changed` and `persisting`, plus `--fail-on new` as a PR gate on new `confirmed` findings.
+- **Tests:** 26 new tests (72 in the package) and bilingual documentation for all four mechanics.
+
 ### - 2026-11-17 · CI, SARIF and traceability
 
 #### Added
 - **`agent-red-team/scripts/export_sarif.py`:** exports the report to SARIF 2.1.0 with one rule per category, `critical/high → error`, `medium → warning`, `low → note`, REJECT always `error` and `needs_validation` as `note` only with `--include-pending`. `rejected` findings are never exported. 12 new tests (50 in the package).
 - **`tests/lint_frontmatter.py`:** frontmatter lint (delimiters, `name` matching the folder, meaningful `description`) plus package manifest checks, with 6 tests of its own.
 - **Real CI:** `.github/workflows/tests.yml` now has two jobs — lint on Ubuntu and the full suite on a **Ubuntu / macOS / Windows matrix** with Python 3.13.
-- **`docs/benchmark/README.md`:** full bilingual traceability of which project each feature comes from across the six skills, including SARIF export and CI.
 
 #### Changed
-- **`PLAN-MEJORA.md` is retired:** every phase is implemented and its content now lives in the benchmark document and the CHANGELOG.
+- **`PLAN-MEJORA.md` is retired:** every phase is implemented and its content now lives in the CHANGELOG and each package's guide.
 
 ### - 2026-11-17 · `appsec-audit` 1.1 — Phase 0
 
