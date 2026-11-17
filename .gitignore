@@ -39,6 +39,7 @@ venv.bak/
 /reports/
 seo-auditor/reports/
 seo-auditor/output/
+skill-evals/reports/
 premium-web-designer/tests/reports/*
 !premium-web-designer/tests/reports/.gitkeep
 replica/diff/*.png

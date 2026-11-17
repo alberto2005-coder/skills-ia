@@ -13,6 +13,7 @@ SUITES = (
     ("premium-web-designer", "custom"),
     ("replica", "unittest"),
     ("seo-auditor", "unittest"),
+    ("skill-evals", "unittest"),
     (".", "unittest"),
 )
 

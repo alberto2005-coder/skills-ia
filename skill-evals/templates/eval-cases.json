@@ -1,0 +1,37 @@
+{
+  "format": "skill-evals-cases",
+  "version": "1.0",
+  "threshold": 0.3,
+  "source": "tests/phrases.json",
+  "cases": [
+    {
+      "id": "pos:appsec-recon:1",
+      "prompt": "define el alcance y los límites legales antes de auditar",
+      "expect": "appsec-recon",
+      "kind": "positive",
+      "split": "train"
+    },
+    {
+      "id": "neg:appsec-recon:1",
+      "prompt": "despliega la app en producción con backups y rollback",
+      "expect": "replica-deploy",
+      "forbid": "appsec-recon",
+      "kind": "negative",
+      "split": "test"
+    },
+    {
+      "id": "ood:1",
+      "prompt": "resume este texto en tres líneas",
+      "expect": null,
+      "kind": "out_of_domain",
+      "split": "train"
+    },
+    {
+      "id": "boundary:empty",
+      "prompt": "",
+      "expect": null,
+      "kind": "boundary",
+      "split": "test"
+    }
+  ]
+}

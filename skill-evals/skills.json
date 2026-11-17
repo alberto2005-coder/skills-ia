@@ -1,0 +1,29 @@
+{
+  "format": "skills-ia-package",
+  "format_version": "1.0",
+  "name": "skill-evals",
+  "version": "1.0.0",
+  "description": "Evaluación offline de skills: casos versionables, precisión y recall de activación, colisiones, presupuesto de contexto e informes reproducibles.",
+  "skills": [
+    {
+      "name": "skill-evals",
+      "path": "SKILL.md",
+      "description": "Maestro: diseño de casos, ejecución contra el router, puertas de calidad, comparación con la línea base e informe."
+    },
+    {
+      "name": "eval-design",
+      "path": "eval-design/SKILL.md",
+      "description": "Diseño y validación del conjunto de casos: positivas, negativas con ganadora, límites, cobertura y split train/test."
+    },
+    {
+      "name": "eval-run",
+      "path": "eval-run/SKILL.md",
+      "description": "Ejecución offline: precisión, recall, MRR, colisiones, presupuesto, regresiones y puertas de salida."
+    },
+    {
+      "name": "eval-report",
+      "path": "eval-report/SKILL.md",
+      "description": "Informe Markdown o HTML autónomo con fallos, colisiones, presupuesto, veredicto y diff contra la línea base."
+    }
+  ]
+}

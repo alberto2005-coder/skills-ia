@@ -718,6 +718,58 @@
           "winner": "appsec-deps"
         }
       ]
+    },
+    "skill-evals": {
+      "positives": [
+        "evalúa el catálogo de skills de principio a fin y deja evidencia reproducible",
+        "monta el flujo completo de evaluación de skills con veredicto final",
+        "end-to-end offline evaluation of the whole skill catalog"
+      ],
+      "negatives": [
+        {
+          "phrase": "escanea esta skill en busca de inyecciones de prompt",
+          "winner": "agent-red-team"
+        }
+      ]
+    },
+    "eval-design": {
+      "positives": [
+        "diseña los casos de evaluación y reparte train y test antes de ejecutar",
+        "genera casos límite y revisa que phrases.json cubra todo el catálogo",
+        "design eval cases and split them into train and test"
+      ],
+      "negatives": [
+        {
+          "phrase": "ejecuta los casos contra el router y aplica las puertas",
+          "winner": "eval-run"
+        }
+      ]
+    },
+    "eval-run": {
+      "positives": [
+        "ejecuta las evaluaciones offline y mide precisión y recall de activación",
+        "corre los casos contra el router y detecta colisiones entre descripciones",
+        "run the eval cases and report precision, recall and per-case regressions"
+      ],
+      "negatives": [
+        {
+          "phrase": "diseña el conjunto de casos y reparte train y test",
+          "winner": "eval-design"
+        }
+      ]
+    },
+    "eval-report": {
+      "positives": [
+        "renderiza el informe de evaluación en html autónomo con la tabla de fallos",
+        "genera el veredicto del informe y compara dos corridas contra la línea base",
+        "render the eval report as standalone html with failures and collisions"
+      ],
+      "negatives": [
+        {
+          "phrase": "mide la precisión de activación y el recall del catálogo",
+          "winner": "eval-run"
+        }
+      ]
     }
   },
   "out_of_domain": [

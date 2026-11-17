@@ -4,7 +4,7 @@
   "updated": "2026-11-17",
   "version": "2.7.0",
   "description": "Índice vendor-neutral de los paquetes de Skills IA. Cualquier agente (Claude, Codex, Cursor, Gemini, OpenCode...) puede descubrir las skills escaneando **/SKILL.md; este índice da además el mapa de paquetes y permite varias skills por carpeta.",
-  "skills_total": 39,
+  "skills_total": 43,
   "packages": [
     {
       "name": "replica",
@@ -97,6 +97,19 @@
       "skills": [
         "premium-web-designer",
         "premium-qa"
+      ]
+    },
+    {
+      "name": "skill-evals",
+      "path": "skill-evals",
+      "version": "1.0.0",
+      "manifest": "skill-evals/skills.json",
+      "skill_count": 4,
+      "skills": [
+        "skill-evals",
+        "eval-design",
+        "eval-run",
+        "eval-report"
       ]
     }
   ]
