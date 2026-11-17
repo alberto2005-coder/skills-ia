@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 SUITES = (
     ("agent-red-team", "unittest"),
+    ("appsec-audit", "unittest"),
     ("humanizador-anti-ia", "unittest"),
     ("premium-web-designer", "custom"),
     ("replica", "unittest"),

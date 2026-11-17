@@ -18,20 +18,22 @@
 - [**Humanizador Anti-IA**](humanizador-anti-ia.md): detección y reescritura de patrones de escritura de IA, con catálogo de 40 patrones y score 0–100 determinista.
 - [**Replica**](replica.md): reconstrucción funcional *clean-room* por fases, con evidencia obligatoria, paridad y rebrand.
 - [**SEO Auditor**](seo-auditor.md): auditoría SEO/GEO con rúbrica 0–100, simulador de SERP y evidencia reproducible.
+- [**AppSec Audit**](appsec-audit.md): auditoría de ciberseguridad integral con trazado fuente→sumidero, tribunal de validación, nota A–F y parches en diff.
 - [**Premium Web Designer**](premium-web-designer.md): diseño y desarrollo de sitios web premium con dirección de arte, UX/UI y QA independiente.
 
 ### Paquetes y Sub-skills
-**5 paquetes, 28 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
+**6 paquetes, 34 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
 
 | Paquete | Skills | Maestro | Sub-skills |
 |---|---:|---|---|
 | `replica` | 14 | `replica` | `replica-recon` (0-1b), `replica-architect`, `replica-design`, `replica-build`, `replica-backend`, `replica-test`, `replica-diff`, `replica-entrepreneur`, `replica-brand`, `replica-launch`, `replica-deploy`, `replica-static`, `replica-redes` |
 | `seo-auditor` | 6 | `seo-auditor` | `seo-audit`, `seo-plan`, `seo-execute`, `seo-serp`, `seo-compare` |
+| `appsec-audit` | 6 | `appsec-audit` | `appsec-recon`, `appsec-code`, `appsec-infra`, `appsec-llm`, `appsec-report` |
 | `agent-red-team` | 3 | `agent-red-team` | `red-scan`, `red-audit` |
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
 | `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
 
-Cada maestro elige el modo, fija los límites y reparte el trabajo; `premium-web-designer` suma `premium-qa` para auditar webs ya construidas.
+Cada maestro elige el modo, fija los límites y reparte el trabajo; `premium-web-designer` suma `premium-qa` para auditar webs ya construidas y `appsec-audit` reparte la auditoría entre reconocimiento, código, infraestructura, LLM e informe.
 
 ### Estructura de un Paquete
 ```text
@@ -74,20 +76,22 @@ uv run python run_tests.py
 - [**Humanizador Anti-IA**](humanizador-anti-ia.md): detection and rewriting of AI writing patterns, with a 40-pattern catalog and a deterministic 0–100 score.
 - [**Replica**](replica.md): clean-room functional reconstruction by phases, with mandatory evidence, parity and rebrand.
 - [**SEO Auditor**](seo-auditor.md): SEO/GEO audit with a 0–100 rubric, SERP simulator and reproducible evidence.
+- [**AppSec Audit**](appsec-audit.md): end-to-end security audit with source-to-sink tracing, a validation tribunal, an A–F grade and diff patches.
 - [**Premium Web Designer**](premium-web-designer.md): premium website design and development with art direction, UX/UI and independent QA.
 
 ### Packages and Sub-skills
-**5 packages, 28 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
+**6 packages, 34 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
 
 | Package | Skills | Master | Sub-skills |
 |---|---:|---|---|
 | `replica` | 14 | `replica` | `replica-recon` (0-1b), `replica-architect`, `replica-design`, `replica-build`, `replica-backend`, `replica-test`, `replica-diff`, `replica-entrepreneur`, `replica-brand`, `replica-launch`, `replica-deploy`, `replica-static`, `replica-redes` |
 | `seo-auditor` | 6 | `seo-auditor` | `seo-audit`, `seo-plan`, `seo-execute`, `seo-serp`, `seo-compare` |
+| `appsec-audit` | 6 | `appsec-audit` | `appsec-recon`, `appsec-code`, `appsec-infra`, `appsec-llm`, `appsec-report` |
 | `agent-red-team` | 3 | `agent-red-team` | `red-scan`, `red-audit` |
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
 | `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
 
-Each master picks the mode, sets boundaries and splits the work; `premium-web-designer` adds `premium-qa` to audit sites that already exist.
+Each master picks the mode, sets boundaries and splits the work; `premium-web-designer` adds `premium-qa` to audit sites that already exist and `appsec-audit` splits the audit across recon, code, infrastructure, LLM and report.
 
 ### Package Structure
 ```text

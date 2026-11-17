@@ -1,0 +1,39 @@
+{
+  "format": "skills-ia-package",
+  "format_version": "1.0",
+  "name": "appsec-audit",
+  "version": "1.0.0",
+  "description": "Auditoría integral de seguridad con trazado de fuentes a sumideros, tribunal de validación y nota A-F.",
+  "skills": [
+    {
+      "name": "appsec-audit",
+      "path": "SKILL.md",
+      "description": "Maestro: alcance, modelo de dos fases, reglas de solo lectura, severidad y entrega del informe."
+    },
+    {
+      "name": "appsec-recon",
+      "path": "appsec-recon/SKILL.md",
+      "description": "Alcance y autorización, inventario de activos, superficie de ataque, dependencias y secretos."
+    },
+    {
+      "name": "appsec-code",
+      "path": "appsec-code/SKILL.md",
+      "description": "Trazado fuente a sumidero en cualquier lenguaje, control de acceso, autenticación y lógica."
+    },
+    {
+      "name": "appsec-infra",
+      "path": "appsec-infra/SKILL.md",
+      "description": "Docker, Kubernetes, Terraform, cloud, permisos IAM y privilegios de CI/CD."
+    },
+    {
+      "name": "appsec-llm",
+      "path": "appsec-llm/SKILL.md",
+      "description": "OWASP LLM Top 10, agentes con herramientas, MCP, RAG e inyección de prompt."
+    },
+    {
+      "name": "appsec-report",
+      "path": "appsec-report/SKILL.md",
+      "description": "Tribunal de validación con confianza 1-10, descarte bajo 7, nota A-F y parches en diff."
+    }
+  ]
+}

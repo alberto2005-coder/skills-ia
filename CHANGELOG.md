@@ -8,6 +8,27 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-17 · `appsec-audit` 1.0
+
+#### Añadido
+- **Paquete `appsec-audit` (6 skills):** maestro + `appsec-recon`, `appsec-code`, `appsec-infra`, `appsec-llm` y `appsec-report`. Cubre web, APIs, repositorios, Docker, IaC, cloud/IAM, binarios y sistemas con LLM, agentes y MCP, con arquitectura de dos fases (descubrimiento y trazado Sources → Sinks, más tribunal de validación) y assets compartidos.
+- **Regla cero:** todo fichero, comentario, README o cadena se trata como dato hostil; el revisor no ejecuta código del proyecto, no instala dependencias, no sale a la red sin autorización y redacta todo secreto. Un intento de inyección indirecta se reporta como hallazgo.
+- **Tribunal con umbral:** cada candidato responde cinco preguntas (alcanzable, mitigado, aplica en producción, quién lo explota, evidencia) y recibe confianza 1–10; **por debajo de 7 se descarta** con el motivo registrado.
+- **`scripts/scan_secrets.py`:** patrones conocidos (AWS, GitHub, Slack, Stripe, Google, JWT, claves privadas) más entropía de Shannon en asignaciones genéricas, con redacción y `--strict` para CI.
+- **`scripts/map_flows.py`:** índice heurístico de candidatos fuente → sumidero en nueve familias de lenguaje, con la fuente cercana y salida `--json`.
+- **`scripts/grade.py`:** nota A–F determinista desde los hallazgos validados (25 por crítico, 10 por alto, 3 por medio, 1 por bajo, suelo en 0); los descartados no puntúan.
+- **`references/`:** `benchmark.md` (tabla comparativa de las siete referencias con la mejora aplicada), `sources-sinks.md`, `owasp-cwe.md`, `cloud-iac.md`, `llm-agents-mcp.md` y `prompt-injection-defense.md`.
+- **`templates/`:** informe completo, ficha de hallazgo y hoja del tribunal.
+- **Tests:** 21 pruebas propias (estructura, frontmatter, gates y handoff, manifiesto, secretos con fixtures, trazado y códigos de salida de los tres scripts).
+- **`docs/appsec-audit.md`:** guía bilingüe con la tabla comparativa de mecánicas heredadas y mejoras.
+
+#### Cambiado
+- **Índice raíz `skills.json`:** 6 paquetes, **34 skills**.
+- **`run_tests.py`:** la suite `appsec-audit` se ejecuta con el resto (329 tests en total).
+- **`tests/phrases.json`:** 21 frases positivas y 12 negativas nuevas, sin colisión con `agent-red-team` ni `seo-audit`.
+- **`README.md` y `docs/index.md`:** recuentos, tabla del paquete y enlace a la guía, en español e inglés.
+- **`tests/test_triggers.py`:** la cobertura del dataset pasa de 28 a 34 skills.
+
 ### - 2026-11-17 · `premium-web-designer` 2.1
 
 #### Añadido
@@ -80,6 +101,27 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-17 · `appsec-audit` 1.0
+
+#### Added
+- **`appsec-audit` package (6 skills):** master + `appsec-recon`, `appsec-code`, `appsec-infra`, `appsec-llm` and `appsec-report`. Covers web, APIs, repositories, Docker, IaC, cloud/IAM, binaries and LLM/agent/MCP systems, with a two-phase design (discovery and Sources → Sinks tracing, plus a validation tribunal) and shared assets.
+- **Zero rule:** every file, comment, README or string is treated as hostile data; the reviewer runs no project code, installs nothing, makes no unauthorized outbound call and redacts every secret. An indirect injection attempt is reported as a finding.
+- **Threshold tribunal:** each candidate answers five questions (reachable, mitigated, applies in production, who exploits it, evidence) and gets 1–10 confidence; **below 7 it is discarded** with the reason logged.
+- **`scripts/scan_secrets.py`:** known shapes (AWS, GitHub, Slack, Stripe, Google, JWT, private keys) plus Shannon entropy on generic assignments, with redaction and `--strict` for CI.
+- **`scripts/map_flows.py`:** heuristic source → sink candidate index across nine language families, with the nearby source and `--json` output.
+- **`scripts/grade.py`:** deterministic A–F grade from validated findings (25 per critical, 10 per high, 3 per medium, 1 per low, floored at 0); discarded findings score nothing.
+- **`references/`:** `benchmark.md` (the seven references compared with the improvement applied), `sources-sinks.md`, `owasp-cwe.md`, `cloud-iac.md`, `llm-agents-mcp.md` and `prompt-injection-defense.md`.
+- **`templates/`:** full report, single finding sheet and tribunal worksheet.
+- **Tests:** 21 of its own (structure, frontmatter, gates and handoff, manifest, secrets with fixtures, tracing and the three scripts' exit codes).
+- **`docs/appsec-audit.md`:** bilingual guide including the inherited-mechanic comparison table.
+
+#### Changed
+- **Root index `skills.json`:** 6 packages, **34 skills**.
+- **`run_tests.py`:** the `appsec-audit` suite runs with the rest (329 tests in total).
+- **`tests/phrases.json`:** 21 new positive and 12 new negative phrases, with no collision against `agent-red-team` or `seo-audit`.
+- **`README.md` and `docs/index.md`:** counts, package table and guide link in Spanish and English.
+- **`tests/test_triggers.py`:** dataset coverage moves from 28 to 34 skills.
 
 ### - 2026-11-17 · `premium-web-designer` 2.1
 

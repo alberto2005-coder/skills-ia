@@ -351,6 +351,75 @@
         { "phrase": "crea una landing page premium para mi tienda online", "winner": "premium-web-designer" },
         { "phrase": "audita el SEO técnico de mi tienda online", "winner": "seo-audit" }
       ]
+    },
+    "appsec-audit": {
+      "positives": [
+        "audita la seguridad de esta aplicación antes de publicarla",
+        "haz una auditoría de ciberseguridad completa del proyecto",
+        "revisa la seguridad de mi API y de la infraestructura",
+        "security audit of my web application before release"
+      ],
+      "negatives": [
+        { "phrase": "audita la seguridad de esta skill de terceros antes de instalarla", "winner": "agent-red-team" },
+        { "phrase": "audita el SEO técnico de mi tienda online", "winner": "seo-audit" }
+      ]
+    },
+    "appsec-recon": {
+      "positives": [
+        "define el alcance y los activos antes de auditar la seguridad",
+        "inventaría la superficie de ataque y las dependencias del repositorio",
+        "scope the assets and the attack surface before the audit"
+      ],
+      "negatives": [
+        { "phrase": "traza si la entrada del usuario llega a la consulta SQL", "winner": "appsec-code" },
+        { "phrase": "revisa los permisos IAM y el Dockerfile del despliegue", "winner": "appsec-infra" }
+      ]
+    },
+    "appsec-code": {
+      "positives": [
+        "traza el flujo de datos desde la petición hasta la consulta SQL",
+        "busca IDOR y fallos de control de acceso en los endpoints",
+        "revisa el código en busca de inyecciones y deserialización insegura",
+        "source to sink analysis of the request handler"
+      ],
+      "negatives": [
+        { "phrase": "audita los manifiestos de Kubernetes y Terraform", "winner": "appsec-infra" },
+        { "phrase": "revisa si el agente puede invocar herramientas sin permiso", "winner": "appsec-llm" }
+      ]
+    },
+    "appsec-infra": {
+      "positives": [
+        "audita el Dockerfile y los permisos IAM del despliegue",
+        "revisa los manifiestos de Kubernetes y Terraform en busca de recursos públicos",
+        "check IAM overpermissions and public buckets in Terraform"
+      ],
+      "negatives": [
+        { "phrase": "revisa la inyección de prompt del agente", "winner": "appsec-llm" },
+        { "phrase": "busca secretos y dependencias en el repositorio", "winner": "appsec-recon" }
+      ]
+    },
+    "appsec-llm": {
+      "positives": [
+        "audita la seguridad de un agente con herramientas y RAG",
+        "revisa la inyección de prompt y los permisos del servidor MCP",
+        "evalúa si el contenido externo puede secuestrar al agente",
+        "audit prompt injection and excessive agency in my LLM agent"
+      ],
+      "negatives": [
+        { "phrase": "audita la seguridad de esta skill de terceros antes de instalarla", "winner": "agent-red-team" },
+        { "phrase": "audita la seguridad de mi API y del código", "winner": "appsec-code" }
+      ]
+    },
+    "appsec-report": {
+      "positives": [
+        "aplica el tribunal y descarta los falsos positivos de la auditoría",
+        "calcula la nota A-F y escribe el informe con parches en diff",
+        "filter false positives with a confidence score and grade the project"
+      ],
+      "negatives": [
+        { "phrase": "define el alcance y los activos de la auditoría", "winner": "appsec-recon" },
+        { "phrase": "revisa los permisos IAM del despliegue", "winner": "appsec-infra" }
+      ]
     }
   },
   "out_of_domain": [

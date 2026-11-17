@@ -2,9 +2,9 @@
   "format": "skills-ia-index",
   "format_version": "1.0",
   "updated": "2026-11-17",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Índice vendor-neutral de los paquetes de Skills IA. Cualquier agente (Claude, Codex, Cursor, Gemini, OpenCode...) puede descubrir las skills escaneando **/SKILL.md; este índice da además el mapa de paquetes y permite varias skills por carpeta.",
-  "skills_total": 28,
+  "skills_total": 34,
   "packages": [
     {
       "name": "replica",
@@ -27,6 +27,21 @@
         "replica-deploy",
         "replica-static",
         "replica-redes"
+      ]
+    },
+    {
+      "name": "appsec-audit",
+      "path": "appsec-audit",
+      "version": "1.0.0",
+      "manifest": "appsec-audit/skills.json",
+      "skill_count": 6,
+      "skills": [
+        "appsec-audit",
+        "appsec-recon",
+        "appsec-code",
+        "appsec-infra",
+        "appsec-llm",
+        "appsec-report"
       ]
     },
     {
