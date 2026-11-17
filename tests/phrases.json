@@ -338,6 +338,19 @@
         { "phrase": "audita las cabeceras de seguridad y el rendimiento técnico SEO de una página", "winner": "seo-audit" },
         { "phrase": "define el alcance legal e inventaría funciones de una app existente antes de replicarla", "winner": "replica-recon" }
       ]
+    },
+    "premium-qa": {
+      "positives": [
+        "audita el diseño de mi web a 360 390 768 1024 y 1440 y dime qué se rompe",
+        "mide el desbordamiento y las líneas del titular en cada ancho",
+        "revisa el responsive de esta web y los objetivos táctiles",
+        "audit the responsive layout of my site at five widths and measure overflow",
+        "measure tap targets and check the sticky header anchor offset"
+      ],
+      "negatives": [
+        { "phrase": "crea una landing page premium para mi tienda online", "winner": "premium-web-designer" },
+        { "phrase": "audita el SEO técnico de mi tienda online", "winner": "seo-audit" }
+      ]
     }
   },
   "out_of_domain": [

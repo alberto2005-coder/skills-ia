@@ -8,6 +8,19 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-17 · `premium-web-designer` 2.1
+
+#### Añadido
+- **Sub-skill `premium-qa`:** auditoría independiente de una web ya construida, con protocolo de medición en 360/390/768/1024/1440 px, gates numéricos (desbordamiento 0, titular de 3 líneas como máximo, controles de 44 px, anclas libres de la cabecera fija, foco en overlays) e informe por severidad.
+- **`scripts/delivery_check.py`:** puerta estática en stdlib sobre `lang`, título, descripción, canonical, Open Graph, jerarquía de encabezados, `alt`, JSON-LD, `:focus-visible`, `prefers-reduced-motion`, cabecera pegajosa sin `scroll-padding-top`, versión en CSS/JS, `robots.txt`, `sitemap.xml` y `llms.txt`. Sale con código 1 si falla un `must`.
+- **`references/qa-metrics.md`:** snippet de medición en consola con lecturas esperadas, comprobación de anclas y diagnóstico de CSS cacheado.
+- **Tests:** seis pruebas de la puerta con fixtures de sitio correcto y defectuoso (43 en el paquete).
+- **`references/performance-seo.md`:** mínimo SEO por página (canonical, Open Graph con imagen, jerarquía de encabezados, sitemap declarado, `llms.txt`) y cabeceras de seguridad para el despliegue.
+
+#### Corregido (detectado al revisar una demo real)
+- El maestro no daba criterios medibles: la demo entregó un `h1` de cinco líneas por auto-placement de la rejilla, pasos de 214 px a 768, controles de 34–39 px, anclas tapadas por la cabecera fija y CSS servido desde caché. Ahora son gates explícitos en el maestro y en `premium-qa`.
+- El maestro pasa de 440 a 111 líneas: el detalle vive en `agents/`, `workflows/`, `references/` y la sub-skill.
+
 ### - 2026-11-17
 
 #### Cambiado
@@ -64,6 +77,19 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-17 · `premium-web-designer` 2.1
+
+#### Added
+- **`premium-qa` sub-skill:** independent audit of an existing site with a measurement protocol at 360/390/768/1024/1440 px, numeric gates (0 overflow, headline at most 3 lines, 44 px controls, anchors clear of sticky headers, focus inside overlays) and a severity-based report.
+- **`scripts/delivery_check.py`:** stdlib static gate covering `lang`, title, description, canonical, Open Graph, heading order, `alt`, JSON-LD, `:focus-visible`, `prefers-reduced-motion`, sticky header without `scroll-padding-top`, asset versioning, `robots.txt`, `sitemap.xml` and `llms.txt`. Exits 1 on any `must` failure.
+- **`references/qa-metrics.md`:** console snippet with expected readings, anchor check and stale-CSS diagnosis.
+- **Tests:** six gate tests with correct and defective fixtures (43 in the package).
+- **`references/performance-seo.md`:** per-page SEO minimum (canonical, Open Graph with image, heading order, declared sitemap, `llms.txt`) and deployment security headers.
+
+#### Fixed (found while reviewing a real demo)
+- The master gave no measurable criteria: the demo shipped a five-line `h1` from grid auto-placement, 214 px steps at 768, 34–39 px controls, anchors hidden behind the sticky header and stale CSS. All are now explicit gates in the master and in `premium-qa`.
+- The master shrinks from 440 to 111 lines, with detail living in `agents/`, `workflows/`, `references/` and the sub-skill.
 
 ### - 2026-11-17
 

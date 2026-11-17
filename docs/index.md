@@ -21,7 +21,7 @@
 - [**Premium Web Designer**](premium-web-designer.md): diseño y desarrollo de sitios web premium con dirección de arte, UX/UI y QA independiente.
 
 ### Paquetes y Sub-skills
-**5 paquetes, 27 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
+**5 paquetes, 28 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
 
 | Paquete | Skills | Maestro | Sub-skills |
 |---|---:|---|---|
@@ -29,9 +29,9 @@
 | `seo-auditor` | 6 | `seo-auditor` | `seo-audit`, `seo-plan`, `seo-execute`, `seo-serp`, `seo-compare` |
 | `agent-red-team` | 3 | `agent-red-team` | `red-scan`, `red-audit` |
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
-| `premium-web-designer` | 1 | `premium-web-designer` | — |
+| `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
 
-Cada maestro elige el modo, fija los límites y reparte el trabajo; `premium-web-designer` funciona como skill independiente, sin sub-skills.
+Cada maestro elige el modo, fija los límites y reparte el trabajo; `premium-web-designer` suma `premium-qa` para auditar webs ya construidas.
 
 ### Estructura de un Paquete
 ```text
@@ -77,7 +77,7 @@ uv run python run_tests.py
 - [**Premium Web Designer**](premium-web-designer.md): premium website design and development with art direction, UX/UI and independent QA.
 
 ### Packages and Sub-skills
-**5 packages, 27 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
+**5 packages, 28 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
 
 | Package | Skills | Master | Sub-skills |
 |---|---:|---|---|
@@ -85,9 +85,9 @@ uv run python run_tests.py
 | `seo-auditor` | 6 | `seo-auditor` | `seo-audit`, `seo-plan`, `seo-execute`, `seo-serp`, `seo-compare` |
 | `agent-red-team` | 3 | `agent-red-team` | `red-scan`, `red-audit` |
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
-| `premium-web-designer` | 1 | `premium-web-designer` | — |
+| `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
 
-Each master picks the mode, sets boundaries and splits the work; `premium-web-designer` is a standalone skill with no sub-skills.
+Each master picks the mode, sets boundaries and splits the work; `premium-web-designer` adds `premium-qa` to audit sites that already exist.
 
 ### Package Structure
 ```text

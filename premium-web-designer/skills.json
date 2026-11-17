@@ -2,13 +2,18 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "premium-web-designer",
-  "version": "2.0.0",
-  "description": "Sistema de diseño y desarrollo de webs premium con dirección de arte, UX/UI y QA independiente.",
+  "version": "2.1.0",
+  "description": "Sistema de diseño y desarrollo de webs premium con dirección de arte, UX/UI y QA independiente medible.",
   "skills": [
     {
       "name": "premium-web-designer",
       "path": "SKILL.md",
       "description": "Diseño y desarrollo de experiencias web premium con dirección de arte, UX/UI, frontend, backend y control de calidad independiente."
+    },
+    {
+      "name": "premium-qa",
+      "path": "premium-qa/SKILL.md",
+      "description": "Auditoría independiente de una web ya construida: medición en cinco anchos, gates numéricos, accesibilidad y informe de entrega."
     }
   ]
 }

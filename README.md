@@ -20,7 +20,7 @@
 ### Visión General
 **Skills IA** es una colección de habilidades modulares, deterministas e independientes diseñadas para ser integradas en cualquier asistente de Inteligencia Artificial (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Cada habilidad es autosuficiente y opera sin alterar paquetes globales ni requerir dependencias complejas.
 
-Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica, varias sub-skills con un corte de uso real. Se instalan juntas y comparten assets sin duplicarlos. El índice máquina-legible está en [`skills.json`](skills.json): 5 paquetes, 27 skills.
+Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica, varias sub-skills con un corte de uso real. Se instalan juntas y comparten assets sin duplicarlos. El índice máquina-legible está en [`skills.json`](skills.json): 5 paquetes, 28 skills.
 
 ### Módulos y Sub-skills
 
@@ -30,7 +30,7 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | **[`seo-auditor`](seo-auditor/)** | Auditoría SEO técnica, de contenido, datos estructurados, sitemaps y GEO, con rúbrica 0–100 y evidencia reproducible. | 6 |
 | **[`agent-red-team`](agent-red-team/)** | Auditoría de seguridad de skills, MCP y carpetas de instrucciones antes de instalarlas. | 3 |
 | **[`humanizador-anti-ia`](humanizador-anti-ia/)** | Detección y reescritura de patrones de escritura de IA, con score 0–100 determinista. | 3 |
-| **[`premium-web-designer`](premium-web-designer/)** | Diseño y desarrollo de sitios web premium con dirección de arte, UX/UI y QA independiente. | 1 |
+| **[`premium-web-designer`](premium-web-designer/)** | Diseño y desarrollo de sitios web premium con dirección de arte, UX/UI y QA independiente medible. | 2 |
 
 #### `replica` — maestro + 13 fases
 
@@ -78,6 +78,13 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | `humanizar` | Reescritura con catálogo de 40 patrones y recorte de relleno. | Sí |
 | `detector-ia` | Solo puntuar y detectar. | No |
 
+#### `premium-web-designer` — maestro + 1 sub-skill
+
+| Sub-skill | Qué hace |
+|---|---|
+| `premium-web-designer` | Maestro: dirección de arte, UX/UI, desarrollo y gates medibles. |
+| `premium-qa` | QA independiente: medición en cinco anchos, gates numéricos e informe de entrega. |
+
 ### Estructura Estándar de cada Paquete
 ```text
 paquete/
@@ -106,7 +113,7 @@ Las guías completas de cada módulo se encuentran en la carpeta [`docs/`](docs/
 - Los tests usan `unittest`; las herramientas de pruebas y calidad (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) están en el grupo `dev` de `pyproject.toml` y se gestionan con [`uv`](https://docs.astral.sh/uv/).
 - Para preparar el entorno `.venv` y ejecutar todos los tests desde la raíz: `uv sync` y `uv run python run_tests.py`.
 - GitHub Actions ejecuta todas las suites en cada `push` mediante `.github/workflows/tests.yml`.
-- Tests transversales en `tests/`: activación de las 27 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
+- Tests transversales en `tests/`: activación de las 28 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
 
 ### Licencia
 Distribuido bajo la [Licencia MIT](LICENSE).
@@ -126,7 +133,7 @@ Distribuido bajo la [Licencia MIT](LICENSE).
 ### Overview
 **Skills IA** is a collection of modular, deterministic, and self-contained agent skills designed for integration with any AI assistant (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Each skill is independent and operates without modifying global packages or requiring third-party libraries.
 
-Each folder is a **package**: one master skill that orchestrates and, where applicable, sub-skills split by real usage boundaries. Packages share assets without duplication. The machine-readable index is [`skills.json`](skills.json): 5 packages, 27 skills.
+Each folder is a **package**: one master skill that orchestrates and, where applicable, sub-skills split by real usage boundaries. Packages share assets without duplication. The machine-readable index is [`skills.json`](skills.json): 5 packages, 28 skills.
 
 ### Modules and Sub-skills
 
@@ -136,7 +143,7 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | **[`seo-auditor`](seo-auditor/)** | Technical, content, structured-data, sitemap and GEO audits with a 0–100 rubric and reproducible evidence. | 6 |
 | **[`agent-red-team`](agent-red-team/)** | Security audit of skills, MCP servers and instruction folders before installing them. | 3 |
 | **[`humanizador-anti-ia`](humanizador-anti-ia/)** | Detection and rewriting of AI writing patterns with a deterministic 0–100 score. | 3 |
-| **[`premium-web-designer`](premium-web-designer/)** | Premium website design and development with art direction, UX/UI and independent QA. | 1 |
+| **[`premium-web-designer`](premium-web-designer/)** | Premium website design and development with art direction, UX/UI and measurable independent QA. | 2 |
 
 #### `replica` — master + 13 phases
 
@@ -184,6 +191,13 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | `humanizar` | Rewrite with the 40-pattern catalog and filler trimming. | Yes |
 | `detector-ia` | Score and detect only. | No |
 
+#### `premium-web-designer` — master + 1 sub-skill
+
+| Sub-skill | Purpose |
+|---|---|
+| `premium-web-designer` | Master: art direction, UX/UI, development and measurable gates. |
+| `premium-qa` | Independent QA: five-width measurement, numeric gates and delivery report. |
+
 ### Standard Package Structure
 ```text
 package/
@@ -212,7 +226,7 @@ Comprehensive module documentation is available in the [`docs/`](docs/) director
 - Tests use `unittest`; test and quality tools (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) are in the `dev` group in `pyproject.toml` and managed by [`uv`](https://docs.astral.sh/uv/).
 - Prepare `.venv` and run every test from the repository root with `uv sync` and `uv run python run_tests.py`.
 - GitHub Actions runs all suites on every `push` via `.github/workflows/tests.yml`.
-- Cross-cutting tests in `tests/`: activation for all 27 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
+- Cross-cutting tests in `tests/`: activation for all 28 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
 
 ### License
 Distributed under the [MIT License](LICENSE).
