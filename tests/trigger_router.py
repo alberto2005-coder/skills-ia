@@ -9,6 +9,8 @@ Criterios:
 - stemming ligero (prefijo de 5 letras) para que "auditoría" y "auditar" casen;
 - IDF sobre el corpus para que los términos distintivos pesen más;
 - bigramas para premiar frases, no solo palabras sueltas;
+- una frase de dos tokens exige las dos coincidencias: un sustantivo genérico
+  suelto ("resume este texto") no activa nada;
 - desempate por especificidad (sub-skill antes que maestro) y, después,
   alfabético, para que el resultado sea reproducible.
 """
@@ -169,6 +171,10 @@ class Router:
             return 0.0
         matched = [token for token in unique if token in skill.token_set]
         if not matched:
+            return 0.0
+        # Con dos tokens no basta con uno: «resume este texto» no debe activar
+        # una skill solo porque su descripción mencione el sustantivo «texto».
+        if len(unique) == 2 and len(matched) < 2:
             return 0.0
 
         coverage = len(matched) / len(unique)
