@@ -28,6 +28,8 @@ Assets compartidos del paquete: `../references/`, `../scripts/`, `../templates/`
 
 Si el encargo es **crear o rediseñar**, manda el maestro; esta sub-skill solo audita.
 
+Antes de medir, recorre `../references/known-defects.md`: seis defectos ya medidos, con su causa y la comprobación que los caza. Si el sitio repite uno de esos patrones, empieza por ahí.
+
 ## Protocolo
 
 ### 1. Inventario antes de medir
@@ -64,6 +66,7 @@ Rellena `../templates/qa-report.md` con una fila por hallazgo: qué, dónde, en 
 |---|---|
 | Desbordamiento horizontal | 0 px en los cinco anchos |
 | Líneas del `h1` | ≤ 3 en cada ancho |
+| Ancho útil de un componente | ≥ 250 px por columna de texto; si no, apilar |
 | Control primario | ≥ 44×44 px |
 | Control secundario | ≥ 24×24 px |
 | Ancla bajo cabecera fija | título visible, sin solape |

@@ -85,6 +85,7 @@ A layout is not approved because it "looks fine". Before delivery, all of this m
 
 - Horizontal overflow is 0 px.
 - The `h1` occupies at most 3 lines; a headline squeezed into a narrow grid column is a defect.
+- No component keeps a column of text under roughly 250 px; when three columns do not fit, they stack.
 - Primary controls are at least 44 px; nothing interactive sits below 24 px.
 - In-page anchors land with the heading visible below any sticky header.
 - Local stylesheets and scripts carry a version query so a deploy cannot serve stale CSS.
