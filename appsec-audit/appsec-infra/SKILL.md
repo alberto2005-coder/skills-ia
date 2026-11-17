@@ -10,6 +10,10 @@ description: >
   nube o endurecer un pipeline de integración y despliegue.
   English: review containers, Kubernetes, Terraform, cloud exposure, IAM
   permissions and CI/CD privileges for over-permissioning and public exposure.
+license: MIT
+metadata:
+  package: appsec-audit
+  version: "1.4.0"
 ---
 
 # AppSec · Infraestructura y cloud

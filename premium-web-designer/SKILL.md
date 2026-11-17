@@ -12,6 +12,10 @@ description: >
   Also answers Spanish requests: rediseñar una web corporativa, diseñar una
   landing page, crear una tienda con carrito y checkout o un portafolio, con
   dirección de arte, tipografía, accesibilidad y calidad visual del sitio.
+license: MIT
+metadata:
+  package: premium-web-designer
+  version: "2.1.0"
 ---
 
 # PREMIUM WEB DESIGNER & DEVELOPER

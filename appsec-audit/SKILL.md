@@ -14,6 +14,10 @@ description: >
   English: security audit of a web application, API, container, cloud
   deployment or LLM agent before release, with source-to-sink tracing,
   A-F grade and ready-to-apply patches.
+license: MIT
+metadata:
+  package: appsec-audit
+  version: "1.4.0"
 ---
 
 # AppSec Audit

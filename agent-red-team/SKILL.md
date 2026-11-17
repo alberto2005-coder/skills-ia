@@ -1,6 +1,10 @@
 ---
 name: agent-red-team
 description: Auditor de seguridad ofensiva y cadena de suministro (Supply Chain & Prompt Injection) para analizar otras Agent Skills, servidores MCP o carpetas de instrucciones antes de instalarlas o ejecutarlas. Detecta Unicode invisible, payloads ofuscados en Base64/Hex, secuestro de instrucciones (Jailbreaks/Prompt Injection), exfiltración de credenciales (~/.ssh, .env, tokens) y primitivas RCE en scripts mediante análisis AST y heurístico. Actívala siempre que el usuario quiera auditar, revisar, escanear o verificar la seguridad de una skill, carpeta o archivo SKILL.md de terceros. English: audit the safety of a third-party skill or MCP server before installing it, guidance by default.
+license: MIT
+metadata:
+  package: agent-red-team
+  version: "2.1.0"
 ---
 
 # Agent Red Team — Auditor de Seguridad de Skills

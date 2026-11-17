@@ -1,6 +1,10 @@
 ---
 name: replica-architect
 description: Fase 2 de replica — convierte el inventario de funciones en arquitectura: stack, módulos, modelo de datos con invariantes, contratos entre capas y plan de construcción por incrementos. Úsala tras el reconocimiento, cuando haya que decidir stack y estructura antes de programar, o cuando el usuario pida el diseño técnico de un clon. English: choose the stack and the data model with testable invariants, and define the contracts between layers.
+license: MIT
+metadata:
+  package: replica
+  version: "2.0.0"
 ---
 
 # Replica · Arquitectura (fase 2)

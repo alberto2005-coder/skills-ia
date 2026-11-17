@@ -1,6 +1,10 @@
 ---
 name: humanizar
 description: Reescribe un texto para quitarle los patrones de IA en modo Quick, Full o Voice — contenido, ritmo, estructura y vocabulario, con recorte de relleno del 20-30%, calibración de voz con párrafos propios del usuario, protección de código/enlaces/datos y score antes/después. Úsala cuando pidan humanizar, naturalizar, «quitar el tono de IA», imitar la voz del usuario o reescribir un texto para que suene a persona. English: rewrite the text to remove the AI patterns, trim the filler and keep the user's voice.
+license: MIT
+metadata:
+  package: humanizador-anti-ia
+  version: "2.0.0"
 ---
 
 # Humanizador · Reescribir (`humanizar`)

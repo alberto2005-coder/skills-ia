@@ -12,6 +12,10 @@ description: >
   English: source-to-sink analysis of request handlers and data flow in any language,
   covering injection, broken access control, authn/authz, crypto misuse and
   business-logic flaws.
+license: MIT
+metadata:
+  package: appsec-audit
+  version: "1.4.0"
 ---
 
 # AppSec · Código y flujo de datos

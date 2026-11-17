@@ -1,6 +1,10 @@
 ---
 name: seo-auditor
 description: Audita y optimiza el SEO de cualquier sitio web público, código fuente local, servidor en desarrollo o modo híbrido. Cubre diagnóstico técnico (rastreabilidad, indexación, canonicals, hreflang, cabeceras de seguridad), contenido y on-page, optimización para motores generativos (GEO / AI Search), datos estructurados con rich preview, sitemaps, simulador de SERP y rendimiento. Motor Python stdlib con rúbrica 0–100 por dimensiones, veredicto en una línea, evidencia reproducible (audit.json), re-score sin red, comparación entre auditorías y modo Execute con dry-run. Úsala siempre que el usuario pida auditar una web, revisar el SEO de un repositorio, preparar contenidos para IA/GEO, optimizar una página individual o diseñar una estrategia SEO. English: choose the audit mode and follow the audit plan execute flow, with the rubric and the one-line verdict.
+license: MIT
+metadata:
+  package: seo-auditor
+  version: "2.0.0"
 ---
 
 # SEO Auditor 2.0

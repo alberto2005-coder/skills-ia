@@ -11,6 +11,10 @@ description: >
   English: validate findings against framework mitigations, score confidence,
   discard noise, grade the project A-F and produce the executive and technical
   report with diff patches.
+license: MIT
+metadata:
+  package: appsec-audit
+  version: "1.4.0"
 ---
 
 # AppSec · Tribunal y informe

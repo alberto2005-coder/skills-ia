@@ -1,6 +1,10 @@
 ---
 name: replica-build
 description: Fase 4 de replica — construye la app por incrementos que cierran flujos must de features.csv, usando los tokens y contratos ya aprobados, y actualiza el estado de cada función al terminarla. Úsala para implementar pantallas y flujos de un clon, para continuar la construcción tras la arquitectura o para saber qué falta para cerrar la paridad. English: implement incrementally the must flows from features.csv with the approved tokens.
+license: MIT
+metadata:
+  package: replica
+  version: "2.0.0"
 ---
 
 # Replica · Construcción (fase 4)

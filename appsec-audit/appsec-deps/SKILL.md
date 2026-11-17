@@ -9,6 +9,10 @@ description: >
   el paquete con el fallo se usa de verdad en el código.
   English: generate a CycloneDX SBOM, match CVEs and check reachability through
   the imports so only exploitable dependencies are reported.
+license: MIT
+metadata:
+  package: appsec-audit
+  version: "1.4.0"
 ---
 
 # AppSec · Dependencias, SBOM y alcanzabilidad

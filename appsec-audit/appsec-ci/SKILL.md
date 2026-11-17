@@ -10,6 +10,10 @@ description: >
   endurecer el agente revisor o subir resultados a code scanning.
   English: wire the audit into CI, audit the workflow itself, harden the
   reviewing agent, normalize external SARIF and gate the PR with --fail-on.
+license: MIT
+metadata:
+  package: appsec-audit
+  version: "1.4.0"
 ---
 
 # AppSec · CI y agentes revisores

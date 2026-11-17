@@ -4,9 +4,10 @@ Uso:
     py tests/lint_frontmatter.py [--json]
 
 Comprueba, sin dependencias, que cada `SKILL.md` fuera de `tests/` tenga
-frontmatter delimitado, `name` igual al nombre de su carpeta y `description`
-útil, y que cada entrada de los `skills.json` de paquete resuelva a un fichero
-con el nombre declarado. Es la puerta de CI independiente de `unittest`.
+frontmatter delimitado, `name` en minúsculas (máx. 64) e igual al nombre de su
+carpeta, `description` de 20 a 1024 caracteres, cuerpo por debajo de 500
+líneas, y que cada entrada de los `skills.json` de paquete resuelva a un
+fichero con el nombre declarado. Es la puerta de CI independiente de `unittest`.
 
 Código de salida: 0 limpio · 1 con problemas.
 """
@@ -22,7 +23,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SKIP_PARTS = {"tests", "fixtures", "node_modules", "__pycache__", ".venv", ".git"}
 FRONTMATTER = re.compile(r"^---\r?\n(.*?)\r?\n---\r?\n", re.S)
+NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+MAX_NAME = 64
 MIN_DESCRIPTION = 20
+MAX_DESCRIPTION = 1024
+MAX_BODY_LINES = 500
 
 
 def _force_utf8_output() -> None:
@@ -71,12 +76,28 @@ def lint_file(path: Path) -> list[str]:
     name = fields.get("name", "")
     if not name:
         problems.append("falta «name»")
-    elif name != path.parent.name:
-        problems.append(f"name «{name}» no coincide con la carpeta «{path.parent.name}»")
+    else:
+        if not NAME_PATTERN.match(name):
+            problems.append(
+                f"name «{name}» debe usar minúsculas, dígitos y guiones simples"
+            )
+        if len(name) > MAX_NAME:
+            problems.append(f"name de {len(name)} caracteres; máximo {MAX_NAME}")
+        if name != path.parent.name:
+            problems.append(f"name «{name}» no coincide con la carpeta «{path.parent.name}»")
 
     description = fields.get("description", "")
-    if len(description) < MIN_DESCRIPTION:
-        problems.append(f"description ausente o demasiado corta ({len(description)} caracteres)")
+    if not MIN_DESCRIPTION <= len(description) <= MAX_DESCRIPTION:
+        problems.append(
+            f"description de {len(description)} caracteres; debe estar entre "
+            f"{MIN_DESCRIPTION} y {MAX_DESCRIPTION}"
+        )
+
+    body_lines = len(text[match.end():].splitlines())
+    if body_lines >= MAX_BODY_LINES:
+        problems.append(
+            f"cuerpo de {body_lines} líneas; debe quedar por debajo de {MAX_BODY_LINES}"
+        )
 
     return problems
 

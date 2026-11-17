@@ -9,6 +9,10 @@ description: >
   comprobar que queda cerrado o revisar si el mismo fallo está en otro sitio.
   English: remediate confirmed findings with approval, dry-run patches,
   sandboxed verification and variant analysis.
+license: MIT
+metadata:
+  package: appsec-audit
+  version: "1.4.0"
 ---
 
 # AppSec · Remediación

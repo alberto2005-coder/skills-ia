@@ -9,6 +9,10 @@ description: >
   la frontera de confianza y qué control lo cubre.
   English: build a threat model with trust boundaries and abuse cases, each
   threat mapped to OWASP 2025 and ASVS 5.0 chapters.
+license: MIT
+metadata:
+  package: appsec-audit
+  version: "1.4.0"
 ---
 
 # AppSec · Modelo de amenazas

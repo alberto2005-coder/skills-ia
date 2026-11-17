@@ -12,6 +12,10 @@ description: >
   revisar el diseño en móvil y escritorio, medir desbordamiento, líneas del
   titular y objetivos táctiles en cada ancho, comprobar accesibilidad y cabecera
   fija antes de publicar.
+license: MIT
+metadata:
+  package: premium-web-designer
+  version: "2.1.0"
 ---
 
 # Premium QA — auditoría medible de una web

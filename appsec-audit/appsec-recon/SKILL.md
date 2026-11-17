@@ -10,6 +10,10 @@ description: >
   configuraciones y dependencias vulnerables.
   English: scope and authorize a security audit, inventory assets and attack
   surface, and collect the evidence baseline before deep analysis.
+license: MIT
+metadata:
+  package: appsec-audit
+  version: "1.4.0"
 ---
 
 # AppSec · Reconocimiento

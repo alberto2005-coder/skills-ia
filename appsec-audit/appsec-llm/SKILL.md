@@ -11,6 +11,10 @@ description: >
   ser manipulado por contenido externo.
   English: audit LLM applications, tool-using agents and MCP servers for prompt
   injection, excessive agency, context leakage and unsafe tool permissions.
+license: MIT
+metadata:
+  package: appsec-audit
+  version: "1.4.0"
 ---
 
 # AppSec · LLM, agentes y MCP
