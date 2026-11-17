@@ -3,7 +3,6 @@ import json
 import unittest
 
 from datetime import datetime, timezone
-from pathlib import Path
 
 from config import REPORT_DIR, TEST_DIR, ensure_report_directory
 

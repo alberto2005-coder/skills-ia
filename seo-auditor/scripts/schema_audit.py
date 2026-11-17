@@ -259,7 +259,6 @@ def rich_preview(blocks, url=""):
         offers = product.get("offers") or {}
         if isinstance(offers, list):
             offers = offers[0] if offers else {}
-        rating = ratings[0] if ratings else (offers.get("price") and None)
         parts.append("<div class=\"card\"><div class=\"label\">Producto</div>")
         parts.append("<div class=\"title\">%s</div>" % html_mod.escape(str(product.get("name", "(sin name)"))))
         if ratings:

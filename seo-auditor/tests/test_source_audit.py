@@ -1,4 +1,5 @@
-import tempfile, unittest
+import tempfile
+import unittest
 import sys
 from pathlib import Path
 
@@ -14,4 +15,5 @@ class SourceTests(unittest.TestCase):
             result=audit_source(d)
             self.assertTrue(any("title" in x["title"].lower() for x in result["findings"]))
 
-if __name__=="__main__": unittest.main()
+if __name__=="__main__":
+    unittest.main()

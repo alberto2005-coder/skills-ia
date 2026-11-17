@@ -199,19 +199,19 @@ class Page(object):
         self.robots_meta = metas.get("robots", "")
         self.og = {k: v for k, v in metas.items() if k.startswith("og:")}
         self.twitter = {k: v for k, v in metas.items() if k.startswith("twitter:")}
-        self.canonicals = [l.get("href", "") for l in p.link_tags
-                           if "canonical" in (l.get("rel") or "").lower()]
-        self.hreflangs = [(l.get("hreflang", ""), l.get("href", "")) for l in p.link_tags
-                          if l.get("hreflang")]
-        self.alternates = [l for l in p.link_tags if "alternate" in (l.get("rel") or "").lower()]
+        self.canonicals = [tag.get("href", "") for tag in p.link_tags
+                           if "canonical" in (tag.get("rel") or "").lower()]
+        self.hreflangs = [(tag.get("hreflang", ""), tag.get("href", "")) for tag in p.link_tags
+                          if tag.get("hreflang")]
+        self.alternates = [tag for tag in p.link_tags if "alternate" in (tag.get("rel") or "").lower()]
         self.html_lang = p.html_lang
         self.headings = {h: list(v) for h, v in p.headings.items()}
         self.images = p.images
         self.iframes = p.iframes
         self.media = p.media
         self.scripts = p.scripts
-        self.styles = [l.get("href", "") for l in p.link_tags
-                       if "stylesheet" in (l.get("rel") or "").lower()]
+        self.styles = [tag.get("href", "") for tag in p.link_tags
+                       if "stylesheet" in (tag.get("rel") or "").lower()]
         self.jsonld = p.jsonld
         self.anchors = p.anchors
         self.text = text_of(p.text_parts)

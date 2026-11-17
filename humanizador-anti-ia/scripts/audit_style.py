@@ -432,7 +432,7 @@ def _structural_signals(clean_text):
         lengths = [len(_words(p)) for p in parrafos]
         mean = sum(lengths) / len(lengths)
         if mean > 0:
-            variance = sum((l - mean) ** 2 for l in lengths) / len(lengths)
+            variance = sum((length - mean) ** 2 for length in lengths) / len(lengths)
             cv_parrafos = math.sqrt(variance) / mean
             if cv_parrafos < 0.22:
                 parrafos_uniformes = 1
@@ -473,13 +473,13 @@ def analyze_text(text):
     total_sentences_count = len(lengths)
 
     mean_len = total_words_count / total_sentences_count
-    variance = sum((l - mean_len) ** 2 for l in lengths) / total_sentences_count
+    variance = sum((length - mean_len) ** 2 for length in lengths) / total_sentences_count
     std_dev = math.sqrt(variance)
 
     cv = (std_dev / mean_len) if mean_len > 0 else 0.0
 
-    short_sentences = sum(1 for l in lengths if l <= 8)
-    long_sentences = sum(1 for l in lengths if l >= 22)
+    short_sentences = sum(1 for length in lengths if length <= 8)
+    long_sentences = sum(1 for length in lengths if length >= 22)
 
     monotonic_runs = 0
     for i in range(len(lengths) - 2):
@@ -524,7 +524,7 @@ def analyze_text(text):
     # --- Señal 2: uniformidad de longitud de frases (inverso de burstiness) ---
     inside = 0
     if total_sentences_count >= 4:
-        inside = sum(1 for l in lengths if abs(l - mean_len) <= 0.20 * mean_len)
+        inside = sum(1 for length in lengths if abs(length - mean_len) <= 0.20 * mean_len)
         uniform_pct = 100.0 * inside / total_sentences_count
     else:
         uniform_pct = 0.0

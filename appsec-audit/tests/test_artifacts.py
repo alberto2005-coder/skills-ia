@@ -308,6 +308,7 @@ class TestLedger(ArtifactTest):
 
         units = self.read_json(path)["units"]
         self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
+        self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
         self.assertEqual([unit["id"] for unit in units], ["U-001", "U-002"])
         self.assertEqual(units[0]["status"], "planned")
 

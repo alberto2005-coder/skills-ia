@@ -7,7 +7,6 @@ bidireccional de pares cuando se dispone de varias páginas analizadas.
 from __future__ import annotations
 
 import re
-from urllib.parse import urlparse
 
 try:
     from .checks import check
@@ -42,7 +41,7 @@ def analyze(page, page_url="", page_map=None, url=""):
     Sin page_map, el retorno bidireccional no se puede verificar -> `skip`.
     """
     checks = []
-    data = {"entries": [{"hreflang": l, "href": h} for l, h in page.hreflangs],
+    data = {"entries": [{"hreflang": code, "href": href} for code, href in page.hreflangs],
             "html_lang": page.html_lang}
 
     checks.append(check(
@@ -51,7 +50,7 @@ def analyze(page, page_url="", page_map=None, url=""):
         "Atributo <html lang>=%r." % (page.html_lang or ""),
         url or page_url))
 
-    bad = [l for l, _ in page.hreflangs if not is_valid_hreflang(l)]
+    bad = [code for code, _ in page.hreflangs if not is_valid_hreflang(code)]
     data["invalid_codes"] = bad
     if page.hreflangs:
         checks.append(check(
@@ -77,8 +76,8 @@ def analyze(page, page_url="", page_map=None, url=""):
                             "Sin URL absoluta de la página o sin hreflang: "
                             "autorreferencia no verificable.", url or page_url))
 
-    langs = {l.lower() for l, _ in page.hreflangs}
-    if len([l for l in langs if l != VALID_X_DEFAULT]) > 1:
+    langs = {code.lower() for code, _ in page.hreflangs}
+    if len([code for code in langs if code != VALID_X_DEFAULT]) > 1:
         has_default = VALID_X_DEFAULT in langs
         data["x_default"] = has_default
         checks.append(check(

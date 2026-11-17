@@ -31,7 +31,7 @@ if str(_SCRIPTS) not in sys.path:
 
 try:
     from . import (analyze, compare as compare_mod, execute, indexcheck,
-                   onpage, perf, report, schema_audit, serp, source_audit,
+                   perf, report, schema_audit, serp, source_audit,
                    web_audit)
     from .httpbody import decode_body
     from .page import parse_file, parse_html
@@ -40,7 +40,6 @@ except (ImportError, ValueError):
     import compare as compare_mod
     import execute
     import indexcheck
-    import onpage
     import perf
     import report
     import schema_audit

@@ -12,10 +12,8 @@ from collections import Counter
 
 try:
     from .checks import check
-    from .page import parse_html
 except (ImportError, ValueError):
     from checks import check
-    from page import parse_html
 
 STOPWORDS = set("""
 de la que el en y a los se del las un por con no una su para es al lo como mas más pero sus le ya o

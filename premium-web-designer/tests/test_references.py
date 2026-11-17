@@ -1,6 +1,5 @@
 import re
 import unittest
-from pathlib import Path
 
 from config import SKILL_ROOT, all_markdown_files
 

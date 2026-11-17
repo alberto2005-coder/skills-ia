@@ -241,7 +241,8 @@ def render_html(payload):
     should_fail = _fail_by_severity(payload, "should")
     nice = payload.get("counts_by_severity", {}).get("nice", {}).get("fail", 0)
 
-    esc = lambda value: html_mod.escape(str(value if value is not None else ""))
+    def esc(value):
+        return html_mod.escape(str(value if value is not None else ""))
 
     parts = []
     parts.append("<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"utf-8\">"

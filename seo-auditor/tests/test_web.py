@@ -199,7 +199,7 @@ class RescoreMessageTests(unittest.TestCase):
             buffer = io.StringIO()
             with contextlib.redirect_stdout(buffer):
                 cli.main(["rescore", str(audit), "--output", str(Path(tmp) / "r")])
-            line = next(l for l in buffer.getvalue().splitlines() if "antes" in l)
+            line = next(entry for entry in buffer.getvalue().splitlines() if "antes" in entry)
 
             self.assertIn("%.1f/100" % before, line)
             self.assertNotIn("audit.json", line)
