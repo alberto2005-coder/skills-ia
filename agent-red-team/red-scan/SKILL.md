@@ -1,6 +1,6 @@
 ---
 name: red-scan
-description: Escaneo rápido de seguridad de una skill, MCP o carpeta de instrucciones, con veredicto y hallazgos en el chat, sin crear ficheros. Úsala para la pregunta puntual «¿esta skill es segura?», «mírame este SKILL.md» o «¿qué hace este script?» antes de instalar algo de terceros.
+description: Escaneo rápido de seguridad de una skill, MCP o carpeta de instrucciones, con veredicto y hallazgos en el chat, sin crear ficheros. Úsala para la pregunta puntual «¿esta skill es segura?», «mírame este SKILL.md» o «¿qué hace este script?» antes de instalar algo de terceros. English: quick scan, give the verdict in chat and create no files.
 ---
 
 # Red Team · Scan rápido (guidance)

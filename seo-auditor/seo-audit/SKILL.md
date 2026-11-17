@@ -1,6 +1,6 @@
 ---
 name: seo-audit
-description: Auditoría SEO completa de una web, repositorio, servidor local o página suelta — técnico, contenido, schema, GEO, seguridad y rendimiento, con rúbrica 0-100, veredicto en una línea, evidence reproducible (audit.json/audit.md/report.html) y re-score sin red. Úsala cuando el usuario pida auditar una web o un repo, diagnosticar indexación, canonical, hreflang, cabeceras, JSON-LD o on-page, o revisar el SEO de una página.
+description: Auditoría SEO completa de una web, repositorio, servidor local o página suelta — técnico, contenido, schema, GEO, seguridad y rendimiento, con rúbrica 0-100, veredicto en una línea, evidence reproducible (audit.json/audit.md/report.html) y re-score sin red. Úsala cuando el usuario pida auditar una web o un repo, diagnosticar indexación, canonical, hreflang, cabeceras, JSON-LD o on-page, o revisar el SEO de una página. English: run the full audit and check the diagnostic modules of the site — indexing, security headers, schema, hreflang, on-page and performance —, collect reproducible evidence and rescore offline.
 ---
 
 # SEO Auditor · Audit

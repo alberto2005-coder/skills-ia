@@ -1,6 +1,6 @@
 ---
 name: replica-design
-description: Fase 3 de replica — construye un sistema de diseño propio (tokens, tipografía, espaciado, componentes y estados) a partir del comportamiento observado, sin copiar assets ni paletas del original, y lo valida con contraste WCAG. Úsala cuando haya que definir la UI antes de construir pantallas, o cuando el usuario pida tokens, componentes o accesibilidad de un clon.
+description: Fase 3 de replica — construye un sistema de diseño propio (tokens, tipografía, espaciado, componentes y estados) a partir del comportamiento observado, sin copiar assets ni paletas del original, y lo valida con contraste WCAG. Úsala cuando haya que definir la UI antes de construir pantallas, o cuando el usuario pida tokens, componentes o accesibilidad de un clon. English: define design tokens, typography and components with WCAG contrast for the clone's design system.
 ---
 
 # Replica · Sistema de diseño (fase 3)

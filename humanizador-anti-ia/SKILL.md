@@ -1,6 +1,6 @@
 ---
 name: humanizador-anti-ia
-description: Humaniza y reescribe textos en español para quitarles los patrones de escritura de IA, con catálogo numerado de 40 patrones (más fuerte a más débil), pack de tells en español, puntuación 0-100 determinista de 4 señales medibles, modos Quick/Full/Voice, detección de registro (LinkedIn, email, artículo, informe) y reglas de honestidad factual y protección de código. Úsala cuando pidan humanizar un texto, quitarle el tono de IA, reescribirlo para que suene natural o auditarlo de forma objetiva.
+description: Humaniza y reescribe textos en español para quitarles los patrones de escritura de IA, con catálogo numerado de 40 patrones (más fuerte a más débil), pack de tells en español, puntuación 0-100 determinista de 4 señales medibles, modos Quick/Full/Voice, detección de registro (LinkedIn, email, artículo, informe) y reglas de honestidad factual y protección de código. Úsala cuando pidan humanizar un texto, quitarle el tono de IA, reescribirlo para que suene natural o auditarlo de forma objetiva. English: choose the anti-AI writing mode, detect the register and set the factual honesty policy.
 ---
 
 # Humanizador Anti-IA

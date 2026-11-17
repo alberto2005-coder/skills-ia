@@ -1,6 +1,6 @@
 ---
 name: replica-test
-description: Fase 6 de replica — plan de pruebas y ejecución real: flujo principal end-to-end, estados vacío/error, invariantes de datos, permisos, regresión y bugs con severidad. Úsala antes de medir paridad, cuando haya que probar un clon, escribir el plan de pruebas o decidir si algo está listo para lanzar.
+description: Fase 6 de replica — plan de pruebas y ejecución real: flujo principal end-to-end, estados vacío/error, invariantes de datos, permisos, regresión y bugs con severidad. Úsala antes de medir paridad, cuando haya que probar un clon, escribir el plan de pruebas o decidir si algo está listo para lanzar. English: write the test plan, run end-to-end cases and log bugs by S1 S2 S3 severity.
 ---
 
 # Replica · Pruebas (fase 6)

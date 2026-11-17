@@ -1,6 +1,6 @@
 ---
 name: replica-backend
-description: Fase 5 de replica — añade backend real al clon: autenticación, esquema de datos con migraciones e invariantes, permisos por recurso, pagos y trabajos en segundo plano, documentando cada decisión. Úsala cuando la app necesite cuentas, guardar datos, cobrar o ejecutar tareas asíncronas.
+description: Fase 5 de replica — añade backend real al clon: autenticación, esquema de datos con migraciones e invariantes, permisos por recurso, pagos y trabajos en segundo plano, documentando cada decisión. Úsala cuando la app necesite cuentas, guardar datos, cobrar o ejecutar tareas asíncronas. English: add authentication, per-resource permissions, versioned migrations, payments and idempotent jobs.
 ---
 
 # Replica · Backend (fase 5)

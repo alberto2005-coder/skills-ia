@@ -1,6 +1,6 @@
 ---
 name: replica-diff
-description: Fase 7 de replica — mide paridad funcional (parity.py) y visual (imgdiff.py) entre el original y el clon: contraste de features por severidad, diff de layout por regiones y evidencia por hallazgo. Úsala para saber si un clon ya iguala a la app original, cerrar un gate de paridad o documentar diferencias aceptadas.
+description: Fase 7 de replica — mide paridad funcional (parity.py) y visual (imgdiff.py) entre el original y el clon: contraste de features por severidad, diff de layout por regiones y evidencia por hallazgo. Úsala para saber si un clon ya iguala a la app original, cerrar un gate de paridad o documentar diferencias aceptadas. English: measure functional and visual parity between the original and the clone, and compare the screenshots with imgdiff.
 ---
 
 # Replica · Paridad (fase 7)

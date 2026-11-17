@@ -1,6 +1,6 @@
 ---
 name: seo-plan
-description: Convierte una auditoría SEO en un plan accionable ordenado por severidad, con cita, recomendación y borradores DRAFT (robots.txt, llms.txt, meta tags, JSON-LD) sin tocar el sitio. Úsala cuando el usuario pida un plan de mejoras SEO, priorizar los fallos de una auditoría o preparar los cambios antes de aplicarlos.
+description: Convierte una auditoría SEO en un plan accionable ordenado por severidad, con cita, recomendación y borradores DRAFT (robots.txt, llms.txt, meta tags, JSON-LD) sin tocar el sitio. Úsala cuando el usuario pida un plan de mejoras SEO, priorizar los fallos de una auditoría o preparar los cambios antes de aplicarlos. English: turn the audit into a prioritized SEO plan for the web with DRAFT files, without touching the site.
 ---
 
 # SEO Auditor · Plan

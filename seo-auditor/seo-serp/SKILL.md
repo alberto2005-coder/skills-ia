@@ -1,6 +1,6 @@
 ---
 name: seo-serp
-description: Simula cómo se verá una página en Google escritorio y móvil, Bing, y en las tarjetas sociales de WhatsApp, Facebook, LinkedIn y X, con medidor de ancho de título/descripción y aviso de truncamiento. Úsala cuando el usuario quiera previsualizar un título, meta descripción o tarjeta OG, o iterar copy antes de publicarlo.
+description: Simula cómo se verá una página en Google escritorio y móvil, Bing, y en las tarjetas sociales de WhatsApp, Facebook, LinkedIn y X, con medidor de ancho de título/descripción y aviso de truncamiento. Úsala cuando el usuario quiera previsualizar un título, meta descripción o tarjeta OG, o iterar copy antes de publicarlo. English: preview the title and description in Google desktop and mobile, Bing and the social cards.
 ---
 
 # SEO Auditor · SERP y tarjetas
