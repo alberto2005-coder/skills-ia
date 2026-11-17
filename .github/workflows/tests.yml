@@ -7,9 +7,34 @@ permissions:
   contents: read
 
 jobs:
+  lint:
+    name: Frontmatter lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
+
+      - name: Sync environment
+        run: uv sync --locked
+
+      - name: Lint frontmatter and manifests
+        run: uv run --locked python tests/lint_frontmatter.py
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+
   test:
-    name: Run all test suites
-    runs-on: windows-latest
+    name: Tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4

@@ -2,16 +2,17 @@
 
 [🇪🇸 Español](#-español) · [🇬🇧 English](#-english)
 
+> Trazabilidad: de qué proyecto viene cada *funcionalidad* (nunca código ajeno).
+> El plan histórico `PLAN-MEJORA.md` se completó y se retiró; este documento conserva su registro.
+
 ---
 
 ## 🇪🇸 Español
 
-> Trazabilidad: de qué proyecto viene cada *funcionalidad* (nunca código ajeno).  
-> Los planes originales están en [`PLAN-MEJORA.md`](../../PLAN-MEJORA.md).
-
 ### Procedencia
 
 - **`replica/` es trabajo original de este repositorio.** No es adaptación de `Jakeschincariol/replica-skill` ni de ningún otro. No volver a plantear.
+- **`premium-web-designer/` es trabajo original**, sin referente directo: sus gates salen de la revisión de una demo propia.
 - Licencias de terceros: **resueltas, fuera de la mesa** (decisión del autor).
 - Regla de oro: **mismas funciones, código propio** (solo stdlib de Python 3.8+).
 
@@ -30,17 +31,18 @@ Comparables de comunidad: `Jakeschincariol/replica-skill`, `aldushmedia/clonar` 
 
 ### Fase 2 — `agent-red-team/` ← `cloudflare/security-audit-skill`
 
-| Funcionalidad | Llegada aquí |
-|---|---|
-| Modos *guidance* vs *auditoría completa* (solo si se pide) | `SKILL.md` |
-| Verificación independiente de cada candidato (intenta refutarlo) | fase de verificación |
-| Coverage ledger (qué se cubrió, qué falta) | `templates/coverage-ledger.json` |
-| Esquema `confirmed / needs_validation / rejected` + severidad | `templates/report-schema.json` |
-| Nivel REJECT por combinación de patrones | motor de `scan_skill.py` + `scripts/rules.json` |
-| Ignorar patrones dentro de code fences | motor de `scan_skill.py` |
-| Catálogo de ataques + checklist de defensa | `references/attack-catalog.md` |
+**Estado: implementada (v2.1.0).** 50 tests.
 
-Comparables: `screem500/prompt-injection-auditor`, `ki-stuff/skill-auditor`, `aliksir/claude-code-skill-security-check` (SARIF), `NovaCode37/claude-security-skills`.
+| Funcionalidad | Origen | Llegada aquí |
+|---|---|---|
+| Modos *guidance* vs *auditoría completa* (solo si se pide) | `cloudflare/security-audit-skill` | `SKILL.md` |
+| Verificación independiente de cada candidato (intenta refutarlo) | `cloudflare` + `Consensys/repo-security-review` | fase 3 |
+| Coverage ledger (qué se cubrió, qué falta) | `cloudflare` | `templates/coverage-ledger.json` |
+| Esquema `confirmed / needs_validation / rejected` + severidad | `cloudflare` | `templates/report-schema.json` |
+| Nivel REJECT por combinación de patrones | `ki-stuff/skill-auditor` | `scan_skill.py` + `scripts/rules.json` |
+| Ignorar patrones dentro de code fences | `ki-stuff/skill-auditor` | motor de `scan_skill.py` |
+| Catálogo de ataques + checklist de defensa | `screem500/prompt-injection-auditor` | `references/attack-catalog.md` |
+| **Exportación SARIF** (solo `confirmed`; pending como `note`; rejected fuera) | `aliksir/claude-code-skill-security-check`, `briiirussell/cybersecurity-skills` | `scripts/export_sarif.py` |
 
 ### Fase 3 — `humanizador-anti-ia/` ← `blader/humanizer`
 
@@ -57,48 +59,82 @@ Comparables: `screem500/prompt-injection-auditor`, `ki-stuff/skill-auditor`, `al
 
 Comparables: `Aboudjem/humanizer-skill` (55 patrones, score 0–100), `keez97/humanizer` (estructurales primero), `shir-danishyar/humanize` (registro), `Aparnabuilds/humanizer`.
 
-### Fase 4 — `seo-auditor/` ← `seo-skills/geo-audit-skill`, `wishfy-ai` y **IndexPulse (propio)**
+### Fase 4 — `seo-auditor/` ← `seo-skills/geo-audit-skill`, `wishfy-ai` e **IndexPulse (propio)**
 
-**Estado: implementada (v2.0.0).** 104 tests `unittest` + servidor HTTP local (gzip/deflate) para el camino de red.
+**Estado: implementada (v2.0.0).** 104 tests + servidor HTTP local para el camino de red.
 
-| Funcionalidad | Llegada aquí | Estado |
+| Funcionalidad | Origen | Llegada aquí |
 |---|---|---|
-| Rúbrica 0–100 con dimensiones + veredicto en 1 línea | `scripts/checks.py` (`compute_rubric`, `verdict_line`) | ✅ |
-| Cada check con id + severidad `must/should/nice` + cita al doc oficial | `scripts/checks.py` + tablas en `references/00..05` | ✅ |
-| `audit.json` (máquina) + `audit.md` (persona) + re-score sin red | `scripts/report.py` (`write_report`, `rescore`) | ✅ |
-| Audit → Plan → Execute con dry-run | `scripts/execute.py` + `cli.py fix` + `SKILL.md` | ✅ (aplicación solo de robots/llms; snippets a mano) |
-| GEO: `llms.txt`, allow-list de crawlers IA por motor | `scripts/geo.py` + `references/03-geo-ai.md` | ✅ (search / user-fetch / training) |
-| `compare`/`monitor` entre dos auditorías | `scripts/compare.py` + `cli.py compare` | ✅ |
-| Crawl respetuoso (robots.txt, 1 req/s, tope declarado) | `scripts/web_audit.py` (bloque `crawl`) | ✅ |
-| **8 módulos IndexPulse** (`gestion_web`, de Alberto) | `indexcheck.py`, `serp.py`, `perf.py`, `security.py`, `schema_audit.py`, `hreflang.py`, `onpage.py`, `report.py` | ✅ 8/8 con límites declarados |
+| Rúbrica 0–100 con dimensiones + veredicto en 1 línea | `yanivgoldenberg/seo-geo-skill` | `scripts/checks.py` |
+| Cada check con id + severidad `must/should/nice` + cita oficial | `wishfy-ai/google-seo-geo-aeo-audit-skill` | `scripts/checks.py` + `references/` |
+| `audit.json` + `audit.md` + re-score sin red | `seo-skills/geo-audit-skill` | `scripts/report.py` |
+| Audit → Plan → Execute con dry-run | `mykpono/ultimate-seo-geo` | `scripts/execute.py` + `cli.py fix` |
+| GEO: `llms.txt` y allow-list de crawlers por motor | `seo-skills/geo-audit-skill` | `scripts/geo.py` |
+| `compare` / `monitor` entre auditorías | `Cognitic-Labs/geoskills` | `scripts/compare.py` |
+| Crawl respetuoso (robots.txt, 1 req/s, tope declarado) | `geo-audit-skill` | `scripts/web_audit.py` |
+| 8 módulos IndexPulse (`gestion_web`, de Alberto) | **propio** | `indexcheck.py`, `serp.py`, `perf.py`, `security.py`, `schema_audit.py`, `hreflang.py`, `onpage.py`, `report.py` |
 
 #### Correspondencia módulo → script (funcionalidad, no código)
 
 | Módulo IndexPulse | Nuestro equivalente stdlib | Límite honesto |
 |---|---|---|
 | 1. Indexación | `indexcheck.analyze` + `check_presence` | `site:` es indirecto → `estimate`; sin Search Console no se afirma indexación |
-| 1b. Directivas cruzadas | `indexcheck.is_allowed` + checks `IDX-*` | reglas Allow/Disallow y conflicto meta↔cabecera verificados |
-| 2. Simulador SERP | `serp.build` | ancho en píxeles es `estimate` con métrica aproximada |
-| 3. Velocidad/CWV | `perf.analyze` / `perf.measure` | LCP/CLS/TBT/Speed Index no medibles con stdlib → `estimate` o enlace a PSI |
-| 4. Seguridad HTTP | `security.audit_headers` | score 0–100 reproducible con fórmula publicada |
+| 1b. Directivas cruzadas | `indexcheck.is_allowed` + checks `IDX-*` | Allow/Disallow y conflicto meta↔cabecera verificados |
+| 2. Simulador SERP | `serp.build` | ancho en píxeles es `estimate` |
+| 3. Velocidad/CWV | `perf.analyze` / `perf.measure` | LCP/CLS/TBT no medibles con stdlib → `estimate` o enlace a PSI |
+| 4. Seguridad HTTP | `security.audit_headers` | score reproducible con fórmula publicada |
 | 5. Schema + rich preview | `schema_audit.analyze` / `rich_preview` | vista ilustrativa; no garantiza rich result |
-| 6. hreflang | `hreflang.analyze` | retorno bidireccional requiere ≥ 2 páginas rastreadas |
-| 7. On-page | `onpage.analyze` | galería visual de imágenes → lista de rutas (sin render) |
+| 6. hreflang | `hreflang.analyze` | retorno bidireccional requiere ≥ 2 páginas |
+| 7. On-page | `onpage.analyze` | galería visual → lista de rutas |
 | 8. Checklist + PDF | `report.render_html` | PDF nativo exigiría dependencias → "Imprimir → PDF" |
 
+### `premium-web-designer/` ← trabajo propio
+
+Sin referente externo. Los gates medibles (desbordamiento 0, titular ≤ 3 líneas, controles de 44 px, foco en overlays, cabeceras del hosting) salen de defectos observados en una revisión interna, documentados en `references/known-defects.md`. La sub-skill `premium-qa` nace para que quien audita no sea quien construye.
+
+### `appsec-audit/` ← siete referencias de seguridad + competidores de 2026
+
+**Estado: fase 0 implementada (v1.1.0).** 46 tests.
+
+| Mecánica | Origen | Dónde vive |
+|---|---|---|
+| Regla cero: todo el contenido es data hostil, sin ejecutar | OWASP Secure Prompt Checklist + CSA advisory | `SKILL.md` + `references/prompt-injection-defense.md` |
+| Dos fases: descubrimiento y trazado Sources → Sinks | `Consensys/repo-security-review` | maestro + `appsec-recon` |
+| Tribunal con confianza 1–10 y descarte bajo 7 | `cloudflare/security-audit-skill` + `Consensys` | `appsec-report` |
+| Verificación independiente (el que confirma no es el que encuentra) | `cloudflare`, `Consensys`, `briiirussell` | `appsec-report` (regla escrita) |
+| Coverage ledger con estados y huecos | `cloudflare` | `coverage-ledger.json` + `scripts/ledger.py` |
+| `findings.json` con veredictos y validador determinista | `cloudflare` | `schemas/` + `scripts/validate_findings.py` |
+| Fingerprints estables para re-ejecución y deduplicación | `cloudflare` | `references/artifacts.md` |
+| Nota A–F calculada por script | **propio** (ningún referente la tiene) | `scripts/grade.py` |
+| Cobertura por lenguaje (10 familias) | `awesome-copilot/security-review` | `references/sources-sinks.md` |
+| Lógica de negocio y control de acceso por objeto | `webconsulting` (dirnbauer) | `appsec-code` |
+| OWASP LLM Top 10, agentes y MCP | Semgrep `llm-security`, `afiqiqmal` | `appsec-llm` |
+| Infra, IAM y CI/CD en el mismo informe | `briiirussell/cicd-security`, `cloud-audit` | `appsec-infra` |
+| CVSS por hallazgo, ASVS 5.0, NIST CSF, packs de cumplimiento | `afiqiqmal`, `Trail of Bits`, `TarkinLarson/asvs-auditor` | pendiente (fase 1 del plan de huecos) |
+| Threat model, modo diff/PR, baseline y triage, SARIF | `Consensys`, `afiqiqmal`, `Codex Security` | pendiente |
+| Dependencias con reachability y SBOM CycloneDX | `Consensys`, `Netresearch` | pendiente |
+
+Competidores adicionales evaluados: `openai/codex-security` (el más completo en artefactos), `briiirussell/cybersecurity-skills` (26 skills modulares), `Trail of Bits skills` (`fp-check`, `cvss-scoring`, SARIF), `Netresearch/security-audit-skill` (565 checkpoints, SBOM), `ECMWF security-audit` (threat model + scanners), `TarkinLarson/asvs-auditor`, `usestrix/strix` (DAST con PoC), `semgrep/skills`, `Snyk Studio`, `zm2231/z-audit`, `BehiSecc/VibeSec-Skill`.
+
 ### Fase 5 — transversal
-Formato genérico multi-skill (índice `skills.json` raíz + `skills.json` por carpeta, sin `.claude-plugin`), tests en todas las skills, README bilingüe y CHANGELOG.
+
+| Elemento | Estado |
+|---|---|
+| Índice `skills.json` raíz + `skills.json` por paquete, sin `.claude-plugin` | ✅ |
+| Tests stdlib en todas las skills, enganchados a `run_tests.py` | ✅ |
+| CI: lint de frontmatter y manifiestos | ✅ `tests/lint_frontmatter.py` |
+| CI: matriz Ubuntu / macOS / Windows con Python 3.13 | ✅ `.github/workflows/tests.yml` |
+| README y CHANGELOG bilingües | ✅ |
+| Trazabilidad por funcionalidad | ✅ este documento |
 
 ---
 
 ## 🇬🇧 English
 
-> Traceability: origin of each *feature* (never third-party code).  
-> Original improvement plans live in [`PLAN-MEJORA.md`](../../PLAN-MEJORA.md).
-
 ### Provenance
 
 - **`replica/` is original work created for this repository.** It is not an adaptation of `Jakeschincariol/replica-skill` or any other project. Not up for re-evaluation.
+- **`premium-web-designer/` is original work**, with no direct referent: its gates come from reviewing an in-house demo.
 - Third-party licenses: **resolved and off the table** (author's decision).
 - Golden rule: **same capabilities, original code** (Python 3.8+ stdlib only).
 
@@ -111,70 +147,95 @@ Formato genérico multi-skill (índice `skills.json` raíz + `skills.json` por c
 | Avoid redundant analysis (save and reuse) | analysis cache rule in `01-recon.md` |
 | Opt-in static analysis (JADX/Ghidra/objdump if installed by user) | `references/12-analisis-estatico.md` |
 | Authorized use / no DRM / no third-party logins DISCLAIMER | hard rules in `SKILL.md` |
-| Generic packaging + tests | `replica/tests/` (standard format, no `.claude-plugin` manifests) |
+| Generic packaging + tests | `replica/tests/` (no `.claude-plugin` manifests) |
 
-Community comparables: `Jakeschincariol/replica-skill`, `aldushmedia/clonar` (master command + `progreso.md` + social/networks), `EncidXVII/claude-reverse-engineering-skill` (trigger evals).
+Community comparables: `Jakeschincariol/replica-skill`, `aldushmedia/clonar`, `EncidXVII/claude-reverse-engineering-skill`.
 
 ### Phase 2 — `agent-red-team/` ← `cloudflare/security-audit-skill`
 
-| Feature | How it lands here |
-|---|---|
-| *Guidance* vs *full audit* modes (only on explicit request) | `SKILL.md` |
-| Independent verification of every candidate (attempts refutation) | verification phase |
-| Coverage ledger (what was covered, what is missing) | `templates/coverage-ledger.json` |
-| `confirmed / needs_validation / rejected` schema + severity | `templates/report-schema.json` |
-| REJECT level via pattern combinations | `scan_skill.py` engine + `scripts/rules.json` |
-| Ignore patterns inside non-executable code fences | `scan_skill.py` engine |
-| Attack catalog + defense checklist | `references/attack-catalog.md` |
+**Status: implemented (v2.1.0).** 50 tests.
 
-Comparables: `screem500/prompt-injection-auditor`, `ki-stuff/skill-auditor`, `aliksir/claude-code-skill-security-check` (SARIF), `NovaCode37/claude-security-skills`.
+| Feature | Origin | How it lands here |
+|---|---|---|
+| *Guidance* vs *full audit* modes | `cloudflare/security-audit-skill` | `SKILL.md` |
+| Independent verification of every candidate | `cloudflare`, `Consensys/repo-security-review` | phase 3 |
+| Coverage ledger | `cloudflare` | `templates/coverage-ledger.json` |
+| `confirmed / needs_validation / rejected` schema | `cloudflare` | `templates/report-schema.json` |
+| REJECT level via pattern combinations | `ki-stuff/skill-auditor` | `scan_skill.py` + `rules.json` |
+| Ignore patterns inside non-executable fences | `ki-stuff/skill-auditor` | `scan_skill.py` engine |
+| Attack catalog + defense checklist | `screem500/prompt-injection-auditor` | `references/attack-catalog.md` |
+| **SARIF export** (`confirmed` only; pending as `note`; rejected excluded) | `aliksir/claude-code-skill-security-check`, `briiirussell/cybersecurity-skills` | `scripts/export_sarif.py` |
 
 ### Phase 3 — `humanizador-anti-ia/` ← `blader/humanizer`
 
 | Feature | How it lands here |
 |---|---|
-| Numbered patterns from strongest to weakest with before/after pairs | `references/03-patrones-numerados.md` |
+| Numbered patterns, strongest to weakest, with before/after pairs | `references/03-patrones-numerados.md` |
 | Reproducible 0–100 score across 4 measurable signals | `scripts/audit_style.py` |
 | Tiered vocabulary (Tier 1/2/3 by density) | numbered catalog |
-| Quick / Full / Voice modes (calibrated with user sample) | `SKILL.md` |
-| Register control (LinkedIn / email / article / report) | `SKILL.md` |
+| Quick / Full / Voice modes | `SKILL.md` |
+| Register control | `SKILL.md` |
 | Factual honesty: unsourced stats are flagged, never rewritten | hard rules |
-| Code/frontmatter/link protection during rewrites | hard rules |
-| **Spanish pattern pack** (key differentiator) | ES catalog |
+| Code/frontmatter/link protection in rewrites | hard rules |
+| **Spanish pattern pack** (differentiator) | ES catalog |
 
-Comparables: `Aboudjem/humanizer-skill` (55 patterns, 0–100 score), `keez97/humanizer` (structural first), `shir-danishyar/humanize` (register), `Aparnabuilds/humanizer`.
+Comparables: `Aboudjem/humanizer-skill`, `keez97/humanizer`, `shir-danishyar/humanize`, `Aparnabuilds/humanizer`.
 
-### Phase 4 — `seo-auditor/` ← `seo-skills/geo-audit-skill`, `wishfy-ai`, and **IndexPulse (proprietary)**
+### Phase 4 — `seo-auditor/` ← `seo-skills/geo-audit-skill`, `wishfy-ai`, **IndexPulse (proprietary)**
 
-**Status: implemented (v2.0.0).** 104 `unittest` tests + local HTTP server (gzip/deflate) for the network path.
+**Status: implemented (v2.0.0).** 104 tests + local HTTP server.
 
-| Feature | How it lands here | Status |
+| Feature | Origin | How it lands here |
 |---|---|---|
-| 0–100 rubric with dimensions + 1-line verdict | `scripts/checks.py` (`compute_rubric`, `verdict_line`) | ✅ |
-| Each check with id + `must/should/nice` severity + official doc citation | `scripts/checks.py` + tables in `references/00..05` | ✅ |
-| `audit.json` (machine) + `audit.md` (human) + offline re-score | `scripts/report.py` (`write_report`, `rescore`) | ✅ |
-| Audit → Plan → Execute with dry-run | `scripts/execute.py` + `cli.py fix` + `SKILL.md` | ✅ (applies robots/llms only; manual snippets) |
-| GEO: `llms.txt`, AI crawler allow-list per engine | `scripts/geo.py` + `references/03-geo-ai.md` | ✅ (search / user-fetch / training) |
-| `compare`/`monitor` between two audits | `scripts/compare.py` + `cli.py compare` | ✅ |
-| Polite crawl (robots.txt, 1 req/s, declared cap) | `scripts/web_audit.py` (`crawl` block) | ✅ |
-| **8 IndexPulse modules** (`gestion_web`, by Alberto) | `indexcheck.py`, `serp.py`, `perf.py`, `security.py`, `schema_audit.py`, `hreflang.py`, `onpage.py`, `report.py` | ✅ 8/8 with declared limits |
+| 0–100 rubric + one-line verdict | `yanivgoldenberg/seo-geo-skill` | `scripts/checks.py` |
+| Stable check id + `must/should/nice` + official citation | `wishfy-ai/google-seo-geo-aeo-audit-skill` | `scripts/checks.py` + `references/` |
+| `audit.json` + `audit.md` + offline re-score | `seo-skills/geo-audit-skill` | `scripts/report.py` |
+| Audit → Plan → Execute with dry-run | `mykpono/ultimate-seo-geo` | `scripts/execute.py` + `cli.py fix` |
+| GEO: `llms.txt`, per-engine crawler allow-list | `seo-skills/geo-audit-skill` | `scripts/geo.py` |
+| `compare` / `monitor` | `Cognitic-Labs/geoskills` | `scripts/compare.py` |
+| Polite crawl (robots, 1 req/s, declared cap) | `geo-audit-skill` | `scripts/web_audit.py` |
+| 8 IndexPulse modules | **proprietary** | eight stdlib scripts, one per module |
 
-#### Module → Script Mapping (capability, not code)
+Module-to-script mapping and honest limits match the Spanish table above.
 
-| IndexPulse Module | Stdlib Equivalent | Honest Limit |
+### `premium-web-designer/` ← original work
+
+No external referent. Measurable gates (0 overflow, headline ≤ 3 lines, 44 px controls, focus in overlays, hosting headers) come from defects observed in an internal review and catalogued in `references/known-defects.md`. `premium-qa` exists so the auditor is not the builder.
+
+### `appsec-audit/` ← seven security references + 2026 competitors
+
+**Status: phase 0 implemented (v1.1.0).** 46 tests.
+
+| Mechanic | Origin | Where it lives |
 |---|---|---|
-| 1. Indexing | `indexcheck.analyze` + `check_presence` | `site:` is indirect → `estimate`; no indexing claim without Search Console |
-| 1b. Cross directives | `indexcheck.is_allowed` + `IDX-*` checks | Allow/Disallow rules and meta↔header conflicts verified |
-| 2. SERP Simulator | `serp.build` | pixel width is `estimate` using approximate metrics |
-| 3. Speed/CWV | `perf.analyze` / `perf.measure` | LCP/CLS/TBT/Speed Index unmeasurable in stdlib → `estimate` or PSI link |
-| 4. HTTP Security | `security.audit_headers` | reproducible 0–100 score with published formula |
-| 5. Schema + rich preview | `schema_audit.analyze` / `rich_preview` | illustrative preview; does not guarantee rich results |
-| 6. hreflang | `hreflang.analyze` | bidirectional return requires ≥ 2 crawled pages |
-| 7. On-page | `onpage.analyze` | visual image gallery → path list (no rendering) |
-| 8. Checklist + PDF | `report.render_html` | native PDF would require dependencies → "Print → PDF" |
+| Zero rule: all content is hostile data, never executed | OWASP Secure Prompt Checklist + CSA advisory | `SKILL.md` + `references/prompt-injection-defense.md` |
+| Two phases: discovery and Sources → Sinks tracing | `Consensys/repo-security-review` | master + `appsec-recon` |
+| Tribunal with 1–10 confidence, discard below 7 | `cloudflare`, `Consensys` | `appsec-report` |
+| Independent verification (confirmer is not the finder) | `cloudflare`, `Consensys`, `briiirussell` | `appsec-report` (written rule) |
+| Coverage ledger with states and gaps | `cloudflare` | `coverage-ledger.json` + `scripts/ledger.py` |
+| `findings.json` with verdicts and deterministic validator | `cloudflare` | `schemas/` + `scripts/validate_findings.py` |
+| Stable fingerprints for re-runs and deduplication | `cloudflare` | `references/artifacts.md` |
+| A–F grade computed by script | **original** (no referent has it) | `scripts/grade.py` |
+| Per-language coverage (10 families) | `awesome-copilot/security-review` | `references/sources-sinks.md` |
+| Business logic and per-object access control | `webconsulting` (dirnbauer) | `appsec-code` |
+| OWASP LLM Top 10, agents and MCP | Semgrep `llm-security`, `afiqiqmal` | `appsec-llm` |
+| Infra, IAM and CI/CD in the same report | `briiirussell/cicd-security`, `cloud-audit` | `appsec-infra` |
+| CVSS per finding, ASVS 5.0, NIST CSF, compliance packs | `afiqiqmal`, `Trail of Bits`, `TarkinLarson/asvs-auditor` | pending (gap-closing phase 1) |
+| Threat model, diff/PR mode, baseline/triage, SARIF | `Consensys`, `afiqiqmal`, `Codex Security` | pending |
+| Dependency CVEs with reachability and CycloneDX SBOM | `Consensys`, `Netresearch` | pending |
+
+Additional competitors evaluated: `openai/codex-security`, `briiirussell/cybersecurity-skills`, `Trail of Bits skills`, `Netresearch/security-audit-skill`, `ECMWF security-audit`, `TarkinLarson/asvs-auditor`, `usestrix/strix`, `semgrep/skills`, `Snyk Studio`, `zm2231/z-audit`, `BehiSecc/VibeSec-Skill`.
 
 ### Phase 5 — Cross-cutting
-Generic multi-skill format (root `skills.json` index + per-folder `skills.json`, no `.claude-plugin`), tests across all skills, bilingual README, and CHANGELOG.
+
+| Element | Status |
+|---|---|
+| Root `skills.json` + per-package `skills.json`, no `.claude-plugin` | ✅ |
+| Stdlib tests in every skill, wired into `run_tests.py` | ✅ |
+| CI: frontmatter and manifest lint | ✅ `tests/lint_frontmatter.py` |
+| CI: Ubuntu / macOS / Windows matrix on Python 3.13 | ✅ `.github/workflows/tests.yml` |
+| Bilingual README and CHANGELOG | ✅ |
+| Per-feature traceability | ✅ this document |
 
 ---
 *Última actualización / Last updated: 2026-11-17.*

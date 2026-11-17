@@ -2,7 +2,7 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "agent-red-team",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Auditoría de seguridad ofensiva de skills, MCP y carpetas de instrucciones: maestro + escaneo rápido (guidance) y auditoría completa con verificación.",
   "author": "Alberto Ortiz",
   "skills": [

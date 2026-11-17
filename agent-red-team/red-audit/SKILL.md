@@ -57,7 +57,8 @@ Escribe una copia `.sanitized`; **nunca** sobrescribe el original.
 1. Rellena `../templates/risk-report.md` (tabla de verificación + combinaciones REJECT + ledger).
 2. Adjunta `../templates/coverage-ledger.json` con las superficies reales y su estado `covered/partial/missing`.
 3. Entrega el JSON validable contra `../templates/report-schema.json`.
-4. Una superficie `missing` **impide** el veredicto APROBADO y se declara como límite.
+4. Si el destino es GitHub, exporta SARIF: `py agent-red-team/scripts/export_sarif.py informe.json --output informe.sarif`. Solo salen los `confirmed`; `--include-pending` añade los `needs_validation` como `note` y los `rejected` nunca se exportan.
+5. Una superficie `missing` **impide** el veredicto APROBADO y se declara como límite.
 
 ## Reglas duras
 

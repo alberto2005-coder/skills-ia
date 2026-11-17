@@ -120,6 +120,7 @@ Las guías completas de cada módulo se encuentran en la carpeta [`docs/`](docs/
 - [Guía de AppSec Audit](docs/appsec-audit.md)
 - [Guía de SEO Auditor](docs/seo-auditor.md)
 - [Premium Web Designer](docs/premium-web-designer.md)
+- [Benchmark y trazabilidad](docs/benchmark/README.md)
 
 ### Requisitos y Filosofía de Cero Dependencias
 - **Python 3.8+** (utiliza únicamente la librería estándar de Python: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).
@@ -246,6 +247,7 @@ Comprehensive module documentation is available in the [`docs/`](docs/) director
 - [AppSec Audit Guide](docs/appsec-audit.md)
 - [SEO Auditor Guide](docs/seo-auditor.md)
 - [Premium Web Designer](docs/premium-web-designer.md)
+- [Benchmark and traceability](docs/benchmark/README.md)
 
 ### Requirements and Zero-Dependency Philosophy
 - **Python 3.8+** (uses only standard library modules: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).

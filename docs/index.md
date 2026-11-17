@@ -20,6 +20,7 @@
 - [**SEO Auditor**](seo-auditor.md): auditoría SEO/GEO con rúbrica 0–100, simulador de SERP y evidencia reproducible.
 - [**AppSec Audit**](appsec-audit.md): auditoría de ciberseguridad integral con trazado fuente→sumidero, tribunal de validación, nota A–F y parches en diff.
 - [**Premium Web Designer**](premium-web-designer.md): diseño y desarrollo de sitios web premium con dirección de arte, UX/UI y QA independiente.
+- [**Benchmark y trazabilidad**](benchmark/README.md): de qué proyecto viene cada funcionalidad, por fase y por skill.
 
 ### Paquetes y Sub-skills
 **6 paquetes, 34 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
@@ -78,6 +79,7 @@ uv run python run_tests.py
 - [**SEO Auditor**](seo-auditor.md): SEO/GEO audit with a 0–100 rubric, SERP simulator and reproducible evidence.
 - [**AppSec Audit**](appsec-audit.md): end-to-end security audit with source-to-sink tracing, a validation tribunal, an A–F grade and diff patches.
 - [**Premium Web Designer**](premium-web-designer.md): premium website design and development with art direction, UX/UI and independent QA.
+- [**Benchmark and traceability**](benchmark/README.md): which project each feature comes from, per phase and per skill.
 
 ### Packages and Sub-skills
 **6 packages, 34 skills.** The machine-readable index lives in [`skills.json`](../skills.json).

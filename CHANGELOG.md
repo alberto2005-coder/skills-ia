@@ -8,6 +8,17 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-17 · CI, SARIF y trazabilidad
+
+#### Añadido
+- **`agent-red-team/scripts/export_sarif.py`:** exporta el informe a SARIF 2.1.0 con una regla por categoría, mapeo `critical/high → error`, `medium → warning`, `low → note`, REJECT siempre `error` y `needs_validation` como `note` solo con `--include-pending`. Los `rejected` no se exportan. 12 tests nuevos (50 en el paquete).
+- **`tests/lint_frontmatter.py`:** lint de frontmatter (delimitadores, `name` igual a la carpeta, `description` útil) y de los manifiestos de paquete, con 6 tests propios.
+- **CI real:** `.github/workflows/tests.yml` pasa a dos jobs — lint en Ubuntu y la suite completa en **matriz Ubuntu / macOS / Windows** con Python 3.13.
+- **`docs/benchmark/README.md`:** trazabilidad completa, bilingüe, de qué proyecto viene cada funcionalidad en las seis skills, incluida la exportación SARIF y la CI.
+
+#### Cambiado
+- **`PLAN-MEJORA.md` se retira:** todas sus fases están implementadas y su contenido vive ahora en el documento de benchmark y en el CHANGELOG.
+
 ### - 2026-11-17 · `appsec-audit` 1.1 — Fase 0
 
 #### Añadido
@@ -112,6 +123,17 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-17 · CI, SARIF and traceability
+
+#### Added
+- **`agent-red-team/scripts/export_sarif.py`:** exports the report to SARIF 2.1.0 with one rule per category, `critical/high → error`, `medium → warning`, `low → note`, REJECT always `error` and `needs_validation` as `note` only with `--include-pending`. `rejected` findings are never exported. 12 new tests (50 in the package).
+- **`tests/lint_frontmatter.py`:** frontmatter lint (delimiters, `name` matching the folder, meaningful `description`) plus package manifest checks, with 6 tests of its own.
+- **Real CI:** `.github/workflows/tests.yml` now has two jobs — lint on Ubuntu and the full suite on a **Ubuntu / macOS / Windows matrix** with Python 3.13.
+- **`docs/benchmark/README.md`:** full bilingual traceability of which project each feature comes from across the six skills, including SARIF export and CI.
+
+#### Changed
+- **`PLAN-MEJORA.md` is retired:** every phase is implemented and its content now lives in the benchmark document and the CHANGELOG.
 
 ### - 2026-11-17 · `appsec-audit` 1.1 — Phase 0
 
