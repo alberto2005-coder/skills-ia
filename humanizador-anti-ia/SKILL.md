@@ -1,74 +1,162 @@
 ---
 name: humanizador-anti-ia
-description: Humaniza y reescribe textos para eliminar patrones de escritura de IA basándose en "Wikipedia: Signs of AI writing", burstiness (variabilidad sintáctica), perplejidad léxica y legibilidad. Incluye auditoría determinista en Python, glosario anti-clichés, guías sintácticas y plantillas de informes. Actívala siempre que el usuario pida humanizar un texto, quitarle el tono de IA, reescribirlo para que suene natural/humano o superar detectores como ZeroGPT, GPTZero, Turnitin u Originality.ai.
+description: Humaniza y reescribe textos en español para quitarles los patrones de escritura de IA, con catálogo numerado de 40 patrones (más fuerte a más débil), pack de tells en español, puntuación 0-100 determinista de 4 señales medibles, modos Quick/Full/Voice, detección de registro (LinkedIn, email, artículo, informe) y reglas de honestidad factual y protección de código. Úsala cuando pidan humanizar un texto, quitarle el tono de IA, reescribirlo para que suene natural o auditarlo de forma objetiva.
 ---
 
 # Humanizador Anti-IA
 
-Reescribe textos generados por modelos de lenguaje o excesivamente corporativos para dotarlos de ritmo orgánico, asimetría humana, precisión léxica y naturalidad de autor, eliminando huellas estadísticas y estilísticas típicas de la IA.
+Reescribe textos generados por modelos de lenguaje o excesivamente corporativos para devolverles ritmo, concreción y voz de autor. No es un sinonimizador: la mayor parte del trabajo está en el contenido y la estructura, no en cambiar palabras.
+
+**Documento obligatorio:** `references/03-patrones-numerados.md`. Recórrelo entero antes de reescribir y vuelve a comprobarlo al terminar. El resto de referencias lo desarrolla, no lo sustituye.
 
 ## Cuándo usar esta skill
 
-- Cuando el usuario pida "humanizar" un texto, hacerlo sonar más natural, desenfadado o quitarle el tono robótico/académico plano.
-- Para adaptar borradores de artículos, ensayos, landing pages, posts o correos y superar filtros editoriales o detectores de IA (GPTZero, ZeroGPT, Turnitin, Originality.ai).
-- Para auditar objetivamente si un texto presenta indicios sintácticos o léxicos de haber sido escrito por un LLM.
+- Cuando pidan humanizar, naturalizar o «quitar el tono de IA» de un texto.
+- Para adaptar borradores de artículos, emails, posts de LinkedIn, landing pages o informes.
+- Para auditar de forma objetiva cuántas señales de IA tiene un texto (score 0-100 reproducible).
 
 ---
 
-## Módulos y Referencias de la Skill
+## Sub-skills
 
-| # | Documento | Foco |
+El paquete se instala como una unidad: las sub-skills comparten `references/`, `scripts/` y `templates/` de esta carpeta.
+
+| Sub-skill | Qué hace | Toca el texto |
 |---|---|---|
-| **01** | `references/lista-negra.md` | Lista negra de clichés, conectores mecánicos prohibidos y sustituciones en español |
-| **02** | `references/01-patrones-sintacticos.md` | Explicación profunda de Perplexity, Burstiness y vicios estructurales de LLMs |
-| **03** | `references/02-tecnicas-reescritura.md` | Técnicas prácticas: Staccato, corte en seco, anclas sensoriales y yuxtaposición |
-| **04** | `templates/informe-auditoria.md` | Plantilla para informes editoriales y comparativas antes/después |
+| `humanizar` | Reescritura en modo Quick/Full/Voice con recorte de relleno y score antes/después | Sí |
+| `detector-ia` | Solo puntuar y detectar: señales, datos sin fuente y segmentos protegidos | No |
+
+Esta skill es el **maestro**: define modos, registro, honestidad factual y protección. El procedimiento vive en `humanizar`; la medición sin edición, en `detector-ia`.
+
+## Modos de trabajo
+
+| Modo | Qué toca | Cuándo usarlo |
+|---|---|---|
+| **Quick** | Solo vocabulario (Tier 1 y 2), artefactos de chatbot y relleno evidente. No cambia la estructura. | Prisa, textos cortos, o cuando el usuario solo quiere «quitar las palabras raras». |
+| **Full** *(por defecto)* | Todo el catálogo: contenido, ritmo, sintaxis, estructura, vocabulario y artefactos. Incluye auditoría estructural y **recorte del 20-30% de relleno**. | Cualquier encargo normal. Es el modo que se aplica si el usuario no especifica. |
+| **Voice** | Full + calibración con **2-3 párrafos de escritura propia del usuario**. Se imitan sus hábitos: longitud media de frase, uso de paréntesis, comillas, muletillas, grado de formalidad y tipo de cierre. | Cuando el texto debe sonar a una persona concreta (su LinkedIn, su newsletter, su firma). |
+
+El procedimiento de cada modo (qué tocar y en qué orden) está en `humanizar`. El maestro fija qué significa cada modo, el registro y lo que no se negocia.
+
+---
+
+## Registro: qué significa «humano» en cada caso
+
+Antes de reescribir, identifica el registro. No hay un único «tono humano»; hay convenciones distintas, y aplicar las de un registro a otro estropea el texto.
+
+| Registro | Señales para detectarlo | Qué es «humano» aquí | Qué NO hacer |
+|---|---|---|---|
+| **Post de LinkedIn / red social** | Primera persona, hashtags, emojis, párrafos de una línea, llamada a comentar | Frases cortas y fragmentos, anécdota concreta, una idea por línea, cierre sin moraleja | Nada de fragmentos en un informe; aquí sí valen |
+| **Email** | Saludo, destinatario, asunto, despedida | Frases directas, contexto compartido, una petición clara, cierre con nombre | No convertir en artículo ni añadir epígrafes |
+| **Artículo / newsletter** | Título, párrafos, ejemplos, quizá enlaces | Voz propia, ejemplos concretos, variación de ritmo, subtítulos concretos | No meter jerga de consultoría ni listas de tres |
+| **Informe formal / técnico** | Epígrafes, tablas, cifras, tercera persona | Precisión, voz activa cuando se sabe el agente, frases completas, cierre con decisión y siguiente paso | **Nada de fragmentos**, nada de coloquialismos, nada de «tú» si el documento no lo usa |
+
+Reglas transversales: el registro manda sobre el catálogo. Si un patrón marcado «a veces es legítimo» encaja con el registro (una raya en un diálogo, una pasiva en un método), se deja y se anota. Si el texto mezcla registros, se elige el dominante y se avisa.
 
 ---
 
 ## Reglas estrictas de edición
 
-### 1. Ritmo y estructura (Burstiness)
-- **Contraste deliberado:** Alterna de forma marcada frases puñetazo (4 a 8 palabras) con oraciones complejas y subordinadas (22 a 35 palabras). Prohibido encadenar 3 o más oraciones de longitud homogénea.
-- **Ruptura de simetría:** Rompe las tríadas clásicas de adjetivos (*"rápido, intuitivo y escalable"*). Varía los arranques de párrafo para que no empiecen con el mismo conector ni con artículos idénticos.
-- **Cero conectores robóticos:** Prohíbe muletillas mecánicas de transición (*En conclusión*, *Cabe destacar*, *Es importante señalar*, *Asimismo*, *Por otro lado*, *En resumen*, *Sin lugar a dudas*, *En última instancia*). Une mediante yuxtaposición o puntuación natural.
+### 1. Honestidad factual (no negociable)
 
-### 2. Vocabulario y riqueza léxica (Perplejidad)
-- **Purga de clichés de LLM:** Consulta `references/lista-negra.md` y erradica adjetivos inflados y metáforas poéticas forzadas (*crucial*, *fascinante*, *tapiz*, *panorama en constante evolución*, *desentrañar*, *sumergirse en*, *testamento de*, *faro de*, *catalizador*, *revolucionar*, *potenciar*, *brindar*, *abarcar*, *multifacético*, *sinergia*, *holístico*).
-- **Verbos directos sobre perífrasis:** Sustituye perífrasis abstractas por acciones directas. Habla como un profesional real con experiencia práctica.
+- Si el texto contiene una **estadística, cifra, cita o fecha sin fuente**, se **marca como «verificar»** en el informe. Nunca se reescribe inventando el dato, el autor ni el estudio.
+- Tampoco se redondea, se actualiza ni se «aproxima» una cifra para que suene mejor.
+- Si el dato es imprescindible y no hay fuente, se deja tal cual con la marca, o se reformula como afirmación cualitativa **sin cifra nueva**: «muchos equipos» en lugar de «el 68%».
+- Las atribuciones vagas («estudios demuestran», «expertos coinciden») se tratan igual: se marcan para verificar.
+- `audit_style.py` las detecta y las lista en `datos_a_verificar`; el informe las recoge en su apartado propio.
 
-### 3. Gramática en español y tono
-- **Prohibición de guiones largos (— o –):** La IA abusa de incisos explicativos entre rayas. Sustitúyelos por comas, paréntesis o punto y seguido.
-- **Evitar la voz pasiva y el gerundio de posterioridad:** Transforma construcciones pasivas (*"ha sido implementado por"*) en voz activa directa, y no uses gerundios que indiquen consecuencia posterior.
-- **Cierre seco sin moralejas:** Elimina el sermón aspiracional final (*"a medida que miramos hacia el futuro..."*). Termina el texto en seco con el último hecho o conclusión útil.
-- **Fidelidad semántica:** Conserva intactos todos los hechos, datos y argumentos técnicos; altera únicamente la arquitectura textual y el estilo.
+### 2. Protección de estructura
+
+No se toca, ni para «mejorar el estilo»:
+
+- bloques de código (```` ``` ```` y `~~~`), código en línea (`` ` ``);
+- frontmatter YAML (el bloque `---` inicial);
+- enlaces y correos (URL, `mailto:`, direcciones);
+- valores de datos: cifras, unidades, nombres propios, rutas, versiones, claves, comandos;
+- tablas y su alineación.
+
+El script enmascara estos segmentos antes de medir (`mask_protected`) y puede restaurarlos (`restore_masked`), de modo que una reescritura no los altere. Si hay que cambiar algo dentro de un bloque protegido, se avisa y se pide permiso; no se hace en silencio.
+
+### 3. Ritmo y estructura
+
+- **Contraste deliberado:** alterna frases de 4-8 palabras con subordinadas de 22-35. Prohibido encadenar 3 o más oraciones de longitud homogénea.
+- **Ruptura de simetría:** rompe las tríadas (*«rápido, intuitivo y escalable»*) y las listas de tres viñetas idénticas.
+- **Cero conectores robóticos:** *En conclusión, Cabe destacar, Es importante señalar, Asimismo, Por otro lado, En resumen, Sin lugar a dudas, En última instancia*.
+- **Cierre seco:** fuera la moraleja aspiracional; se corta en el último hecho, decisión o siguiente paso.
+
+### 4. Vocabulario
+
+- Purga Tier 1 (ver catálogo, grupo C): *crucial, fascinante, holístico, multifacético, inquebrantable, meticuloso, intrincado, paradigmático, tapiz, crisol*.
+- Tier 2 por densidad: *potenciar, optimizar, fomentar, brindar, abarcar, maximizar, agilizar*.
+- Verbos directos sobre perífrasis: «llevar a cabo un análisis» → «analizar».
+
+### 5. Gramática en español
+
+- Rayas (—/–) solo para incisos reales o diálogo; nunca decorativas.
+- Sin gerundio de posterioridad («lanzó la campaña, logrando…»).
+- Voz activa cuando el agente se conoce.
+- Sin pasiva analítica de relleno («ha sido implementado por»).
+
+### 6. Fidelidad semántica
+
+Se conservan hechos, argumentos y datos. Se cambia la arquitectura textual y el estilo, no el contenido. Si al recortar el 20-30% se pierde un matiz relevante, se conserva el matiz y se recorta otra cosa.
 
 ---
 
-## Herramienta de Auditoría Determinista (`scripts/`)
+## Puntuación 0-100 (`scripts/audit_style.py`)
 
-Script en Python 3.8+ (solo librería estándar) para verificar métricas objetivas:
+Python 3.8+, solo stdlib, sin red. **Más alto = más IA.** Todos los comandos se ejecutan desde la raíz del repositorio (`skills-ia-main/`). Es una medición reproducible del texto, no un veredicto sobre quién lo escribió.
 
 ```bash
-# Auditar un texto directo
-python scripts/audit_style.py --text "Tu texto reescrito aquí..."
-
-# Auditar un archivo y exportar en Markdown o JSON
-python scripts/audit_style.py --file borrador.md --markdown
-python scripts/audit_style.py --file borrador.md --json
+py humanizador-anti-ia/scripts/audit_style.py --text "Tu texto aquí..."
+py humanizador-anti-ia/scripts/audit_style.py --file borrador.md --markdown
+py humanizador-anti-ia/scripts/audit_style.py --file borrador.md --json
+py humanizador-anti-ia/scripts/audit_style.py --file borrador.md --score
 ```
 
-**Métricas evaluadas por el script:**
-- **Burstiness (CV):** Coeficiente de variación (debe ser $\ge 0.45$).
-- **Legibilidad:** Índice Fernández-Huerta para español.
-- **Diversidad léxica:** Type-Token Ratio (TTR).
-- **Detección de patrones:** Clichés de lista negra, guiones largos (—), abuso de pasiva y oraciones homogéneas consecutivas.
+### Las cuatro señales
+
+Vocabulario IA (30%), uniformidad de frases (25%), patrones estructurales (30%) y artefactos de chatbot (15%); `total` es su media ponderada. La definición de cada señal, los niveles y el detalle del cálculo están en `detector-ia`.
+
+Notas de calibración, para que nadie lea el número como una verdad absoluta:
+- Las densidades usan una base mínima de 250 palabras: un texto corto no se extrapola a «20 por cada 1000».
+- El vocabulario pesa menos que el conjunto contenido+estructura a propósito. Cambiar palabras sin tocar la estructura es maquillaje.
+- Un texto humano informal suele quedar por debajo de 25. Un texto formal bien escrito puede llegar a 30-40 sin ser IA: por eso el informe se lee junto a los hallazgos, no solo con el número.
+- La uniformidad necesita al menos 4 frases; con menos, vale 0 y el detalle lo indica.
+
+### Salida `--score`
+
+JSON plano con `total`, `nivel`, las cuatro claves, `detalle` (recuentos que justifican cada señal) y `datos_a_verificar`. Sale con código 0: mide, no aprueba ni suspende.
+
+```json
+{
+  "total": 75.4,
+  "nivel": "alto",
+  "vocabulario_ia": 100.0,
+  "uniformidad_frases": 62.5,
+  "patrones_estructurales": 94.0,
+  "artefactos_chatbot": 0.0,
+  "detalle": {"palabras": 165, "frases": 8, "...": "recuentos por señal"},
+  "datos_a_verificar": []
+}
+```
+
+### Compatibilidad con el uso anterior
+
+Se mantienen `--text`, `--file`, `--json`, `--markdown` y los códigos de salida (0 aprobado, 2 requiere reescritura, 1 error). El JSON del análisis conserva `burstiness_cv`, `banned_phrases`, `issues` y `passed`, y añade `score`, `datos_a_verificar` y `protected_segments`.
 
 ---
 
-## Flujo de trabajo obligatorio
+## Flujo
 
-1. **Revisión previa:** Revisa `references/lista-negra.md` y `references/01-patrones-sintacticos.md` para interiorizar los patrones a evitar.
-2. **Reescritura integral:** Aplica las técnicas de `references/02-tecnicas-reescritura.md` alternando conscientemente longitudes de frase, inyectando vocabulario preciso y suprimiendo moralejas.
-3. **Auditoría automática:** Si dispones de entorno de ejecución, corre `python scripts/audit_style.py --file <archivo>` para comprobar que el Burstiness supera 0.45 y los clichés estén en cero. Corrige cualquier observación antes de entregar.
-4. **Entrega de resultados:** Presenta el texto humanizado limpio y, si el usuario lo solicita, adjunta la comparativa usando `templates/informe-auditoria.md`.
+El flujo obligatorio (registro y modo → puntuar → catálogo → reescribir → recortar → volver a puntuar → informe) está en `humanizar`, que es quien lo ejecuta.
+
+---
+
+## Tests
+
+```bash
+py -m unittest discover -s humanizador-anti-ia/tests -v
+```
+
+Corpus en `tests/corpus/`: 2 textos sintéticos de IA (`ia_*.txt`), 2 humanos (`humano_*.txt`), 1 con datos sin fuente y 1 con código y enlaces. Verifican que el score separa IA de humano, que el código y las URLs no se tocan, que se detecta el dato sin fuente y que el JSON tiene las cuatro claves.

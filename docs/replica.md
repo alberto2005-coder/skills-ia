@@ -1,7 +1,7 @@
 # Replica
 
-> Metodología y pipeline de reconstrucción funcional clean-room de software.  
-> Clean-room functional reverse-engineering methodology and pipeline for software.
+> Reconstrucción funcional clean-room de software, por fases y con evidencia.  
+> Clean-room functional reconstruction of software, phase by phase, with evidence.
 
 [🇪🇸 Español](#-español) · [🇬🇧 English](#-english)
 
@@ -11,54 +11,84 @@
 
 ### Índice
 1. [Filosofía Clean-Room](#filosofía-clean-room)
-2. [Pipeline de 11 Fases](#pipeline-de-11-fases)
-3. [Protocolo para Software de Alta Complejidad](#protocolo-para-software-de-alta-complejidad)
-4. [Herramientas Deterministas](#herramientas-deterministas)
-5. [Plantillas Disponibles](#plantillas-disponibles)
-6. [Modo de Uso](#modo-de-uso)
+2. [Pipeline de 14 Fases (0–13)](#pipeline-de-14-fases-013)
+3. [Sub-skills](#sub-skills)
+4. [Comando Maestro y Estado](#comando-maestro-y-estado)
+5. [Evidencia Obligatoria](#evidencia-obligatoria)
+6. [Herramientas Deterministas](#herramientas-deterministas)
+7. [Plantillas](#plantillas)
+8. [Uso y Tests](#uso-y-tests)
 
 ### Filosofía Clean-Room
-`replica` reconstruye **lo que una aplicación hace**, no lo que posee. Se basa exclusivamente en comportamiento observable desde fuentes públicas y cuentas propias en uso normal. Nunca se copia código fuente, bases de datos privadas ni activos protegidos.
+`replica` reconstruye **lo que una aplicación hace**, no lo que posee. Solo fuentes públicas, documentación, help center, store listing, reseñas públicas y **tu propia cuenta**. Nunca código, assets, textos ni bases de datos del original. Si sus términos prohíben un competidor, se dice y se limita a fuentes públicas; la decisión legal es del usuario.
 
-### Pipeline de 11 Fases
-- **Fase 0 (Límites):** Delimitar alcance, qué entra y qué queda fuera (`scope.md`).
-- **Fase 1 (Reconocimiento):** Mapeo de pantallas, flujos y catálogo de features (`features.csv`).
-- **Fase 1b (Apps Complejas):** Especificación de motores de alta densidad (`complex-app-spec.md`).
-- **Fase 2 (Arquitectura):** Stack, DDL con invariantes y rebanadas verticales (`architecture.md`).
-- **Fases 3 a 5 (Construcción):** Sistema de diseño, frontend, auth, backend y pagos.
-- **Fase 6 (Pruebas):** Casos de prueba E2E y matriz de bugs S1–S4 (`test-plan.md`).
-- **Fases 7 a 10 (Validación):** Medición de paridad funcional, rebrand y preparación de lanzamiento.
-- **Fase 11 (Despliegue):** Checklist preflight obligatorio antes de publicar (`preflight.md`).
+**Paquete de 14 skills:** maestro + 13 sub-skills, una por bloque de fases.
 
-### Protocolo para Software de Alta Complejidad
-Para suites interactivas (procesadores de texto, hojas de cálculo, editores visuales tipo Figma/Word), la Fase 1b descompone el sistema en 8 subsistemas independientes:
-1. Modelo de Documento (Document AST).
-2. Motor de Selección y Caret (coordenadas de rango y navegación por teclado).
-3. Pila de Comandos e Historial Transaccional (Undo/Redo con batching).
-4. Cascada de Estilos y Formato (herencia de 4 niveles).
-5. Motor de Paginación y Geometría (line-breaking, huérfanas/viudas, hojas A4/Carta).
-6. Estructuras Complejas (tablas matriciales con merge e imágenes inline/wrap).
-7. Shell de UI y Ergonomía (Ribbon, regla interactiva, barra de estado).
-8. Persistencia e Interoperabilidad (JSON nativo, DOCX y PDF).
+### Pipeline de 14 Fases (0–13)
+| # | Fase | Sub-skill | Salida en `replica/` |
+|---|---|---|---|
+| 0 | Límites y alcance | `replica-recon` | `scope.md` |
+| 1 | Reconocimiento por función | `replica-recon` | `recon.md`, `features.csv`, `screens/` |
+| 1b | Apps complejas (Word, Figma, suites) | `replica-recon` | `complex-app-spec.md` |
+| 2 | Arquitectura | `replica-architect` | `architecture.md` |
+| 3 | Sistema de diseño | `replica-design` | `design/tokens.json`, `design/components.md` |
+| 4 | Construcción | `replica-build` | código + `features.csv` actualizado |
+| 5 | Backend (auth, datos, pagos) | `replica-backend` | `backend.md` |
+| 6 | Pruebas | `replica-test` | `test-plan.md`, `bugs.md` |
+| 7 | Paridad | `replica-diff` | `parity.md`, `diff/*.png` |
+| 8 | Voz del usuario | `replica-entrepreneur` | `reviews.csv`, `themes.md`, `fix-plan.md` |
+| 9 | Marca (rebrand) | `replica-brand` | `brand/*` + código limpio |
+| 10 | Lanzamiento | `replica-launch` | landing, `launch/listing.json`, `launch/paises.md` |
+| 11 | Despliegue | `replica-deploy` | `preflight.md`, app live |
+| 12 | Análisis estático (**opt-in**) | `replica-static` | `static/static-report.md`, `static/hallazgos-*.json` |
+| 13 | Redes (**opt-in**) | `replica-redes` | `launch/redes.md` |
+
+La fase 12 exige petición explícita, artefacto propio o autorizado y herramientas ya instaladas (nunca DRM, logins ajenos ni paywalls). La 13 va siempre después de la marca (9) y el lanzamiento (10). Cualquier fase puede ejecutarse suelta.
+
+### Sub-skills
+| Sub-skill | Fases | Qué hace |
+|---|---|---|
+| `replica-recon` | 0, 1, 1b | Límites legales, alcance, inventario de funciones con evidencia y especificación de apps complejas. |
+| `replica-architect` | 2 | Stack, módulos, modelo de datos con invariantes y contratos entre capas. |
+| `replica-design` | 3 | Tokens, componentes y estados con identidad propia, validados con contraste WCAG. |
+| `replica-build` | 4 | Construcción por incrementos que cierran flujos `must`. |
+| `replica-backend` | 5 | Auth, esquema con migraciones, permisos por recurso, pagos y jobs. |
+| `replica-test` | 6 | Plan y ejecución de pruebas, invariantes y bugs S1/S2/S3. |
+| `replica-diff` | 7 | Paridad funcional (`parity.py`) y visual (`imgdiff.py`). |
+| `replica-entrepreneur` | 8 | Reseñas reales con cita y URL, temas y plan de mejoras. |
+| `replica-brand` | 9 | Rebrand completo y `sweep.py` a 0. |
+| `replica-launch` | 10 | Landing, listing de tiendas y precios por país. |
+| `replica-deploy` | 11 | Preflight, backups y publicación verificada. |
+| `replica-static` | 12 | Análisis estático autorizado, con límites declarados. |
+| `replica-redes` | 13 | 3 guiones de Reels, captions y banco de ganchos. |
+
+### Comando Maestro y Estado
+El maestro (`replica/SKILL.md`) arranca o retoma el pipeline: lee `replica/progreso.md`, recorre las fases en orden, **para al final de cada una** y pide aprobación explícita. Guarda fase, estado (`pendiente` · `en curso` · `aprobada` · `bloqueada` · `n/a`), decisiones, bloqueos y bitácora. Un gate rojo deja la fase `bloqueada`; no se rodea.
+
+### Evidencia Obligatoria
+En recon (1), paridad (7) y análisis estático (12) todo hallazgo que sostenga una decisión usa `templates/evidence.md`: **Fuente · Observación · Inferencia · Confianza (high/medium/low/THIN) · Límites y desconocidos**. Sin fuente, el hallazgo se descarta; `THIN` (<3 muestras o una sola fuente) no se usa como argumento.
 
 ### Herramientas Deterministas
-- `parity.py`: Calcula el porcentaje de paridad funcional y valida que ningún requisito *must* quede pendiente.
-- `sweep.py`: Escanea el código en busca de nombres, marcas, dominios o identificadores de la app original.
-- `contrast.py`: Valida contraste de color WCAG AA/AAA sobre los tokens de diseño.
-- `imgdiff.py`: Compara similitud de layout sin penalizar el cambio de color o marca.
-- `reviews.py`: Analiza citas de reseñas públicas reales.
-- `listing.py`: Valida textos de tienda para App Store y Google Play.
+- `parity.py`: paridad funcional ponderada (must 3 / should 2 / could 1), falla si queda un `must`.
+- `sweep.py`: nombre, dominio, colores e identificadores del original; exit 1 si hay restos.
+- `contrast.py`: WCAG AA/AAA sobre los tokens.
+- `imgdiff.py`: diff de layout por regiones, sin penalizar el color.
+- `reviews.py`: temas y citas literales con URL; descarta filas sin enlace.
+- `listing.py`: límites de App Store/Play, claims y nombre del original.
 
-### Plantillas Disponibles
-Ubicadas en `replica/templates/`: `scope.md`, `complex-app-spec.md`, `architecture.md`, `test-plan.md`, `preflight.md`, `features.csv`, `tokens.json`, `reviews.csv`, `themes.json`, `listing.json`.
+### Plantillas
+`scope.md`, `architecture.md`, `complex-app-spec.md`, `test-plan.md`, `preflight.md`, `evidence.md`, `progreso.md`, `reels.md`, `features.csv`, `tokens.json`, `reviews.csv`, `themes.json`, `listing.json`.
 
-### Modo de Uso
+### Uso y Tests
 ```bash
-# Comprobar paridad funcional frente a features.csv
-python replica/scripts/parity.py replica/features.csv
+# Paridad funcional
+py replica/scripts/parity.py replica/features.csv --markdown --out replica/parity.md
 
-# Verificar limpieza de marcas e identificadores del original
-python replica/scripts/sweep.py . --avoid "AppOriginal" --avoid apporiginal.com
+# Sweep de marca
+py replica/scripts/sweep.py . --avoid "App Original" --avoid apporiginal.com
+
+# Tests del paquete
+py -m unittest discover -s replica/tests -v
 ```
 
 ---
@@ -67,52 +97,82 @@ python replica/scripts/sweep.py . --avoid "AppOriginal" --avoid apporiginal.com
 
 ### Table of Contents
 1. [Clean-Room Philosophy](#clean-room-philosophy)
-2. [11-Phase Pipeline](#11-phase-pipeline)
-3. [Complex Software Protocol](#complex-software-protocol)
-4. [Deterministic Tools](#deterministic-tools)
-5. [Available Templates](#available-templates)
-6. [Usage Instructions](#usage-instructions-1)
+2. [14-Phase Pipeline (0–13)](#14-phase-pipeline-013)
+3. [Sub-skills](#sub-skills-1)
+4. [Master Command and State](#master-command-and-state)
+5. [Mandatory Evidence](#mandatory-evidence)
+6. [Deterministic Tools](#deterministic-tools)
+7. [Templates](#templates)
+8. [Usage and Tests](#usage-and-tests)
 
 ### Clean-Room Philosophy
-`replica` reconstructs **what an application does**, not what it owns. It studies strictly observable behavior from public documentation and own normal-use accounts. No proprietary code, assets, or database schemas are ever copied.
+`replica` reconstructs **what an application does**, not what it owns. Only public sources, docs, help center, store listing, public reviews and **your own account**. Never the original's code, assets, copy or databases. If its terms forbid a competitor, say so and stay on public sources; the legal call belongs to the user.
 
-### 11-Phase Pipeline
-- **Phase 0 (Boundaries):** Scope definition, what is in/out of scope (`scope.md`).
-- **Phase 1 (Reconnaissance):** Surface mapping, user flows, and feature matrix (`features.csv`).
-- **Phase 1b (Complex Apps):** High-density engine specification (`complex-app-spec.md`).
-- **Phase 2 (Architecture):** Stack decisions, schema with constraints, and vertical slices (`architecture.md`).
-- **Phases 3 to 5 (Build):** Design tokens, frontend implementation, auth, backend, and billing.
-- **Phase 6 (Testing):** E2E test plan and S1–S4 bug tracking (`test-plan.md`).
-- **Phases 7 to 10 (Validation):** Parity measurement, rebranding sweep, and store listing preparation.
-- **Phase 11 (Deployment):** Mandatory preflight gate checklist prior to going live (`preflight.md`).
+**14-skill package:** master + 13 sub-skills, one per phase block.
 
-### Complex Software Protocol
-For high-density interactive tools (word processors, spreadsheets, canvas editors), Phase 1b decomposes the engine into 8 decoupled subsystems:
-1. Document AST Model.
-2. Selection & Caret Engine (range coordinates and full keyboard navigation).
-3. Command Stack & Transactional History (Undo/Redo with typing batching).
-4. Style Cascading & Formatting (4-level inheritance).
-5. Pagination & Geometry Engine (line-breaking, orphan/widow control, page sheets).
-6. Complex Structures (matrix tables with cell merging and inline/wrapped images).
-7. UI Shell & Ergonomics (Ribbon tabs, interactive ruler, status bar metrics).
-8. Persistence & Interoperability (native JSON AST, DOCX import/export, and PDF).
+### 14-Phase Pipeline (0–13)
+| # | Phase | Sub-skill | Output in `replica/` |
+|---|---|---|---|
+| 0 | Boundaries and scope | `replica-recon` | `scope.md` |
+| 1 | Feature-based reconnaissance | `replica-recon` | `recon.md`, `features.csv`, `screens/` |
+| 1b | Complex apps (Word, Figma, suites) | `replica-recon` | `complex-app-spec.md` |
+| 2 | Architecture | `replica-architect` | `architecture.md` |
+| 3 | Design system | `replica-design` | `design/tokens.json`, `design/components.md` |
+| 4 | Build | `replica-build` | code + updated `features.csv` |
+| 5 | Backend (auth, data, payments) | `replica-backend` | `backend.md` |
+| 6 | Tests | `replica-test` | `test-plan.md`, `bugs.md` |
+| 7 | Parity | `replica-diff` | `parity.md`, `diff/*.png` |
+| 8 | User voice | `replica-entrepreneur` | `reviews.csv`, `themes.md`, `fix-plan.md` |
+| 9 | Brand (rebrand) | `replica-brand` | `brand/*` + clean code |
+| 10 | Launch | `replica-launch` | landing, `launch/listing.json`, `launch/paises.md` |
+| 11 | Deployment | `replica-deploy` | `preflight.md`, live app |
+| 12 | Static analysis (**opt-in**) | `replica-static` | `static/static-report.md`, `static/hallazgos-*.json` |
+| 13 | Social (**opt-in**) | `replica-redes` | `launch/redes.md` |
+
+Phase 12 requires an explicit request, an owned or authorized artifact and already-installed tools (never DRM, third-party logins or paywalls). Phase 13 always runs after brand (9) and launch (10). Any phase can be run standalone.
+
+### Sub-skills
+| Sub-skill | Phases | Purpose |
+|---|---|---|
+| `replica-recon` | 0, 1, 1b | Legal boundaries, scope, evidence-backed feature inventory and complex-app spec. |
+| `replica-architect` | 2 | Stack, modules, data model with invariants and layer contracts. |
+| `replica-design` | 3 | Own tokens, components and states, validated with WCAG contrast. |
+| `replica-build` | 4 | Incremental build closing `must` flows. |
+| `replica-backend` | 5 | Auth, schema with migrations, per-resource permissions, payments and jobs. |
+| `replica-test` | 6 | Test plan and execution, invariants, S1/S2/S3 bugs. |
+| `replica-diff` | 7 | Functional (`parity.py`) and visual (`imgdiff.py`) parity. |
+| `replica-entrepreneur` | 8 | Real reviews with quote and URL, themes and fix plan. |
+| `replica-brand` | 9 | Full rebrand and `sweep.py` at 0. |
+| `replica-launch` | 10 | Landing, store listing and per-country pricing. |
+| `replica-deploy` | 11 | Preflight, backups and verified deployment. |
+| `replica-static` | 12 | Authorized static analysis, with declared limits. |
+| `replica-redes` | 13 | 3 Reels scripts, captions and hook bank. |
+
+### Master Command and State
+The master (`replica/SKILL.md`) starts or resumes the pipeline: reads `replica/progreso.md`, walks phases in order, **stops after each one** and asks for explicit approval. It records phase, state (`pending` · `in progress` · `approved` · `blocked` · `n/a`), decisions, blockers and log. A red gate leaves the phase `blocked`; it is never bypassed.
+
+### Mandatory Evidence
+In recon (1), parity (7) and static analysis (12), every finding backing a decision uses `templates/evidence.md`: **Source · Observation · Inference · Confidence (high/medium/low/THIN) · Limits and unknowns**. No source, no finding; `THIN` (<3 samples or a single source) is not used as an argument.
 
 ### Deterministic Tools
-- `parity.py`: Calculates functional parity percentage and enforces that all *must* features are complete.
-- `sweep.py`: Scans the codebase to ensure zero traces of original brand names, domains, or identifiers remain.
-- `contrast.py`: Validates WCAG AA/AAA color contrast ratios on design tokens.
-- `imgdiff.py`: Structural layout difference comparison.
-- `reviews.py`: Extracts and clusters verifiable user review quotes.
-- `listing.py`: Validates App Store and Google Play listing limits and rules.
+- `parity.py`: weighted functional parity (must 3 / should 2 / could 1); fails on any pending `must`.
+- `sweep.py`: original name, domain, colors and identifiers; exit 1 on leftovers.
+- `contrast.py`: WCAG AA/AAA over design tokens.
+- `imgdiff.py`: layout diff by regions, color-agnostic.
+- `reviews.py`: themes and literal quotes with URL; drops rows without a link.
+- `listing.py`: App Store/Play limits, claims and original name in the listing.
 
-### Available Templates
-Located in `replica/templates/`: `scope.md`, `complex-app-spec.md`, `architecture.md`, `test-plan.md`, `preflight.md`, `features.csv`, `tokens.json`, `reviews.csv`, `themes.json`, `listing.json`.
+### Templates
+`scope.md`, `architecture.md`, `complex-app-spec.md`, `test-plan.md`, `preflight.md`, `evidence.md`, `progreso.md`, `reels.md`, `features.csv`, `tokens.json`, `reviews.csv`, `themes.json`, `listing.json`.
 
-### Usage Instructions
+### Usage and Tests
 ```bash
-# Check functional parity progress
-python replica/scripts/parity.py replica/features.csv
+# Functional parity
+py replica/scripts/parity.py replica/features.csv --markdown --out replica/parity.md
 
-# Run brand sweep to verify zero leftover traces of original app
-python replica/scripts/sweep.py . --avoid "OriginalApp" --avoid originalapp.com
+# Brand sweep
+py replica/scripts/sweep.py . --avoid "OriginalApp" --avoid originalapp.com
+
+# Package tests
+py -m unittest discover -s replica/tests -v
 ```

@@ -1,0 +1,5 @@
+# Ejemplo SEO
+
+> Guía de auditoría SEO técnica.
+
+- [Guía](https://example.com/guia)

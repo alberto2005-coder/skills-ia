@@ -1,5 +1,7 @@
 # Python
 __pycache__/
+.ruff_cache/
+.pytest_cache/
 *.py[cod]
 *$py.class
 *.so
@@ -33,9 +35,12 @@ ENV/
 env.bak/
 venv.bak/
 
-# Salidas de reportes generados dinámicamente (conservar estructura y .gitkeep)
-seo-auditor/reports/*/*
-!seo-auditor/reports/.gitkeep
+# Salidas de auditorías: se recrean al ejecutar, no se versionan
+/reports/
+seo-auditor/reports/
+seo-auditor/output/
+premium-web-designer/tests/reports/*
+!premium-web-designer/tests/reports/.gitkeep
 replica/diff/*.png
 replica/reports/*
 

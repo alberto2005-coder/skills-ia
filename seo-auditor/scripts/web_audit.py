@@ -1,80 +1,240 @@
-import re, time
+# -*- coding: utf-8 -*-
+"""Rastreador HTTP con crawl respetuoso.
+
+Reglas duras implementadas:
+  - respeta robots.txt (Allow/Disallow por agente) antes de encolar cada URL;
+  - 1 petición por segundo por defecto (`requests_per_second`);
+  - tope de páginas y profundidad declarado en el informe (`crawl`).
+
+Todo lo medido se guarda para que `--rescore` no necesite volver a la red.
+"""
+from __future__ import annotations
+
+import re
+import time
 from collections import deque
+from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin, urlparse, urldefrag
-from urllib.request import Request, urlopen
-from urllib.error import URLError, HTTPError
-from html.parser import HTMLParser
+from urllib.request import Request
+
 try:
-    from .models import Finding
-    from .security import validate_target
+    from . import analyze, indexcheck, perf
+    from .httpbody import decode_body
+    from .page import parse_html
+    from .security import build_safe_opener, validate_target
 except (ImportError, ValueError):
-    from models import Finding
-    from security import validate_target
+    import analyze
+    import indexcheck
+    import perf
+    from httpbody import decode_body
+    from page import parse_html
+    from security import build_safe_opener, validate_target
 
-class LinkParser(HTMLParser):
-    def __init__(self):
-        super().__init__(); self.links=[]; self.title=[]; self.in_title=False
-        self.h1=[]; self.in_h1=False; self.meta=[]; self.canonical=[]
-        self.images=[]; self.text=[]
-    def handle_starttag(self, tag, attrs):
-        a=dict(attrs)
-        if tag=="title": self.in_title=True
-        if tag=="h1": self.in_h1=True
-        if tag=="a" and a.get("href"): self.links.append(a["href"])
-        if tag=="meta": self.meta.append(a)
-        if tag=="link" and "canonical" in a.get("rel","").lower(): self.canonical.append(a.get("href",""))
-        if tag=="img": self.images.append(a)
-    def handle_endtag(self, tag):
-        if tag=="title": self.in_title=False
-        if tag=="h1": self.in_h1=False
-    def handle_data(self, data):
-        s=data.strip()
-        if s:
-            if self.in_title: self.title.append(s)
-            if self.in_h1: self.h1.append(s)
-            self.text.append(s)
+USER_AGENT = "SEOAuditor/1.0 (+authorized SEO audit; respeta robots.txt)"
+MAX_BYTES = 2_000_000
 
-def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=False):
+
+def fetch(url, timeout=10, allow_local=False):
+    """Una petición GET con tiempos y cabeceras. Devuelve dict."""
+    validate_target(url, allow_local=allow_local)
+    request = Request(url, headers={"User-Agent": USER_AGENT,
+                                    "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
+                                    "Accept-Encoding": "gzip, deflate"})
+    start = time.time()
+    response = build_safe_opener(allow_local).open(request, timeout=timeout)
+    raw = response.read(MAX_BYTES)
+    elapsed = int((time.time() - start) * 1000)
+    headers = {str(k).lower(): str(v) for k, v in response.headers.items()}
+    return {
+        "status": getattr(response, "status", None),
+        "final_url": response.geturl(),
+        "headers": headers,
+        "body": decode_body(raw, headers),
+        "encoded_bytes": len(raw),
+        "ttfb_ms": elapsed,
+        "total_ms": elapsed,
+    }
+
+
+def _origin(url):
+    parsed = urlparse(url)
+    return "%s://%s" % (parsed.scheme, parsed.netloc)
+
+
+def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=False,
+              rate=1.0, respect_robots=True):
     validate_target(start_url, allow_local=allow_local)
-    origin=urlparse(start_url); origin_host=origin.netloc
-    queue=deque([(start_url,0)]); seen=set(); pages=[]; findings=[]
-    while queue and len(pages)<max_pages:
-        url,depth=queue.popleft()
-        url=urldefrag(url)[0]
-        if url in seen: continue
-        seen.add(url)
+    limit = max(1, min(int(max_pages), 500))
+    rate = max(0.1, float(rate or 1.0))
+    interval = 1.0 / rate
+
+    origin = urlparse(start_url)
+    origin_host = origin.netloc
+
+    # robots.txt una sola vez por origen.
+    robots = None
+    robots_url = _origin(start_url) + "/robots.txt"
+    if respect_robots:
         try:
-            validate_target(url, allow_local=allow_local)
-            req=Request(url,headers={"User-Agent":"SEOAuditor/1.0 (+authorized SEO audit)","Accept":"text/html,*/*;q=0.8"})
-            with urlopen(req,timeout=timeout) as response:
-                status=response.status; final=response.geturl()
-                content_type=response.headers.get("Content-Type","")
-                body=response.read(2_000_000)
-            record={"url":url,"final_url":final,"status":status,"content_type":content_type}
-            pages.append(record)
-            if "html" not in content_type.lower(): continue
-            parser=LinkParser()
-            parser.feed(body.decode("utf-8",errors="replace"))
-            title=" ".join(parser.title); h1=" ".join(parser.h1)
-            metas={m.get("name","").lower():m.get("content","") for m in parser.meta}
-            if not title:
-                findings.append(Finding("WEB-TITLE-001","content","high","Falta title","No se detectó <title>.",url,"Añade un title único y descriptivo.",url,"high","low","high").to_dict())
-            if not h1:
-                findings.append(Finding("WEB-H1-001","content","medium","No se detecta H1","No se detectó un H1 en el HTML recibido.",url,"Revisa la jerarquía de encabezados.",url).to_dict())
-            if "description" not in metas or not metas["description"].strip():
-                findings.append(Finding("WEB-META-001","content","low","Falta meta description","No se detectó meta description.",url,"Añade una descripción útil.",url).to_dict())
-            if metas.get("robots","").lower().find("noindex")>=0:
-                findings.append(Finding("WEB-NOINDEX-001","technical","high","Directiva noindex","Meta robots contiene noindex.",url,"Confirma si la página debe excluirse del índice.",url).to_dict())
-            for i,img in enumerate(parser.images,1):
-                if "alt" not in img:
-                    findings.append(Finding(f"WEB-ALT-{i:03d}","content","low","Imagen sin alt",f"Imagen #{i} sin atributo alt.",url,"Añade alt si aporta información; alt vacío si es decorativa.",url).to_dict())
-            if depth<max_depth:
-                for href in parser.links:
-                    absolute=urljoin(final,href)
-                    p=urlparse(absolute)
-                    if p.scheme in ("http","https") and p.netloc==origin_host:
-                        clean=urldefrag(absolute)[0]
-                        if clean not in seen: queue.append((clean,depth+1))
-        except Exception as exc:
-            findings.append(Finding("WEB-FETCH-001","technical","medium","No se pudo recuperar la URL",str(exc),url,"Comprueba disponibilidad, DNS, TLS y permisos de rastreo.",url,"high","medium","medium").to_dict())
-    return {"start_url":start_url,"pages_scanned":len(pages),"pages":pages,"findings":findings}
+            robots_text, robots_url = indexcheck.fetch_robots(
+                start_url, timeout=timeout, allow_local=allow_local)
+            robots = indexcheck.parse_robots(robots_text)
+        except Exception:
+            robots = None
+
+    sitemap_urls = list((robots or {}).get("sitemaps", []))
+    llms_status = None
+    llms_full_status = None
+    try:
+        for name, setter in (("llms.txt", "llms"), ("llms-full.txt", "llms_full")):
+            try:
+                response = fetch(_origin(start_url) + "/" + name, timeout=timeout,
+                                 allow_local=allow_local)
+                ok = 200 <= (response["status"] or 0) < 300 and len(response["body"]) > 0
+            except (HTTPError, URLError, ValueError):
+                ok = False
+            if setter == "llms":
+                llms_status = ok
+            else:
+                llms_full_status = ok
+    except Exception:
+        pass
+
+    queue = deque([(start_url, 0)])
+    seen = set()
+    records = []
+    parsed_pages = []
+    skipped = []
+    last_request = 0.0
+    fetched = 0
+
+    while queue and fetched < limit:
+        url, depth = queue.popleft()
+        url = urldefrag(url)[0]
+        if url in seen:
+            continue
+        seen.add(url)
+
+        if respect_robots and robots is not None and not indexcheck.is_allowed(
+                robots, urlparse(url).path or "/", "Googlebot"):
+            skipped.append(url)
+            continue
+
+        wait = interval - (time.time() - last_request)
+        if last_request and wait > 0:
+            time.sleep(wait)
+        last_request = time.time()
+
+        try:
+            response = fetch(url, timeout=timeout, allow_local=allow_local)
+        except (HTTPError, URLError, ValueError, OSError) as exc:
+            records.append({"url": url, "status": None, "error": str(exc)})
+            continue
+
+        fetched += 1
+        content_type = response["headers"].get("content-type", "")
+        record = {
+            "url": url,
+            "final_url": response["final_url"],
+            "status": response["status"],
+            "content_type": content_type,
+            "ttfb_ms": response["ttfb_ms"],
+            "bytes": len(response["body"]),
+        }
+        records.append(record)
+
+        if "html" not in content_type.lower():
+            continue
+
+        page = parse_html(response["body"].decode("utf-8", errors="replace"))
+        parsed_pages.append((url, page, response["headers"], record))
+
+        if depth < max_depth:
+            for href in page.anchors:
+                absolute = urljoin(response["final_url"], href)
+                parsed = urlparse(absolute)
+                if parsed.scheme in ("http", "https") and parsed.netloc == origin_host:
+                    clean = urldefrag(absolute)[0]
+                    if clean not in seen:
+                        queue.append((clean, depth + 1))
+
+    # Sitemap: si robots no lo declara, se prueba /sitemap.xml.
+    sitemap_count = None
+    if not sitemap_urls:
+        try:
+            candidate = _origin(start_url) + "/sitemap.xml"
+            response = fetch(candidate, timeout=timeout, allow_local=allow_local)
+            if 200 <= (response["status"] or 0) < 300:
+                text = response["body"].decode("utf-8", errors="replace")
+                sitemap_count = len(re.findall(r"<loc>", text))
+                sitemap_urls.append(candidate)
+        except Exception:
+            sitemap_count = None
+
+    page_map = {url: page.hreflangs for url, page, _h, _r in parsed_pages}
+
+    checks = []
+    data = {
+        "crawl": {
+            "max_pages": limit,
+            "max_depth": max_depth,
+            "requests_per_second": rate,
+            "robots_respected": bool(respect_robots),
+            "robots_url": robots_url,
+            "pages_fetched": fetched,
+            "skipped_by_robots": len(skipped),
+            "limit_declared": True,
+        },
+        "sitemap": {"urls": sitemap_urls, "loc_count": sitemap_count},
+        "pages": records,
+    }
+
+    for index, (url, page, headers, record) in enumerate(parsed_pages):
+        page_checks, page_data = analyze.document_checks(
+            page, url=url, page_url=record["final_url"], headers=headers,
+            robots=robots, sitemap_urls=sitemap_urls, page_map=page_map,
+            llms_status=llms_status, http_llms_status=llms_full_status)
+        checks.extend(page_checks)
+
+        perf_checks, perf_data = perf.analyze(
+            headers, record["bytes"], record["ttfb_ms"], record["ttfb_ms"], page,
+            url=record["final_url"])
+        checks.extend(perf_checks)
+
+        if index == 0:
+            data.update({k: v for k, v in page_data.items() if k != "page"})
+            data["page"] = page_data["page"]
+            data["perf"] = perf_data
+            data["index"] = page_data.get("index", {})
+        data.setdefault("per_page", []).append({
+            "url": url,
+            "status": record["status"],
+            "ttfb_ms": record["ttfb_ms"],
+            "bytes": record["bytes"],
+            "security_score": (page_data.get("security") or {}).get("score"),
+        })
+
+    # Crawl respetuoso como check explícito.
+    checks.append({
+        "id": "CRAWL-ROBOTS-001", "status": "pass" if respect_robots else "fail",
+        "evidence": "robots.txt respetado=%s; %.1f req/s; tope %d páginas; "
+                    "%d URLs omitidas por robots." % (
+                        respect_robots, rate, limit, len(skipped)),
+        "url": start_url, "dimension": "tecnico", "severity": "should",
+        "citation": "https://developers.google.com/search/docs/crawling-indexing/robots/robots_txt",
+        "title": "Crawl respetuoso: robots.txt respetado y 1 petición/segundo",
+        "known": True,
+    })
+
+    return {
+        "mode": "local" if allow_local else "web",
+        "target": start_url,
+        "start_url": start_url,
+        "pages_scanned": len(records),
+        "pages": records,
+        "skipped_by_robots": skipped,
+        "crawl": data["crawl"],
+        "checks": checks,
+        "findings": analyze.to_findings(checks),
+        "data": data,
+    }

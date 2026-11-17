@@ -1,0 +1,29 @@
+name: Tests
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run all test suites
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
+
+      - name: Sync environment
+        run: uv sync --locked
+
+      - name: Run every test suite
+        run: uv run --locked python run_tests.py
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"

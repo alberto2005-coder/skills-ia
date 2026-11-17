@@ -1,0 +1,82 @@
+{
+  "format": "skills-ia-index",
+  "format_version": "1.0",
+  "updated": "2026-11-17",
+  "version": "2.0.0",
+  "description": "Índice vendor-neutral de los paquetes de Skills IA. Cualquier agente (Claude, Codex, Cursor, Gemini, OpenCode...) puede descubrir las skills escaneando **/SKILL.md; este índice da además el mapa de paquetes y permite varias skills por carpeta.",
+  "skills_total": 27,
+  "packages": [
+    {
+      "name": "replica",
+      "path": "replica",
+      "version": "2.0.0",
+      "manifest": "replica/skills.json",
+      "skill_count": 14,
+      "skills": [
+        "replica",
+        "replica-recon",
+        "replica-architect",
+        "replica-design",
+        "replica-build",
+        "replica-backend",
+        "replica-test",
+        "replica-diff",
+        "replica-entrepreneur",
+        "replica-brand",
+        "replica-launch",
+        "replica-deploy",
+        "replica-static",
+        "replica-redes"
+      ]
+    },
+    {
+      "name": "agent-red-team",
+      "path": "agent-red-team",
+      "version": "2.0.0",
+      "manifest": "agent-red-team/skills.json",
+      "skill_count": 3,
+      "skills": [
+        "agent-red-team",
+        "red-scan",
+        "red-audit"
+      ]
+    },
+    {
+      "name": "humanizador-anti-ia",
+      "path": "humanizador-anti-ia",
+      "version": "2.0.0",
+      "manifest": "humanizador-anti-ia/skills.json",
+      "skill_count": 3,
+      "skills": [
+        "humanizador-anti-ia",
+        "humanizar",
+        "detector-ia"
+      ]
+    },
+    {
+      "name": "seo-auditor",
+      "path": "seo-auditor",
+      "version": "2.0.0",
+      "manifest": "seo-auditor/skills.json",
+      "skill_count": 6,
+      "skills": [
+        "seo-auditor",
+        "seo-audit",
+        "seo-plan",
+        "seo-execute",
+        "seo-serp",
+        "seo-compare"
+      ]
+    },
+    {
+      "name": "premium-web-designer",
+      "path": "premium-web-designer",
+      "version": "2.0.0",
+      "manifest": "premium-web-designer/skills.json",
+      "skill_count": 1,
+      "skills": [
+        "premium-web-designer"
+      ]
+    }
+  ]
+}

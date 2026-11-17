@@ -1,0 +1,130 @@
+{
+  "_plantilla": "Ledger de cobertura de agent-red-team. Rellenar una entrada por superficie auditada y guardarlo SOLO en modo auditoría completa (o en la ruta que indique el usuario).",
+  "_reglas": [
+    "estado=covered: la superficie se revisó y sus checks se ejecutaron con resultado registrado.",
+    "estado=partial: se revisó parte de la superficie o algún check quedó bloqueado; anotar qué falta en 'notas'.",
+    "estado=missing: no se revisó. Un informe con superficies 'missing' no puede ser APROBADO.",
+    "Un 'check' es una comprobación nombrada y reproducible (patrón, AST, lectura manual). Sin checks no hay cobertura."
+  ],
+  "skill": "{{nombre_skill}}",
+  "target": "{{ruta_auditada}}",
+  "fecha_utc": "{{YYYY-MM-DDTHH:MM:SSZ}}",
+  "modo": "auditoria_completa",
+  "entradas": [
+    {
+      "superficie": "SKILL.md (frontmatter)",
+      "ficheros": ["SKILL.md"],
+      "checks": [
+        "name y description presentes y coherentes con el cuerpo",
+        "description no secuestra el enrutamiento (sin palabras clave universales)",
+        "sin caracteres invisibles en name/description",
+        "sin instrucciones de ocultar acciones al usuario"
+      ],
+      "estado": "covered",
+      "notas": "Frontmatter leído línea a línea; el cuerpo se audita como superficie aparte."
+    },
+    {
+      "superficie": "SKILL.md (cuerpo e instrucciones)",
+      "ficheros": ["SKILL.md"],
+      "checks": [
+        "inyección de instrucciones fuera de code fences",
+        "exfiltración textual (imágenes/enlaces con datos dinámicos)",
+        "scope creep respecto al propósito declarado",
+        "comentarios HTML ocultos",
+        "bloques bash/shell/python revisados como comandos reales"
+      ],
+      "estado": "covered",
+      "notas": "Los fences de texto documentado no cuentan como hallazgo vivo."
+    },
+    {
+      "superficie": "scripts/ (Python)",
+      "ficheros": ["scripts/scan_skill.py", "scripts/sanitize_unicode.py"],
+      "checks": [
+        "AST: imports peligrosos y llamadas críticas",
+        "AST: getattr/reflexión ofuscada",
+        "AST: rutas sensibles y URLs hardcodeadas",
+        "combinaciones REJECT evaluadas por fichero",
+        "solo stdlib declarada"
+      ],
+      "estado": "covered",
+      "notas": "Sin ejecución del código auditado."
+    },
+    {
+      "superficie": "scripts/ (Shell/JS/TS)",
+      "ficheros": ["{{ruta_script_sh}}"],
+      "checks": [
+        "pipe to shell, reverse shells, chmod, persistencia",
+        "exfiltración de variables de entorno",
+        "combinaciones REJECT evaluadas por fichero"
+      ],
+      "estado": "partial",
+      "notas": "Ejemplo de superficie parcial: no había scripts shell en la skill, solo se revisó el README."
+    },
+    {
+      "superficie": "hooks del agente / automatizaciones",
+      "ficheros": ["{{ruta_config_hooks}}"],
+      "checks": [
+        "hooks pre/post ejecutan comandos externos",
+        "rutas absolutas fuera del workspace",
+        "variables de entorno con secretos en claro"
+      ],
+      "estado": "missing",
+      "notas": "La skill no declara hooks, pero tampoco se localizó configuración global del agente: cobertura no verificable."
+    },
+    {
+      "superficie": "MCP config",
+      "ficheros": ["{{ruta_mcp_json}}"],
+      "checks": [
+        "servidores MCP con origen y versión fijados",
+        "comandos npx/uvx sin versión (supply chain)",
+        "herramientas con descripciones envenenadas o permisos excesivos",
+        "elicitación de datos sensibles al usuario"
+      ],
+      "estado": "missing",
+      "notas": "No se entregó configuración MCP con el paquete auditado."
+    },
+    {
+      "superficie": "templates/",
+      "ficheros": ["templates/risk-report.md", "templates/coverage-ledger.json", "templates/report-schema.json"],
+      "checks": [
+        "plantillas sin payloads ejecutables",
+        "placeholders sin datos reales de usuarios",
+        "JSON válido y esquema coherente"
+      ],
+      "estado": "covered",
+      "notas": "Validado con json.load y con los tests de la skill."
+    },
+    {
+      "superficie": "references/",
+      "ficheros": ["references/threat-matrix.md", "references/attack-catalog.md"],
+      "checks": [
+        "payloads educativos dentro de code fences (no activos)",
+        "sin URLs de exfiltración reales ni credenciales",
+        "citas a incidentes verificables, sin CVEs inventados"
+      ],
+      "estado": "covered",
+      "notas": "El catálogo es documentación: sus payloads viven en fences de texto."
+    },
+    {
+      "superficie": "assets/ y binarios",
+      "ficheros": [],
+      "checks": [
+        "existencia de binarios opacos",
+        "imágenes/modelos con metadatos o tamaño anómalo"
+      ],
+      "estado": "missing",
+      "notas": "No hay carpeta assets/ en el paquete; se marca missing para no dar por cubierta la superficie."
+    },
+    {
+      "superficie": "CI y automatizaciones del repo",
+      "ficheros": [".github/workflows/{{workflow}}.yml"],
+      "checks": [
+        "workflows con permisos mínimos",
+        "secrets expuestos en logs o en comandos",
+        "acciones con versión fijada por SHA"
+      ],
+      "estado": "partial",
+      "notas": "Solo se revisó la existencia del workflow; los permisos quedan pendientes."
+    }
+  ]
+}

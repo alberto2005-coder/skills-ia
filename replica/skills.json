@@ -1,0 +1,80 @@
+{
+  "format": "skills-ia-package",
+  "format_version": "1.0",
+  "name": "replica",
+  "version": "2.0.0",
+  "description": "Reconstrucción clean-room de apps comerciales: maestro + 13 sub-skills por fase, con paridad, sweep de marca, evidencia, redes y análisis estático opt-in.",
+  "author": "Alberto Ortiz",
+  "skills": [
+    {
+      "name": "replica",
+      "path": "SKILL.md",
+      "description": "Maestro del pipeline de 14 fases para replicar funciones y flujos de una app (clean-room): orquesta, guarda progreso.md y pide aprobación fase a fase."
+    },
+    {
+      "name": "replica-recon",
+      "path": "replica-recon/SKILL.md",
+      "description": "Fases 0, 1 y 1b: límites legales, alcance, reconocimiento por función con evidencia obligatoria, features.csv y especificación de apps complejas."
+    },
+    {
+      "name": "replica-architect",
+      "path": "replica-architect/SKILL.md",
+      "description": "Fase 2: stack, módulos, modelo de datos con invariantes testeables y contratos entre capas."
+    },
+    {
+      "name": "replica-design",
+      "path": "replica-design/SKILL.md",
+      "description": "Fase 3: tokens, componentes y estados con identidad propia, validados con contraste WCAG AA/AAA."
+    },
+    {
+      "name": "replica-build",
+      "path": "replica-build/SKILL.md",
+      "description": "Fase 4: construcción por incrementos que cierran flujos must de features.csv, contra los contratos y tokens aprobados."
+    },
+    {
+      "name": "replica-backend",
+      "path": "replica-backend/SKILL.md",
+      "description": "Fase 5: autenticación, esquema con migraciones, permisos por recurso, pagos y jobs idempotentes."
+    },
+    {
+      "name": "replica-test",
+      "path": "replica-test/SKILL.md",
+      "description": "Fase 6: plan y ejecución de pruebas end-to-end, estados vacío/error, invariantes, permisos y bugs S1/S2/S3."
+    },
+    {
+      "name": "replica-diff",
+      "path": "replica-diff/SKILL.md",
+      "description": "Fase 7: paridad funcional con parity.py y visual con imgdiff.py, con evidencia por diferencia y diferencias aceptadas."
+    },
+    {
+      "name": "replica-entrepreneur",
+      "path": "replica-entrepreneur/SKILL.md",
+      "description": "Fase 8: reseñas públicas reales con cita y URL, temas, descarte de muestras THIN y plan de mejoras priorizado."
+    },
+    {
+      "name": "replica-brand",
+      "path": "replica-brand/SKILL.md",
+      "description": "Fase 9: rebrand completo (nombre, paleta, logo, copy y voz) con sweep.py a 0 y contraste AA."
+    },
+    {
+      "name": "replica-launch",
+      "path": "replica-launch/SKILL.md",
+      "description": "Fase 10: landing, listing de App Store/Play, precios y facturación por país y claims con evidencia."
+    },
+    {
+      "name": "replica-deploy",
+      "path": "replica-deploy/SKILL.md",
+      "description": "Fase 11: preflight, secretos, migraciones, restore de backup probado y despliegue verificado con confirmación explícita."
+    },
+    {
+      "name": "replica-static",
+      "path": "replica-static/SKILL.md",
+      "description": "Fase 12 opt-in: análisis estático de binarios propios o autorizados, con observación/inferencia/límites separados y sin DRM ni logins ajenos."
+    },
+    {
+      "name": "replica-redes",
+      "path": "replica-redes/SKILL.md",
+      "description": "Fase 13: 3 guiones de Reels, captions por red y banco de ganchos con claims respaldados y sweep 0."
+    }
+  ]
+}

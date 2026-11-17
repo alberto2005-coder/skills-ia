@@ -1,0 +1,17 @@
+[project]
+name = "skills-ia-tests"
+version = "0.1.0"
+description = "Entorno común para las suites de pruebas del repositorio"
+requires-python = ">=3.9"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0,<10.0",
+    "pytest-json-report>=1.5,<2.0",
+    "pyyaml>=6.0,<7.0",
+    "ruff>=0.9,<1.0",
+]

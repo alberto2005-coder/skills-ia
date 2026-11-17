@@ -1,0 +1,25 @@
+{
+  "format": "skills-ia-package",
+  "format_version": "1.0",
+  "name": "humanizador-anti-ia",
+  "version": "2.0.0",
+  "description": "Humanización de textos: maestro + reescritura (humanizar) y detección sin edición (detector-ia), con catálogo numerado y score 0-100 determinista.",
+  "author": "Alberto Ortiz",
+  "skills": [
+    {
+      "name": "humanizador-anti-ia",
+      "path": "SKILL.md",
+      "description": "Maestro: modos Quick/Full/Voice, registro (LinkedIn/email/artículo/informe), honestidad factual, protección de estructura y flujo obligatorio."
+    },
+    {
+      "name": "humanizar",
+      "path": "humanizar/SKILL.md",
+      "description": "Reescritura completa con catálogo de 40 patrones, recorte de relleno del 20-30%, score antes/después e informe de auditoría."
+    },
+    {
+      "name": "detector-ia",
+      "path": "detector-ia/SKILL.md",
+      "description": "Solo medición: score de 4 señales, patrones detectados, datos a verificar y segmentos protegidos, sin modificar el texto."
+    }
+  ]
+}

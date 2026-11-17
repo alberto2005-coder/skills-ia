@@ -1,0 +1,13 @@
+Para reproducir el fallo, abre el repositorio y ejecuta el script con la ruta del registro.
+
+```python
+# En conclusión, esto es crucial — y no solo por la velocidad, sino por la memoria.
+def cargar(ruta):
+    return open(ruta, encoding="utf-8").read()  # 95% de los casos
+```
+
+El error aparece cuando el archivo supera los dos megas. Prueba con `pip install -e .` y luego lanza el comando de siempre.
+
+La documentación está en https://ejemplo.com/docs/guia?x=1#instalacion y el ticket en https://ejemplo.com/t/4821.
+
+Si sigue fallando, revisa los permisos del directorio temporal.

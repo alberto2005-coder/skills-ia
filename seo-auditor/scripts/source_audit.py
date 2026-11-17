@@ -1,116 +1,159 @@
-import os, re, json
+# -*- coding: utf-8 -*-
+"""Auditoría de código fuente local.
+
+Reutiliza el pipeline de `analyze` (mismo HTML -> mismos checks que en web)
+y añade detección de framework, robots.txt, sitemap y llms.txt del proyecto.
+"""
+from __future__ import annotations
+
+import json
+import os
 from pathlib import Path
-from html.parser import HTMLParser
+
 try:
-    from .models import Finding
+    from . import analyze, indexcheck
+    from .page import parse_file
 except (ImportError, ValueError):
-    from models import Finding
+    import analyze
+    import indexcheck
+    from page import parse_file
 
 EXCLUDED_DIRS = {".git", "node_modules", "vendor", "dist", "build", "coverage",
-                 ".next", ".nuxt", ".venv", "venv", "__pycache__", ".idea"}
+                 ".next", ".nuxt", ".venv", "venv", "__pycache__", ".idea",
+                 "output", "reports"}
 SENSITIVE_NAMES = {".env", ".env.local", ".env.production", "id_rsa", "id_ed25519",
                    "credentials.json", "secrets.json"}
-HTML_EXTS = {".html", ".htm", ".php", ".twig", ".njk", ".liquid", ".jsx", ".tsx", ".vue", ".svelte"}
+HTML_EXTS = {".html", ".htm", ".php", ".twig", ".njk", ".liquid", ".jsx", ".tsx",
+             ".vue", ".svelte"}
 
-class PageParser(HTMLParser):
-    def __init__(self):
-        super().__init__()
-        self.title_parts=[]; self.in_title=False; self.h1=[]; self.in_h1=False
-        self.meta=[]; self.links=[]; self.canonicals=[]; self.jsonld=[]
-        self.robots=[]; self.images=[]; self.text_chars=0
-    def handle_starttag(self, tag, attrs):
-        a=dict(attrs)
-        if tag=="title": self.in_title=True
-        if tag=="h1": self.in_h1=True
-        if tag=="meta": self.meta.append(a)
-        if tag=="link" and "canonical" in a.get("rel","").lower(): self.canonicals.append(a.get("href",""))
-        if tag=="a" and a.get("href"): self.links.append(a["href"])
-        if tag=="img": self.images.append(a)
-        if tag=="script" and a.get("type","").lower()=="application/ld+json": self.jsonld.append("pending")
-    def handle_endtag(self, tag):
-        if tag=="title": self.in_title=False
-        if tag=="h1": self.in_h1=False
-    def handle_data(self, data):
-        s=data.strip()
-        if self.in_title and s: self.title_parts.append(s)
-        if self.in_h1 and s: self.h1.append(s)
-        self.text_chars += len(s)
 
-def analyze_html(path: Path, rel: str) -> list[Finding]:
-    findings=[]
-    try:
-        raw=path.read_text(encoding="utf-8", errors="replace")
-    except OSError:
-        return findings
-    p=PageParser()
-    try: p.feed(raw)
-    except Exception: pass
-    title=" ".join(p.title_parts).strip()
-    h1=" ".join(p.h1).strip()
-    metas={m.get("name","").lower():m.get("content","") for m in p.meta}
-    if not title:
-        findings.append(Finding("SRC-TITLE-001","content","high","Falta la etiqueta title",
-            f"Archivo: {rel}","Añade un title único y descriptivo.",rel,"high","low","high"))
-    elif len(title)>60:
-        findings.append(Finding("SRC-TITLE-002","content","low","Title posiblemente largo",
-            f"{len(title)} caracteres en {rel}","Revisa si puede ser más conciso sin perder intención.",rel,"medium","low","low"))
-    if not h1:
-        findings.append(Finding("SRC-H1-001","content","medium","No se detecta H1",
-            f"Archivo: {rel}","Incluye un encabezado principal que describa el propósito de la página.",rel,"medium","low","medium"))
-    if "description" not in metas or not metas["description"].strip():
-        findings.append(Finding("SRC-META-001","content","low","Falta meta description",
-            f"Archivo: {rel}","Añade una descripción útil; no garantiza un snippet concreto.",rel,"high","low","low"))
-    if metas.get("robots","").lower().find("noindex")>=0:
-        findings.append(Finding("SRC-ROBOTS-001","technical","high","Directiva noindex en el código",
-            f"meta robots={metas['robots']} en {rel}","Confirma que la exclusión es intencionada; no la elimines sin validar el objetivo.",rel,"high","low","high"))
-    if not p.canonicals:
-        findings.append(Finding("SRC-CANON-001","technical","low","No se detecta canonical",
-            f"Archivo: {rel}","Comprueba si esta plantilla necesita canonical absoluto y coherente.",rel,"medium","low","low"))
-    for i,img in enumerate(p.images,1):
-        if not img.get("alt"):
-            findings.append(Finding(f"SRC-ALT-{i:03d}","content","low","Imagen sin atributo alt",
-                f"Imagen #{i} en {rel}","Añade texto alternativo descriptivo cuando la imagen transmita información; usa alt vacío si es decorativa.",rel,"high","low","low"))
-    if not raw.strip():
-        findings.append(Finding("SRC-EMPTY-001","technical","medium","Archivo HTML vacío",rel,"Comprueba si la plantilla se genera dinámicamente.",rel))
-    return findings
+def analyze_html(path, rel):
+    """Analiza un archivo HTML y devuelve hallazgos (compatibilidad)."""
+    page = parse_file(str(path))
+    checks, _data = analyze.document_checks(page, url=rel)
+    return analyze.to_findings(checks)
 
-def detect_framework(root: Path) -> list[str]:
+
+def detect_framework(root):
     checks = {
-        "Next.js": ["next.config.js","next.config.mjs","next.config.ts"],
-        "Astro": ["astro.config.mjs","astro.config.ts"],
-        "Vite/React": ["vite.config.js","vite.config.ts"],
+        "Next.js": ["next.config.js", "next.config.mjs", "next.config.ts"],
+        "Astro": ["astro.config.mjs", "astro.config.ts"],
+        "Vite/React": ["vite.config.js", "vite.config.ts"],
         "Laravel": ["artisan"],
         "WordPress": ["wp-config.php"],
         "Shopify theme": ["config/settings_schema.json"],
     }
-    found=[]
+    found = []
     for name, markers in checks.items():
-        if any((root/m).exists() for m in markers): found.append(name)
-    if (root/"package.json").exists():
+        if any((root / marker).exists() for marker in markers):
+            found.append(name)
+    if (root / "package.json").exists():
         try:
-            pkg=json.loads((root/"package.json").read_text(encoding="utf-8"))
-            deps={**pkg.get("dependencies",{}),**pkg.get("devDependencies",{})}
-            if "next" in deps and "Next.js" not in found: found.append("Next.js")
-            if "astro" in deps and "Astro" not in found: found.append("Astro")
-            if "react" in deps and not any(x in found for x in ("Next.js","Vite/React")): found.append("React")
-        except Exception: pass
+            pkg = json.loads((root / "package.json").read_text(encoding="utf-8"))
+            deps = {}
+            deps.update(pkg.get("dependencies", {}))
+            deps.update(pkg.get("devDependencies", {}))
+            if "next" in deps and "Next.js" not in found:
+                found.append("Next.js")
+            if "astro" in deps and "Astro" not in found:
+                found.append("Astro")
+            if "react" in deps and not any(x in found for x in ("Next.js", "Vite/React")):
+                found.append("React")
+        except Exception:
+            pass
     return found or ["HTML/CSS/JS o framework no identificado"]
 
-def audit_source(root: str, max_files: int=500) -> dict:
-    base=Path(root).resolve()
-    if not base.is_dir(): raise ValueError(f"No es un directorio: {base}")
-    findings=[]; pages=[]; count=0
+
+def _site_files(base):
+    """Lee robots.txt / sitemap.xml / llms.txt del proyecto como raíz de sitio."""
+    robots = None
+    robots_path = base / "robots.txt"
+    if robots_path.exists():
+        robots = indexcheck.parse_robots(
+            robots_path.read_text(encoding="utf-8", errors="replace"))
+    sitemap_urls = []
+    for name in ("sitemap.xml", "sitemap_index.xml", "sitemap-index.xml"):
+        candidate = base / name
+        if candidate.exists():
+            sitemap_urls.append("/%s" % name)
+    if robots:
+        sitemap_urls.extend(robots.get("sitemaps", []))
+    llms = (base / "llms.txt").exists()
+    llms_full = (base / "llms-full.txt").exists()
+    return robots, sitemap_urls, llms, llms_full
+
+
+def audit_source(root, max_files=500):
+    base = Path(root).resolve()
+    if not base.is_dir():
+        raise ValueError("No es un directorio: %s" % base)
+    robots, sitemap_urls, llms, llms_full = _site_files(base)
+
+    checks = []
+    pages = []
+    files_data = []
+    first_page = None
+    count = 0
+
     for current, dirs, names in os.walk(base):
         dirs[:] = [d for d in dirs if d not in EXCLUDED_DIRS and not d.startswith(".")]
-        for name in names:
-            if name.lower() in SENSITIVE_NAMES or name.startswith(".env"): continue
-            path=Path(current)/name
-            if path.suffix.lower() not in HTML_EXTS: continue
-            count+=1
-            if count>max_files: break
-            rel=str(path.relative_to(base))
+        for name in sorted(names):
+            if name.lower() in SENSITIVE_NAMES or name.startswith(".env"):
+                continue
+            path = Path(current) / name
+            if path.suffix.lower() not in HTML_EXTS:
+                continue
+            count += 1
+            if count > max_files:
+                break
+            rel = str(path.relative_to(base)).replace("\\", "/")
             pages.append(rel)
-            findings.extend(analyze_html(path, rel))
-        if count>max_files: break
-    return {"root":str(base),"frameworks":detect_framework(base),"files_scanned":len(pages),
-            "pages":pages,"findings":[f.to_dict() for f in findings]}
+            page = parse_file(str(path))
+            if first_page is None:
+                first_page = (page, rel)
+            site_path = "/" + rel
+            file_checks, _data = analyze.document_checks(
+                page, url=rel, page_url="", headers=None, robots=robots,
+                sitemap_urls=sitemap_urls, page_map=None,
+                llms_status=llms, http_llms_status=llms_full)
+            checks.extend(file_checks)
+            files_data.append({
+                "archivo": rel,
+                "title": page.title,
+                "palabras": page.word_count,
+                "ratio_texto_html": page.ratio(),
+                "h1": len(page.headings.get("h1", [])),
+                "sin_alt": len(page.images_without_alt()),
+                "path": site_path,
+            })
+        if count > max_files:
+            break
+
+    if first_page is None:
+        page, rel = None, ""
+    else:
+        page, rel = first_page
+
+    data = {
+        "files": files_data,
+        "robots": {"present": robots is not None,
+                   "groups": len((robots or {}).get("groups", [])),
+                   "sitemaps": (robots or {}).get("sitemaps", [])},
+        "sitemap_urls": sitemap_urls,
+        "llms_txt": llms,
+        "llms_full_txt": llms_full,
+    }
+    if page is not None:
+        data["page"] = analyze.snapshot(page, rel)
+
+    return {
+        "mode": "source",
+        "target": str(base),
+        "root": str(base),
+        "frameworks": detect_framework(base),
+        "files_scanned": len(pages),
+        "pages": pages,
+        "checks": checks,
+        "findings": analyze.to_findings(checks),
+        "data": data,
+    }

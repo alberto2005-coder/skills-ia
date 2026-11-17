@@ -1,0 +1,7 @@
+El primer día que conectamos el sensor, el sistema marcó 41 grados en el depósito. A las dos horas, 63. Nadie sabía por qué.
+
+Llamé a Marta, que llevaba once años en planta y desconfiaba de cualquier cosa con pantalla. Me dijo que revisara la válvula de purga, esa que nadie limpia desde 2019. Tenía razón. El tapón de cal se había endurecido hasta parecer piedra y el sensor estaba midiendo el aire caliente que subía por el hueco de la escalera, no el líquido.
+
+Ese error nos costó tres semanas de lecturas falsas y una discusión bastante tonta con el proveedor, que insistía en que el equipo funcionaba perfectamente. Lo arreglamos con una llave del doce y cuarenta minutos de paciencia. Desde entonces revisamos las válvulas cada lunes, antes de mirar la pantalla.
+
+La lección no es épica: los aparatos nuevos no arreglan el mantenimiento viejo.

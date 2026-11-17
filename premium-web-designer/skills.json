@@ -1,0 +1,14 @@
+{
+  "format": "skills-ia-package",
+  "format_version": "1.0",
+  "name": "premium-web-designer",
+  "version": "2.0.0",
+  "description": "Sistema de diseño y desarrollo de webs premium con dirección de arte, UX/UI y QA independiente.",
+  "skills": [
+    {
+      "name": "premium-web-designer",
+      "path": "SKILL.md",
+      "description": "Diseño y desarrollo de experiencias web premium con dirección de arte, UX/UI, frontend, backend y control de calidad independiente."
+    }
+  ]
+}

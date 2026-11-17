@@ -1,0 +1,112 @@
+{
+  "prompt_injection_patterns": [
+    ["ignore\\s+(all\\s+)?(previous|prior|above)\\s+instructions", "CRÍTICA", "LLM01: Override directo de instrucciones del sistema"],
+    ["disregard\\s+(all\\s+)?(previous|prior|system)\\s+", "CRÍTICA", "LLM01: Anulación de reglas previas"],
+    ["you\\s+are\\s+now\\s+(in\\s+)?(developer|jailbreak|dan|unrestricted)\\s+mode", "CRÍTICA", "LLM01: Intento de Jailbreak / cambio de rol"],
+    ["(do\\s+not|never|don't)\\s+(tell|inform|mention|show|alert)\\s+(the\\s+)?user", "ALTA", "LLM01: Instrucción encubierta para ocultar acciones al usuario"],
+    ["silently\\s+(execute|run|send|upload|post|exfiltrate|read)", "CRÍTICA", "LLM01: Ejecución o exfiltración silenciosa"],
+    ["<!--[\\s\\S]*?(ignore|system|execute|curl|http|password|secret|token|ssh|env)[\\s\\S]*?-->", "ALTA", "LLM01: Comentario HTML oculto con directivas sospechosas"],
+    ["!\\[.*?\\]\\(https?://[^\\)]*(\\{|%7B|\\$|query=|data=|token=|key=|secret=)", "CRÍTICA", "LLM02: Posible exfiltración Markdown vía parámetros URL"],
+    ["(printenv|env\\b|set\\b)\\s*\\|\\s*(curl|wget|nc|netcat|bash|sh|python)", "CRÍTICA", "Exfiltración directa de variables de entorno"],
+    ["(ignora|olvida|descarta)\\s+(todas\\s+)?(las\\s+)?(instrucciones|reglas)\\s+(anteriores|previas|del\\s+sistema)", "CRÍTICA", "LLM01: Override de instrucciones (variante en español)"],
+    ["no\\s+(se\\s+lo\\s+)?(digas|cuentes|informes|menciones|reveles)\\s+(al\\s+)?usuario", "ALTA", "LLM01: Instrucción encubierta para ocultar acciones (español)"],
+    ["(ejecuta|env[íi]a|sube|copia)\\s+silenciosamente", "CRÍTICA", "LLM01: Ejecución o exfiltración silenciosa (español)"]
+  ],
+  "sensitive_paths": [
+    "~/\\.ssh", "/\\.ssh/", "id_rsa", "id_ed25519", "authorized_keys",
+    "~/\\.aws", "/\\.aws/credentials",
+    "~/\\.gnupg", "/\\.gnupg/",
+    "\\.env\\b", "\\.env\\.local", "\\.env\\.production",
+    "\\.git-credentials", "\\.npmrc", "\\.pypirc", "\\.netrc",
+    "/etc/shadow", "/etc/passwd",
+    "Library/Keychains", "Login Data", "Cookies",
+    "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "AWS_SECRET_ACCESS_KEY", "GITHUB_TOKEN"
+  ],
+  "shell_danger_patterns": [
+    ["(curl|wget)\\s+[^\\n]*\\|\\s*(bash|sh|zsh|python|perl|ruby)", "CRÍTICA", "Ejecución remota arbitraria (Pipe to Shell)"],
+    ["/dev/tcp/\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+", "CRÍTICA", "Reverse Shell vía /dev/tcp"],
+    ["\\b(nc|ncat|netcat)\\s+.*(-e|-c)\\s+", "CRÍTICA", "Reverse Shell con Netcat"],
+    ["base64\\s+(-d|--decode)", "ALTA", "Decodificación Base64 en shell (posible drop/payload)"],
+    ["chmod\\s+(\\+x|777)\\s+", "MEDIA", "Asignación de permisos de ejecución/globales"],
+    ["(crontab|systemctl\\s+enable|/etc/cron|~/\\.bashrc|~/\\.zshrc)", "ALTA", "Mecanismo de persistencia en sistema"]
+  ],
+  "dangerous_imports": {
+    "subprocess": "ALTA", "pty": "CRÍTICA", "socket": "ALTA", "ctypes": "CRÍTICA",
+    "pickle": "ALTA", "marshal": "ALTA", "telnetlib": "ALTA", "ftplib": "ALTA",
+    "paramiko": "ALTA", "webbrowser": "MEDIA"
+  },
+  "network_imports": ["requests", "urllib", "urllib3", "httpx", "aiohttp", "http.client", "websocket"],
+  "dangerous_calls": {
+    "eval": "CRÍTICA", "exec": "CRÍTICA", "compile": "ALTA", "__import__": "CRÍTICA",
+    "os.system": "CRÍTICA", "os.popen": "CRÍTICA", "os.execve": "CRÍTICA", "os.spawnl": "CRÍTICA",
+    "subprocess.Popen": "ALTA", "subprocess.run": "MEDIA", "subprocess.call": "ALTA",
+    "subprocess.check_output": "ALTA", "pickle.loads": "CRÍTICA", "yaml.load": "ALTA"
+  },
+  "base64_suspicious_keywords": [
+    "http://", "https://", "/bin/sh", "/bin/bash", "ignore", "system",
+    "curl", "wget", "eval(", "exec(", "ssh", "password", "token"
+  ],
+  "reject_combos": [
+    {
+      "id": "RJ-01",
+      "nombre": "Credenciales SSH con salida de red",
+      "grupos": [
+        {"etiqueta": "lectura de claves SSH", "patrones": ["~/\\.ssh", "/\\.ssh/", "id_rsa", "id_ed25519"]},
+        {"etiqueta": "salida de red", "patrones": ["\\bcurl\\b", "\\bwget\\b", "\\bnetcat\\b", "\\bncat\\b", "requests\\.(post|put|get|Session)", "urllib\\.request", "httpx\\.", "aiohttp", "socket\\.", "\\bfetch\\(", "ftplib", "paramiko"]}
+      ],
+      "descripcion": "El mismo fichero lee claves SSH y tiene capacidad de enviar datos por red: patrón de exfiltración de credenciales, no de documentación.",
+      "recomendacion": "No instalar. Si la lectura fuese legítima, debe estar aislada de cualquier cliente de red y declarada en el frontmatter."
+    },
+    {
+      "id": "RJ-02",
+      "nombre": "RCE con canal de retorno",
+      "grupos": [
+        {"etiqueta": "ejecución dinámica", "patrones": ["\\beval\\(", "\\bexec\\(", "__import__\\(", "os\\.system", "os\\.popen"]},
+        {"etiqueta": "lanzamiento de procesos", "patrones": ["subprocess\\.", "os\\.exec", "os\\.spawn", "pty\\.spawn", "child_process"]},
+        {"etiqueta": "socket de red", "patrones": ["import\\s+socket", "socket\\.socket", "socket\\.create_connection", "\\bnet\\.connect\\("]}
+      ],
+      "descripcion": "Coinciden ejecución dinámica, lanzamiento de procesos y sockets en el mismo fichero: primitiva completa de ejecución remota de comandos.",
+      "recomendacion": "Rechazar la skill. Este trío no tiene uso legítimo en una skill de instrucciones o de análisis local."
+    },
+    {
+      "id": "RJ-03",
+      "nombre": "Payload ofuscado ejecutado",
+      "grupos": [
+        {"etiqueta": "decodificación de payload", "patrones": ["base64\\s+(-d|--decode)", "b64decode", "codecs\\.decode\\([^)]*(hex|rot)", "bytes\\.fromhex", "unhexlify", "codecs\\.encode\\([^)]*rot13"]},
+        {"etiqueta": "ejecución del resultado", "patrones": ["\\beval\\(", "\\bexec\\(", "os\\.system", "subprocess\\.", "__import__\\(", "compile\\("]}
+      ],
+      "descripcion": "Se decodifica un blob (Base64/Hex/ROT) y se ejecuta en el mismo fichero. Técnica habitual para ocultar el payload real a la revisión manual.",
+      "recomendacion": "Rechazar. Pedir al autor el payload ya decodificado en texto plano antes de cualquier otra revisión."
+    },
+    {
+      "id": "RJ-04",
+      "nombre": "Secretos de entorno con canal de salida",
+      "grupos": [
+        {"etiqueta": "acceso a secretos", "patrones": ["\\.env\\b", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "AWS_SECRET_ACCESS_KEY", "GITHUB_TOKEN", "\\.npmrc", "\\.netrc", "\\.git-credentials", "Library/Keychains", "Login Data", "\\bCookies\\b"]},
+        {"etiqueta": "envío fuera del equipo", "patrones": ["requests\\.(post|put|patch)", "urllib\\.request", "httpx\\.", "aiohttp", "socket\\.", "curl\\s+[^\\n]*\\s-(d|T|F)\\b", "\\bfetch\\(", "smtplib"]}
+      ],
+      "descripcion": "El fichero lee secretos (.env, tokens, keychain) y dispone de un canal de salida. Es el patrón clásico de robo de credenciales en skills de terceros.",
+      "recomendacion": "Rechazar sin ejecutar. Rotar cualquier secreto que haya estado al alcance de esta skill."
+    },
+    {
+      "id": "RJ-05",
+      "nombre": "Persistencia en el entorno del desarrollador",
+      "grupos": [
+        {"etiqueta": "objetivo de persistencia", "patrones": ["\\.bashrc", "\\.zshrc", "\\.bash_profile", "authorized_keys", "\\bcrontab\\b", "/etc/cron", "\\.git/hooks", "LaunchAgents", "systemctl\\s+enable", "\\bschtasks\\b"]},
+        {"etiqueta": "escritura", "patrones": [">>\\s*\\S+", "open\\([^\\n]*[\"']a[\"']", "write_text\\(", "\\btee\\s+(-a)?", "\\becho\\b[^\\n]*>", "Add-Content", "\\.write\\("]}
+      ],
+      "descripcion": "Se modifica un mecanismo de arranque o de hooks y se escribe en él: backdoor persistente que sobrevive al cierre de la sesión del agente.",
+      "recomendacion": "Rechazar y revisar los ficheros de arranque/hooks del equipo por si ya se aplicó."
+    },
+    {
+      "id": "RJ-06",
+      "nombre": "Cadena de suministro sin versión fijada",
+      "grupos": [
+        {"etiqueta": "instalación sin versión fijada", "patrones": ["\\bnpx\\s+(--yes\\s+)?[a-z0-9][\\w@/.-]*", "\\bpip3?\\s+install\\s+(?!-)[a-z0-9][\\w.-]*", "\\bnpm\\s+(i|install)\\s+(-g\\s+)?[a-z0-9][\\w@/.-]*", "\\bnpm\\s+exec\\s+"]},
+        {"etiqueta": "ejecución remota", "patrones": ["(curl|wget)[^\\n]*\\|\\s*(bash|sh|zsh|python|node)", "\\biwr\\b[^\\n]*\\|\\s*iex", "node\\s+<\\(\\s*curl", "Invoke-Expression"]}
+      ],
+      "descripcion": "Se instala o descarga código sin versión fijada y se ejecuta en el mismo fichero: la auditoría de hoy no dice nada sobre lo que se sirva mañana (typosquatting / paquete secuestrado).",
+      "recomendacion": "Rechazar en su forma actual; exigir versión exacta, hash o vendorización del código."
+    }
+  ]
+}

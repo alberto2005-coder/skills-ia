@@ -10,11 +10,12 @@ Uso:
 import argparse
 import re
 from pathlib import Path
+from typing import Tuple
 
 INVISIBLE_CODEPOINTS = set(range(0x200B, 0x2010)) | set(range(0x202A, 0x202F)) | set(range(0x2060, 0x2065)) | set(range(0x2066, 0x206A)) | set(range(0xE0000, 0xE0080))
 
 
-def sanitize_content(text: str) -> tuple[str, int, int]:
+def sanitize_content(text: str) -> Tuple[str, int, int]:
     cleaned_chars = []
     removed_unicode = 0
     for idx, ch in enumerate(text):

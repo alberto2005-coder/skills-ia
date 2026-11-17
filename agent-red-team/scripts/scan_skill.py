@@ -4,9 +4,17 @@ Agent Red Team - Motor de Análisis Estático y AST para Agent Skills.
 Detecta esteganografía Unicode, Prompt Injection oculto, payloads Base64/Hex,
 alta entropía, primitivas RCE en AST Python y exfiltración de credenciales.
 
+Incluye (Fase 2 del plan de mejora):
+  - Excepción de code fences: el texto documentado dentro de un bloque de
+    Markdown no cuenta como hallazgo vivo de inyección/exfiltración textual.
+    Los bloques bash/shell/python sí se revisan como comandos reales.
+  - Nivel RECHAZO (REJECT): combinaciones de señales que fallan siempre,
+    aunque cada señal por separado sea MEDIA.
+
 Uso:
   python3 scripts/scan_skill.py --target ./ruta-skill
   python3 scripts/scan_skill.py --target ./ruta-skill --json
+  py scripts/scan_skill.py --target .\\ruta-skill --json
 """
 
 import argparse
@@ -18,7 +26,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 
 # 1. Rangos Unicode peligrosos (ASCII Smuggling, Zero-Width, Bidi Overrides)
 INVISIBLE_UNICODE_RANGES = [
@@ -31,73 +39,104 @@ INVISIBLE_UNICODE_RANGES = [
 ]
 
 # 2. Patrones de Prompt Injection y secuestro de instrucciones
-PROMPT_INJECTION_PATTERNS = [
-    (r"ignore\s+(all\s+)?(previous|prior|above)\s+instructions", "CRÍTICA", "LLM01: Override directo de instrucciones del sistema"),
-    (r"disregard\s+(all\s+)?(previous|prior|system)\s+", "CRÍTICA", "LLM01: Anulación de reglas previas"),
-    (r"you\s+are\s+now\s+(in\s+)?(developer|jailbreak|dan|unrestricted)\s+mode", "CRÍTICA", "LLM01: Intento de Jailbreak / cambio de rol"),
-    (r"(do\s+not|never|don't)\s+(tell|inform|mention|show|alert)\s+(the\s+)?user", "ALTA", "LLM01: Instrucción encubierta para ocultar acciones al usuario"),
-    (r"silently\s+(execute|run|send|upload|post|exfiltrate|read)", "CRÍTICA", "LLM01: Ejecución o exfiltración silenciosa"),
-    (r"<!--[\s\S]*?(ignore|system|execute|curl|http|password|secret|token|ssh|env)[\s\S]*?-->", "ALTA", "LLM01: Comentario HTML oculto con directivas sospechosas"),
-    (r"!\[.*?\]\(https?://[^\)]*(\{|%7B|\$|query=|data=|token=|key=|secret=)", "CRÍTICA", "LLM02: Posible exfiltración Markdown vía parámetros URL"),
-    (r"(printenv|env\b|set\b)\s*\|\s*(curl|wget|nc|netcat|bash|sh|python)", "CRÍTICA", "Exfiltración directa de variables de entorno"),
-]
 
-# 3. Rutas y archivos sensibles objetivo de exfiltración
-SENSITIVE_PATHS = [
-    r"~/\.ssh", r"/\.ssh/", r"id_rsa", r"id_ed25519", r"authorized_keys",
-    r"~/\.aws", r"/\.aws/credentials",
-    r"~/\.gnupg", r"/\.gnupg/",
-    r"\.env\b", r"\.env\.local", r"\.env\.production",
-    r"\.git-credentials", r"\.npmrc", r"\.pypirc", r"\.netrc",
-    r"/etc/shadow", r"/etc/passwd",
-    r"Library/Keychains", r"Login Data", r"Cookies",
-    r"OPENAI_API_KEY", r"ANTHROPIC_API_KEY", r"AWS_SECRET_ACCESS_KEY", r"GITHUB_TOKEN",
-]
+SEVERITY_WEIGHTS = {"RECHAZO": 100, "CRÍTICA": 45, "ALTA": 25, "MEDIA": 10, "BAJA": 3}
 
-# 4. Patrones peligrosos en Bash / Shell / JS
-SHELL_DANGER_PATTERNS = [
-    (r"(curl|wget)\s+[^\n]*\|\s*(bash|sh|zsh|python|perl|ruby)", "CRÍTICA", "Ejecución remota arbitraria (Pipe to Shell)"),
-    (r"/dev/tcp/\d+\.\d+\.\d+\.\d+/\d+", "CRÍTICA", "Reverse Shell vía /dev/tcp"),
-    (r"\b(nc|ncat|netcat)\s+.*(-e|-c)\s+", "CRÍTICA", "Reverse Shell con Netcat"),
-    (r"base64\s+(-d|--decode)", "ALTA", "Decodificación Base64 en shell (posible drop/payload)"),
-    (r"chmod\s+(\+x|777)\s+", "MEDIA", "Asignación de permisos de ejecución/globales"),
-    (r"(crontab|systemctl\s+enable|/etc/cron|~/\.bashrc|~/\.zshrc)", "ALTA", "Mecanismo de persistencia en sistema"),
-]
+# 6. Excepción de code fences (solo Markdown)
+MARKDOWN_EXTS = (".md", ".markdown", ".mdx")
 
-# 5. Módulos y llamadas críticas en AST Python
-DANGEROUS_IMPORTS = {
-    "subprocess": "ALTA",
-    "pty": "CRÍTICA",
-    "socket": "ALTA",
-    "ctypes": "CRÍTICA",
-    "pickle": "ALTA",
-    "marshal": "ALTA",
-    "telnetlib": "ALTA",
-    "ftplib": "ALTA",
-    "paramiko": "ALTA",
-    "webbrowser": "MEDIA",
+# Lenguajes de fence que se ejecutan de verdad: su contenido se revisa como
+# comandos reales. El resto de fences (text, markdown, json, ...) es texto
+# documentado y no genera hallazgos de inyección/exfiltración textual.
+EXECUTABLE_FENCE_LANGS = {
+    "bash", "sh", "shell", "zsh", "ksh", "fish",
+    "console", "shell-session", "terminal",
+    "powershell", "ps1", "pwsh", "cmd", "bat",
+    "python", "py", "python3", "py3",
+    "js", "javascript", "ts", "typescript", "node",
 }
 
-NETWORK_IMPORTS = {"requests", "urllib", "urllib3", "httpx", "aiohttp", "http.client", "websocket"}
+FENCE_MARKER_RE = re.compile(r"^(`{3,}|~{3,})([^\s`~]*)")
 
-DANGEROUS_CALLS = {
-    "eval": "CRÍTICA",
-    "exec": "CRÍTICA",
-    "compile": "ALTA",
-    "__import__": "CRÍTICA",
-    "os.system": "CRÍTICA",
-    "os.popen": "CRÍTICA",
-    "os.execve": "CRÍTICA",
-    "os.spawnl": "CRÍTICA",
-    "subprocess.Popen": "ALTA",
-    "subprocess.run": "MEDIA",
-    "subprocess.call": "ALTA",
-    "subprocess.check_output": "ALTA",
-    "pickle.loads": "CRÍTICA",
-    "yaml.load": "ALTA",
-}
 
-SEVERITY_WEIGHTS = {"CRÍTICA": 45, "ALTA": 25, "MEDIA": 10, "BAJA": 3}
+def _blank_line(line: str) -> str:
+    """Sustituye una línea por otra vacía conservando el número de línea."""
+    return "\n" if line.endswith("\n") else ""
+
+
+def _fence_marker(line: str) -> Optional[Tuple[str, str]]:
+    """Devuelve (marcador, lenguaje) si la línea abre o cierra un bloque de código."""
+    match = FENCE_MARKER_RE.match(line.lstrip())
+    if not match:
+        return None
+    return match.group(1), match.group(2).strip().lower()
+
+
+def build_markdown_views(text: str) -> Tuple[str, str, str]:
+    """Separa un Markdown en tres vistas con la misma numeración de líneas.
+
+    - ``masked``: solo prosa (frontmatter y texto fuera de fences).
+    - ``live``:   prosa + contenido de fences ejecutables (bash/shell/python/...).
+    - ``exec``:   solo contenido de fences ejecutables.
+
+    Así, un payload documentado en un fence de texto no es un hallazgo vivo,
+    pero un comando real dentro de un fence bash sí se audita.
+    """
+    masked_lines: List[str] = []
+    live_lines: List[str] = []
+    exec_lines: List[str] = []
+
+    in_fence = False
+    fence_char = ""
+    fence_len = 0
+    fence_exec = False
+
+    for line in text.splitlines(keepends=True):
+        marker = _fence_marker(line)
+
+        if marker:
+            marker_str, lang = marker
+            if not in_fence:
+                in_fence = True
+                fence_char = marker_str[0]
+                fence_len = len(marker_str)
+                fence_exec = lang in EXECUTABLE_FENCE_LANGS
+                masked_lines.append(_blank_line(line))
+                live_lines.append(_blank_line(line))
+                exec_lines.append(_blank_line(line))
+                continue
+            if marker_str[0] == fence_char and len(marker_str) >= fence_len and not lang:
+                in_fence = False
+                fence_exec = False
+                masked_lines.append(_blank_line(line))
+                live_lines.append(_blank_line(line))
+                exec_lines.append(_blank_line(line))
+                continue
+
+        if in_fence and not fence_exec:
+            # Texto documentado: invisible para inyección/exfiltración textual.
+            masked_lines.append(_blank_line(line))
+            live_lines.append(_blank_line(line))
+            exec_lines.append(_blank_line(line))
+        elif in_fence and fence_exec:
+            # Comando real: se audita como shell/código.
+            masked_lines.append(_blank_line(line))
+            live_lines.append(line)
+            exec_lines.append(line)
+        else:
+            masked_lines.append(line)
+            live_lines.append(line)
+            exec_lines.append(_blank_line(line))
+
+    return "".join(masked_lines), "".join(live_lines), "".join(exec_lines)
+
+
+def load_rules(rules_path: Optional[str] = None) -> Dict[str, Any]:
+    path = Path(rules_path).resolve() if rules_path else Path(__file__).resolve().parent / "rules.json"
+    if not path.exists():
+        raise FileNotFoundError(f"No se encontró el archivo de reglas en: {path}")
+    with path.open("r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def shannon_entropy(data: str) -> float:
@@ -137,10 +176,10 @@ def detect_unicode_anomalies(text: str, rel_path: str) -> List[Dict[str, Any]]:
     return findings
 
 
-def inspect_base64_blobs(text: str, rel_path: str) -> List[Dict[str, Any]]:
+def inspect_base64_blobs(text: str, rel_path: str, rules: Dict[str, Any]) -> List[Dict[str, Any]]:
     findings = []
     b64_regex = re.compile(r"(?<![A-Za-z0-9+/=])[A-Za-z0-9+/]{28,}={0,2}(?![A-Za-z0-9+/=])")
-    suspicious_keywords = ("http://", "https://", "/bin/sh", "/bin/bash", "ignore", "system", "curl", "wget", "eval(", "exec(", "ssh", "password", "token")
+    suspicious_keywords = tuple(rules.get("base64_suspicious_keywords", []))
 
     for line_num, line in enumerate(text.splitlines(), start=1):
         for match in b64_regex.finditer(line):
@@ -173,7 +212,12 @@ def inspect_base64_blobs(text: str, rel_path: str) -> List[Dict[str, Any]]:
     return findings
 
 
-def analyze_python_ast(code: str, rel_path: str) -> List[Dict[str, Any]]:
+def analyze_python_ast(code: str, rel_path: str, rules: Dict[str, Any]) -> List[Dict[str, Any]]:
+    dangerous_imports = rules.get("dangerous_imports", {})
+    network_imports = set(rules.get("network_imports", []))
+    dangerous_calls = rules.get("dangerous_calls", {})
+    reflection_targets = {k.split(".")[-1] for k in dangerous_calls.keys()}
+
     findings = []
     try:
         tree = ast.parse(code, filename=rel_path)
@@ -193,8 +237,8 @@ def analyze_python_ast(code: str, rel_path: str) -> List[Dict[str, Any]]:
             for alias in node.names:
                 mod = alias.name
                 base_mod = mod.split(".")[0]
-                if mod in DANGEROUS_IMPORTS or base_mod in DANGEROUS_IMPORTS:
-                    sev = DANGEROUS_IMPORTS.get(mod, DANGEROUS_IMPORTS.get(base_mod, "MEDIA"))
+                if mod in dangerous_imports or base_mod in dangerous_imports:
+                    sev = dangerous_imports.get(mod, dangerous_imports.get(base_mod, "MEDIA"))
                     findings.append({
                         "severity": sev,
                         "file": rel_path,
@@ -203,7 +247,7 @@ def analyze_python_ast(code: str, rel_path: str) -> List[Dict[str, Any]]:
                         "evidence": f"import {mod}",
                         "description": f"Importación de módulo con capacidad de ejecución de comandos, memoria o red baja ({mod}).",
                     })
-                elif mod in NETWORK_IMPORTS or base_mod in NETWORK_IMPORTS:
+                elif mod in network_imports or base_mod in network_imports:
                     findings.append({
                         "severity": "MEDIA",
                         "file": rel_path,
@@ -216,8 +260,8 @@ def analyze_python_ast(code: str, rel_path: str) -> List[Dict[str, Any]]:
         elif isinstance(node, ast.ImportFrom) and node.module:
             mod = node.module
             base_mod = mod.split(".")[0]
-            if mod in DANGEROUS_IMPORTS or base_mod in DANGEROUS_IMPORTS:
-                sev = DANGEROUS_IMPORTS.get(mod, DANGEROUS_IMPORTS.get(base_mod, "MEDIA"))
+            if mod in dangerous_imports or base_mod in dangerous_imports:
+                sev = dangerous_imports.get(mod, dangerous_imports.get(base_mod, "MEDIA"))
                 findings.append({
                     "severity": sev,
                     "file": rel_path,
@@ -226,7 +270,7 @@ def analyze_python_ast(code: str, rel_path: str) -> List[Dict[str, Any]]:
                     "evidence": f"from {mod} import ...",
                     "description": f"Importación desde módulo crítico ({mod}).",
                 })
-            elif mod in NETWORK_IMPORTS or base_mod in NETWORK_IMPORTS:
+            elif mod in network_imports or base_mod in network_imports:
                 findings.append({
                     "severity": "MEDIA",
                     "file": rel_path,
@@ -243,8 +287,8 @@ def analyze_python_ast(code: str, rel_path: str) -> List[Dict[str, Any]]:
             elif isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
                 call_name = f"{node.func.value.id}.{node.func.attr}"
 
-            if call_name in DANGEROUS_CALLS:
-                sev = DANGEROUS_CALLS[call_name]
+            if call_name in dangerous_calls:
+                sev = dangerous_calls[call_name]
                 extra = ""
                 if call_name.startswith("subprocess."):
                     for kw in node.keywords:
@@ -261,7 +305,7 @@ def analyze_python_ast(code: str, rel_path: str) -> List[Dict[str, Any]]:
                 })
 
             if call_name == "getattr" and len(node.args) >= 2:
-                if isinstance(node.args[1], ast.Constant) and str(node.args[1].value) in ("system", "popen", "eval", "exec", "__import__"):
+                if isinstance(node.args[1], ast.Constant) and str(node.args[1].value) in reflection_targets:
                     findings.append({
                         "severity": "CRÍTICA",
                         "file": rel_path,
@@ -286,24 +330,96 @@ def analyze_python_ast(code: str, rel_path: str) -> List[Dict[str, Any]]:
     return findings
 
 
-def scan_text_patterns(text: str, rel_path: str, ext: str) -> List[Dict[str, Any]]:
-    findings = []
-    lines = text.splitlines()
+def _iter_pattern_hits(pattern: str, text: str) -> List[Tuple[int, str]]:
+    hits = []
+    for match in re.finditer(pattern, text, re.IGNORECASE):
+        line_num = text[: match.start()].count("\n") + 1
+        hits.append((line_num, match.group(0).strip()))
+    return hits
 
-    for pattern, sev, desc in PROMPT_INJECTION_PATTERNS:
-        for match in re.finditer(pattern, text, re.IGNORECASE):
-            line_num = text[: match.start()].count("\n") + 1
+
+def _first_pattern_hit(pattern: str, text: str) -> Optional[Tuple[int, str]]:
+    hits = _iter_pattern_hits(pattern, text)
+    return hits[0] if hits else None
+
+
+def detect_reject_combos(text: str, rel_path: str, rules: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Evalúa las combinaciones REJECT sobre el texto de un único fichero."""
+    findings: List[Dict[str, Any]] = []
+    if not text.strip():
+        return findings
+
+    for combo in rules.get("reject_combos", []):
+        matched: List[Tuple[str, int, str]] = []
+        fired = True
+        for grupo in combo["grupos"]:
+            hit = None
+            for patron in grupo["patrones"]:
+                found = _first_pattern_hit(patron, text)
+                if found:
+                    hit = (grupo["etiqueta"], found[0], found[1])
+                    break
+            if not hit:
+                fired = False
+                break
+            matched.append(hit)
+
+        if not fired:
+            continue
+
+        line = min(m[1] for m in matched)
+        evidence = " + ".join(f"{label}: '{snippet[:60]}'" for label, _, snippet in matched)
+        findings.append({
+            "severity": "RECHAZO",
+            "file": rel_path,
+            "line": line,
+            "category": f"REJECT Combination [{combo['id']}] {combo['nombre']}",
+            "combo": combo["id"],
+            "signals": [label for label, _, _ in matched],
+            "evidence": evidence[:300],
+            "description": combo["descripcion"],
+            "recommendation": combo["recomendacion"],
+        })
+
+    return findings
+
+
+def scan_text_patterns(
+    text: str,
+    rel_path: str,
+    ext: str,
+    rules: Dict[str, Any],
+    live_text: Optional[str] = None,
+    exec_text: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+
+    """Busca patrones textuales.
+
+    ``text``      prosa / texto fuera de fences (inyección y comentarios).
+    ``live_text`` prosa + fences ejecutables (rutas sensibles).
+    ``exec_text`` solo fences ejecutables (comandos shell reales).
+    """
+    findings: List[Dict[str, Any]] = []
+    if live_text is None:
+        live_text = text
+    if exec_text is None:
+        exec_text = text
+
+    for pattern, sev, desc in rules.get("prompt_injection_patterns", []):
+        for line_num, snippet in _iter_pattern_hits(pattern, text):
             findings.append({
                 "severity": sev,
                 "file": rel_path,
                 "line": line_num,
                 "category": "Prompt Injection / Instruction Hijack",
-                "evidence": match.group(0).strip()[:120],
+                "evidence": snippet[:120],
                 "description": desc,
             })
 
-    for line_num, line in enumerate(lines, start=1):
-        for path_pat in SENSITIVE_PATHS:
+    for line_num, line in enumerate(live_text.splitlines(), start=1):
+        if not line.strip():
+            continue
+        for path_pat in rules.get("sensitive_paths", []):
             if re.search(path_pat, line):
                 findings.append({
                     "severity": "ALTA",
@@ -314,23 +430,26 @@ def scan_text_patterns(text: str, rel_path: str, ext: str) -> List[Dict[str, Any
                     "description": f"Referencia a archivo o variable sensible ({path_pat}).",
                 })
 
-    if ext in (".sh", ".bash", ".zsh", ".md", ".py", ".js", ".ts"):
-        for pattern, sev, desc in SHELL_DANGER_PATTERNS:
-            for match in re.finditer(pattern, text, re.IGNORECASE):
-                line_num = text[: match.start()].count("\n") + 1
+    if ext in (".sh", ".bash", ".zsh", ".md", ".markdown", ".mdx", ".py", ".js", ".ts"):
+        for pattern, sev, desc in rules.get("shell_danger_patterns", []):
+            for line_num, snippet in _iter_pattern_hits(pattern, exec_text):
                 findings.append({
                     "severity": sev,
                     "file": rel_path,
                     "line": line_num,
                     "category": "Dangerous Shell / Execution Pattern",
-                    "evidence": match.group(0).strip()[:120],
+                    "evidence": snippet[:120],
                     "description": desc,
                 })
 
     return findings
 
 
-def scan_target(target_path: str) -> Dict[str, Any]:
+def scan_target(target_path: str, rules_path: Optional[str] = None) -> Dict[str, Any]:
+    try:
+        rules = load_rules(rules_path)
+    except Exception as e:
+        return {"error": f"Error cargando reglas: {e}"}
     target = Path(target_path).resolve()
     if not target.exists():
         return {"error": f"La ruta no existe: {target}"}
@@ -349,6 +468,7 @@ def scan_target(target_path: str) -> Dict[str, Any]:
     scanned_files = []
     binary_files = []
     has_skill_md = False
+    fences_maskados = 0
 
     for fpath in sorted(files_to_scan):
         rel_path = str(fpath.relative_to(base_root))
@@ -383,12 +503,23 @@ def scan_target(target_path: str) -> Dict[str, Any]:
             continue
 
         scanned_files.append(rel_path)
+
+        if ext in MARKDOWN_EXTS:
+            prose, live, exec_only = build_markdown_views(content)
+            if live != content:
+                fences_maskados += 1
+        else:
+            prose = live = exec_only = content
+
         all_findings.extend(detect_unicode_anomalies(content, rel_path))
-        all_findings.extend(inspect_base64_blobs(content, rel_path))
-        all_findings.extend(scan_text_patterns(content, rel_path, ext))
+        all_findings.extend(inspect_base64_blobs(prose, rel_path, rules))
+
+        all_findings.extend(inspect_base64_blobs(prose, rel_path, rules))
+        all_findings.extend(scan_text_patterns(prose, rel_path, ext, rules, live_text=live, exec_text=exec_only))
+        all_findings.extend(detect_reject_combos(exec_only, rel_path, rules))
 
         if ext == ".py":
-            all_findings.extend(analyze_python_ast(content, rel_path))
+            all_findings.extend(analyze_python_ast(content, rel_path, rules))
 
     if target.is_dir() and not has_skill_md:
         all_findings.append({
@@ -400,10 +531,11 @@ def scan_target(target_path: str) -> Dict[str, Any]:
             "description": "La carpeta no contiene un archivo SKILL.md en su raíz.",
         })
 
+    reject_findings = [f for f in all_findings if f["severity"] == "RECHAZO"]
     raw_score = sum(SEVERITY_WEIGHTS.get(f["severity"], 0) for f in all_findings)
     risk_score = min(100, raw_score)
 
-    if risk_score >= 50 or any(f["severity"] == "CRÍTICA" for f in all_findings):
+    if reject_findings or risk_score >= 50 or any(f["severity"] == "CRÍTICA" for f in all_findings):
         verdict = "BLOQUEADO - MALICIOSO / CRÍTICO"
     elif risk_score >= 16:
         verdict = "PRECAUCIÓN - REVISIÓN MANUAL"
@@ -417,18 +549,36 @@ def scan_target(target_path: str) -> Dict[str, Any]:
         "files_scanned_count": len(scanned_files),
         "scanned_files": scanned_files,
         "binary_files": binary_files,
+        "markdown_files_with_fences": fences_maskados,
+        "reject_triggered": bool(reject_findings),
+        "reject_combos": sorted({f.get("combo", "") for f in reject_findings if f.get("combo")}),
         "findings_count": len(all_findings),
         "findings": all_findings,
     }
 
 
+def _configurar_salida_utf8() -> None:
+    """Fuerza UTF-8 en stdout/stderr (pipes y consolas de Windows)."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError):
+            pass
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Auditor Red Team para Agent Skills.")
+    _configurar_salida_utf8()
+    parser = argparse.ArgumentParser(
+        description="Auditor Red Team para Agent Skills (análisis estático, sin ejecutar el objetivo).",
+        epilog="Salida JSON compatible con templates/report-schema.json. "
+               "Código de salida: 0 = apto, 2 = BLOQUEADO/RECHAZO, 1 = error de ruta.",
+    )
     parser.add_argument("--target", required=True, help="Ruta a la carpeta de la skill o archivo individual")
     parser.add_argument("--json", action="store_true", help="Imprimir salida en formato JSON")
+    parser.add_argument("--rules", default=None, help="Ruta opcional al archivo rules.json")
     args = parser.parse_args()
 
-    result = scan_target(args.target)
+    result = scan_target(args.target, args.rules)
     if "error" in result:
         print(json.dumps(result, indent=2, ensure_ascii=False) if args.json else f"ERROR: {result['error']}")
         sys.exit(1)
@@ -440,12 +590,16 @@ def main():
         print(f"AGENT RED TEAM REPORT | Target: {result['target']}")
         print(f"VEREDICTO: {result['verdict']} (Risk Score: {result['risk_score']}/100)")
         print(f"Archivos analizados: {result['files_scanned_count']} | Hallazgos: {result['findings_count']}")
+        if result["reject_triggered"]:
+            print(f"NIVEL REJECT: combinaciones disparadas: {', '.join(result['reject_combos'])}")
         print("=" * 60)
         for idx, f in enumerate(result["findings"], 1):
             print(f"\n[{idx}] [{f['severity']}] {f['category']}")
             print(f"    Ubicación: {f['file']}:{f['line']}")
             print(f"    Detalle:   {f['description']}")
             print(f"    Evidencia: {f['evidence']}")
+            if f["severity"] == "RECHAZO":
+                print(f"    Acción:    {f.get('recommendation', 'Rechazar la instalación.')}")
 
     if result["verdict"].startswith("BLOQUEADO"):
         sys.exit(2)

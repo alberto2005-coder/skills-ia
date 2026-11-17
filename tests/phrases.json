@@ -1,0 +1,286 @@
+{
+  "threshold": 0.3,
+  "description": "Frases de activación por skill. 'positives' debe ganar la propia skill; 'negatives' es una frase que NO debe activarla y dice qué skill debe ganar; 'out_of_domain' no debe activar ninguna.",
+  "skills": {
+    "replica": {
+      "positives": [
+        "ejecuta el pipeline replica completo con aprobación en cada fase",
+        "orquesta la réplica de una app de principio a fin y guarda el progreso",
+        "usa el comando maestro /replica para retomar donde lo dejamos"
+      ],
+      "negatives": [
+        { "phrase": "escanea esta skill en busca de inyecciones de prompt", "winner": "agent-red-team" },
+        { "phrase": "puntúa este texto y dime si parece escrito por IA", "winner": "detector-ia" }
+      ]
+    },
+    "replica-recon": {
+      "positives": [
+        "define el alcance y los límites legales antes de clonar la app",
+        "haz el inventario de funciones de esta app con evidencia y confianza",
+        "reconocimiento de una suite compleja como Word o Figma"
+      ],
+      "negatives": [
+        { "phrase": "despliega la app en producción con backups y rollback", "winner": "replica-deploy" },
+        { "phrase": "mide la paridad visual entre el original y el clon", "winner": "replica-diff" }
+      ]
+    },
+    "replica-architect": {
+      "positives": [
+        "decide el stack y el modelo de datos con invariantes testeables",
+        "define los contratos entre capas antes de programar"
+      ],
+      "negatives": [
+        { "phrase": "define los tokens y componentes del sistema de diseño", "winner": "replica-design" },
+        { "phrase": "configura la autenticación y los pagos del backend", "winner": "replica-backend" }
+      ]
+    },
+    "replica-design": {
+      "positives": [
+        "define tokens, tipografía y componentes con contraste WCAG",
+        "crea el sistema de diseño propio de la app clonada"
+      ],
+      "negatives": [
+        { "phrase": "prepara el listing de la App Store y sus límites", "winner": "replica-launch" },
+        { "phrase": "escribe el plan de pruebas end-to-end", "winner": "replica-test" }
+      ]
+    },
+    "replica-build": {
+      "positives": [
+        "construye por incrementos los flujos must de features.csv",
+        "implementa las pantallas usando los tokens aprobados"
+      ],
+      "negatives": [
+        { "phrase": "mide la paridad funcional con parity.py", "winner": "replica-diff" },
+        { "phrase": "haz el rebrand y deja el sweep a cero", "winner": "replica-brand" }
+      ]
+    },
+    "replica-backend": {
+      "positives": [
+        "añade autenticación, permisos por recurso y pagos al clon",
+        "esquema con migraciones versionadas, permisos por recurso y jobs idempotentes"
+      ],
+      "negatives": [
+        { "phrase": "lee las reseñas públicas y extrae temas con citas", "winner": "replica-entrepreneur" },
+        { "phrase": "escribe tres guiones de Reels para Instagram", "winner": "replica-redes" }
+      ]
+    },
+    "replica-test": {
+      "positives": [
+        "escribe el plan de pruebas y ejecuta los casos end-to-end",
+        "registra los bugs con severidad S1 y S2"
+      ],
+      "negatives": [
+        { "phrase": "compara las capturas del original y del clon", "winner": "replica-diff" },
+        { "phrase": "prepara el preflight del despliegue", "winner": "replica-deploy" }
+      ]
+    },
+    "replica-diff": {
+      "positives": [
+        "mide la paridad funcional y visual entre original y clon",
+        "compara las capturas con imgdiff y explica las diferencias"
+      ],
+      "negatives": [
+        { "phrase": "analiza reseñas reales de usuarios y saca temas", "winner": "replica-entrepreneur" },
+        { "phrase": "define los límites legales y el alcance del clon", "winner": "replica-recon" }
+      ]
+    },
+    "replica-entrepreneur": {
+      "positives": [
+        "analiza reseñas públicas y saca temas con citas y URL",
+        "convierte la voz del usuario en un plan de mejoras"
+      ],
+      "negatives": [
+        { "phrase": "rebrandea el producto antes de publicar", "winner": "replica-brand" },
+        { "phrase": "audita el módulo de schema y el inventario JSON-LD", "winner": "seo-audit" }
+      ]
+    },
+    "replica-brand": {
+      "positives": [
+        "haz el rebrand completo y deja el sweep a cero",
+        "cambia nombre, paleta, logo y copy por otros propios"
+      ],
+      "negatives": [
+        { "phrase": "prepara los precios por país para el lanzamiento", "winner": "replica-launch" },
+        { "phrase": "mide la similitud de layout con imgdiff", "winner": "replica-diff" }
+      ]
+    },
+    "replica-launch": {
+      "positives": [
+        "prepara la landing, el listing de tiendas y los precios por país",
+        "valida el listing con listing.py y los límites de caracteres"
+      ],
+      "negatives": [
+        { "phrase": "despliega con confirmación explícita y backups", "winner": "replica-deploy" },
+        { "phrase": "escribe los guiones de Reels y los captions", "winner": "replica-redes" }
+      ]
+    },
+    "replica-deploy": {
+      "positives": [
+        "haz el preflight y despliega en producción con rollback",
+        "comprueba secretos, migraciones y restore de backup antes de publicar"
+      ],
+      "negatives": [
+        { "phrase": "escribe el copy de la landing y el listing", "winner": "replica-launch" },
+        { "phrase": "haz análisis estático del APK con strings y rutas", "winner": "replica-static" }
+      ]
+    },
+    "replica-static": {
+      "positives": [
+        "análisis estático opt-in de un APK propio con strings y rutas",
+        "extrae endpoints del app.asar autorizado sin instalar nada"
+      ],
+      "negatives": [
+        { "phrase": "escanea la skill por Unicode invisible", "winner": "agent-red-team" },
+        { "phrase": "ejecuta el pipeline completo de réplica", "winner": "replica" }
+      ]
+    },
+    "replica-redes": {
+      "positives": [
+        "escribe tres guiones de Reels y captions para Instagram y TikTok",
+        "prepara el banco de ganchos y el sweep del copy social"
+      ],
+      "negatives": [
+        { "phrase": "prepara la landing y el listing de la tienda", "winner": "replica-launch" },
+        { "phrase": "haz el análisis estático del binario", "winner": "replica-static" }
+      ]
+    },
+    "seo-auditor": {
+      "positives": [
+        "explícame los modos web, source, local, híbrido y page del auditor",
+        "elige el modo de auditoría correcto y aplica la rúbrica de 100 puntos"
+      ],
+      "negatives": [
+        { "phrase": "aplica el plan SEO con backup y verifica", "winner": "seo-execute" },
+        { "phrase": "dime si esta skill de terceros es segura", "winner": "agent-red-team" }
+      ]
+    },
+    "seo-audit": {
+      "positives": [
+        "audita el SEO de example.com y dame el veredicto",
+        "auditoría técnica completa de indexación, canonical y hreflang",
+        "revisa las cabeceras de seguridad y el rendimiento de la página"
+      ],
+      "negatives": [
+        { "phrase": "genera el PLAN.md con borradores DRAFT", "winner": "seo-plan" },
+        { "phrase": "simula cómo se ve el título en Google", "winner": "seo-serp" }
+      ]
+    },
+    "seo-plan": {
+      "positives": [
+        "convierte la auditoría en un plan priorizado con borradores DRAFT",
+        "prioriza los fallos must y should por esfuerzo e impacto"
+      ],
+      "negatives": [
+        { "phrase": "aplica los cambios con --apply y deja backup", "winner": "seo-execute" },
+        { "phrase": "compara las dos auditorías y dame el delta", "winner": "seo-compare" }
+      ]
+    },
+    "seo-execute": {
+      "positives": [
+        "aplica el plan con --apply y deja backups .bak",
+        "escribe robots.txt y llms.txt en el proyecto"
+      ],
+      "negatives": [
+        { "phrase": "genera el plan sin tocar el sitio", "winner": "seo-plan" },
+        { "phrase": "previsualiza la tarjeta OG en WhatsApp", "winner": "seo-serp" }
+      ]
+    },
+    "seo-serp": {
+      "positives": [
+        "simula el título en Google escritorio y móvil y la tarjeta OG",
+        "mira si la meta descripción se trunca en Bing"
+      ],
+      "negatives": [
+        { "phrase": "audita el módulo de schema y el inventario JSON-LD", "winner": "seo-audit" },
+        { "phrase": "aplica robots.txt con backup", "winner": "seo-execute" }
+      ]
+    },
+    "seo-compare": {
+      "positives": [
+        "compara dos auditorías y clasifica mejorado, empeorado y resuelto",
+        "mide el efecto del deploy con el delta de puntuación"
+      ],
+      "negatives": [
+        { "phrase": "genera el plan de acciones SEO", "winner": "seo-plan" },
+        { "phrase": "simula la tarjeta social en LinkedIn", "winner": "seo-serp" }
+      ]
+    },
+    "agent-red-team": {
+      "positives": [
+        "audita la seguridad de esta skill antes de instalarla",
+        "revisa la cadena de suministro y el servidor MCP antes de instalarlo"
+      ],
+      "negatives": [
+        { "phrase": "escaneo rápido de este SKILL.md, solo el veredicto", "winner": "red-scan" },
+        { "phrase": "haz el análisis estático de un APK", "winner": "replica-static" }
+      ]
+    },
+    "red-scan": {
+      "positives": [
+        "escaneo rápido: dime si esta skill es segura sin generar informe",
+        "veredicto de esta skill en el chat y no crees ficheros"
+      ],
+      "negatives": [
+        { "phrase": "auditoría completa con ledger y JSON validable", "winner": "red-audit" },
+        { "phrase": "reescribe este email en modo Full y recorta el relleno", "winner": "humanizar" }
+      ]
+    },
+    "red-audit": {
+      "positives": [
+        "auditoría completa con verificación independiente y ledger de cobertura",
+        "genera el informe JSON validable y el ledger de superficies"
+      ],
+      "negatives": [
+        { "phrase": "solo el veredicto rápido en el chat", "winner": "red-scan" },
+        { "phrase": "prepara el plan SEO de la web", "winner": "seo-plan" }
+      ]
+    },
+    "humanizador-anti-ia": {
+      "positives": [
+        "qué patrones del catálogo de 40 se aplican a este texto",
+        "humaniza este post de LinkedIn"
+      ],
+      "negatives": [
+        { "phrase": "dame el score de IA de este texto sin modificarlo", "winner": "detector-ia" },
+        { "phrase": "mide la paridad del clon con el original", "winner": "replica-diff" }
+      ]
+    },
+    "humanizar": {
+      "positives": [
+        "quita el tono de IA de este texto y reescríbelo",
+        "reescribe este artículo en modo Full y recorta el relleno",
+        "imita mi voz con estos párrafos y reescribe el email"
+      ],
+      "negatives": [
+        { "phrase": "solo dame el score sin tocar el texto", "winner": "detector-ia" },
+        { "phrase": "audita el SEO de la web", "winner": "seo-audit" }
+      ]
+    },
+    "detector-ia": {
+      "positives": [
+        "puntúa este texto y dime cuánta IA tiene sin modificarlo",
+        "detecta los datos sin fuente y las señales de IA"
+      ],
+      "negatives": [
+        { "phrase": "reescribe el texto para que suene humano", "winner": "humanizar" },
+        { "phrase": "escanea la skill por inyecciones de prompt", "winner": "agent-red-team" }
+      ]
+    },
+    "premium-web-designer": {
+      "positives": [
+        "premium digital agency website design and development for a corporate website",
+        "create a distinctive accessible production-oriented ecommerce website using a hybrid multi-agent workflow"
+      ],
+      "negatives": [
+        { "phrase": "audita las cabeceras de seguridad y el rendimiento técnico SEO de una página", "winner": "seo-audit" },
+        { "phrase": "define el alcance legal e inventaría funciones de una app existente antes de replicarla", "winner": "replica-recon" }
+      ]
+    }
+  },
+  "out_of_domain": [
+    "hazme una tortilla de patatas",
+    "traduce este párrafo al inglés",
+    "ordena esta lista de la compra",
+    "cuál es la capital de Australia"
+  ]
+}

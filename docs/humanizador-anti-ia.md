@@ -1,7 +1,7 @@
 # Humanizador Anti-IA
 
-> Módulo de reescritura estilística y variabilidad rítmica en español.  
-> Stylistic rewriting and sentence burstiness module for Spanish prose.
+> Detección y reescritura de patrones de escritura de IA, en español.  
+> Detection and rewriting of AI writing patterns, in Spanish.
 
 [🇪🇸 Español](#-español) · [🇬🇧 English](#-english)
 
@@ -10,45 +10,66 @@
 ## 🇪🇸 Español
 
 ### Índice
-1. [Propósito y Enfoque](#propósito-y-enfoque)
-2. [Métricas Estadísticas Evaluadas](#métricas-estadísticas-evaluadas)
-3. [Reglas Clave de Edición](#reglas-clave-de-edición)
-4. [Archivos y Referencias](#archivos-y-referencias)
-5. [Ejecución del Auditor Estilístico](#ejecución-del-auditor-estilístico)
+1. [Propósito](#propósito)
+2. [Modos](#modos)
+3. [Score 0–100](#score-0100)
+4. [Reglas No Negociables](#reglas-no-negociables)
+5. [Sub-skills](#sub-skills)
+6. [Referencias, Plantilla y Corpus](#referencias-plantilla-y-corpus)
+7. [Uso y Tests](#uso-y-tests)
 
-### Propósito y Enfoque
-Este módulo reescribe borradores con cadencia mecánica de IA para dotarlos de ritmo asimétrico, precisión léxica y naturalidad de autor, erradicando muletillas comunes y homogeneidad sintáctica.
+### Propósito
+Reescribe textos con cadencia de IA para devolverles ritmo, concreción y voz de autor. No es un sinonimizador: el trabajo está en el contenido y la estructura. El catálogo de **40 patrones numerados** (más fuerte a más débil) es la referencia obligatoria, con pack de tells en español.
 
-### Métricas Estadísticas Evaluadas
-- **Burstiness (Coeficiente de Variación $\ge 0.45$):** Alternancia entre oraciones cortas (4–8 palabras) y subordinadas complejas (22–35 palabras).
-- **Legibilidad Fernández-Huerta:** Fórmula matemática ajustada al idioma español que pondera sílabas y longitud de oraciones.
-- **Diversidad léxica (Type-Token Ratio):** Mide la variedad de vocabulario evitando redundancias repetitivas.
-- **Detección de patrones:** Cuenta guiones largos (`—`), perífrasis pasivas y secuencias de oraciones monótonas.
+**Paquete de 3 skills:** maestro + `humanizar` (reescribe) y `detector-ia` (solo mide).
 
-### Reglas Clave de Edición
-1. **Ruptura de tríadas:** Evitar enumeraciones automáticas de 3 adjetivos o complementos simétricos.
-2. **Cero conectores robóticos:** Prohibir transiciones escolares como *"En conclusión"*, *"Asimismo"*, *"Cabe destacar"*, *"Por otro lado"*.
-3. **Cierre seco:** Cortar el texto en el último dato o hecho útil; suprimir moralejas aspiracionales finales.
-4. **Voz activa:** Eliminar la pasiva analítica y los gerundios de posterioridad.
+### Modos
+| Modo | Qué toca |
+|---|---|
+| **Quick** | Vocabulario Tier 1/2, artefactos de chatbot y relleno evidente; no cambia la estructura. |
+| **Full** (por defecto) | Catálogo completo: contenido, ritmo, sintaxis, estructura, vocabulario y artefactos; recorte del 20–30% de relleno. |
+| **Voice** | Full + calibración con 2–3 párrafos del usuario. |
 
-### Archivos y Referencias
-- `SKILL.md`: Directrices y flujo de trabajo.
-- `references/lista-negra.md`: Términos sobreutilizados y sustituciones directas.
-- `references/01-patrones-sintacticos.md`: Análisis de perplejidad y burstiness.
-- `references/02-tecnicas-reescritura.md`: Técnicas de staccato y anclas sensoriales.
-- `scripts/audit_style.py`: Auditor determinista.
-- `templates/informe-auditoria.md`: Plantilla de informe comparativo.
+En Quick solo deben bajar vocabulario y artefactos. En Voice se imitan las decisiones del usuario, no sus frases; con menos de 80 palabras o registro distinto, se dice en vez de inventar un perfil.
 
-### Ejecución del Auditor Estilístico
+### Score 0–100
+**Más alto = más IA.** Medición reproducible, no veredicto de autoría.
+
+| Señal | Peso | Qué mide |
+|---|---:|---|
+| `vocabulario_ia` | 30% | Lista negra por 1000 palabras, con saturación |
+| `uniformidad_frases` | 25% | % de frases dentro de ±20% de la media |
+| `patrones_estructurales` | 30% | «No solo X sino Y», tríadas, cierre moral, listas simétricas, párrafos uniformes |
+| `artefactos_chatbot` | 15% | «Como modelo», «aquí tienes», ofertas de seguimiento |
+
+`total` es la media ponderada. Niveles: `bajo` (<20), `moderado` (<40), `medio` (<60), `alto` (<80), `muy alto` (≥80). Con textos cortos la densidad usa una base mínima de 250 palabras; la uniformidad necesita ≥4 frases. Un informe formal legítimo puede rondar 30–40 sin ser IA: el número se lee junto a los hallazgos.
+
+### Reglas No Negociables
+1. **Honestidad factual:** un dato, cifra, cita o fecha sin fuente se marca para verificar; nunca se inventa, redondea ni «aproxima».
+2. **Protección de estructura:** no se toca código, frontmatter, enlaces, correos, cifras, nombres propios, rutas, versiones ni tablas. El script los enmascara antes de medir.
+3. **Registro:** LinkedIn, email, artículo o informe tienen convenciones distintas; el registro manda sobre el catálogo.
+4. **Fidelidad semántica:** se cambia la arquitectura textual y el estilo, no los hechos.
+
+### Sub-skills
+| Sub-skill | Qué hace | Toca el texto |
+|---|---|---|
+| `humanizar` | Reescritura en Quick/Full/Voice, recorte de relleno y score antes/después. | Sí |
+| `detector-ia` | Solo puntuar y detectar: señales, datos sin fuente y segmentos protegidos. | No |
+
+### Referencias, Plantilla y Corpus
+- `references/03-patrones-numerados.md`: catálogo 1–40 + pack español.
+- `references/lista-negra.md`, `01-patrones-sintacticos.md`, `02-tecnicas-reescritura.md`.
+- `templates/informe-auditoria.md`: score antes/después, datos a verificar y patrones dejados a propósito.
+- `tests/corpus/`: 2 textos de IA, 2 humanos, 1 con datos sin fuente y 1 con código y enlaces.
+
+### Uso y Tests
 ```bash
-# Auditar texto directo
-python humanizador-anti-ia/scripts/audit_style.py --text "Tu texto aquí..."
+py humanizador-anti-ia/scripts/audit_style.py --text "Tu texto aquí..."
+py humanizador-anti-ia/scripts/audit_style.py --file borrador.md --markdown
+py humanizador-anti-ia/scripts/audit_style.py --file borrador.md --json
+py humanizador-anti-ia/scripts/audit_style.py --file borrador.md --score
 
-# Auditar archivo con salida en Markdown
-python humanizador-anti-ia/scripts/audit_style.py --file borrador.md --markdown
-
-# Auditar archivo con salida estructurada en JSON
-python humanizador-anti-ia/scripts/audit_style.py --file borrador.md --json
+py -m unittest discover -s humanizador-anti-ia/tests -v
 ```
 
 ---
@@ -56,43 +77,64 @@ python humanizador-anti-ia/scripts/audit_style.py --file borrador.md --json
 ## 🇬🇧 English
 
 ### Table of Contents
-1. [Purpose and Approach](#purpose-and-approach)
-2. [Statistical Metrics Evaluated](#statistical-metrics-evaluated)
-3. [Core Editing Rules](#core-editing-rules)
-4. [Files and References](#files-and-references)
-5. [Running the Stylistic Auditor](#running-the-stylistic-auditor)
+1. [Purpose](#purpose)
+2. [Modes](#modes)
+3. [0–100 Score](#0100-score)
+4. [Non-Negotiable Rules](#non-negotiable-rules)
+5. [Sub-skills](#sub-skills-1)
+6. [References, Template and Corpus](#references-template-and-corpus)
+7. [Usage and Tests](#usage-and-tests)
 
-### Purpose and Approach
-This module rewrites text with synthetic AI cadence into natural, organic Spanish prose with authentic author voice, asymmetric rhythm, and enriched lexical entropy.
+### Purpose
+Rewrites AI-cadence text to restore rhythm, specificity and author voice. It is not a synonym swapper: the work is in content and structure. The **40 numbered patterns** catalog (strongest to weakest) is the mandatory reference, with a Spanish tells pack.
 
-### Statistical Metrics Evaluated
-- **Burstiness (Coefficient of Variation $\ge 0.45$):** Marked contrast between short punchy sentences (4–8 words) and extended compound clauses (22–35 words).
-- **Fernández-Huerta Readability:** Standard readability formula specifically calibrated for Spanish syllable structures.
-- **Lexical Diversity (Type-Token Ratio):** Ratio between unique vocabulary and total word count.
-- **Pattern Detection:** Flags em-dashes (`—`), passive constructions, and repetitive consecutive sentence lengths.
+**3-skill package:** master + `humanizar` (rewrites) and `detector-ia` (measures only).
 
-### Core Editing Rules
-1. **Triad Breaking:** Avoid symmetrical lists of 3 adjectives or parallel verbs.
-2. **Zero Robotic Connectors:** Ban formulaic transitions such as *"En conclusión"*, *"Asimismo"*, *"Cabe destacar"*.
-3. **Abrupt Closures:** End texts on the final actionable fact; purge generic philosophical wrap-ups.
-4. **Active Voice:** Replace periphrastic passive structures with direct action verbs.
+### Modes
+| Mode | What it touches |
+|---|---|
+| **Quick** | Tier 1/2 vocabulary, chatbot artifacts and obvious filler; structure untouched. |
+| **Full** (default) | Full catalog: content, rhythm, syntax, structure, vocabulary and artifacts; 20–30% filler trim. |
+| **Voice** | Full + calibration against 2–3 paragraphs from the user. |
 
-### Files and References
-- `SKILL.md`: Core directives and editorial workflow.
-- `references/lista-negra.md`: Banned clichés and organic replacements.
-- `references/01-patrones-sintacticos.md`: Perplexity and burstiness mechanics.
-- `references/02-tecnicas-reescritura.md`: Staccato, juxtaposition, and sensory grounding.
-- `scripts/audit_style.py`: Deterministic evaluator.
-- `templates/informe-auditoria.md`: Comparative audit report template.
+In Quick only vocabulary and artifacts should drop. In Voice the user's decisions are imitated, not their sentences; with fewer than 80 words or a different register, say so instead of inventing a profile.
 
-### Running the Stylistic Auditor
+### 0–100 Score
+**Higher = more AI.** A reproducible measurement, not a verdict on authorship.
+
+| Signal | Weight | What it measures |
+|---|---:|---|
+| `vocabulario_ia` | 30% | Banned vocabulary per 1000 words, saturated |
+| `uniformidad_frases` | 25% | % of sentences within ±20% of the mean length |
+| `patrones_estructurales` | 30% | "Not only X but Y", triads, moralizing close, symmetric lists, uniform paragraphs |
+| `artefactos_chatbot` | 15% | "As a model", "here you go", follow-up offers |
+
+`total` is the weighted mean. Levels: `low` (<20), `moderate` (<40), `medium` (<60), `high` (<80), `very high` (≥80). Short texts use a 250-word floor for density; uniformity needs ≥4 sentences. A legitimate formal report can score 30–40 without being AI: read the number next to the findings.
+
+### Non-Negotiable Rules
+1. **Factual honesty:** any unsourced figure, quote or date is flagged for verification; never invented, rounded or "approximated".
+2. **Structure protection:** code, frontmatter, links, emails, figures, proper nouns, paths, versions and tables are untouched. The script masks them before measuring.
+3. **Register:** LinkedIn, email, article and formal report follow different conventions; register wins over the catalog.
+4. **Semantic fidelity:** textual architecture and style change, facts do not.
+
+### Sub-skills
+| Sub-skill | Purpose | Edits text |
+|---|---|---|
+| `humanizar` | Quick/Full/Voice rewrite, filler trim and before/after score. | Yes |
+| `detector-ia` | Score and detect only: signals, unsourced data and protected segments. | No |
+
+### References, Template and Corpus
+- `references/03-patrones-numerados.md`: catalog 1–40 + Spanish pack.
+- `references/lista-negra.md`, `01-patrones-sintacticos.md`, `02-tecnicas-reescritura.md`.
+- `templates/informe-auditoria.md`: before/after score, data to verify and patterns left on purpose.
+- `tests/corpus/`: 2 AI texts, 2 human texts, 1 with unsourced data and 1 with code and links.
+
+### Usage and Tests
 ```bash
-# Evaluate raw text string
-python humanizador-anti-ia/scripts/audit_style.py --text "Your text here..."
+py humanizador-anti-ia/scripts/audit_style.py --text "Your text here..."
+py humanizador-anti-ia/scripts/audit_style.py --file draft.md --markdown
+py humanizador-anti-ia/scripts/audit_style.py --file draft.md --json
+py humanizador-anti-ia/scripts/audit_style.py --file draft.md --score
 
-# Evaluate file with Markdown output
-python humanizador-anti-ia/scripts/audit_style.py --file draft.md --markdown
-
-# Evaluate file with JSON output
-python humanizador-anti-ia/scripts/audit_style.py --file draft.md --json
+py -m unittest discover -s humanizador-anti-ia/tests -v
 ```

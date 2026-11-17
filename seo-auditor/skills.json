@@ -1,0 +1,40 @@
+{
+  "format": "skills-ia-package",
+  "format_version": "1.0",
+  "name": "seo-auditor",
+  "version": "2.0.0",
+  "description": "Auditoría y optimización SEO/GEO con maestro + 5 sub-skills (audit, plan, execute, serp, compare), rúbrica 0-100 y evidencia reproducible.",
+  "author": "Alberto Ortiz",
+  "skills": [
+    {
+      "name": "seo-auditor",
+      "path": "SKILL.md",
+      "description": "Maestro: modos web/source/local/hybrid/page, rúbrica 0-100 por dimensiones, veredicto en una línea, reglas duras y flujo Audit → Plan → Execute."
+    },
+    {
+      "name": "seo-audit",
+      "path": "seo-audit/SKILL.md",
+      "description": "Auditoría completa y módulos de diagnóstico: indexación, presencia indirecta, perf, headers, schema con rich preview, hreflang, on-page y rescore sin red."
+    },
+    {
+      "name": "seo-plan",
+      "path": "seo-plan/SKILL.md",
+      "description": "Convierte audit.json en PLAN.md priorizado por severidad y borradores DRAFT (robots, llms.txt, meta tags, JSON-LD) sin tocar el sitio."
+    },
+    {
+      "name": "seo-execute",
+      "path": "seo-execute/SKILL.md",
+      "description": "Aplica el plan con --apply y backups .bak, deja los snippets para integración manual y verifica con una nueva auditoría y compare."
+    },
+    {
+      "name": "seo-serp",
+      "path": "seo-serp/SKILL.md",
+      "description": "Simulador de SERP (Google escritorio/móvil, Bing) y tarjetas sociales (WhatsApp, Facebook, LinkedIn, X) con medidor de ancho y aviso de truncamiento."
+    },
+    {
+      "name": "seo-compare",
+      "path": "seo-compare/SKILL.md",
+      "description": "Diff entre dos auditorías (mejorado/empeorado/nuevo/resuelto) con delta por dimensión y aviso de must nuevos, sin volver a la red."
+    }
+  ]
+}

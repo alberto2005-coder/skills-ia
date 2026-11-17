@@ -1,0 +1,25 @@
+{
+  "format": "skills-ia-package",
+  "format_version": "1.0",
+  "name": "agent-red-team",
+  "version": "2.0.0",
+  "description": "Auditoría de seguridad ofensiva de skills, MCP y carpetas de instrucciones: maestro + escaneo rápido (guidance) y auditoría completa con verificación.",
+  "author": "Alberto Ortiz",
+  "skills": [
+    {
+      "name": "agent-red-team",
+      "path": "SKILL.md",
+      "description": "Maestro: elige modo (guidance vs auditoría completa), protocolo 0-5, nivel RECHAZO, excepción de code fences, ledger, esquema JSON y límites."
+    },
+    {
+      "name": "red-scan",
+      "path": "red-scan/SKILL.md",
+      "description": "Escaneo rápido en modo guidance: veredicto, hallazgos con fichero:línea y límites en el chat, sin crear ficheros."
+    },
+    {
+      "name": "red-audit",
+      "path": "red-audit/SKILL.md",
+      "description": "Auditoría completa: superficies, escaneo estático, revisión adversarial, verificación independiente (confirmed/needs_validation/rejected), ledger e informe JSON validable."
+    }
+  ]
+}

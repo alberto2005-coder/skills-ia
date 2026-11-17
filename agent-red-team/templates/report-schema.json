@@ -1,0 +1,156 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-red-team.local/schemas/report-schema.json",
+  "title": "Informe de auditoría agent-red-team",
+  "description": "Esquema de la salida JSON del informe. Un hallazgo solo puede ser 'confirmed' tras pasar la fase de verificación independiente; si no se refuta ni se confirma queda como 'needs_validation'.",
+  "type": "object",
+  "required": ["herramienta", "target", "fecha", "modo", "veredicto", "puntuacion_riesgo", "findings"],
+  "properties": {
+    "herramienta": {
+      "type": "string",
+      "const": "agent-red-team"
+    },
+    "version": {
+      "type": "string",
+      "description": "Versión del motor o del informe."
+    },
+    "target": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Ruta o identificador del paquete auditado."
+    },
+    "fecha": {
+      "type": "string",
+      "description": "Fecha UTC en formato ISO-8601."
+    },
+    "modo": {
+      "type": "string",
+      "enum": ["guidance", "auditoria_completa"],
+      "description": "guidance = consulta puntual sin ficheros; auditoria_completa = solicitada explícitamente por el usuario."
+    },
+    "veredicto": {
+      "type": "string",
+      "enum": ["APROBADO", "PRECAUCION", "BLOQUEADO"]
+    },
+    "puntuacion_riesgo": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "rechazo": {
+      "type": "boolean",
+      "default": false,
+      "description": "true si se disparó al menos una combinación del nivel REJECT."
+    },
+    "combos_reject": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Identificadores de combinación disparados (RJ-01 ... RJ-06)."
+    },
+    "findings": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/finding"}
+    },
+    "cobertura": {
+      "type": "array",
+      "description": "Copia del ledger de cobertura usado en el informe.",
+      "items": {"$ref": "#/definitions/cobertura"}
+    }
+  },
+  "additionalProperties": true,
+  "definitions": {
+    "finding": {
+      "type": "object",
+      "required": [
+        "id",
+        "titulo",
+        "severidad",
+        "categoria",
+        "fichero",
+        "linea",
+        "evidencia",
+        "verificacion",
+        "recomendacion"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Z]{2,4}-[0-9]{2,3}$",
+          "description": "Identificador estable, p. ej. SEC-01 o REJ-01."
+        },
+        "titulo": {
+          "type": "string",
+          "minLength": 3
+        },
+        "severidad": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"]
+        },
+        "nivel": {
+          "type": "string",
+          "enum": ["REJECT", "normal"],
+          "default": "normal",
+          "description": "REJECT para combinaciones que fallan siempre."
+        },
+        "categoria": {
+          "type": "string",
+          "minLength": 3,
+          "description": "Familia del hallazgo (inyección, Unicode, exfiltración, RCE, supply chain...)."
+        },
+        "fichero": {
+          "type": "string",
+          "minLength": 1
+        },
+        "linea": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "0 cuando el hallazgo es de fichero completo."
+        },
+        "evidencia": {
+          "type": "string",
+          "description": "Fragmento literal y mínimo (sin secretos completos)."
+        },
+        "verificacion": {
+          "type": "string",
+          "enum": ["confirmed", "needs_validation", "rejected"],
+          "description": "Resultado de la fase de verificación independiente."
+        },
+        "justificacion_verificacion": {
+          "type": "string",
+          "description": "Por qué se confirmó, se dejó pendiente o se refutó (explicación benigna encontrada)."
+        },
+        "recomendacion": {
+          "type": "string",
+          "minLength": 3
+        }
+      }
+    },
+    "cobertura": {
+      "type": "object",
+      "required": ["superficie", "ficheros", "checks", "estado", "notas"],
+      "additionalProperties": false,
+      "properties": {
+        "superficie": {
+          "type": "string",
+          "minLength": 3
+        },
+        "ficheros": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "checks": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "estado": {
+          "type": "string",
+          "enum": ["covered", "partial", "missing"]
+        },
+        "notas": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
