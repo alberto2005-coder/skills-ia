@@ -44,6 +44,8 @@ py premium-web-designer/scripts/delivery_check.py <carpeta-del-sitio>
 
 Cubre `lang`, título, descripción, canonical, Open Graph, un solo `h1`, orden de encabezados, `alt`, JSON-LD, `:focus-visible`, `prefers-reduced-motion`, compensación de cabecera pegajosa, versión en CSS/JS locales, `robots.txt`, `sitemap.xml` y `llms.txt`. Sale 1 si falla algún `must`.
 
+**`--public` cuando la carpeta va a publicarse.** Sin esa bandera la puerta asume prototipo local y deja en aviso canonical, Open Graph con imagen, `robots.txt` y `sitemap.xml`. Con ella, esos cuatro son `must` y bloquean la entrega: úsala en el gate de salida de una web real, no en un borrador sin dominio.
+
 ### 3. Medición en navegador
 
 Para cada ancho (360, 390, 768, 1024, 1440) ejecuta el snippet de `../references/qa-metrics.md` y anota: desbordamiento, líneas del `h1`, tamaño de los controles, posición de las anclas bajo la cabecera y elementos que se solapan.

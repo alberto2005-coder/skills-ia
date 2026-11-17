@@ -1,7 +1,11 @@
 """Puerta de entrega para una web estática: comprueba lo medible sin navegador.
 
 Uso:
-    py premium-web-designer/scripts/delivery_check.py <carpeta> [--json]
+    py premium-web-designer/scripts/delivery_check.py <carpeta> [--public] [--json]
+
+Sin `--public` la puerta asume un prototipo local y deja en aviso el mínimo de un
+sitio publicado (canonical, Open Graph con imagen, robots.txt y sitemap.xml).
+Con `--public` esos cuatro pasan a `must` y bloquean la entrega.
 
 Código de salida: 0 si no falla ninguna comprobación `must`, 1 si falla alguna,
 2 si la carpeta no existe o no contiene HTML.
@@ -134,7 +138,7 @@ def read_text(path: Path) -> str:
         return ""
 
 
-def check_page(root: Path, result: Result) -> None:
+def check_page(root: Path, result: Result, public: bool = False) -> None:
     pages = find_files(root, ".html")
     index = next((path for path in pages if path.name == "index.html"), pages[0] if pages else None)
 
@@ -210,7 +214,13 @@ def check_page(root: Path, result: Result) -> None:
     result.add("HTML-006", MUST, viewport, "Meta viewport", "ausente" if not viewport else "")
 
     canonical = any(link.get("rel", "").lower() == "canonical" for link in page.links)
-    result.add("HTML-007", SHOULD, canonical, "Enlace canonical", "ausente" if not canonical else "")
+    result.add(
+        "HTML-007",
+        MUST if public else SHOULD,
+        canonical,
+        "Enlace canonical",
+        "ausente" if not canonical else "",
+    )
 
     og = {
         meta.get("property", "").lower()
@@ -219,7 +229,7 @@ def check_page(root: Path, result: Result) -> None:
     }
     result.add(
         "HTML-008",
-        SHOULD,
+        MUST if public else SHOULD,
         {"og:title", "og:description", "og:image"} <= og,
         "Open Graph completo (title, description, image)",
         f"presentes: {sorted(og) or 'ninguno'}",
@@ -338,10 +348,16 @@ def check_css(root: Path, result: Result) -> None:
     )
 
 
-def check_files(root: Path, result: Result) -> None:
+def check_files(root: Path, result: Result, public: bool = False) -> None:
     robots = root / "robots.txt"
     robots_text = read_text(robots) if robots.is_file() else ""
-    result.add("FILE-001", SHOULD, robots.is_file(), "robots.txt", "ausente" if not robots.is_file() else "")
+    result.add(
+        "FILE-001",
+        MUST if public else SHOULD,
+        robots.is_file(),
+        "robots.txt",
+        "ausente" if not robots.is_file() else "",
+    )
     result.add(
         "FILE-002",
         SHOULD,
@@ -351,15 +367,22 @@ def check_files(root: Path, result: Result) -> None:
     )
 
     sitemap = root / "sitemap.xml"
-    result.add("FILE-003", SHOULD, sitemap.is_file(), "sitemap.xml", "ausente" if not sitemap.is_file() else "")
+    result.add(
+        "FILE-003",
+        MUST if public else SHOULD,
+        sitemap.is_file(),
+        "sitemap.xml",
+        "ausente" if not sitemap.is_file() else "",
+    )
 
     llms = root / "llms.txt"
     result.add("FILE-004", NICE, llms.is_file(), "llms.txt para superficies de IA", "ausente" if not llms.is_file() else "")
 
 
-def render(root: Path, result: Result) -> str:
+def render(root: Path, result: Result, public: bool = False) -> str:
     icons = {True: "OK  ", False: "FALLA"}
-    lines = [f"Puerta de entrega — {root}", ""]
+    mode = "sitio publicado" if public else "prototipo local (usa --public al publicar)"
+    lines = [f"Puerta de entrega — {root}", f"Modo: {mode}", ""]
 
     for item in result.items:
         marker = icons[item["ok"]]
@@ -386,6 +409,11 @@ def render(root: Path, result: Result) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Puerta de entrega para una web estática.")
     parser.add_argument("target", help="Carpeta del sitio")
+    parser.add_argument(
+        "--public",
+        action="store_true",
+        help="Exige el mínimo de un sitio publicado: canonical, Open Graph con imagen, robots.txt y sitemap.xml pasan a must.",
+    )
     parser.add_argument("--json", action="store_true", help="Salida JSON")
     args = parser.parse_args(argv)
 
@@ -396,15 +424,16 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     result = Result()
-    check_page(root, result)
+    check_page(root, result, public=args.public)
     check_css(root, result)
-    check_files(root, result)
+    check_files(root, result, public=args.public)
 
     if args.json:
         print(
             json.dumps(
                 {
                     "target": str(root),
+                    "public": args.public,
                     "must_failed": len(result.must_failures()),
                     "items": result.items,
                 },
@@ -413,7 +442,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
     else:
-        print(render(root, result))
+        print(render(root, result, public=args.public))
 
     return 1 if result.must_failures() else 0
 

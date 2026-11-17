@@ -91,7 +91,7 @@ A layout is not approved because it "looks fine". Before delivery, all of this m
 - Local stylesheets and scripts carry a version query so a deploy cannot serve stale CSS.
 - Overlays move focus inside, close with Escape and return focus to the opener.
 
-`py premium-web-designer/scripts/delivery_check.py <carpeta>` verifies the static part: headings, metadata, alt, focus styles, sticky-header offset, cache busting, robots, sitemap and llms. Whatever it cannot measure is measured in the browser by `premium-qa`.
+`py premium-web-designer/scripts/delivery_check.py <carpeta>` verifies the static part: headings, metadata, alt, focus styles, sticky-header offset, cache busting, robots, sitemap and llms. Add `--public` when the folder is going live: canonical, Open Graph with image, `robots.txt` and `sitemap.xml` become `must` and block delivery. Whatever it cannot measure is measured in the browser by `premium-qa`.
 
 ## 11. SUB-SKILLS
 

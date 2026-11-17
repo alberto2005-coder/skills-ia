@@ -38,7 +38,7 @@ Avoid duplicate titles, empty metadata, keyword stuffing, misleading structured 
 
 ## VERIFICATION
 
-`py premium-web-designer/scripts/delivery_check.py <folder>` checks the static half of this list before delivery. Then:
+`py premium-web-designer/scripts/delivery_check.py <folder>` checks the static half of this list before delivery. Pass `--public` for a folder that is actually going live: canonical, Open Graph with image, `robots.txt` and `sitemap.xml` then become `must` instead of advice. Then:
 
 - Measure in a browser: transferred weight, request count, TTFB and layout shifts.
 - Inspect the rendered page at 360, 390, 768, 1024 and 1440 px.
