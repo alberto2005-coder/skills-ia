@@ -67,13 +67,18 @@ Cada hallazgo lleva severidad **crítica / alta / media / baja** según impacto 
 
 1. Alcance y activos (`appsec-recon`), con autorización escrita del propietario del sistema.
 2. Trazado y revisión por superficie: código (`appsec-code`), infraestructura (`appsec-infra`), LLM (`appsec-llm`).
-3. Soporte determinista:
+3. Artefactos y soporte determinista:
 
 ```bash
+py appsec-audit/scripts/init_audit.py <dir>
 py appsec-audit/scripts/scan_secrets.py <ruta>
 py appsec-audit/scripts/map_flows.py <ruta>
-py appsec-audit/scripts/grade.py hallazgos.json
+py appsec-audit/scripts/validate_findings.py <dir>/findings.json
+py appsec-audit/scripts/ledger.py gaps <dir>/coverage-ledger.json --strict
+py appsec-audit/scripts/grade.py <dir>/findings.json
 ```
+
+Los tres artefactos, los veredictos y la regla de fingerprints están en [`references/artifacts.md`](references/artifacts.md).
 
 4. Tribunal y nota (`appsec-report`).
 5. Informe con `templates/report.md`: resumen ejecutivo, hallazgos ordenados, vector paso a paso y parche en diff.

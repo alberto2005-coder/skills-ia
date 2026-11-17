@@ -55,6 +55,9 @@ py appsec-audit/scripts/grade.py hallazgos.json
 ```
 `scan_secrets` busca patrones conocidos (AWS, GitHub, Slack, Stripe, JWT, claves privadas) y asignaciones de alta entropía, con redacción. `map_flows` indexa candidatos fuente→sumidero por lenguaje para priorizar la lectura. `grade` convierte hallazgos validados en nota. Los tres son stdlib, sin red.
 
+### Artefactos de auditoría
+`init_audit.py` crea `<target>/.appsec-audit/` con `findings.json`, `coverage-ledger.json` y `architecture.md`. El hallazgo tiene tres veredictos: `confirmed` (exige severidad, confianza ≥ 7, vector y parche), `needs_validation` (sin severidad y con el dato exacto que falta) y `rejected` (con lo que lo refutó). El fingerprint es `sha256(cwe|fichero|causa raíz)` truncado a 32 hex, sin número de línea, así que sobrevive a refactors y sirve para re-ejecuciones. El ledger marca cada unidad como `planned`, `hunting`, `covered` o `skipped`; `ledger.py gaps --strict` impide cerrar la auditoría con superficie sin revisar.
+
 ### De dónde viene cada mecánica
 | Referencia | Mecánica heredada | Mejora aplicada aquí |
 |---|---|---|
@@ -121,6 +124,9 @@ py appsec-audit/scripts/map_flows.py <path> --json
 py appsec-audit/scripts/grade.py findings.json
 ```
 `scan_secrets` matches known shapes (AWS, GitHub, Slack, Stripe, JWT, private keys) and high-entropy assignments, with redaction. `map_flows` indexes source→sink candidates per language to prioritise reading. `grade` turns validated findings into a grade. All three are stdlib and offline.
+
+### Audit artifacts
+`init_audit.py` creates `<target>/.appsec-audit/` with `findings.json`, `coverage-ledger.json` and `architecture.md`. Every finding has one of three verdicts: `confirmed` (requires severity, confidence ≥ 7, exploit vector and patch), `needs_validation` (no severity, states the exact missing fact) and `rejected` (records what disproved it). The fingerprint is `sha256(cwe|file|root cause)` truncated to 32 hex, with no line number, so it survives refactors and drives re-runs. The ledger marks each unit as `planned`, `hunting`, `covered` or `skipped`; `ledger.py gaps --strict` blocks closing an audit with unreviewed surface.
 
 ### Where each mechanic comes from
 | Reference | Inherited mechanic | Improvement applied here |

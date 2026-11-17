@@ -8,6 +8,17 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-17 · `appsec-audit` 1.1 — Fase 0
+
+#### Añadido
+- **Artefactos verificables:** `init_audit.py` crea `<target>/.appsec-audit/` con `findings.json`, `coverage-ledger.json` y `architecture.md` válidos desde el primer minuto, sin sobrescribir sin `--force`.
+- **`schemas/findings.schema.json` y `schemas/coverage-ledger.schema.json`:** contrato cerrado de ambos artefactos, con campos permitidos y enums.
+- **`validate_findings.py`:** validador determinista que exige severidad solo en `confirmed`, confianza ≥ 7, dos pasos de explotación, parche, `unresolved` en `needs_validation`, `reason` en `rejected`, huella recalculada y `source_unit` existente en el ledger.
+- **`ledger.py`:** alta de unidades superficie × subsistema × clase de ataque, actualización de estado y `gaps --strict` como puerta de cierre.
+- **Fingerprint estable:** `sha256(cwe|fichero|causa raíz)[:32]`, independiente del número de línea, para deduplicar y re-ejecutar.
+- **`references/artifacts.md`** y guía bilingüe: veredictos, huellas y estados del ledger.
+- **Tests:** 25 pruebas nuevas de init, validador y ledger (46 en el paquete).
+
 ### - 2026-11-17 · `appsec-audit` 1.0
 
 #### Añadido
@@ -101,6 +112,17 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-17 · `appsec-audit` 1.1 — Phase 0
+
+#### Added
+- **Verifiable artifacts:** `init_audit.py` creates `<target>/.appsec-audit/` with `findings.json`, `coverage-ledger.json` and `architecture.md`, valid from the start and never overwritten without `--force`.
+- **`schemas/findings.schema.json` and `schemas/coverage-ledger.schema.json`:** closed contract for both artifacts, with allowed fields and enums.
+- **`validate_findings.py`:** deterministic validator requiring severity only on `confirmed`, confidence ≥ 7, two exploit steps, a patch, `unresolved` on `needs_validation`, `reason` on `rejected`, a recomputed fingerprint and a `source_unit` that exists in the ledger.
+- **`ledger.py`:** creates surface × subsystem × attack-class units, updates their state and exposes `gaps --strict` as the closing gate.
+- **Stable fingerprint:** `sha256(cwe|file|root cause)[:32]`, independent of line numbers, for deduplication and re-runs.
+- **`references/artifacts.md`** and bilingual guide: verdicts, fingerprints and ledger states.
+- **Tests:** 25 new tests for init, validator and ledger (46 in the package).
 
 ### - 2026-11-17 · `appsec-audit` 1.0
 

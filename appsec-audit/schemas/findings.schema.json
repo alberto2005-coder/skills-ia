@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://appsec-audit.local/schemas/findings.schema.json",
+  "title": "findings.json",
+  "description": "Hallazgos de una auditoría appsec-audit. Un hallazgo confirmado exige severidad, confianza >= 7, vector y parche; needs_validation no lleva severidad y declara el dato exacto que falta; rejected explica qué lo refutó.",
+  "type": "object",
+  "required": ["audit_id", "target", "findings"],
+  "additionalProperties": false,
+  "properties": {
+    "audit_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identificador estable de la auditoría."
+    },
+    "target": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Ruta, repositorio o servicio auditado."
+    },
+    "created_at": {
+      "type": "string",
+      "description": "Fecha ISO 8601 de creación del artefacto."
+    },
+    "profile": {
+      "enum": ["quick", "standard", "deep"]
+    },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/finding" }
+    }
+  },
+  "definitions": {
+    "finding": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "verdict",
+        "confidence",
+        "cwe",
+        "location",
+        "evidence",
+        "fingerprint"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^F-[0-9]{3,}$" },
+        "title": { "type": "string", "minLength": 1 },
+        "verdict": { "enum": ["confirmed", "needs_validation", "rejected"] },
+        "confidence": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "severity": { "enum": ["critica", "alta", "media", "baja"] },
+        "cwe": { "type": "string", "pattern": "^CWE-[0-9]+$" },
+        "owasp": {
+          "type": "string",
+          "description": "Categoría OWASP, por ejemplo A03 o LLM01."
+        },
+        "location": {
+          "type": "object",
+          "required": ["file", "line"],
+          "additionalProperties": false,
+          "properties": {
+            "file": { "type": "string", "minLength": 1 },
+            "line": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "source_unit": {
+          "type": "string",
+          "pattern": "^U-[0-9]{3,}$",
+          "description": "Unidad del coverage-ledger que originó el hallazgo."
+        },
+        "root_cause": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Causa raíz en una frase; es la base del fingerprint."
+        },
+        "evidence": { "type": "string", "minLength": 1 },
+        "exploit": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Vector paso a paso; obligatorio en confirmed."
+        },
+        "patch": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Diff propuesto; obligatorio en confirmed."
+        },
+        "unresolved": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Dato exacto que falta; obligatorio en needs_validation."
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Qué refutó el candidato; obligatorio en rejected."
+        },
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{32}$",
+          "description": "sha256(cwe|fichero|causa raíz normalizada), truncado a 32 hex."
+        }
+      }
+    }
+  }
+}

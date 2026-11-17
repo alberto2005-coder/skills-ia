@@ -25,6 +25,12 @@ REQUIRED_FILES = [
     "scripts/scan_secrets.py",
     "scripts/map_flows.py",
     "scripts/grade.py",
+    "scripts/init_audit.py",
+    "scripts/validate_findings.py",
+    "scripts/ledger.py",
+    "schemas/findings.schema.json",
+    "schemas/coverage-ledger.schema.json",
+    "references/artifacts.md",
     "skills.json",
 ]
 

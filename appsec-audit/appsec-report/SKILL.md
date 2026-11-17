@@ -59,7 +59,7 @@ Severidad por impacto y explotabilidad reales, no por tipo de CWE. La nota globa
 
 ## Informe
 
-Rellenar `templates/report.md`:
+Rellenar `templates/report.md` y escribir los hallazgos en `findings.json` (esquema en `../schemas/findings.schema.json`):
 
 - **Resumen ejecutivo** en lenguaje de negocio: qué se puede perder y qué hacer primero, en cinco líneas.
 - **Tabla de hallazgos** ordenada por severidad, con `CWE`, `OWASP`, confianza y ubicación.
@@ -74,6 +74,7 @@ Rellenar `templates/report.md`:
 - Nota calculada con el script, no a ojo.
 - Resumen ejecutivo comprensible sin leer el detalle técnico.
 - Parches en diff aplicables, sin cambios de estilo.
+- `findings.json` pasa `validate_findings.py`: sin severidad fuera de `confirmed` y sin unidades `planned` en el ledger.
 
 ## Handoff
 

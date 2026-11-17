@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://appsec-audit.local/schemas/coverage-ledger.schema.json",
+  "title": "coverage-ledger.json",
+  "description": "Unidades de cobertura de una auditoría. Cada unidad es la combinación de superficie de entrada, subsistema y clase de ataque; una unidad planned o hunting es un hueco.",
+  "type": "object",
+  "required": ["audit_id", "target", "units"],
+  "additionalProperties": false,
+  "properties": {
+    "audit_id": { "type": "string", "minLength": 1 },
+    "target": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string" },
+    "updated_at": { "type": "string" },
+    "units": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/unit" }
+    }
+  },
+  "definitions": {
+    "unit": {
+      "type": "object",
+      "required": ["id", "surface", "subsystem", "attack_class", "status", "updated_at"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^U-[0-9]{3,}$" },
+        "surface": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Punto de entrada concreto, por ejemplo POST /login o cola payments."
+        },
+        "subsystem": { "type": "string", "minLength": 1 },
+        "attack_class": {
+          "enum": [
+            "injection",
+            "auth",
+            "access-control",
+            "crypto",
+            "logic",
+            "supply-chain",
+            "cloud-infra",
+            "cicd",
+            "llm-agent",
+            "data-isolation",
+            "availability",
+            "memory-safety",
+            "protocol",
+            "client-side"
+          ]
+        },
+        "status": {
+          "enum": ["planned", "hunting", "covered", "skipped"],
+          "description": "planned y hunting son huecos; skipped exige motivo."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Sub-skill o persona responsable de la unidad."
+        },
+        "checks": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Comprobaciones ejecutadas; obligatorias al marcar covered."
+        },
+        "findings": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^F-[0-9]{3,}$" }
+        },
+        "skip_reason": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Por qué no se revisó; obligatorio en skipped."
+        },
+        "updated_at": { "type": "string" }
+      }
+    }
+  }
+}
