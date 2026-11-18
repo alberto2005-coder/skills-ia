@@ -83,6 +83,16 @@ class TestHotspots(unittest.TestCase):
             self.assertGreaterEqual(top["complexity"], 2)
             self.assertEqual(top["score"], top["churn"] * top["complexity"])
 
+    def test_bare_date_is_normalised_to_midnight(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = self._repo(tmp)
+            code, output = run(["--path", str(repo), "--since", "2026-01-01", "--json"])
+            report = json.loads(output)
+            self.assertEqual(code, 0)
+            self.assertEqual(report["since"], "2026-01-01T00:00:00")
+            self.assertEqual(report["commits"], 2)
+            self.assertEqual(report["files"][0]["path"], "app.py")
+
     def test_since_filters_old_commits(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = self._repo(tmp)

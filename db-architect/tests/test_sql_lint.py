@@ -62,7 +62,7 @@ class TestSqlLint(unittest.TestCase):
 
     def test_table_without_primary_key(self):
         with tempfile.TemporaryDirectory() as tmp:
-            code, report = self._rules(tmp, "CREATE TABLE events (id integer, name text);\n")
+            code, report = self._rules(tmp, "CREATE TABLE events (id integer, name text)\n")
             self.assertEqual(code, 1)
             rules = {item["rule"] for item in report["findings"]}
             self.assertIn("tabla-sin-clave", rules)

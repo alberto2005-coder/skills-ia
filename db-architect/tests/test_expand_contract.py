@@ -25,6 +25,8 @@ ALTER TABLE users ADD CONSTRAINT fk_org FOREIGN KEY (org_id) REFERENCES orgs (id
 DESTRUCTIVE = """
 ALTER TABLE users DROP COLUMN legacy;
 
+ALTER TABLE users DROP CONSTRAINT fk_org;
+
 DROP TABLE invoices;
 """
 
@@ -59,7 +61,7 @@ class TestExpandContract(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertEqual(report["phases"]["expand"], [])
             self.assertEqual([item["kind"] for item in report["phases"]["contract"]],
-                             ["drop-column", "drop-table"])
+                             ["drop-column", "drop-constraint", "drop-table"])
 
     def test_mixed_migration_needs_two_deploys(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -67,7 +69,7 @@ class TestExpandContract(unittest.TestCase):
             report = json.loads(output)
             self.assertEqual(code, 0)
             self.assertFalse(report["deployable_together"])
-            self.assertEqual(report["statements"], 6)
+            self.assertEqual(report["statements"], 7)
 
     def test_not_null_column_warns(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -96,6 +98,31 @@ class TestExpandContract(unittest.TestCase):
             self.assertEqual(code, 1)
             self.assertEqual(report["phases"]["contract"][0]["kind"], "rename")
             self.assertEqual(report["warnings"][0]["rule"], "rename-no-divisible")
+
+    def test_function_body_semicolons_are_not_split(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            sql = "CREATE FUNCTION f() RETURNS int AS $$ SELECT 1; $$ LANGUAGE sql;\n"
+            code, output = run(["--path", self._write(tmp, sql), "--json"])
+            report = json.loads(output)
+            self.assertEqual(report["statements"], 1)
+            self.assertEqual(len(report["phases"]["unknown"]), 1)
+            self.assertEqual(code, 1)
+
+    def test_unrecognised_statement_is_not_expand(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            sql = "DROP INDEX idx_users_seen;\n\nINSERT INTO audit VALUES (1);\n"
+            code, output = run(["--path", self._write(tmp, sql), "--json"])
+            report = json.loads(output)
+            self.assertEqual(code, 1)
+            self.assertEqual(report["phases"]["expand"], [])
+            self.assertEqual(report["phases"]["contract"], [])
+            self.assertEqual(len(report["phases"]["unknown"]), 2)
+            self.assertEqual([item["kind"] for item in report["phases"]["unknown"]],
+                             ["desconocida", "desconocida"])
+            self.assertEqual([item["rule"] for item in report["warnings"]],
+                             ["sentencia-desconocida", "sentencia-desconocida"])
+            self.assertFalse(report["deployable_together"])
+            self.assertEqual(report["statements"], 2)
 
     def test_fail_on_none_never_fails(self):
         with tempfile.TemporaryDirectory() as tmp:

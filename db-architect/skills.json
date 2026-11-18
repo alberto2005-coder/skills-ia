@@ -8,7 +8,7 @@
     {
       "name": "db-architect",
       "path": "SKILL.md",
-      "description": "Maestro: flujo Audit → Guard → Optimize y regla de no aplicar migraciones destructivas."
+      "description": "Maestro: flujo Audit → Guard → Plan → Lock → Drift → Optimize → Seed y regla de no aplicar migraciones destructivas."
     },
     {
       "name": "db-schema-audit",

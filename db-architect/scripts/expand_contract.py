@@ -30,8 +30,8 @@ EXPAND_KINDS = (
 )
 CONTRACT_KINDS = (
     ("drop-table", re.compile(r"^\s*DROP\s+TABLE\b", re.I)),
-    ("drop-column", re.compile(r"^\s*ALTER\s+TABLE\s+\S+\s+DROP\s+(?:COLUMN\s+)?\S+", re.I)),
     ("drop-constraint", re.compile(r"^\s*ALTER\s+TABLE\s+\S+\s+DROP\s+CONSTRAINT\b", re.I)),
+    ("drop-column", re.compile(r"^\s*ALTER\s+TABLE\s+\S+\s+DROP\s+(?:COLUMN\s+)?(?!CONSTRAINT\b)\S+", re.I)),
     ("rename", re.compile(r"^\s*ALTER\s+TABLE\s+\S+\s+RENAME\b", re.I)),
     ("set-not-null", re.compile(r"\bSET\s+NOT\s+NULL\b", re.I)),
     ("alter-type", re.compile(r"\bALTER\s+COLUMN\s+\S+\s+(?:SET\s+DATA\s+)?TYPE\b", re.I)),
@@ -49,8 +49,58 @@ WARNINGS = (
 )
 
 
+DOLLAR_TAG = re.compile(r"\$[A-Za-z_]*\$")
+
+
 def statements(sql: str) -> list[str]:
-    return [chunk.strip() for chunk in sql.split(";") if chunk.strip()]
+    """Separa por `;` sin cortar cadenas ni cuerpos `$$` de funciones."""
+    chunks, current = [], []
+    quote: str | None = None
+    dollar: str | None = None
+    index = 0
+    while index < len(sql):
+        char = sql[index]
+        if dollar is not None:
+            if sql.startswith(dollar, index):
+                current.append(dollar)
+                index += len(dollar)
+                dollar = None
+            else:
+                current.append(char)
+                index += 1
+            continue
+        if quote is not None:
+            current.append(char)
+            if char == quote:
+                if sql.startswith(quote, index + 1):
+                    current.append(quote)
+                    index += 2
+                    continue
+                quote = None
+            index += 1
+            continue
+        if char in "'\"":
+            quote = char
+        elif char == "$":
+            tag = DOLLAR_TAG.match(sql, index)
+            if tag:
+                dollar = tag.group(0)
+                current.append(dollar)
+                index += len(dollar)
+                continue
+        elif char == ";":
+            chunk = "".join(current).strip()
+            if chunk:
+                chunks.append(chunk)
+            current = []
+            index += 1
+            continue
+        current.append(char)
+        index += 1
+    tail = "".join(current).strip()
+    if tail:
+        chunks.append(tail)
+    return chunks
 
 
 def classify(statement: str) -> str:
@@ -60,7 +110,7 @@ def classify(statement: str) -> str:
     for _, pattern in CONTRACT_KINDS:
         if pattern.search(statement):
             return "contract"
-    return "expand"
+    return "unknown"
 
 
 def kind_of(statement: str) -> str:
@@ -71,15 +121,25 @@ def kind_of(statement: str) -> str:
 
 
 def plan(sql: str) -> dict:
-    phases = {"expand": [], "contract": []}
+    phases = {"expand": [], "contract": [], "unknown": []}
     warnings = []
     for statement in statements(sql):
         phase = classify(statement)
+        flattened = re.sub(r"\s+", " ", statement)
         phases[phase].append({
             "step": len(phases[phase]) + 1,
             "kind": kind_of(statement),
-            "statement": re.sub(r"\s+", " ", statement),
+            "statement": flattened,
         })
+        if phase == "unknown":
+            warnings.append({
+                "rule": "sentencia-desconocida",
+                "severity": "high",
+                "statement": flattened,
+                "message": "la sentencia no se reconoce y no se coloca en ninguna fase",
+                "alternative": "revísala a mano y decide si es aditiva o de retirada antes de desplegar",
+            })
+            continue
         for rule, pattern, alternative in WARNINGS:
             if pattern.search(statement):
                 warnings.append({
@@ -92,8 +152,8 @@ def plan(sql: str) -> dict:
     return {
         "phases": phases,
         "warnings": warnings,
-        "deployable_together": not (phases["expand"] and phases["contract"]),
-        "statements": len(phases["expand"]) + len(phases["contract"]),
+        "deployable_together": not (phases["expand"] and phases["contract"]) and not phases["unknown"],
+        "statements": len(phases["expand"]) + len(phases["contract"]) + len(phases["unknown"]),
     }
 
 
@@ -114,7 +174,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.json:
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:
-        for phase in ("expand", "contract"):
+        for phase in ("expand", "contract", "unknown"):
             print(f"{phase}: {len(report['phases'][phase])} sentencia(s)")
             for item in report["phases"][phase]:
                 print(f"  {item['step']}. [{item['kind']}] {item['statement']}")

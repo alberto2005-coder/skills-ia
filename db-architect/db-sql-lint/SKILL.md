@@ -39,7 +39,7 @@ py db-architect/scripts/sql_lint.py --path migrations/ --json --fail-on medium
 ## Límites
 
 - Texto, no dialecto: no distingue PostgreSQL de MySQL y puede marcar sintaxis válida de uno como rara.
-- No formatea ni reescribe: solo señala con fichero, línea y regla.
+- No formatea ni reescribe: solo señala con fichero, línea y regla. Los comentarios de línea no cuentan para los identificadores, pero sí para la longitud de línea.
 - Es un subconjunto pequeño: no cubre las 79 reglas de sqlfluff ni sus reglas de indentación.
 
 ## Gate de salida

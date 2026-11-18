@@ -24,11 +24,9 @@ SEVERITIES = {"low": 1, "medium": 2}
 SKIP_PARTS = {"__pycache__", ".venv", ".git"}
 LOWERCASE_KEYWORD = re.compile(r"^\s*(select|insert|update|delete|create|alter|drop|with)\b", re.M)
 STAR = re.compile(r"\bSELECT\s+\*\s+FROM\b", re.I)
-CREATE_TABLE = re.compile(r"CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)\s*\((.*?)\)\s*;", re.I | re.S)
-NOT_EQUAL = re.compile(r"!=")
-TAB = re.compile(r"\t")
+CREATE_TABLE = re.compile(r"CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)\s*\((.*?)\)\s*(?:;|$)", re.I | re.S)
+COMMENT = re.compile(r"--[^\n]*")
 CAMEL = re.compile(r"\b[a-z]+[A-Z]\w*\b")
-COLUMN_DEF = re.compile(r"^\s*(\w+)\s+(?:integer|int|bigint|serial|text|varchar|boolean|timestamp|date|numeric)", re.I | re.M)
 MAX_LINE = 120
 
 
@@ -58,28 +56,21 @@ def lint_file(path: Path) -> list[dict]:
     for match in STAR.finditer(text):
         add("select-asterisco", "medium", text[:match.start()].count("\n") + 1,
             "SELECT * acopla la consulta al orden de columnas; nómbralas")
-    for match in NOT_EQUAL.finditer(text):
-        add("comparacion-distinta", "low", text[:match.start()].count("\n") + 1,
-            "usa <> en lugar de != para SQL portátil")
-    for match in TAB.finditer(text):
-        add("tabulador", "low", text[:match.start()].count("\n") + 1,
-            "usa espacios en lugar de tabuladores")
     for number, line in enumerate(text.splitlines(), 1):
         if len(line) > MAX_LINE:
             add("linea-larga", "low", number, f"línea de {len(line)} caracteres (máximo {MAX_LINE})")
-        for name in CAMEL.findall(line):
+        code = COMMENT.sub("", line)
+        for name in sorted(set(CAMEL.findall(code))):
             add("identificador-no-snake", "low", number, f"{name} no está en snake_case")
+        if "\t" in code:
+            add("tabulador", "low", number, "usa espacios en lugar de tabuladores")
+        if "!=" in code:
+            add("comparacion-distinta", "low", number, "usa <> en lugar de != para SQL portátil")
     for match in CREATE_TABLE.finditer(text):
         table, block = match.group(1), match.group(2)
         if not re.search(r"\bPRIMARY\s+KEY\b", block, re.I):
             add("tabla-sin-clave", "medium", text[:match.start()].count("\n") + 1,
                 f"la tabla {table} no declara clave primaria")
-        for column_match in COLUMN_DEF.finditer(block):
-            name = column_match.group(1)
-            if name.islower() or "_" in name:
-                continue
-            add("identificador-no-snake", "low", text[:match.start()].count("\n") + 1,
-                f"la columna {name} no está en snake_case")
     return findings
 
 

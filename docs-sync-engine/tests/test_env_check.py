@@ -62,7 +62,7 @@ class TestEnvCheck(unittest.TestCase):
     def test_example_variable_without_use_is_low(self):
         with tempfile.TemporaryDirectory() as tmp:
             code, report = self._run(tmp, "import os\n\nURL = os.getenv(\"DATABASE_URL\")\n",
-                                     example="DATABASE_URL=\nOLD_TOKEN=\n",
+                                     example="DATABASE_URL=\nexport OLD_TOKEN=\n",
                                      docs="Configura DATABASE_URL y OLD_TOKEN.\n")
             self.assertEqual(code, 0)
             self.assertIn(("ejemplo-sin-uso", "OLD_TOKEN"),

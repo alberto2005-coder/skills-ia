@@ -60,6 +60,7 @@ Un maestro y ocho sub-skills con scripts compartidos. Se instala la carpeta comp
 | `reescritura-de-tipo`, `set-not-null` | `lock_audit.py` | alta |
 | `deriva` (`tabla-*`, `columna-*`, `tipo-distinto`) | `drift.py` | media/alta |
 | `columna-obligatoria-en-un-paso`, `rename-no-divisible`, `reescritura-no-divisible` | `expand_contract.py` | alta |
+| `sentencia-desconocida` | `expand_contract.py` | alta |
 | `tabla-sin-clave`, `select-asterisco` | `sql_lint.py` | media |
 | `palabra-clave-minuscula`, `identificador-no-snake`, `comparacion-distinta`, `linea-larga`, `tabulador` | `sql_lint.py` | baja |
 | `consulta-en-bucle` | `query_trace.py` | media |
@@ -106,10 +107,10 @@ Copia la carpeta `db-architect/` completa. Ejemplos de petición:
 uv run python -m unittest discover -s db-architect/tests -t db-architect/tests
 ```
 
-46 pruebas: esquema limpio frente a esquema con hallazgos, migración destructiva frente a reversible, N+1 detectado y no detectado, siembra determinista con la misma semilla, códigos de salida de los seis scripts, y doce sobre bloqueos (cada regla, migración segura, comentarios ignorados, umbral y `--fail-on none`) y deriva (esquema que cuadra, columnas y tablas que sobran o faltan, tipos distintos y renombrado intermedio), y dieciséis sobre el plan de dos fases (aditivo, destructivo, mezcla, columna obligatoria, cambio de tipo, `rename`, `--fail-on none` y ruta ausente) y el lint SQL (fichero limpio, palabra clave en minúscula, `SELECT *`, tabla sin clave, camelCase, `!=` con línea larga, `--fail-on none` y ruta ausente).
+48 pruebas: esquema limpio frente a esquema con hallazgos, migración destructiva frente a reversible, N+1 detectado y no detectado, siembra determinista con la misma semilla, códigos de salida de los seis scripts, y doce sobre bloqueos (cada regla, migración segura, comentarios ignorados, umbral y `--fail-on none`) y deriva (esquema que cuadra, columnas y tablas que sobran o faltan, tipos distintos y renombrado intermedio), y dieciocho sobre el plan de dos fases (aditivo, destructivo, mezcla, columna obligatoria, cambio de tipo, `rename`, sentencia desconocida, cuerpo de función con `;` sin partir, `--fail-on none` y ruta ausente) y el lint SQL (fichero limpio, palabra clave en minúscula, `SELECT *`, tabla sin clave, camelCase, `!=` con línea larga, `--fail-on none` y ruta ausente).
 
 ### Límites
-El análisis es textual y heurístico: no valida el SQL contra un motor real, no conoce dialectos y no modela planes de ejecución. Un esquema generado por ORM sin `.sql` no se audita hasta exportarlo, y la detección de N+1 solo ve consultas escritas dentro del bucle, no las que dispara el ORM por carga diferida. `seed_gen` genera datos sintéticos, nunca extrae datos reales.
+El análisis es textual y heurístico: no valida el SQL contra un motor real, no conoce dialectos y no modela planes de ejecución. Un esquema generado por ORM sin `.sql` no se audita hasta exportarlo, y la detección de N+1 solo ve consultas escritas dentro del bucle, no las que dispara el ORM por carga diferida. `seed_gen` genera datos sintéticos, nunca extrae datos reales. Las sentencias que `expand_contract` no reconoce no se asignan a ninguna fase: salen como desconocidas con aviso.
 
 ---
 
@@ -166,6 +167,7 @@ One master and eight sub-skills with shared scripts. The whole folder is install
 | `reescritura-de-tipo`, `set-not-null` | `lock_audit.py` | high |
 | `deriva` (`tabla-*`, `columna-*`, `tipo-distinto`) | `drift.py` | medium/high |
 | `columna-obligatoria-en-un-paso`, `rename-no-divisible`, `reescritura-no-divisible` | `expand_contract.py` | high |
+| `sentencia-desconocida` | `expand_contract.py` | high |
 | `tabla-sin-clave`, `select-asterisco` | `sql_lint.py` | medium |
 | `palabra-clave-minuscula`, `identificador-no-snake`, `comparacion-distinta`, `linea-larga`, `tabulador` | `sql_lint.py` | low |
 | `consulta-en-bucle` | `query_trace.py` | medium |
@@ -212,7 +214,7 @@ Copy the whole `db-architect/` folder. Example requests:
 uv run python -m unittest discover -s db-architect/tests -t db-architect/tests
 ```
 
-46 tests: clean schema versus schema with findings, destructive versus reversible migration, N+1 detected and not detected, deterministic seeding with the same seed, exit codes for all six scripts, and twelve covering locks (every rule, a safe migration, ignored comments, thresholds and `--fail-on none`) and drift (matching schema, extra or missing columns and tables, type mismatches and an intermediate rename), and sixteen for the two-phase plan (additive, destructive, mixed, mandatory column, type change, `rename`, `--fail-on none` and missing path) and the SQL lint (clean file, lowercase keyword, `SELECT *`, table without a key, camelCase, `!=` with a long line, `--fail-on none` and missing path).
+48 tests: clean schema versus schema with findings, destructive versus reversible migration, N+1 detected and not detected, deterministic seeding with the same seed, exit codes for all six scripts, and twelve covering locks (every rule, a safe migration, ignored comments, thresholds and `--fail-on none`) and drift (matching schema, extra or missing columns and tables, type mismatches and an intermediate rename), and eighteen for the two-phase plan (additive, destructive, mixed, mandatory column, type change, `rename`, unknown statement, function body with `;` kept whole, `--fail-on none` and missing path) and the SQL lint (clean file, lowercase keyword, `SELECT *`, table without a key, camelCase, `!=` with a long line, `--fail-on none` and missing path).
 
 ### Limits
-The analysis is textual and heuristic: it does not validate SQL against a real engine, knows no dialects and models no execution plans. An ORM-generated schema without `.sql` is not audited until exported, and N+1 detection only sees queries written inside the loop, not those triggered by lazy loading. `seed_gen` produces synthetic data and never extracts real records.
+The analysis is textual and heuristic: it does not validate SQL against a real engine, knows no dialects and models no execution plans. An ORM-generated schema without `.sql` is not audited until exported, and N+1 detection only sees queries written inside the loop, not those triggered by lazy loading. `seed_gen` produces synthetic data and never extracts real records. Statements `expand_contract` does not recognise are assigned to no phase: they come out as unknown with a warning.

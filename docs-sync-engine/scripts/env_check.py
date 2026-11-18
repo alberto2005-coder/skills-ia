@@ -55,7 +55,7 @@ def used_variables(root: Path) -> dict[str, list[str]]:
 def example_variables(path: Path) -> set[str]:
     names = set()
     for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
-        line = raw.strip()
+        line = re.sub(r"^export\s+", "", raw.strip())
         if not line or line.startswith("#") or "=" not in line:
             continue
         names.add(line.split("=", 1)[0].strip())

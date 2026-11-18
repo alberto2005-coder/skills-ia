@@ -4,6 +4,9 @@ Uso:
     py refactor-surgeon/scripts/hotspots.py --path . --since 2026-01-01
         [--top 10] [--json] [--fail-on hotspot] [--min-score 1000]
 
+Una fecha sin hora se normaliza a `T00:00:00`: git, con solo la fecha, usa la
+hora actual del día y perdería los commits de la mañana.
+
 Churn = líneas añadidas + borradas por fichero desde `--since`; complejidad =
 suma de `V(G)` de sus funciones. El producto ordena los ficheros que más cambian
 y más cuestan. Es el único script del paquete que lee historia: sin `--since`,
@@ -17,12 +20,19 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 DECISIONS = (ast.If, ast.For, ast.AsyncFor, ast.While, ast.Try, ast.IfExp,
-             ast.comprehension, ast.Assert, ast.With, ast.AsyncWith)
+             ast.Assert, ast.With, ast.AsyncWith)
+
+
+def normalize_since(value: str) -> str:
+    """Una fecha sin hora se fija a medianoche: git la redondearía a la hora actual."""
+    clean = value.strip()
+    return f"{clean}T00:00:00" if re.fullmatch(r"\d{4}-\d{2}-\d{2}", clean) else clean
 
 
 def git(path: Path, *args: str) -> subprocess.CompletedProcess:
@@ -50,6 +60,8 @@ def complexity(path: Path) -> int:
             total += 1
         elif isinstance(node, DECISIONS):
             total += 1
+        elif isinstance(node, ast.comprehension):
+            total += len(node.ifs)
         elif isinstance(node, ast.BoolOp):
             total += len(node.values) - 1
     return max(1, total)
@@ -75,14 +87,18 @@ def churn_per_file(root: Path, since: str) -> tuple[dict[str, int], int]:
 
 def measure(root: Path, since: str, top: int) -> dict:
     churn, commits = churn_per_file(root, since)
-    files = []
+    files, skipped = [], []
     for name, lines in churn.items():
-        score = lines * complexity(root / name)
+        target = root / name
+        if not target.exists():
+            skipped.append(name)
+            continue
+        value = complexity(target)
         files.append({
             "path": name,
             "churn": lines,
-            "complexity": complexity(root / name),
-            "score": score,
+            "complexity": value,
+            "score": lines * value,
         })
     files.sort(key=lambda item: (-item["score"], item["path"]))
     return {
@@ -91,6 +107,7 @@ def measure(root: Path, since: str, top: int) -> dict:
         "commits": commits,
         "files": files[:top],
         "total_files": len(files),
+        "skipped": len(skipped),
     }
 
 
@@ -117,11 +134,12 @@ def main(argv: list[str] | None = None) -> int:
     if shallow.stdout.strip() == "true":
         return not_measured("clon shallow: la historia está truncada y el churn sería falso", args.json)
 
-    report = measure(root, args.since, args.top)
+    report = measure(root, normalize_since(args.since), args.top)
     if args.json:
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:
-        print(f"desde {report['since']} · commits {report['commits']} · ficheros {report['total_files']}")
+        print(f"desde {report['since']} · commits {report['commits']} · ficheros {report['total_files']} "
+              f"· omitidos (borrados) {report['skipped']}")
         for item in report["files"]:
             print(f"  {item['score']:>6}  churn {item['churn']:>4} × complejidad {item['complexity']:>3}  {item['path']}")
 

@@ -32,7 +32,7 @@ py refactor-surgeon/scripts/hotspots.py --path . --since 2026-01-01T00:00:00 --t
 | Complejidad | Suma de `V(G)` de las funciones del fichero; los que no son Python cuentan 1 |
 | Score | Churn × complejidad, ordenado de mayor a menor |
 
-Cada fila del informe lleva ruta, churn, complejidad y score, para poder discutir el número y no la intuición.
+Cada fila del informe lleva ruta, churn, complejidad y score, para poder discutir el número y no la intuición. Los ficheros que ya no existen se cuentan aparte (`skipped`) y no entran en el ranking: recomendar refactorizar un fichero borrado no sirve de nada.
 
 ## No medido
 
@@ -41,7 +41,7 @@ Cada fila del informe lleva ruta, churn, complejidad y score, para poder discuti
 | Falta `--since` | `measured: false`, salida 2 |
 | La ruta no es un repositorio git | `measured: false`, salida 2 |
 | Clon shallow (historia truncada) | `measured: false`, salida 2 |
-| `--since` con solo fecha | Git redondea a la hora actual del día: usa `AAAA-MM-DDTHH:MM:SS` |
+| `--since` con solo fecha | Se normaliza a `AAAA-MM-DDT00:00:00` antes de llamar a git |
 
 La degradación es explícita a propósito: un churn calculado sobre historia truncada parece un dato y no lo es.
 

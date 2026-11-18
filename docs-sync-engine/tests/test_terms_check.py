@@ -57,15 +57,22 @@ class TestTermsCheck(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             code, report = self._run(tmp, "El proyecto usa openapi en los contratos.\n")
             self.assertEqual(code, 0)
-            self.assertEqual(report["findings"][0]["rule"], "grafia-no-canonica")
+            finding = report["findings"][0]
+            self.assertEqual(finding["rule"], "grafia-no-canonica")
+            self.assertEqual(finding["found"], "openapi")
+            self.assertIn("«openapi»", finding["message"])
+            self.assertIn("«OpenAPI»", finding["message"])
+            self.assertNotIn("«OpenAPI» aparece", finding["message"])
             failing, _ = self._run(tmp, "El proyecto usa openapi en los contratos.\n", ["--fail-on", "low"])
             self.assertEqual(failing, 1)
 
-    def test_code_fences_are_ignored(self):
+    def test_code_fences_are_ignored_without_shifting_lines(self):
         with tempfile.TemporaryDirectory() as tmp:
-            code, report = self._run(tmp, "```json\n{\"endpoint\": \"/x\"}\n```\n")
-            self.assertEqual(code, 0)
-            self.assertEqual(report["findings"], [])
+            markdown = "```json\n{\"endpoint\": \"/x\"}\n```\nEste endpoint devuelve los pedidos.\n"
+            code, report = self._run(tmp, markdown)
+            self.assertEqual(code, 1)
+            self.assertEqual(len(report["findings"]), 1)
+            self.assertEqual(report["findings"][0]["line"], 4)
 
     def test_inline_code_is_ignored(self):
         with tempfile.TemporaryDirectory() as tmp:

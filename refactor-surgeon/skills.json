@@ -8,7 +8,7 @@
     {
       "name": "refactor-surgeon",
       "path": "SKILL.md",
-      "description": "Maestro: medir, congelar, cortar y verificar."
+      "description": "Maestro: medir, priorizar, congelar, purgar, deduplicar, desenredar, cortar y verificar."
     },
     {
       "name": "refactor-metrics",

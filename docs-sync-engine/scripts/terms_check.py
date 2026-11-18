@@ -21,7 +21,7 @@ import re
 import sys
 from pathlib import Path
 
-SEVERITIES = {"low": 1, "medium": 2}
+SEVERITIES = {"low": 1, "medium": 2, "high": 3}
 FENCE = re.compile(r"```.*?```", re.S)
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 
@@ -43,7 +43,9 @@ def glossary(path: Path | None) -> list[tuple[str, str]]:
 
 
 def visible_text(markdown: str) -> str:
-    return INLINE_CODE.sub("", FENCE.sub("", markdown))
+    """Quita código sin mover las líneas: los bloques se sustituyen por sus saltos."""
+    without_fences = FENCE.sub(lambda match: "\n" * match.group(0).count("\n"), markdown)
+    return INLINE_CODE.sub("", without_fences)
 
 
 def markdown_files(root: Path) -> list[Path]:
@@ -76,14 +78,17 @@ def check(root: Path, accepted: list[tuple[str, str]], rejected: list[tuple[str,
             pattern = re.compile(rf"\b{re.escape(term)}\b", re.I)
             exact = re.compile(rf"\b{re.escape(term)}\b")
             for number, line in enumerate(lines, 1):
-                if pattern.search(line) and not exact.search(line):
+                match = pattern.search(line)
+                if match and not exact.search(line):
+                    found = match.group(0)
                     findings.append({
                         "file": path.as_posix(),
                         "line": number,
                         "rule": "grafia-no-canonica",
                         "severity": "low",
                         "term": term,
-                        "message": f"«{term}» aparece con otra grafía; la canónica es «{term}»",
+                        "found": found,
+                        "message": f"«{found}» aparece con otra grafía; la canónica es «{term}»",
                     })
     findings.sort(key=lambda item: (item["file"], item["line"], item["rule"]))
     return findings

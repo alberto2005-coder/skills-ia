@@ -32,7 +32,7 @@ py docs-sync-engine/scripts/env_check.py --path src/ --env-example .env.example 
 | `env-sin-documentar` | media | El código la lee y no aparece en la documentación |
 | `ejemplo-sin-uso` | baja | Está en `.env.example` y ningún fichero la lee |
 
-Reconoce `os.environ[...]`, `os.environ.get`, `os.getenv`, `process.env.X` e `import.meta.env.X`.
+Reconoce `os.environ[...]`, `os.environ.get`, `os.getenv`, `process.env.X` e `import.meta.env.X`, y en `.env.example` acepta tanto `CLAVE=` como `export CLAVE=`.
 
 ## Límites
 
