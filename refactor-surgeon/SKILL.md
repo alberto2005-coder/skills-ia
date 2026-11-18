@@ -1,0 +1,46 @@
+---
+name: refactor-surgeon
+description: Refactoriza con red: mide complejidad y anidamiento, graba casos dorados, propone cortes por grafo de llamadas y verifican que la conducta no cambió.
+license: MIT
+metadata:
+  package: refactor-surgeon
+  version: "1.0.0"
+---
+
+# Refactor Surgeon
+
+## Propósito
+
+Cambiar la forma del código sin cambiar lo que hace: primero medir, luego congelar la conducta con casos dorados, después cortar y al final verificar que nada se movió.
+
+## Flujo
+
+1. **Medir** con `refactor-metrics`: complejidad ciclomática, anidamiento y nota de mantenibilidad por función.
+2. **Congelar** con `refactor-harness`: graba los casos dorados antes de tocar nada.
+3. **Cortar** con `refactor-slice`: el grafo de llamadas dice qué funciones forman un módulo.
+4. **Verificar** con `refactor-verify`: los mismos casos deben dar el mismo resultado.
+
+## Sub-skills
+
+| Sub-skill | Qué hace |
+|---|---|
+| `refactor-metrics` | Complejidad, anidamiento y mantenibilidad por función |
+| `refactor-harness` | Graba casos dorados antes del cambio |
+| `refactor-slice` | Componentes conexas del grafo de llamadas |
+| `refactor-verify` | Compara la conducta contra los casos grabados |
+
+## Reglas
+
+- Sin casos dorados no se refactoriza: primero se congela la conducta.
+- Un refactor no cambia comportamiento; si cambia algo, se convierte en otro cambio.
+- Cada corte se justifica con métricas de antes y después, no con impresiones.
+
+## Gate de salida
+
+- Métricas antes y después, y la nota de mantenibilidad.
+- Casos dorados grabados y verificados sin discrepancias.
+- Los cortes aplicados quedan listados con su grupo de funciones.
+
+## Handoff
+
+Entrega a `refactor-verify` el snapshot y el comando de verificación. Si aparece una discrepancia, el cambio se revierte antes de seguir cortando.

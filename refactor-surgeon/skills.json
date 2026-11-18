@@ -1,0 +1,34 @@
+{
+  "format": "skills-ia-package",
+  "format_version": "1.0",
+  "name": "refactor-surgeon",
+  "version": "1.0.0",
+  "description": "Refactor con red: métricas, casos dorados, cortes por grafo de llamadas y verificación.",
+  "skills": [
+    {
+      "name": "refactor-surgeon",
+      "path": "SKILL.md",
+      "description": "Maestro: medir, congelar, cortar y verificar."
+    },
+    {
+      "name": "refactor-metrics",
+      "path": "refactor-metrics/SKILL.md",
+      "description": "Complejidad, anidamiento, parámetros y mantenibilidad."
+    },
+    {
+      "name": "refactor-harness",
+      "path": "refactor-harness/SKILL.md",
+      "description": "Casos dorados antes y después del refactor."
+    },
+    {
+      "name": "refactor-slice",
+      "path": "refactor-slice/SKILL.md",
+      "description": "Componentes conexas del grafo de llamadas como cortes."
+    },
+    {
+      "name": "refactor-verify",
+      "path": "refactor-verify/SKILL.md",
+      "description": "Conducta sin cambios contra el snapshot."
+    }
+  ]
+}

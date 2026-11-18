@@ -1025,6 +1025,88 @@
           "winner": "eval-report"
         }
       ]
+    },
+    "refactor-surgeon": {
+      "positives": [
+        "refactoriza con red: métricas, casos dorados, cortes y verificación",
+        "refactoriza con red: mide, congela casos dorados y verifica"
+      ],
+      "negatives": [
+        {
+          "phrase": "revisa los permisos iam del rol de despliegue",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "audita el seo técnico de la web",
+          "winner": "seo-audit"
+        }
+      ]
+    },
+    "refactor-metrics": {
+      "positives": [
+        "mide la complejidad ciclomática y el anidamiento de las funciones",
+        "mide la complejidad del módulo por función y su mantenibilidad",
+        "mide el anidamiento y los parámetros de cada función"
+      ],
+      "negatives": [
+        {
+          "phrase": "publica la landing con precios por país y listing",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "calcula el coste de los tokens del modelo",
+          "winner": "finops-llm-scan"
+        }
+      ]
+    },
+    "refactor-harness": {
+      "positives": [
+        "graba casos dorados antes de refactorizar y reprodúcelos después",
+        "congela la conducta del módulo con casos antes de tocar el código"
+      ],
+      "negatives": [
+        {
+          "phrase": "genera el seed de la base de datos de pruebas",
+          "winner": "db-seed-gen"
+        },
+        {
+          "phrase": "revisa la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        }
+      ]
+    },
+    "refactor-slice": {
+      "positives": [
+        "calcula el grafo de llamadas y propone cortar el fichero en módulos",
+        "propone cortes del fichero por componentes conexas del grafo de llamadas"
+      ],
+      "negatives": [
+        {
+          "phrase": "audita el esquema de la base de datos y sus índices",
+          "winner": "db-schema-audit"
+        },
+        {
+          "phrase": "corrige los tests que fallan en el pipeline",
+          "winner": "eval-run"
+        }
+      ]
+    },
+    "refactor-verify": {
+      "positives": [
+        "verifica que el refactor no cambió la conducta contra el snapshot",
+        "verifica que el refactor no cambió el comportamiento con los casos dorados",
+        "comprueba con el snapshot que el refactor no cambió la conducta"
+      ],
+      "negatives": [
+        {
+          "phrase": "revisa la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        },
+        {
+          "phrase": "protege el contrato de la api antes de publicar",
+          "winner": "api-contract-guard"
+        }
+      ]
     }
   },
   "out_of_domain": [
