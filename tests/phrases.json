@@ -958,6 +958,73 @@
           "winner": "agent-red-team"
         }
       ]
+    },
+    "api-contract-guard": {
+      "positives": [
+        "defiende el contrato de la api: diff semver, cruce de rutas y servidor mock",
+        "revisa el contrato de la api: impacto semver y rutas del frontend",
+        "revisa el contrato de la api antes de publicarlo: diff, cruce de rutas y mock"
+      ],
+      "negatives": [
+        {
+          "phrase": "revisa los permisos iam del rol de despliegue",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "revisa el sbom y las cves alcanzables",
+          "winner": "appsec-deps"
+        }
+      ]
+    },
+    "api-diff": {
+      "positives": [
+        "compara dos contratos openapi y calcula el impacto semver",
+        "compara dos contratos openapi y detecta el cambio major en el endpoint o en el tipo de respuesta",
+        "calcula el impacto semver del contrato: endpoint eliminado es major y lo aditivo minor"
+      ],
+      "negatives": [
+        {
+          "phrase": "publica la landing con precios por país y listing",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "audita el seo técnico de la web",
+          "winner": "seo-audit"
+        }
+      ]
+    },
+    "api-code-sync": {
+      "positives": [
+        "cruza las rutas del backend con las llamadas del frontend",
+        "detecta llamadas del frontend a rutas que el backend no declara"
+      ],
+      "negatives": [
+        {
+          "phrase": "revisa la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        },
+        {
+          "phrase": "corrige los tests que fallan en el pipeline",
+          "winner": "eval-run"
+        }
+      ]
+    },
+    "api-mock-server": {
+      "positives": [
+        "levanta un servidor http mock en 127.0.0.1 con los ejemplos del contrato openapi",
+        "responde los ejemplos del contrato sin tocar el backend real",
+        "monta un servidor http mock local que responde los ejemplos declarados en el contrato"
+      ],
+      "negatives": [
+        {
+          "phrase": "calcula el coste mensual de la infraestructura cloud",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "genera el informe de evaluación en html",
+          "winner": "eval-report"
+        }
+      ]
     }
   },
   "out_of_domain": [

@@ -1,0 +1,29 @@
+{
+  "format": "skills-ia-package",
+  "format_version": "1.0",
+  "name": "api-contract-guard",
+  "version": "1.0.0",
+  "description": "Defensa de contratos de API: diff SemVer, cruce de rutas backend/frontend y mock local.",
+  "skills": [
+    {
+      "name": "api-contract-guard",
+      "path": "SKILL.md",
+      "description": "Maestro: diff, cruce y mock con veredicto SemVer."
+    },
+    {
+      "name": "api-diff",
+      "path": "api-diff/SKILL.md",
+      "description": "Impacto SemVer entre dos contratos OpenAPI."
+    },
+    {
+      "name": "api-code-sync",
+      "path": "api-code-sync/SKILL.md",
+      "description": "Rutas del backend frente a llamadas del frontend."
+    },
+    {
+      "name": "api-mock-server",
+      "path": "api-mock-server/SKILL.md",
+      "description": "Servidor mock local con los ejemplos del contrato."
+    }
+  ]
+}
