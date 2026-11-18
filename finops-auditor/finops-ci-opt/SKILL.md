@@ -4,7 +4,7 @@ description: Revisa workflows de GitHub Actions: falta de caché de dependencias
 license: MIT
 metadata:
   package: finops-auditor
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # FinOps CI Opt

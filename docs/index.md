@@ -28,7 +28,7 @@
 - [**Skill Evals**](skill-evals.md): evaluación offline del catálogo con casos desde frases reales, puertas de precisión/recall/MRR, informe reproducible y optimización de descripciones.
 
 ### Paquetes y Sub-skills
-**12 paquetes, 70 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
+**12 paquetes, 71 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
 
 | Paquete | Skills | Maestro | Sub-skills |
 |---|---:|---|---|
@@ -39,7 +39,7 @@
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
 | `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
 | `skill-evals` | 4 | `skill-evals` | `eval-design`, `eval-run`, `eval-report` |
-| `finops-auditor` | 6 | `finops-auditor` | `finops-scan`, `finops-rightsize`, `finops-llm-scan`, `finops-infra-scan`, `finops-ci-opt` |
+| `finops-auditor` | 7 | `finops-auditor` | `finops-scan`, `finops-rightsize`, `finops-llm-scan`, `finops-infra-scan`, `finops-ci-opt`, `finops-diff` |
 | `db-architect` | 7 | `db-architect` | `db-schema-audit`, `db-migration-guard`, `db-lock-audit`, `db-drift`, `db-query-trace`, `db-seed-gen` |
 | `api-contract-guard` | 4 | `api-contract-guard` | `api-diff`, `api-code-sync`, `api-mock-server` |
 | `refactor-surgeon` | 6 | `refactor-surgeon` | `refactor-metrics`, `refactor-harness`, `refactor-clones`, `refactor-slice`, `refactor-verify` |
@@ -98,7 +98,7 @@ uv run python run_tests.py
 - [**Skill Evals**](skill-evals.md): offline catalog evaluation with cases from real phrases, precision/recall/MRR gates, a reproducible report and description optimisation.
 
 ### Packages and Sub-skills
-**12 packages, 70 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
+**12 packages, 71 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
 
 | Package | Skills | Master | Sub-skills |
 |---|---:|---|---|
@@ -109,7 +109,7 @@ uv run python run_tests.py
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
 | `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
 | `skill-evals` | 4 | `skill-evals` | `eval-design`, `eval-run`, `eval-report` |
-| `finops-auditor` | 6 | `finops-auditor` | `finops-scan`, `finops-rightsize`, `finops-llm-scan`, `finops-infra-scan`, `finops-ci-opt` |
+| `finops-auditor` | 7 | `finops-auditor` | `finops-scan`, `finops-rightsize`, `finops-llm-scan`, `finops-infra-scan`, `finops-ci-opt`, `finops-diff` |
 | `db-architect` | 7 | `db-architect` | `db-schema-audit`, `db-migration-guard`, `db-lock-audit`, `db-drift`, `db-query-trace`, `db-seed-gen` |
 | `api-contract-guard` | 4 | `api-contract-guard` | `api-diff`, `api-code-sync`, `api-mock-server` |
 | `refactor-surgeon` | 6 | `refactor-surgeon` | `refactor-metrics`, `refactor-harness`, `refactor-clones`, `refactor-slice`, `refactor-verify` |

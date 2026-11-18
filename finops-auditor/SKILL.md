@@ -4,7 +4,7 @@ description: Auditoría integral de costes Cloud, detección de recursos huérfa
 license: MIT
 metadata:
   package: finops-auditor
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # FinOps Auditor Master
@@ -18,7 +18,8 @@ Orquesta el análisis de costes, uso de recursos y eficiencia financiera en infr
 3. **Fase 2b (Infraestructura)**: `finops-infra-scan` revisa Terraform y manifiestos Kubernetes: buckets sin ciclo de vida, logs sin retención y contenedores sin límites.
 4. **Fase 2c (CI)**: `finops-ci-opt` revisa los workflows de GitHub Actions: falta de caché y doble ejecución de `push` y `pull_request`.
 5. **Fase 3 (Derechizado)**: `finops-rightsize` propone instancias óptimas y planes de ahorro (Reserved Instances / Savings Plans).
-6. **Fase 4 (Informe)**: valida con el motor de reglas y genera el informe ejecutivo en Markdown con `templates/report-template.md`.
+6. **Fase 3b (Diff)**: `finops-diff` compara dos inventarios y rompe el pipeline si el aumento supera los guardrails acordados.
+7. **Fase 4 (Informe)**: valida con el motor de reglas y genera el informe ejecutivo en Markdown con `templates/report-template.md`.
 
 El modo lo fija el alcance: si solo se pide el inventario, basta `finops-scan`; si se pide revisar un repositorio, entran las tres fases 2; el informe completo exige todas.
 
@@ -31,6 +32,7 @@ El modo lo fija el alcance: si solo se pide el inventario, basta `finops-scan`; 
 | `finops-infra-scan` | Coste de Terraform y Kubernetes |
 | `finops-ci-opt` | Coste de CI: caché y concurrencia |
 | `finops-rightsize` | Redimensionado con ahorro, riesgo y verificación |
+| `finops-diff` | Coste entre dos inventarios con guardrails de CI |
 
 ## Reglas
 

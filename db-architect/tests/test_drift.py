@@ -88,9 +88,14 @@ class TestDrift(unittest.TestCase):
 
     def test_migration_dropping_a_declared_table_is_drift(self):
         with tempfile.TemporaryDirectory() as tmp:
-            schema, migrations = self._setup(tmp, MIGRATION_OK + "\nDROP TABLE invoices;\n")
-            code, _ = run(["--schema", str(schema), "--migrations", str(migrations)])
-            self.assertEqual(code, 0)
+            schema, migrations = self._setup(tmp, MIGRATION_OK + "\nDROP TABLE users;\n")
+            code, output = run(["--schema", str(schema), "--migrations", str(migrations), "--json"])
+            report = json.loads(output)
+            rules = {(item["rule"], item["target"]) for item in report["findings"]}
+            self.assertEqual(code, 1)
+            self.assertEqual(rules, {("tabla-solo-en-esquema", "users")})
+            self.assertEqual(report["schema_tables"], 2)
+            self.assertEqual(report["migration_tables"], 1)
 
     def test_rename_and_add_are_applied_in_order(self):
         with tempfile.TemporaryDirectory() as tmp:

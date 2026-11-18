@@ -4,7 +4,7 @@ description: Revisa llamadas a APIs de LLM en el código Python: falta de max_to
 license: MIT
 metadata:
   package: finops-auditor
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # FinOps LLM Scan

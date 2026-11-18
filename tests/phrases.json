@@ -1223,6 +1223,23 @@
           "winner": "eval-run"
         }
       ]
+    },
+    "finops-diff": {
+      "positives": [
+        "compara el coste de dos inventarios y aplica guardrails",
+        "compara el coste entre dos inventarios antes y después",
+        "rompe el pipeline si el coste sube más del límite con max-increase y budget"
+      ],
+      "negatives": [
+        {
+          "phrase": "detecta las migraciones que bloquean la tabla",
+          "winner": "db-lock-audit"
+        },
+        {
+          "phrase": "revisa los permisos iam del rol de despliegue",
+          "winner": "appsec-infra"
+        }
+      ]
     }
   },
   "out_of_domain": [

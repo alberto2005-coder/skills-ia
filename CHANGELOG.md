@@ -8,6 +8,47 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-18 · `finops-auditor` 1.3 — `finops-diff`
+
+#### Añadido
+- **Sub-skill `finops-diff`:** responde «cuánto cuesta este cambio» comparando dos inventarios por `id` de recurso y rompe el pipeline cuando el aumento supera lo acordado.
+- **`scripts/cost_diff.py`:** totales `before_total`/`after_total` con su delta absoluto y porcentual, altas, bajas y cambios de precio por recurso, y guardrails independientes `--max-increase`, `--max-percent` y `--budget`; `--json`, `--fail-on guardrail|none` y códigos de salida 0/1/2 para CI.
+- **8 pruebas** en `finops-auditor/tests/test_cost_diff.py`: inventarios idénticos sin hallazgos, crecimiento con altas y cambios, cada guardrail rompiendo la puerta con su cifra, los tres a la vez, `--fail-on none`, e inventario inexistente devolviendo 2.
+- **Frases de activación:** 3 positivas y 2 negativas en `tests/phrases.json` (ganan `db-lock-audit` y `appsec-infra`), verificadas contra el router antes de escribirlas.
+
+#### Cambiado
+- **Índice raíz `skills.json`:** de **70 a 71 skills**, versión 3.5.0; `finops-auditor` pasa a 1.3.0 con 7 skills.
+- **Maestro del paquete:** fase **3b (Diff)** en el protocolo y fila nueva en la tabla de sub-skills.
+- **`docs/finops-auditor.md`, `README.md` y `docs/index.md`:** «seis sub-skills», comando `cost_diff.py` en los dos bloques, recuentos actualizados y 26 pruebas descritas por paquete.
+
+### - 2026-11-18 · `db-architect` 1.1 — `db-lock-audit` y `db-drift`
+
+#### Añadido
+- **Sub-skill `db-lock-audit`:** detecta la migración que bloquea la tabla o la reescribe, separando el riesgo de datos (del guardián) del tiempo de bloqueo (de este auditor).
+- **`scripts/lock_audit.py`:** reglas `reescritura-de-tipo`, `columna-not-null-con-default`, `set-not-null`, `indice-sin-concurrently`, `rename-inseguro`, `fk-sin-not-valid`, `check-sin-not-valid`, `vacuum-full` y `delete-sin-where`, con `--path`, `--json` y `--fail-on low|medium|high|none` (por defecto `high`); cada hallazgo sale con fichero, línea, tabla, regla y alternativa segura. Códigos 0/1/2, sin motor ni conexión.
+- **Sub-skill `db-drift`:** compara el esquema declarado con el que resulta de reproducir las migraciones en orden alfabético, por tabla, por columna y por tipo.
+- **`scripts/drift.py`:** reglas `tabla-solo-en-esquema`, `tabla-solo-en-migraciones`, `columna-solo-en-esquema`, `columna-solo-en-migraciones` y `tipo-distinto`, aplicando `CREATE TABLE`, `ADD`/`DROP COLUMN`, `ALTER TYPE`, `RENAME COLUMN`, `RENAME TO` y `DROP TABLE`; flags `--schema`, `--migrations`, `--json` y `--fail-on drift|none`.
+- **12 pruebas** repartidas entre `db-architect/tests/test_lock_audit.py` y `db-architect/tests/test_drift.py` (6 cada uno): cada regla de bloqueo, migración segura, comentarios ignorados, umbrales y `--fail-on none`; y esquema que cuadra, columnas y tablas que sobran o faltan, tipos distintos, renombrado intermedio y `DROP` de una tabla declarada.
+- **Frases de activación:** 2 positivas y 2 negativas para `db-lock-audit` (ganan `db-schema-audit` y `replica-diff`) y 3 + 2 para `db-drift` (ganan `db-seed-gen` y `eval-run`), verificadas contra el router antes de escribirlas.
+
+#### Cambiado
+- **Índice raíz `skills.json`:** de **68 a 70 skills**, versión 3.4.0; `db-architect` pasa a 1.1.0 con 7 skills.
+- **Maestro del paquete:** el flujo pasa a **Audit → Guard → Lock → Drift → Optimize**, con las dos sub-skills en la tabla y los gates ampliados.
+- **`docs/db-architect.md`, `README.md` y `docs/index.md`:** filas y comandos nuevos, recuentos actualizados y 30 pruebas descritas por paquete.
+
+### - 2026-11-18 · `refactor-surgeon` 1.1 — `refactor-clones`
+
+#### Añadido
+- **Sub-skill `refactor-clones`:** detección de duplicación por shingles normalizados sobre el AST. Los identificadores se sustituyen por su tipo (`Name`, `arg`, `Attribute`, `Constant:tipo`), así que un renombrado cuenta como clon exacto en lugar de pasar desapercibido.
+- **`scripts/clone_detect.py`:** ventanas de tokens con Jaccard entre funciones, `--shingle` (8), `--min-tokens` (20), `--threshold` (0.8), `--json` y `--fail-on clone|none`; cada par sale con `clon-exacto`/`clon-cercano`, similitud y las dos ubicaciones. Códigos de salida 0/1/2, sin ejecutar el código analizado.
+- **7 pruebas** en `refactor-surgeon/tests/test_clone_detect.py`: renombrado detectado como clon exacto, funciones distintas sin hallazgos, funciones diminutas ignoradas, umbral que filtra el par, `--fail-on none`, ruta ausente y estructura del JSON.
+- **Frases de activación:** 3 positivas y 2 negativas en `tests/phrases.json`, verificadas contra el router antes de escribirlas.
+
+#### Cambiado
+- **Índice raíz `skills.json`:** de **67 a 68 skills**, versión 3.3.0; `refactor-surgeon` pasa a 1.1.0 con 6 skills.
+- **Maestro del paquete:** `refactor-clones` entra en el flujo (medir → congelar → deduplicar → cortar → verificar) y en la tabla de sub-skills.
+- **`docs/refactor-surgeon.md`, `README.md` y `docs/index.md`:** fila y comando nuevos, recuentos actualizados y 19 pruebas descritas por paquete.
+
 ### - 2026-11-18 · `finops-auditor` 2.0, `db-architect`, `api-contract-guard`, `refactor-surgeon` y `docs-sync-engine`
 
 #### Añadido
@@ -177,6 +218,47 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-18 · `finops-auditor` 1.3 — `finops-diff`
+
+#### Added
+- **`finops-diff` sub-skill:** answers "what does this change cost" by comparing two inventories per resource `id`, and fails the pipeline when the increase goes past what was agreed.
+- **`scripts/cost_diff.py`:** `before_total`/`after_total` with their absolute and percentage delta, added, removed and repriced resources, and independent `--max-increase`, `--max-percent` and `--budget` guardrails; `--json`, `--fail-on guardrail|none` and exit codes 0/1/2 for CI.
+- **8 tests** in `finops-auditor/tests/test_cost_diff.py`: identical inventories clean, growth with additions and changes, each guardrail breaking the gate with its figure, all three at once, `--fail-on none`, and a missing inventory returning 2.
+- **Activation phrases:** 3 positives and 2 negatives in `tests/phrases.json` (`db-lock-audit` and `appsec-infra` win), verified against the router before being written.
+
+#### Changed
+- **Root index `skills.json`:** from **70 to 71 skills**, version 3.5.0; `finops-auditor` moves to 1.3.0 with 7 skills.
+- **Package master:** **3b (Diff)** phase in the protocol and a new row in the sub-skill table.
+- **`docs/finops-auditor.md`, `README.md` and `docs/index.md`:** "six sub-skills", `cost_diff.py` command in both blocks, updated counts and 26 tests described per package.
+
+### - 2026-11-18 · `db-architect` 1.1 — `db-lock-audit` and `db-drift`
+
+#### Added
+- **`db-lock-audit` sub-skill:** flags the migration that locks the table or rewrites it, keeping data risk (the guard's job) apart from lock time (this auditor's).
+- **`scripts/lock_audit.py`:** rules `reescritura-de-tipo`, `columna-not-null-con-default`, `set-not-null`, `indice-sin-concurrently`, `rename-inseguro`, `fk-sin-not-valid`, `check-sin-not-valid`, `vacuum-full` and `delete-sin-where`, with `--path`, `--json` and `--fail-on low|medium|high|none` (`high` by default); every finding carries the file, line, table, rule and safe alternative. Exit codes 0/1/2, without an engine or a connection.
+- **`db-drift` sub-skill:** compares the declared schema with the one produced by replaying the migrations in alphabetical order, per table, per column and per type.
+- **`scripts/drift.py`:** rules `tabla-solo-en-esquema`, `tabla-solo-en-migraciones`, `columna-solo-en-esquema`, `columna-solo-en-migraciones` and `tipo-distinto`, applying `CREATE TABLE`, `ADD`/`DROP COLUMN`, `ALTER TYPE`, `RENAME COLUMN`, `RENAME TO` and `DROP TABLE`; flags `--schema`, `--migrations`, `--json` and `--fail-on drift|none`.
+- **12 tests** split between `db-architect/tests/test_lock_audit.py` and `db-architect/tests/test_drift.py` (6 each): every lock rule, a safe migration, ignored comments, thresholds and `--fail-on none`; and a matching schema, extra or missing columns and tables, type mismatches, an intermediate rename and a `DROP` of a declared table.
+- **Activation phrases:** 2 positives and 2 negatives for `db-lock-audit` (`db-schema-audit` and `replica-diff` win) and 3 + 2 for `db-drift` (`db-seed-gen` and `eval-run` win), verified against the router before being written.
+
+#### Changed
+- **Root index `skills.json`:** from **68 to 70 skills**, version 3.4.0; `db-architect` moves to 1.1.0 with 7 skills.
+- **Package master:** the flow becomes **Audit → Guard → Lock → Drift → Optimize**, with both sub-skills in the table and wider gates.
+- **`docs/db-architect.md`, `README.md` and `docs/index.md`:** new rows and commands, updated counts and 30 tests described per package.
+
+### - 2026-11-18 · `refactor-surgeon` 1.1 — `refactor-clones`
+
+#### Added
+- **`refactor-clones` sub-skill:** duplication detection through normalised AST shingles. Identifiers are replaced by their kind (`Name`, `arg`, `Attribute`, `Constant:type`), so a rename shows up as an exact clone instead of slipping through.
+- **`scripts/clone_detect.py`:** token windows with Jaccard across functions, `--shingle` (8), `--min-tokens` (20), `--threshold` (0.8), `--json` and `--fail-on clone|none`; every pair carries `clon-exacto`/`clon-cercano`, its similarity and both locations. Exit codes 0/1/2, without running the analysed code.
+- **7 tests** in `refactor-surgeon/tests/test_clone_detect.py`: rename detected as an exact clone, distinct functions clean, tiny functions ignored, threshold filtering the pair, `--fail-on none`, missing path and JSON shape.
+- **Activation phrases:** 3 positives and 2 negatives in `tests/phrases.json`, verified against the router before being written.
+
+#### Changed
+- **Root index `skills.json`:** from **67 to 68 skills**, version 3.3.0; `refactor-surgeon` moves to 1.1.0 with 6 skills.
+- **Package master:** `refactor-clones` joins the flow (measure → freeze → deduplicate → cut → verify) and the sub-skill table.
+- **`docs/refactor-surgeon.md`, `README.md` and `docs/index.md`:** new row and command, updated counts and 19 tests described per package.
 
 ### - 2026-11-18 · `finops-auditor` 2.0, `db-architect`, `api-contract-guard`, `refactor-surgeon` and `docs-sync-engine`
 

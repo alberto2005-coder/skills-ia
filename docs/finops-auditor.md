@@ -33,7 +33,7 @@ El maestro no usa flags: el modo lo fija el alcance de la petición.
 El modo Escaneo sirve para responder «cuánto estamos tirando» en una sola pasada. El modo Informe es el que se entrega a dirección: añade el plan de redimensionado y separa ahorro confirmado de ahorro potencial.
 
 ### Arquitectura
-Un maestro y cinco sub-skills con assets compartidos (`references/`, `scripts/`, `templates/`). Se instala la carpeta completa.
+Un maestro y seis sub-skills con assets compartidos (`references/`, `scripts/`, `templates/`). Se instala la carpeta completa.
 
 | Sub-skill | Qué hace |
 |---|---|
@@ -43,6 +43,7 @@ Un maestro y cinco sub-skills con assets compartidos (`references/`, `scripts/`,
 | `finops-llm-scan` | Coste de llamadas a LLM: `max_tokens`, modelo caro como clasificador y bucles sin tope |
 | `finops-infra-scan` | Terraform y Kubernetes: buckets sin ciclo de vida, logs sin retención y contenedores sin límites |
 | `finops-ci-opt` | GitHub Actions: caché de dependencias y ejecución duplicada de push y pull_request |
+| `finops-diff` | Coste entre dos inventarios con guardrails `--max-increase`, `--max-percent` y `--budget` |
 
 `finops-scan` entrega el JSON de hallazgos a `finops-rightsize`; el maestro recibe ambos y el informe. Los umbrales viven en [`cloud-pricing-rules.md`](../finops-auditor/references/cloud-pricing-rules.md) y la plantilla en [`report-template.md`](../finops-auditor/templates/report-template.md).
 
@@ -64,6 +65,7 @@ py finops-auditor/scripts/finops_analyzer.py --input inventory.json
 py finops-auditor/scripts/llm_cost_scan.py --path src/ --fail-on medium
 py finops-auditor/scripts/infra_cost_scan.py --path infra/ --json
 py finops-auditor/scripts/ci_cost_scan.py --path .github/workflows/ --json
+py finops-auditor/scripts/cost_diff.py --before antes.json --after despues.json --max-increase 100 --budget 5000 --json
 ```
 
 Salida JSON con `total_monthly_cost`, `total_estimated_waste`, `finops_score` y la lista de `findings`:
@@ -94,7 +96,7 @@ Copia la carpeta `finops-auditor/` completa. Ejemplos de petición:
 uv run python -m unittest discover -s finops-auditor/tests -t finops-auditor/tests
 ```
 
-Dos pruebas propias sobre el analizador: una infraestructura limpia puntúa 100 sin desperdicio y una con un recurso huérfano y una instancia al 3 % detecta los dos hallazgos y baja la nota.
+Dos pruebas propias sobre el analizador (y 26 en el paquete, con las de los escáneres y el diff): una infraestructura limpia puntúa 100 sin desperdicio y una con un recurso huérfano y una instancia al 3 % detecta los dos hallazgos y baja la nota.
 
 ### Límites
 Solo analiza el inventario que se le entrega: no consulta facturación ni métricas en vivo, no aplica cambios y no convierte monedas. La estimación de subutilización asume una bajada de tier del 50 %, y un recurso sin precio o sin métricas se declara ausente en lugar de estimarse. No sustituye a la herramienta de costes del proveedor; la complementa con una segunda lectura reproducible.
@@ -127,7 +129,7 @@ The master uses no flags: the request's scope sets the mode.
 Scan mode answers "how much are we wasting" in one pass. Report mode is the one you hand to leadership: it adds the rightsizing plan and separates confirmed from potential savings.
 
 ### Architecture
-One master and five sub-skills sharing assets (`references/`, `scripts/`, `templates/`). The whole folder is installed.
+One master and six sub-skills sharing assets (`references/`, `scripts/`, `templates/`). The whole folder is installed.
 
 | Sub-skill | What it does |
 |---|---|
@@ -137,6 +139,7 @@ One master and five sub-skills sharing assets (`references/`, `scripts/`, `templ
 | `finops-llm-scan` | LLM call cost: `max_tokens`, expensive model as classifier and unbounded loops |
 | `finops-infra-scan` | Terraform and Kubernetes: buckets without lifecycle, logs without retention and containers without limits |
 | `finops-ci-opt` | GitHub Actions: dependency cache and duplicated push and pull_request runs |
+| `finops-diff` | Cost between two inventories with `--max-increase`, `--max-percent` and `--budget` guardrails |
 
 `finops-scan` hands the findings JSON to `finops-rightsize`; the master receives both plus the report. Thresholds live in [`cloud-pricing-rules.md`](../finops-auditor/references/cloud-pricing-rules.md) and the template in [`report-template.md`](../finops-auditor/templates/report-template.md).
 
@@ -158,6 +161,7 @@ py finops-auditor/scripts/finops_analyzer.py --input inventory.json
 py finops-auditor/scripts/llm_cost_scan.py --path src/ --fail-on medium
 py finops-auditor/scripts/infra_cost_scan.py --path infra/ --json
 py finops-auditor/scripts/ci_cost_scan.py --path .github/workflows/ --json
+py finops-auditor/scripts/cost_diff.py --before antes.json --after despues.json --max-increase 100 --budget 5000 --json
 ```
 
 JSON output with `total_monthly_cost`, `total_estimated_waste`, `finops_score` and the `findings` list:
@@ -188,7 +192,7 @@ Copy the whole `finops-auditor/` folder. Example requests:
 uv run python -m unittest discover -s finops-auditor/tests -t finops-auditor/tests
 ```
 
-Two tests over the analyzer: a clean infrastructure scores 100 with zero waste, and one with an orphaned resource plus an instance at 3 % finds both findings and lowers the score.
+Two tests over the analyzer (26 in the package, including the scanners and the diff): a clean infrastructure scores 100 with zero waste, and one with an orphaned resource plus an instance at 3 % finds both findings and lowers the score.
 
 ### Limits
 It only reads the inventory it is given: no billing or live metrics, it applies no changes and converts no currencies. The underutilisation estimate assumes a 50 % tier drop, and a resource without price or metrics is reported as missing instead of estimated. It does not replace the provider's cost tool; it complements it with a reproducible second reading.
