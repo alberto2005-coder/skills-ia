@@ -4,7 +4,7 @@ description: Propone recomendaciones de cambio de tamaño (right-sizing) para in
 license: MIT
 metadata:
   package: finops-auditor
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # FinOps Right-Sizing

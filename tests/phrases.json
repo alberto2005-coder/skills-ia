@@ -822,6 +822,57 @@
           "winner": "replica-diff"
         }
       ]
+    },
+    "finops-llm-scan": {
+      "positives": [
+        "revisa las llamadas a la api del llm y marca las que no tienen max_tokens",
+        "detecta modelos caros usados como clasificador y bucles de agente sin tope",
+        "audita los prompts de sistema largos sin caché en el código python"
+      ],
+      "negatives": [
+        {
+          "phrase": "revisa los permisos iam y los security groups",
+          "winner": "appsec-audit"
+        },
+        {
+          "phrase": "revisa las dependencias vulnerables del package.json",
+          "winner": "appsec-deps"
+        }
+      ]
+    },
+    "finops-infra-scan": {
+      "positives": [
+        "revisa los buckets sin ciclo de vida y los grupos de logs sin retención",
+        "comprueba que los contenedores de kubernetes tengan límites de cpu y memoria",
+        "detecta bases de datos sin autoscaling y contenedores sin límites en kubernetes"
+      ],
+      "negatives": [
+        {
+          "phrase": "despliega en producción con backups y rollback",
+          "winner": "replica-deploy"
+        },
+        {
+          "phrase": "audita el seo técnico de la web",
+          "winner": "seo-audit"
+        }
+      ]
+    },
+    "finops-ci-opt": {
+      "positives": [
+        "revisa los workflows de github actions y su caché de dependencias",
+        "detecta la ejecución duplicada de push y pull_request sin concurrencia",
+        "revisa el coste de los workflows de github actions: caché y concurrencia"
+      ],
+      "negatives": [
+        {
+          "phrase": "escanea este repositorio de skills en busca de inyecciones de prompt",
+          "winner": "agent-red-team"
+        },
+        {
+          "phrase": "publica la landing con precios por país y listing",
+          "winner": "replica-launch"
+        }
+      ]
     }
   },
   "out_of_domain": [

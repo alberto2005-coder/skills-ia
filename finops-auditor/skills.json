@@ -2,7 +2,7 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "finops-auditor",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Auditoría de costes cloud: recursos huérfanos, sobreaprovisionamiento, derechosizing y planes de ahorro con scripts deterministas.",
   "skills": [
     {
@@ -19,6 +19,21 @@
       "name": "finops-rightsize",
       "path": "finops-rightsize/SKILL.md",
       "description": "Redimensionado de instancias y bases de datos sobreaprovisionadas con ahorro y riesgo por recurso."
+    },
+    {
+      "name": "finops-llm-scan",
+      "path": "finops-llm-scan/SKILL.md",
+      "description": "Coste de IA: max_tokens ausente, modelos caros, bucles sin tope y prompts sin caché."
+    },
+    {
+      "name": "finops-infra-scan",
+      "path": "finops-infra-scan/SKILL.md",
+      "description": "Coste de Terraform y Kubernetes: buckets sin ciclo de vida, logs sin retención, contenedores sin límites."
+    },
+    {
+      "name": "finops-ci-opt",
+      "path": "finops-ci-opt/SKILL.md",
+      "description": "Coste de CI: falta de caché y doble ejecución de push y pull_request sin concurrencia."
     }
   ]
 }
