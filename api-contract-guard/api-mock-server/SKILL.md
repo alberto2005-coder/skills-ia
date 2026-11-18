@@ -4,7 +4,7 @@ description: Levanta un servidor HTTP mock en 127.0.0.1 desde un contrato OpenAP
 license: MIT
 metadata:
   package: api-contract-guard
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # API Mock Server

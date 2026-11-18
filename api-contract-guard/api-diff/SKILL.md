@@ -4,7 +4,7 @@ description: Compara dos contratos OpenAPI y calcula el impacto SemVer: endpoint
 license: MIT
 metadata:
   package: api-contract-guard
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # API Diff

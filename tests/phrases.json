@@ -1307,6 +1307,22 @@
           "winner": "db-seed-gen"
         }
       ]
+    },
+    "api-auth-coverage": {
+      "positives": [
+        "comprueba que las rutas protegidas tengan guarda de autenticación",
+        "cruza la seguridad del contrato openapi con el código"
+      ],
+      "negatives": [
+        {
+          "phrase": "compara dos contratos openapi y calcula el impacto semver",
+          "winner": "api-diff"
+        },
+        {
+          "phrase": "cruza las rutas del backend con las llamadas del frontend",
+          "winner": "api-code-sync"
+        }
+      ]
     }
   },
   "out_of_domain": [

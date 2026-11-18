@@ -4,7 +4,7 @@ description: Cruza rutas del backend con llamadas del frontend con expresiones r
 license: MIT
 metadata:
   package: api-contract-guard
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # API Code Sync

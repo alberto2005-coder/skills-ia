@@ -4,7 +4,7 @@ description: Orquesta la defensa de un contrato de API: diff SemVer entre versio
 license: MIT
 metadata:
   package: api-contract-guard
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # API Contract Guard
@@ -17,8 +17,9 @@ Evitar que un cambio de API rompa a quien la consume: decidir si el impacto es `
 
 1. **Diff** con `api-diff`: compara la versión publicada con la nueva y calcula el impacto SemVer.
 2. **Cruce** con `api-code-sync`: verifica que cada llamada del frontend tenga su endpoint y cada endpoint su consumidor.
-3. **Mock** con `api-mock-server`: sirve los ejemplos del contrato en `127.0.0.1` para probar el cliente sin desplegar nada.
-4. **Veredicto**: un `major` exige versión nueva de la API y plan de migración; un `minor` solo requiere anuncio.
+3. **Cobertura** con `api-auth-coverage`: las rutas que el contrato marca protegidas deben llevar guarda en el código.
+4. **Mock** con `api-mock-server`: sirve los ejemplos del contrato en `127.0.0.1` para probar el cliente sin desplegar nada.
+5. **Veredicto**: un `major` exige versión nueva de la API y plan de migración; un `minor` solo requiere anuncio.
 
 ## Sub-skills
 
@@ -26,6 +27,7 @@ Evitar que un cambio de API rompa a quien la consume: decidir si el impacto es `
 |---|---|
 | `api-diff` | Diff OpenAPI → `major`/`minor`/`patch` con detalle por ruta |
 | `api-code-sync` | Rutas backend vs llamadas frontend: `dead-call` y `sin-consumidor` |
+| `api-auth-coverage` | `security` del contrato frente a las guardas del código |
 | `api-mock-server` | Servidor HTTP local con los ejemplos del contrato |
 
 ## Reglas
@@ -33,6 +35,7 @@ Evitar que un cambio de API rompa a quien la consume: decidir si el impacto es `
 - Sin red: el diff y el cruce son estáticos y el mock solo escucha en loopback.
 - Un `major` no se negocia con un umbral: se publica una versión nueva.
 - Todo hallazgo lleva ruta, método y evidencia; lo que no se pudo analizar se declara.
+- Una ruta que el contrato marca protegida y el código no guarda no se publica.
 
 ## Gate de salida
 

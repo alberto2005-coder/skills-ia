@@ -2,9 +2,9 @@
   "format": "skills-ia-index",
   "format_version": "1.0",
   "updated": "2026-11-18",
-  "version": "3.8.0",
+  "version": "3.9.0",
   "description": "Índice vendor-neutral de los paquetes de Skills IA. Cualquier agente (Claude, Codex, Cursor, Gemini, OpenCode...) puede descubrir las skills escaneando **/SKILL.md; este índice da además el mapa de paquetes y permite varias skills por carpeta.",
-  "skills_total": 75,
+  "skills_total": 76,
   "packages": [
     {
       "name": "replica",
@@ -149,14 +149,15 @@
     {
       "name": "api-contract-guard",
       "path": "api-contract-guard",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "manifest": "api-contract-guard/skills.json",
-      "skill_count": 4,
+      "skill_count": 5,
       "skills": [
         "api-contract-guard",
         "api-diff",
         "api-code-sync",
-        "api-mock-server"
+        "api-mock-server",
+        "api-auth-coverage"
       ]
     },
     {

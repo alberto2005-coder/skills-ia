@@ -29,16 +29,18 @@ El maestro no usa flags: el alcance de la petición fija las fases.
 |---|---|---|
 | **Impacto** | `api-diff` | Nivel SemVer y cambios por ruta |
 | **Consistencia** | `api-code-sync` | `dead-call`, `metodo-distinto` y `sin-consumidor` |
+| **Cobertura** | `api-auth-coverage` | `ruta-sin-guarda`, `ruta-sin-spec` y `spec-sin-security` |
 | **Prueba** | `api-mock-server` | Servidor local con los ejemplos del contrato |
 
 ### Arquitectura
-Un maestro y tres sub-skills con assets compartidos. Se instala la carpeta completa.
+Un maestro y cuatro sub-skills con assets compartidos. Se instala la carpeta completa.
 
 | Sub-skill | Qué hace |
 |---|---|
 | `api-contract-guard` | Maestro: ordena diff, cruce y prueba, y firma el veredicto |
 | `api-diff` | Compara dos contratos OpenAPI y calcula el impacto SemVer |
 | `api-code-sync` | Cruza las rutas del backend con las llamadas del frontend |
+| `api-auth-coverage` | Seguridad del contrato frente a las guardas del código |
 | `api-mock-server` | Sirve los ejemplos del contrato desde loopback |
 
 ### Clasificación
@@ -49,7 +51,7 @@ Un maestro y tres sub-skills con assets compartidos. Se instala la carpeta compl
 | Endpoint o método nuevo | `minor` |
 | Solo cambia la documentación | `patch` |
 
-En el cruce, `dead-call` (el frontend llama a algo inexistente) bloquea el despliegue; `metodo-distinto` es media y `sin-consumidor` es baja y se revisa para decidir si el endpoint se retira.
+En el cruce, `dead-call` (el frontend llama a algo inexistente) bloquea el despliegue; `metodo-distinto` es media y `sin-consumidor` es baja y se revisa para decidir si el endpoint se retira. En la cobertura, `ruta-sin-guarda` es alta y bloquea: el contrato dice que hay autenticación y el código no la aplica.
 
 ### Herramientas
 
@@ -57,6 +59,7 @@ En el cruce, `dead-call` (el frontend llama a algo inexistente) bloquea el despl
 py api-contract-guard/scripts/contract_diff.py --old old.json --new new.json --fail-on major
 py api-contract-guard/scripts/code_sync.py --backend api.py --frontend app.js --json
 py api-contract-guard/scripts/mock_server.py --spec api.json --port 8080
+py api-contract-guard/scripts/auth_coverage.py --spec openapi.json --code src/ --json
 ```
 
 Salida del diff:
@@ -87,10 +90,10 @@ Copia la carpeta `api-contract-guard/` completa. Ejemplos de petición:
 uv run python -m unittest discover -s api-contract-guard/tests -t api-contract-guard/tests
 ```
 
-11 pruebas: endpoint eliminado como `major`, aditivo como `minor`, tipo de respuesta cambiado, JSON ilegible, rutas que cuadran, `dead-call` que rompe la puerta, `--fail-on none`, fichero ausente y el mock sirviendo ejemplos, devolviendo 404 y sin salir de loopback.
+20 pruebas: endpoint eliminado como `major`, aditivo como `minor`, tipo de respuesta cambiado, JSON ilegible, rutas que cuadran, `dead-call` que rompe la puerta, `--fail-on none`, fichero ausente el mock sirviendo ejemplos, devolviendo 404 y sin salir de loopback, y nueve de la cobertura (rutas con guarda, contrato sin guarda, guarda sin `security`, ruta fuera del contrato, operación sin código, seguridad global heredada, Flask con parámetros normalizados, `--fail-on none` y contrato ausente).
 
 ### Límites
-Compara JSON OpenAPI, no YAML, y no resuelve `$ref` externos: solo clasifica el primer código de respuesta (`200`/`201`). El cruce lee decoradores y `fetch`/`axios`/`XHR` por expresión regular, así que una ruta construida dinámicamente aparece como `dead-call` y hay que declararla. El mock no valida cuerpos ni aplica reglas de negocio: es un mock, no un emulador.
+Compara JSON OpenAPI, no YAML, y no resuelve `$ref` externos: solo clasifica el primer código de respuesta (`200`/`201`). El cruce lee decoradores y `fetch`/`axios`/`XHR` por expresión regular, así que una ruta construida dinámicamente aparece como `dead-call` y hay que declararla. El mock no valida cuerpos ni aplica reglas de negocio: es un mock, no un emulador. La cobertura reconoce la guarda por el texto del decorador: una comprobación dentro del cuerpo o un middleware global no aparecen y hay que declararlos.
 
 ---
 
@@ -116,16 +119,18 @@ The master takes no flags: the request's scope sets the phases.
 |---|---|---|
 | **Impact** | `api-diff` | SemVer level and per-route changes |
 | **Consistency** | `api-code-sync` | `dead-call`, `metodo-distinto` and `sin-consumidor` |
+| **Coverage** | `api-auth-coverage` | `ruta-sin-guarda`, `ruta-sin-spec` and `spec-sin-security` |
 | **Test** | `api-mock-server` | Local server serving the contract examples |
 
 ### Architecture
-One master and three sub-skills with shared assets. The whole folder is installed.
+One master and four sub-skills with shared assets. The whole folder is installed.
 
 | Sub-skill | What it does |
 |---|---|
 | `api-contract-guard` | Master: orders diff, sync and test, then signs the verdict |
 | `api-diff` | Compares two OpenAPI contracts and computes SemVer impact |
 | `api-code-sync` | Crosses backend routes with frontend calls |
+| `api-auth-coverage` | Contract security against the guards in the code |
 | `api-mock-server` | Serves the contract examples from loopback |
 
 ### Classification
@@ -136,7 +141,7 @@ One master and three sub-skills with shared assets. The whole folder is installe
 | Endpoint or method added | `minor` |
 | Documentation only | `patch` |
 
-In the sync, `dead-call` (the frontend calls something that does not exist) blocks deployment; `metodo-distinto` is medium and `sin-consumidor` is low and reviewed to decide whether the endpoint is retired.
+In the sync, `dead-call` (the frontend calls something that does not exist) blocks deployment; `metodo-distinto` is medium and `sin-consumidor` is low and reviewed to decide whether the endpoint is retired. In coverage, `ruta-sin-guarda` is high and blocks: the contract claims authentication and the code does not apply it.
 
 ### Tools
 
@@ -144,6 +149,7 @@ In the sync, `dead-call` (the frontend calls something that does not exist) bloc
 py api-contract-guard/scripts/contract_diff.py --old old.json --new new.json --fail-on major
 py api-contract-guard/scripts/code_sync.py --backend api.py --frontend app.js --json
 py api-contract-guard/scripts/mock_server.py --spec api.json --port 8080
+py api-contract-guard/scripts/auth_coverage.py --spec openapi.json --code src/ --json
 ```
 
 Diff output:
@@ -174,7 +180,7 @@ Copy the whole `api-contract-guard/` folder. Example requests:
 uv run python -m unittest discover -s api-contract-guard/tests -t api-contract-guard/tests
 ```
 
-11 tests: removed endpoint as `major`, additive as `minor`, changed response type, unreadable JSON, matching routes, `dead-call` failing the gate, `--fail-on none`, missing file, and the mock serving examples, returning 404 and staying on loopback.
+20 tests: removed endpoint as `major`, additive as `minor`, changed response type, unreadable JSON, matching routes, `dead-call` failing the gate, `--fail-on none`, missing file, the mock serving examples, returning 404 and staying on loopback, and nine for coverage (guarded routes, contract without a guard, guard without `security`, route outside the contract, operation without code, inherited global security, Flask with normalised parameters, `--fail-on none` and missing contract).
 
 ### Limits
-It compares JSON OpenAPI, not YAML, and does not resolve external `$ref`: it only classifies the first response code (`200`/`201`). The sync reads decorators and `fetch`/`axios`/`XHR` through regex, so a dynamically built route shows up as `dead-call` and must be declared. The mock validates no bodies and applies no business rules: it is a mock, not an emulator.
+It compares JSON OpenAPI, not YAML, and does not resolve external `$ref`: it only classifies the first response code (`200`/`201`). The sync reads decorators and `fetch`/`axios`/`XHR` through regex, so a dynamically built route shows up as `dead-call` and must be declared. The mock validates no bodies and applies no business rules: it is a mock, not an emulator. Coverage recognises a guard by the decorator text: a check inside the body or a global middleware does not appear and must be declared.

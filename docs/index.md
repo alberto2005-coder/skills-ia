@@ -28,7 +28,7 @@
 - [**Skill Evals**](skill-evals.md): evaluación offline del catálogo con casos desde frases reales, puertas de precisión/recall/MRR, informe reproducible y optimización de descripciones.
 
 ### Paquetes y Sub-skills
-**12 paquetes, 75 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
+**12 paquetes, 76 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
 
 | Paquete | Skills | Maestro | Sub-skills |
 |---|---:|---|---|
@@ -41,7 +41,7 @@
 | `skill-evals` | 4 | `skill-evals` | `eval-design`, `eval-run`, `eval-report` |
 | `finops-auditor` | 7 | `finops-auditor` | `finops-scan`, `finops-rightsize`, `finops-llm-scan`, `finops-infra-scan`, `finops-ci-opt`, `finops-diff` |
 | `db-architect` | 9 | `db-architect` | `db-schema-audit`, `db-migration-guard`, `db-expand-contract`, `db-lock-audit`, `db-drift`, `db-sql-lint`, `db-query-trace`, `db-seed-gen` |
-| `api-contract-guard` | 4 | `api-contract-guard` | `api-diff`, `api-code-sync`, `api-mock-server` |
+| `api-contract-guard` | 5 | `api-contract-guard` | `api-diff`, `api-code-sync`, `api-auth-coverage`, `api-mock-server` |
 | `refactor-surgeon` | 8 | `refactor-surgeon` | `refactor-metrics`, `refactor-harness`, `refactor-deadcode`, `refactor-clones`, `refactor-cycles`, `refactor-slice`, `refactor-verify` |
 | `docs-sync-engine` | 4 | `docs-sync-engine` | `docs-drift-check`, `docs-arch-gen`, `docs-changelog` |
 
@@ -98,7 +98,7 @@ uv run python run_tests.py
 - [**Skill Evals**](skill-evals.md): offline catalog evaluation with cases from real phrases, precision/recall/MRR gates, a reproducible report and description optimisation.
 
 ### Packages and Sub-skills
-**12 packages, 75 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
+**12 packages, 76 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
 
 | Package | Skills | Master | Sub-skills |
 |---|---:|---|---|
@@ -111,7 +111,7 @@ uv run python run_tests.py
 | `skill-evals` | 4 | `skill-evals` | `eval-design`, `eval-run`, `eval-report` |
 | `finops-auditor` | 7 | `finops-auditor` | `finops-scan`, `finops-rightsize`, `finops-llm-scan`, `finops-infra-scan`, `finops-ci-opt`, `finops-diff` |
 | `db-architect` | 9 | `db-architect` | `db-schema-audit`, `db-migration-guard`, `db-expand-contract`, `db-lock-audit`, `db-drift`, `db-sql-lint`, `db-query-trace`, `db-seed-gen` |
-| `api-contract-guard` | 4 | `api-contract-guard` | `api-diff`, `api-code-sync`, `api-mock-server` |
+| `api-contract-guard` | 5 | `api-contract-guard` | `api-diff`, `api-code-sync`, `api-auth-coverage`, `api-mock-server` |
 | `refactor-surgeon` | 8 | `refactor-surgeon` | `refactor-metrics`, `refactor-harness`, `refactor-deadcode`, `refactor-clones`, `refactor-cycles`, `refactor-slice`, `refactor-verify` |
 | `docs-sync-engine` | 4 | `docs-sync-engine` | `docs-drift-check`, `docs-arch-gen`, `docs-changelog` |
 
