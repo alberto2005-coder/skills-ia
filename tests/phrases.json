@@ -1257,6 +1257,22 @@
           "winner": "refactor-metrics"
         }
       ]
+    },
+    "refactor-cycles": {
+      "positives": [
+        "detecta ciclos de imports entre los módulos",
+        "encuentra módulos que se importan en círculo"
+      ],
+      "negatives": [
+        {
+          "phrase": "encuentra código muerto antes de refactorizar",
+          "winner": "refactor-deadcode"
+        },
+        {
+          "phrase": "propone cortes por componentes del grafo de llamadas",
+          "winner": "refactor-slice"
+        }
+      ]
     }
   },
   "out_of_domain": [

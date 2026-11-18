@@ -4,7 +4,7 @@ description: Graba casos dorados de un módulo antes de refactorizarlo y los rep
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Refactor Harness

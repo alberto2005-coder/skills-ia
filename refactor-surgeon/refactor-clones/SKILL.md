@@ -4,7 +4,7 @@ description: Detecta funciones duplicadas con shingles normalizados del AST: dos
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Refactor Clones

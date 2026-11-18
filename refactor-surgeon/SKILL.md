@@ -4,7 +4,7 @@ description: Refactoriza con red: mide complejidad y anidamiento, graba casos do
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Refactor Surgeon
@@ -19,8 +19,9 @@ Cambiar la forma del código sin cambiar lo que hace: primero medir, luego conge
 2. **Congelar** con `refactor-harness`: graba los casos dorados antes de tocar nada.
 3. **Purgar** con `refactor-deadcode`: imports y definiciones privadas que ya nadie usa.
 4. **Deduplicar** con `refactor-clones`: los bloques que solo cambian de nombre se unifican antes de cortar.
-5. **Cortar** con `refactor-slice`: el grafo de llamadas dice qué funciones forman un módulo.
-6. **Verificar** con `refactor-verify`: los mismos casos deben dar el mismo resultado.
+5. **Desenredar** con `refactor-cycles`: los módulos que se importan en círculo no se cortan todavía.
+6. **Cortar** con `refactor-slice`: el grafo de llamadas dice qué funciones forman un módulo.
+7. **Verificar** con `refactor-verify`: los mismos casos deben dar el mismo resultado.
 
 ## Sub-skills
 
@@ -30,6 +31,7 @@ Cambiar la forma del código sin cambiar lo que hace: primero medir, luego conge
 | `refactor-harness` | Graba casos dorados antes del cambio |
 | `refactor-deadcode` | Imports y definiciones privadas sin uso |
 | `refactor-clones` | Duplicación por shingles normalizados del AST |
+| `refactor-cycles` | Ciclos de imports entre módulos |
 | `refactor-slice` | Componentes conexas del grafo de llamadas |
 | `refactor-verify` | Compara la conducta contra los casos grabados |
 
