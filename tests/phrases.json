@@ -1273,6 +1273,40 @@
           "winner": "refactor-slice"
         }
       ]
+    },
+    "db-expand-contract": {
+      "positives": [
+        "divide la migración en dos fases expand y contract",
+        "planifica el despliegue en dos fases sin cortar la tabla",
+        "separa los cambios aditivos de los destructivos en dos despliegues"
+      ],
+      "negatives": [
+        {
+          "phrase": "detecta las migraciones que bloquean la tabla",
+          "winner": "db-lock-audit"
+        },
+        {
+          "phrase": "compara el esquema declarado con las migraciones reproducidas",
+          "winner": "db-drift"
+        }
+      ]
+    },
+    "db-sql-lint": {
+      "positives": [
+        "revisa el estilo de las sentencias sql",
+        "lint de estilo sobre las consultas y migraciones sql",
+        "comprueba mayúsculas de palabras clave y el select asterisco"
+      ],
+      "negatives": [
+        {
+          "phrase": "audita el esquema y las claves foráneas sin índice",
+          "winner": "db-schema-audit"
+        },
+        {
+          "phrase": "genera el seed de la base de datos de pruebas",
+          "winner": "db-seed-gen"
+        }
+      ]
     }
   },
   "out_of_domain": [

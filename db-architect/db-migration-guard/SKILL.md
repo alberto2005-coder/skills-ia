@@ -4,7 +4,7 @@ description: Clasifica el riesgo de migraciones SQL y Alembic/Django: DROP, TRUN
 license: MIT
 metadata:
   package: db-architect
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # DB Migration Guard

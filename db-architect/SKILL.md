@@ -4,7 +4,7 @@ description: Orquesta la auditoría de bases de datos: esquema, riesgo de migrac
 license: MIT
 metadata:
   package: db-architect
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # DB Architect
@@ -15,12 +15,13 @@ Revisar la base de datos antes de que duela: un esquema sin claves ni índices, 
 
 ## Flujo obligatorio: Audit → Guard → Lock → Drift → Optimize
 
-1. **Audit** con `db-schema-audit`: esquema real, claves primarias, claves foráneas sin índice y sintaxis.
+1. **Audit** con `db-schema-audit`: esquema real, claves primarias, claves foráneas sin índice y sintaxis; `db-sql-lint` revisa el estilo de las mismas sentencias.
 2. **Guard** con `db-migration-guard`: cada migración antes de aplicarse, con su nivel de riesgo y su reversión.
-3. **Lock** con `db-lock-audit`: qué operación bloquea la tabla o la reescribe, y con qué alternativa se evita.
-4. **Drift** con `db-drift`: esquema declarado frente a las migraciones reproducidas, por tabla y por columna.
-5. **Optimize** con `db-query-trace`: consultas dentro de bucles y carga anticipada que falta.
-6. **Seed** con `db-seed-gen`: datos de prueba deterministas cuando falten para verificar.
+3. **Plan** con `db-expand-contract`: qué sentencia va en la fase aditiva y cuál en la de retirada, y qué no se puede partir.
+4. **Lock** con `db-lock-audit`: qué operación bloquea la tabla o la reescribe, y con qué alternativa se evita.
+5. **Drift** con `db-drift`: esquema declarado frente a las migraciones reproducidas, por tabla y por columna.
+6. **Optimize** con `db-query-trace`: consultas dentro de bucles y carga anticipada que falta.
+7. **Seed** con `db-seed-gen`: datos de prueba deterministas cuando falten para verificar.
 
 La regla dura: **ninguna migración destructiva se aplica sin aprobación humana explícita**. El paquete analiza y propone; no ejecuta SQL contra una base real.
 
@@ -30,8 +31,10 @@ La regla dura: **ninguna migración destructiva se aplica sin aprobación humana
 |---|---|
 | `db-schema-audit` | DDL validado en SQLite en memoria, PK ausente y FK sin índice |
 | `db-migration-guard` | `critical`/`warning` por operación y exigencia de `DOWN`/`downgrade()` |
+| `db-expand-contract` | Fases expand/contract y avisos de lo no divisible |
 | `db-lock-audit` | Bloqueo y reescritura por operación, con su alternativa segura |
 | `db-drift` | Esquema declarado frente a migraciones reproducidas |
+| `db-sql-lint` | Estilo SQL: claves, `SELECT *`, palabras clave y snake_case |
 | `db-query-trace` | Patrón N+1 por AST y aviso de carga anticipada ausente |
 | `db-seed-gen` | Inserts deterministas en orden topológico de claves foráneas |
 

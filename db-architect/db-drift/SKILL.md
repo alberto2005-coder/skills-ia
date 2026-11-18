@@ -4,7 +4,7 @@ description: Compara el esquema declarado con el que resulta de reproducir las m
 license: MIT
 metadata:
   package: db-architect
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # DB Drift
