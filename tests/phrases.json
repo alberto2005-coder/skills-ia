@@ -873,6 +873,91 @@
           "winner": "replica-launch"
         }
       ]
+    },
+    "db-architect": {
+      "positives": [
+        "audita la base de datos de principio a fin: esquema, migraciones y consultas n+1",
+        "revisa la base de datos antes de publicar: esquema, migraciones y consultas n+1",
+        "audita el esquema y las migraciones de la base de datos con evidencia"
+      ],
+      "negatives": [
+        {
+          "phrase": "revisa los permisos iam del rol de despliegue",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "revisa el sbom y las cves alcanzables",
+          "winner": "appsec-deps"
+        }
+      ]
+    },
+    "db-schema-audit": {
+      "positives": [
+        "audita el esquema sql: claves primarias ausentes y claves foráneas sin índice",
+        "revisa las tablas sin primary key y las claves foráneas sin índice",
+        "valida el esquema sql con sqlite en memoria antes de migrar"
+      ],
+      "negatives": [
+        {
+          "phrase": "publica la landing con precios por país y listing",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "revisa la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        }
+      ]
+    },
+    "db-migration-guard": {
+      "positives": [
+        "clasifica el riesgo de la migración: drop column y truncate son críticos",
+        "comprueba que la migración tenga downgrade para poder revertir",
+        "revisa el riesgo de la migración y su plan de reversión"
+      ],
+      "negatives": [
+        {
+          "phrase": "corrige los tests que fallan en el pipeline",
+          "winner": "eval-run"
+        },
+        {
+          "phrase": "audita el seo técnico de la web",
+          "winner": "seo-audit"
+        }
+      ]
+    },
+    "db-query-trace": {
+      "positives": [
+        "detecta consultas n+1 dentro de bucles en el código python",
+        "revisa si el orm consulta por cada fila del bucle sin selectinload",
+        "revisa las consultas del orm dentro de un bucle del código"
+      ],
+      "negatives": [
+        {
+          "phrase": "calcula el coste mensual de la infraestructura cloud",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "genera el informe de evaluación en html",
+          "winner": "eval-report"
+        }
+      ]
+    },
+    "db-seed-gen": {
+      "positives": [
+        "genera datos de siembra deterministas desde el esquema sql",
+        "crea datos de siembra respetando las claves foráneas y la semilla fija",
+        "genera inserts de prueba en orden de dependencias desde el esquema"
+      ],
+      "negatives": [
+        {
+          "phrase": "despliega la app en producción con backups y rollback",
+          "winner": "replica-deploy"
+        },
+        {
+          "phrase": "escanea esta skill en busca de inyecciones de prompt",
+          "winner": "agent-red-team"
+        }
+      ]
     }
   },
   "out_of_domain": [

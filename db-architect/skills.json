@@ -1,0 +1,34 @@
+{
+  "format": "skills-ia-package",
+  "format_version": "1.0",
+  "name": "db-architect",
+  "version": "1.0.0",
+  "description": "Auditoría de bases de datos: esquema, migraciones, consultas N+1 y datos de siembra deterministas.",
+  "skills": [
+    {
+      "name": "db-architect",
+      "path": "SKILL.md",
+      "description": "Maestro: flujo Audit → Guard → Optimize y regla de no aplicar migraciones destructivas."
+    },
+    {
+      "name": "db-schema-audit",
+      "path": "db-schema-audit/SKILL.md",
+      "description": "DDL validado en SQLite en memoria, PK ausente y FK sin índice."
+    },
+    {
+      "name": "db-migration-guard",
+      "path": "db-migration-guard/SKILL.md",
+      "description": "Riesgo por operación y exigencia de DOWN/downgrade()."
+    },
+    {
+      "name": "db-query-trace",
+      "path": "db-query-trace/SKILL.md",
+      "description": "Patrón N+1 por AST y carga anticipada ausente."
+    },
+    {
+      "name": "db-seed-gen",
+      "path": "db-seed-gen/SKILL.md",
+      "description": "Inserts deterministas en orden topológico de claves foráneas."
+    }
+  ]
+}

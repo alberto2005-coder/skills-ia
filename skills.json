@@ -2,9 +2,9 @@
   "format": "skills-ia-index",
   "format_version": "1.0",
   "updated": "2026-11-18",
-  "version": "2.8.0",
+  "version": "2.9.0",
   "description": "Índice vendor-neutral de los paquetes de Skills IA. Cualquier agente (Claude, Codex, Cursor, Gemini, OpenCode...) puede descubrir las skills escaneando **/SKILL.md; este índice da además el mapa de paquetes y permite varias skills por carpeta.",
-  "skills_total": 49,
+  "skills_total": 54,
   "packages": [
     {
       "name": "replica",
@@ -125,6 +125,20 @@
         "finops-llm-scan",
         "finops-infra-scan",
         "finops-ci-opt"
+      ]
+    },
+    {
+      "name": "db-architect",
+      "path": "db-architect",
+      "version": "1.0.0",
+      "manifest": "db-architect/skills.json",
+      "skill_count": 5,
+      "skills": [
+        "db-architect",
+        "db-schema-audit",
+        "db-migration-guard",
+        "db-query-trace",
+        "db-seed-gen"
       ]
     }
   ]
