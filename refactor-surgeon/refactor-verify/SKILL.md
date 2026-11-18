@@ -4,7 +4,7 @@ description: Verifica que el refactor no cambió la conducta comparando los caso
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # Refactor Verify

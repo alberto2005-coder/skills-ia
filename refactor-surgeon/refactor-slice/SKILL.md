@@ -4,7 +4,7 @@ description: Calcula el grafo de llamadas de un fichero y propone cortes por com
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # Refactor Slice

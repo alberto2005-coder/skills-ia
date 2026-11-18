@@ -2,9 +2,9 @@
   "format": "skills-ia-index",
   "format_version": "1.0",
   "updated": "2026-11-18",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Índice vendor-neutral de los paquetes de Skills IA. Cualquier agente (Claude, Codex, Cursor, Gemini, OpenCode...) puede descubrir las skills escaneando **/SKILL.md; este índice da además el mapa de paquetes y permite varias skills por carpeta.",
-  "skills_total": 78,
+  "skills_total": 79,
   "packages": [
     {
       "name": "replica",
@@ -163,11 +163,12 @@
     {
       "name": "refactor-surgeon",
       "path": "refactor-surgeon",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "manifest": "refactor-surgeon/skills.json",
-      "skill_count": 8,
+      "skill_count": 9,
       "skills": [
         "refactor-surgeon",
+        "refactor-hotspots",
         "refactor-metrics",
         "refactor-harness",
         "refactor-clones",

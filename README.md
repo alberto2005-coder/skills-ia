@@ -20,7 +20,7 @@
 ### Visión General
 **Skills IA** es una colección de habilidades modulares, deterministas e independientes diseñadas para ser integradas en cualquier asistente de Inteligencia Artificial (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Cada habilidad es autosuficiente y opera sin alterar paquetes globales ni requerir dependencias complejas.
 
-Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica, varias sub-skills con un corte de uso real. Se instalan juntas y comparten assets sin duplicarlos. El índice máquina-legible está en [`skills.json`](skills.json): 12 paquetes, 78 skills.
+Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica, varias sub-skills con un corte de uso real. Se instalan juntas y comparten assets sin duplicarlos. El índice máquina-legible está en [`skills.json`](skills.json): 12 paquetes, 79 skills.
 
 ### Módulos y Sub-skills
 
@@ -36,7 +36,7 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | **[`finops-auditor`](finops-auditor/)** | Auditoría de costes cloud: recursos huérfanos, sobreaprovisionamiento, derechosizing, coste de LLM, infraestructura como código, CI y diff con guardrails. | 7 |
 | **[`db-architect`](db-architect/)** | Auditoría de bases de datos sin motor: esquema, riesgo y bloqueo de migraciones, plan de dos fases, deriva, estilo SQL, consultas N+1 y datos de siembra. | 9 |
 | **[`api-contract-guard`](api-contract-guard/)** | Defensa del contrato de API: impacto SemVer, cruce de rutas backend/frontend, cobertura de autenticación y mock local. | 5 |
-| **[`refactor-surgeon`](refactor-surgeon/)** | Refactor con red: métricas de complejidad, código muerto, detección de clones, ciclos de imports, casos dorados, cortes por grafo de llamadas y verificación. | 8 |
+| **[`refactor-surgeon`](refactor-surgeon/)** | Refactor con red: métricas de complejidad, hotspots por churn, código muerto, detección de clones, ciclos de imports, casos dorados, cortes por grafo de llamadas y verificación. | 9 |
 | **[`docs-sync-engine`](docs-sync-engine/)** | Documentación sincronizada con el código: referencias, glosario, variables de entorno, arquitectura regenerable y CHANGELOG. | 6 |
 
 #### `replica` — maestro + 13 fases
@@ -129,12 +129,13 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | `api-auth-coverage` | Seguridad del contrato frente a las guardas del código. |
 | `api-mock-server` | Servidor mock local con los ejemplos del contrato. |
 
-#### `refactor-surgeon` — maestro + 7 sub-skills
+#### `refactor-surgeon` — maestro + 8 sub-skills
 
 | Sub-skill | Qué hace |
 |---|---|
 | `refactor-surgeon` | Maestro: medir, congelar, cortar y verificar. |
 | `refactor-metrics` | Complejidad `V(G)`, anidamiento, parámetros y mantenibilidad. |
+| `refactor-hotspots` | Churn de `git log` × complejidad, con «no medido» explícito. |
 | `refactor-harness` | Casos dorados grabados antes y reproducidos después. |
 | `refactor-deadcode` | Imports y definiciones privadas que nadie referencia. |
 | `refactor-clones` | Duplicación por shingles normalizados del AST. |
@@ -211,7 +212,7 @@ Las guías completas de cada módulo se encuentran en la carpeta [`docs/`](docs/
 - Los tests usan `unittest`; las herramientas de pruebas y calidad (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) están en el grupo `dev` de `pyproject.toml` y se gestionan con [`uv`](https://docs.astral.sh/uv/).
 - Para preparar el entorno `.venv` y ejecutar todos los tests desde la raíz: `uv sync` y `uv run python run_tests.py`.
 - GitHub Actions ejecuta todas las suites en cada `push` mediante `.github/workflows/tests.yml`.
-- Tests transversales en `tests/`: activación de las 78 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
+- Tests transversales en `tests/`: activación de las 79 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
 
 ### Licencia
 Distribuido bajo la [Licencia MIT](LICENSE).
@@ -231,7 +232,7 @@ Distribuido bajo la [Licencia MIT](LICENSE).
 ### Overview
 **Skills IA** is a collection of modular, deterministic, and self-contained agent skills designed for integration with any AI assistant (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Each skill is independent and operates without modifying global packages or requiring third-party libraries.
 
-Each folder is a **package**: one master skill that orchestrates and, where applicable, sub-skills split by real usage boundaries. Packages share assets without duplication. The machine-readable index is [`skills.json`](skills.json): 12 packages, 78 skills.
+Each folder is a **package**: one master skill that orchestrates and, where applicable, sub-skills split by real usage boundaries. Packages share assets without duplication. The machine-readable index is [`skills.json`](skills.json): 12 packages, 79 skills.
 
 ### Modules and Sub-skills
 
@@ -247,7 +248,7 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | **[`finops-auditor`](finops-auditor/)** | Cloud cost audit: orphaned resources, overprovisioning, rightsizing, LLM spend, infrastructure as code, CI and diff with guardrails. | 7 |
 | **[`db-architect`](db-architect/)** | Database audit without an engine: schema, migration risk and locking, two-phase plans, drift, SQL style, N+1 queries and seed data. | 9 |
 | **[`api-contract-guard`](api-contract-guard/)** | API contract defence: SemVer impact, backend/frontend route sync, authentication coverage and a local mock. | 5 |
-| **[`refactor-surgeon`](refactor-surgeon/)** | Refactoring with a safety net: complexity metrics, dead code, clone detection, import cycles, golden cases, call-graph cuts and verification. | 8 |
+| **[`refactor-surgeon`](refactor-surgeon/)** | Refactoring with a safety net: complexity metrics, churn hotspots, dead code, clone detection, import cycles, golden cases, call-graph cuts and verification. | 9 |
 | **[`docs-sync-engine`](docs-sync-engine/)** | Documentation synced with the code: references, glossary, environment variables, regenerable architecture and CHANGELOG. | 6 |
 
 #### `replica` — master + 13 phases
@@ -340,12 +341,13 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | `api-auth-coverage` | Contract security against the guards in the code. |
 | `api-mock-server` | Local mock server serving the contract examples. |
 
-#### `refactor-surgeon` — master + 7 sub-skills
+#### `refactor-surgeon` — master + 8 sub-skills
 
 | Sub-skill | Purpose |
 |---|---|
 | `refactor-surgeon` | Master: measure, freeze, cut and verify. |
 | `refactor-metrics` | `V(G)` complexity, nesting, parameters and maintainability. |
+| `refactor-hotspots` | `git log` churn × complexity, with an explicit "not measured". |
 | `refactor-harness` | Golden cases recorded before and replayed after. |
 | `refactor-deadcode` | Imports and private definitions nothing references. |
 | `refactor-clones` | Duplication by normalised AST shingles. |
@@ -422,7 +424,7 @@ Comprehensive module documentation is available in the [`docs/`](docs/) director
 - Tests use `unittest`; test and quality tools (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) are in the `dev` group in `pyproject.toml` and managed by [`uv`](https://docs.astral.sh/uv/).
 - Prepare `.venv` and run every test from the repository root with `uv sync` and `uv run python run_tests.py`.
 - GitHub Actions runs all suites on every `push` via `.github/workflows/tests.yml`.
-- Cross-cutting tests in `tests/`: activation for all 78 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
+- Cross-cutting tests in `tests/`: activation for all 79 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
 
 ### License
 Distributed under the [MIT License](LICENSE).

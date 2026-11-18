@@ -1357,6 +1357,23 @@
           "winner": "docs-terms"
         }
       ]
+    },
+    "refactor-hotspots": {
+      "positives": [
+        "ordena los ficheros que más cambian y más complejos son",
+        "detecta hotspots por churn y complejidad",
+        "cruza git log con la complejidad ciclomática"
+      ],
+      "negatives": [
+        {
+          "phrase": "detecta ciclos de imports entre los módulos",
+          "winner": "refactor-cycles"
+        },
+        {
+          "phrase": "encuentra código muerto antes de refactorizar",
+          "winner": "refactor-deadcode"
+        }
+      ]
     }
   },
   "out_of_domain": [

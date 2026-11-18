@@ -4,7 +4,7 @@ description: Refactoriza con red: mide complejidad y anidamiento, graba casos do
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # Refactor Surgeon
@@ -16,18 +16,20 @@ Cambiar la forma del código sin cambiar lo que hace: primero medir, luego conge
 ## Flujo
 
 1. **Medir** con `refactor-metrics`: complejidad ciclomática, anidamiento y nota de mantenibilidad por función.
-2. **Congelar** con `refactor-harness`: graba los casos dorados antes de tocar nada.
-3. **Purgar** con `refactor-deadcode`: imports y definiciones privadas que ya nadie usa.
-4. **Deduplicar** con `refactor-clones`: los bloques que solo cambian de nombre se unifican antes de cortar.
-5. **Desenredar** con `refactor-cycles`: los módulos que se importan en círculo no se cortan todavía.
-6. **Cortar** con `refactor-slice`: el grafo de llamadas dice qué funciones forman un módulo.
-7. **Verificar** con `refactor-verify`: los mismos casos deben dar el mismo resultado.
+2. **Priorizar** con `refactor-hotspots`: churn × complejidad desde un `--since` explícito.
+3. **Congelar** con `refactor-harness`: graba los casos dorados antes de tocar nada.
+4. **Purgar** con `refactor-deadcode`: imports y definiciones privadas que ya nadie usa.
+5. **Deduplicar** con `refactor-clones`: los bloques que solo cambian de nombre se unifican antes de cortar.
+6. **Desenredar** con `refactor-cycles`: los módulos que se importan en círculo no se cortan todavía.
+7. **Cortar** con `refactor-slice`: el grafo de llamadas dice qué funciones forman un módulo.
+8. **Verificar** con `refactor-verify`: los mismos casos deben dar el mismo resultado.
 
 ## Sub-skills
 
 | Sub-skill | Qué hace |
 |---|---|
 | `refactor-metrics` | Complejidad, anidamiento y mantenibilidad por función |
+| `refactor-hotspots` | Churn × complejidad desde git log, con degradación explícita |
 | `refactor-harness` | Graba casos dorados antes del cambio |
 | `refactor-deadcode` | Imports y definiciones privadas sin uso |
 | `refactor-clones` | Duplicación por shingles normalizados del AST |

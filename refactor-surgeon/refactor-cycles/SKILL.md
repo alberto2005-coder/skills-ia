@@ -4,7 +4,7 @@ description: Encuentra los ciclos de imports entre los módulos de un árbol Pyt
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # Refactor Cycles
