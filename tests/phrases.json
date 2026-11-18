@@ -1240,6 +1240,23 @@
           "winner": "appsec-infra"
         }
       ]
+    },
+    "refactor-deadcode": {
+      "positives": [
+        "busca imports y funciones que nadie usa en el código",
+        "encuentra código muerto antes de refactorizar",
+        "detecta funciones privadas sin referencias en el proyecto"
+      ],
+      "negatives": [
+        {
+          "phrase": "detecta funciones duplicadas por similitud del ast",
+          "winner": "refactor-clones"
+        },
+        {
+          "phrase": "mide la complejidad ciclomática de cada función",
+          "winner": "refactor-metrics"
+        }
+      ]
     }
   },
   "out_of_domain": [

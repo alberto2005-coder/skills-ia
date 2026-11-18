@@ -4,7 +4,7 @@ description: Mide complejidad ciclomática, anidamiento, líneas y parámetros p
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Refactor Metrics

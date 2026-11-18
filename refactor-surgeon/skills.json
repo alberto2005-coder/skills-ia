@@ -2,8 +2,8 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "refactor-surgeon",
-  "version": "1.1.0",
-  "description": "Refactor con red: métricas, clones, casos dorados, cortes por grafo de llamadas y verificación.",
+  "version": "1.2.0",
+  "description": "Refactor con red: métricas, clones, código muerto, casos dorados, cortes por grafo y verificación.",
   "skills": [
     {
       "name": "refactor-surgeon",
@@ -24,6 +24,11 @@
       "name": "refactor-clones",
       "path": "refactor-clones/SKILL.md",
       "description": "Duplicación por shingles normalizados del AST."
+    },
+    {
+      "name": "refactor-deadcode",
+      "path": "refactor-deadcode/SKILL.md",
+      "description": "Imports y definiciones privadas sin uso en el árbol."
     },
     {
       "name": "refactor-slice",
