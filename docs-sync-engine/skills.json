@@ -1,0 +1,29 @@
+{
+  "format": "skills-ia-package",
+  "format_version": "1.0",
+  "name": "docs-sync-engine",
+  "version": "1.0.0",
+  "description": "Documentación sincronizada con el código: referencias, arquitectura y CHANGELOG.",
+  "skills": [
+    {
+      "name": "docs-sync-engine",
+      "path": "SKILL.md",
+      "description": "Maestro: verificar, regenerar y cerrar la documentación."
+    },
+    {
+      "name": "docs-drift-check",
+      "path": "docs-drift-check/SKILL.md",
+      "description": "Referencias rotas entre la doc y el árbol."
+    },
+    {
+      "name": "docs-arch-gen",
+      "path": "docs-arch-gen/SKILL.md",
+      "description": "Borrador de arquitectura desde los AST."
+    },
+    {
+      "name": "docs-changelog",
+      "path": "docs-changelog/SKILL.md",
+      "description": "CHANGELOG desde commits convencionales."
+    }
+  ]
+}

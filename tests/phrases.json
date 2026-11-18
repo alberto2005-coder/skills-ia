@@ -1107,6 +1107,72 @@
           "winner": "api-contract-guard"
         }
       ]
+    },
+    "docs-sync-engine": {
+      "positives": [
+        "sincroniza la documentación con el código: referencias, arquitectura y changelog",
+        "mantén la documentación pegada al código y al día",
+        "mantiene la documentación al día: referencias, arquitectura y changelog"
+      ],
+      "negatives": [
+        {
+          "phrase": "revisa los permisos iam del rol de despliegue",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "publica la landing con precios por país y listing",
+          "winner": "replica-launch"
+        }
+      ]
+    },
+    "docs-drift-check": {
+      "positives": [
+        "detecta referencias rotas en la documentación",
+        "detecta referencias rotas comparando las rutas y los enlaces contra el árbol real",
+        "comprueba las referencias de la documentación contra el árbol del repositorio"
+      ],
+      "negatives": [
+        {
+          "phrase": "revisa la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        },
+        {
+          "phrase": "corrige los tests que fallan en el pipeline",
+          "winner": "eval-run"
+        }
+      ]
+    },
+    "docs-arch-gen": {
+      "positives": [
+        "genera un borrador de arquitectura con la estructura y las responsabilidades",
+        "genera la tabla de módulos y responsabilidades leyendo los docstrings"
+      ],
+      "negatives": [
+        {
+          "phrase": "audita el esquema de la base de datos y sus índices",
+          "winner": "db-schema-audit"
+        },
+        {
+          "phrase": "calcula el coste de los tokens del modelo",
+          "winner": "finops-llm-scan"
+        }
+      ]
+    },
+    "docs-changelog": {
+      "positives": [
+        "genera el changelog a partir de los commits convencionales",
+        "agrupa los commits en un borrador de changelog por versión"
+      ],
+      "negatives": [
+        {
+          "phrase": "refactoriza con red: mide y congela casos dorados",
+          "winner": "refactor-surgeon"
+        },
+        {
+          "phrase": "protege el contrato de la api antes de publicar",
+          "winner": "api-contract-guard"
+        }
+      ]
     }
   },
   "out_of_domain": [
