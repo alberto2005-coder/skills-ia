@@ -21,9 +21,13 @@
 - [**AppSec Audit**](appsec-audit.md): auditoría de ciberseguridad integral con trazado fuente→sumidero, tribunal de validación, nota A–F y parches en diff.
 - [**FinOps Auditor**](finops-auditor.md): auditoría de costes cloud con recursos huérfanos, derechosizing, rúbrica 0–100 y ahorro mensual reproducible.
 - [**Premium Web Designer**](premium-web-designer.md): diseño y desarrollo de sitios web premium con dirección de arte, UX/UI y QA independiente.
+- [**DB Architect**](db-architect.md): auditoría de bases de datos sin motor, con esquema, riesgo de migraciones, consultas N+1 y siembra determinista.
+- [**API Contract Guard**](api-contract-guard.md): impacto SemVer de un cambio de contrato, cruce de rutas backend/frontend y mock local.
+- [**Refactor Surgeon**](refactor-surgeon.md): refactor con métricas, casos dorados, cortes por grafo de llamadas y verificación de conducta.
+- [**Docs Sync Engine**](docs-sync-engine.md): referencias de la documentación verificadas, arquitectura regenerable y CHANGELOG desde commits.
 
 ### Paquetes y Sub-skills
-**8 paquetes, 46 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
+**12 paquetes, 67 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
 
 | Paquete | Skills | Maestro | Sub-skills |
 |---|---:|---|---|
@@ -34,7 +38,11 @@
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
 | `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
 | `skill-evals` | 4 | `skill-evals` | `eval-design`, `eval-run`, `eval-report` |
-| `finops-auditor` | 3 | `finops-auditor` | `finops-scan`, `finops-rightsize` |
+| `finops-auditor` | 6 | `finops-auditor` | `finops-scan`, `finops-rightsize`, `finops-llm-scan`, `finops-infra-scan`, `finops-ci-opt` |
+| `db-architect` | 5 | `db-architect` | `db-schema-audit`, `db-migration-guard`, `db-query-trace`, `db-seed-gen` |
+| `api-contract-guard` | 4 | `api-contract-guard` | `api-diff`, `api-code-sync`, `api-mock-server` |
+| `refactor-surgeon` | 5 | `refactor-surgeon` | `refactor-metrics`, `refactor-harness`, `refactor-slice`, `refactor-verify` |
+| `docs-sync-engine` | 4 | `docs-sync-engine` | `docs-drift-check`, `docs-arch-gen`, `docs-changelog` |
 
 Cada maestro elige el modo, fija los límites y reparte el trabajo; `premium-web-designer` suma `premium-qa` para auditar webs ya construidas y `appsec-audit` reparte la auditoría entre reconocimiento, código, infraestructura, LLM, amenazas, dependencias, CI, remediación, informe y escala, y `skill-evals` reparte el ciclo entre diseño de casos, ejecución e informe.
 
@@ -82,9 +90,13 @@ uv run python run_tests.py
 - [**AppSec Audit**](appsec-audit.md): end-to-end security audit with source-to-sink tracing, a validation tribunal, an A–F grade and diff patches.
 - [**FinOps Auditor**](finops-auditor.md): cloud cost audit with orphaned resources, rightsizing, a 0–100 rubric and reproducible monthly savings.
 - [**Premium Web Designer**](premium-web-designer.md): premium website design and development with art direction, UX/UI and independent QA.
+- [**DB Architect**](db-architect.md): database audit without an engine, covering schema, migration risk, N+1 queries and deterministic seeding.
+- [**API Contract Guard**](api-contract-guard.md): SemVer impact of a contract change, backend/frontend route sync and a local mock.
+- [**Refactor Surgeon**](refactor-surgeon.md): refactoring with metrics, golden cases, call-graph cuts and behaviour verification.
+- [**Docs Sync Engine**](docs-sync-engine.md): verified documentation references, regenerable architecture and a CHANGELOG from commits.
 
 ### Packages and Sub-skills
-**8 packages, 46 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
+**12 packages, 67 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
 
 | Package | Skills | Master | Sub-skills |
 |---|---:|---|---|
@@ -95,7 +107,11 @@ uv run python run_tests.py
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
 | `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
 | `skill-evals` | 4 | `skill-evals` | `eval-design`, `eval-run`, `eval-report` |
-| `finops-auditor` | 3 | `finops-auditor` | `finops-scan`, `finops-rightsize` |
+| `finops-auditor` | 6 | `finops-auditor` | `finops-scan`, `finops-rightsize`, `finops-llm-scan`, `finops-infra-scan`, `finops-ci-opt` |
+| `db-architect` | 5 | `db-architect` | `db-schema-audit`, `db-migration-guard`, `db-query-trace`, `db-seed-gen` |
+| `api-contract-guard` | 4 | `api-contract-guard` | `api-diff`, `api-code-sync`, `api-mock-server` |
+| `refactor-surgeon` | 5 | `refactor-surgeon` | `refactor-metrics`, `refactor-harness`, `refactor-slice`, `refactor-verify` |
+| `docs-sync-engine` | 4 | `docs-sync-engine` | `docs-drift-check`, `docs-arch-gen`, `docs-changelog` |
 
 Each master picks the mode, sets boundaries and splits the work; `premium-web-designer` adds `premium-qa` to audit sites that already exist and `appsec-audit` splits the audit across recon, code, infrastructure, LLM, threats, dependencies, CI, remediation, report and scale, while `skill-evals` splits the loop across case design, run and report.
 

@@ -1,13 +1,20 @@
-"""Lint de frontmatter y manifiestos de todas las skills del repositorio.
+"""Lint de frontmatter, manifiestos, enlaces relativos e índice del repositorio.
 
 Uso:
     py tests/lint_frontmatter.py [--json]
 
-Comprueba, sin dependencias, que cada `SKILL.md` fuera de `tests/` tenga
-frontmatter delimitado, `name` en minúsculas (máx. 64) e igual al nombre de su
-carpeta, `description` de 20 a 1024 caracteres, cuerpo por debajo de 500
-líneas, y que cada entrada de los `skills.json` de paquete resuelva a un
-fichero con el nombre declarado. Es la puerta de CI independiente de `unittest`.
+Comprueba, sin dependencias:
+
+1. Frontmatter de cada `SKILL.md` fuera de `tests/`: delimitadores, `name` en
+   minúsculas (máx. 64) e igual al nombre de su carpeta, `description` de 20 a
+   1024 caracteres y cuerpo por debajo de 500 líneas.
+2. Cada entrada de los `skills.json` de paquete resuelve a un fichero con el
+   nombre declarado.
+3. Cada enlace relativo de cada Markdown resuelve a un fichero existente.
+4. El índice raíz `skills.json` cuadra con el disco: `skills_total`, el número
+   de skills por paquete y la cobertura de todos los `SKILL.md`.
+
+Es la puerta de CI independiente de `unittest`.
 
 Código de salida: 0 limpio · 1 con problemas.
 """
@@ -24,6 +31,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SKIP_PARTS = {"tests", "fixtures", "node_modules", "__pycache__", ".venv", ".git"}
 FRONTMATTER = re.compile(r"^---\r?\n(.*?)\r?\n---\r?\n", re.S)
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+MARKDOWN_LINK = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
+LINK_IGNORED_PREFIXES = ("http://", "https://", "mailto:", "#", "/")
 MAX_NAME = 64
 MIN_DESCRIPTION = 20
 MAX_DESCRIPTION = 1024
@@ -110,6 +119,32 @@ def iter_skill_files(root: Path) -> list[Path]:
     )
 
 
+def iter_markdown_files(root: Path) -> list[Path]:
+    """Markdown del repositorio, sin los borradores de plan de la raíz."""
+    return sorted(
+        path
+        for path in root.glob("**/*.md")
+        if not SKIP_PARTS & set(path.relative_to(root).parts)
+        and not (path.parent == root and path.name.lower().startswith("plan"))
+    )
+
+
+def lint_links(root: Path) -> dict[str, list[str]]:
+    """Comprueba que cada enlace relativo de cada Markdown resuelva a un fichero."""
+    problems: dict[str, list[str]] = {}
+    for markdown in iter_markdown_files(root):
+        relative = markdown.relative_to(root).as_posix()
+        for target in MARKDOWN_LINK.findall(markdown.read_text(encoding="utf-8")):
+            if target.startswith(LINK_IGNORED_PREFIXES):
+                continue
+            clean = target.split("#", 1)[0].split("?", 1)[0]
+            if not clean:
+                continue
+            if not (markdown.parent / clean).exists():
+                problems.setdefault(relative, []).append(f"enlace relativo roto: {target}")
+    return problems
+
+
 def lint_manifests(root: Path) -> dict[str, list[str]]:
     problems: dict[str, list[str]] = {}
     for manifest_path in sorted(root.glob("*/skills.json")):
@@ -141,6 +176,80 @@ def lint_manifests(root: Path) -> dict[str, list[str]]:
     return problems
 
 
+def lint_index(root: Path) -> list[str]:
+    """Cuadra el índice raíz con los SKILL.md y los manifiestos del disco."""
+    index_path = root / "skills.json"
+    if not index_path.is_file():
+        return []
+
+    try:
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        return [f"JSON inválido: {error}"]
+
+    problems: list[str] = []
+    packages = index.get("packages")
+    if not isinstance(packages, list) or not packages:
+        return ["sin lista «packages»"]
+
+    on_disk = {path.parent.name: path for path in iter_skill_files(root)}
+    covered: set[str] = set()
+    total = 0
+
+    for package in packages:
+        name = package.get("name", "")
+        skills = package.get("skills") or []
+        count = package.get("skill_count")
+        manifest_path = package.get("manifest", f"{name}/skills.json")
+
+        if count != len(skills):
+            problems.append(
+                f"«{name}»: skill_count={count} pero declara {len(skills)} skills"
+            )
+        total += len(skills)
+
+        manifest_file = root / manifest_path
+        if not manifest_file.is_file():
+            problems.append(f"«{name}»: manifiesto inexistente {manifest_path}")
+            continue
+
+        try:
+            manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as error:
+            problems.append(f"«{name}»: manifiesto con JSON inválido: {error}")
+            continue
+
+        manifest_skills = [entry.get("name") for entry in manifest.get("skills", [])]
+        if sorted(manifest_skills) != sorted(skills):
+            problems.append(
+                f"«{name}»: el índice lista skills que el manifiesto no declara"
+            )
+
+        for skill in skills:
+            path = on_disk.get(skill)
+            if path is None:
+                problems.append(f"«{name}»: falta el SKILL.md de {skill}")
+                continue
+            expected = root / Path(package.get("path", name))
+            if path.parent == root or expected not in path.parents:
+                problems.append(
+                    f"«{skill}» vive en {path.relative_to(root).as_posix()}, fuera del paquete «{name}»"
+                )
+            covered.add(skill)
+
+    declared = index.get("skills_total")
+    if declared != total:
+        problems.append(f"skills_total={declared} pero los paquetes suman {total}")
+    if declared != len(on_disk):
+        problems.append(f"skills_total={declared} y hay {len(on_disk)} SKILL.md en el disco")
+
+    missing = sorted(set(on_disk) - covered)
+    if missing:
+        problems.append("SKILL.md fuera del índice: " + ", ".join(missing))
+
+    return problems
+
+
 def lint_repository(root: Path = ROOT) -> dict[str, list[str]]:
     problems: dict[str, list[str]] = {}
     for path in iter_skill_files(root):
@@ -149,12 +258,17 @@ def lint_repository(root: Path = ROOT) -> dict[str, list[str]]:
             problems[path.relative_to(root).as_posix()] = found
     for path, found in lint_manifests(root).items():
         problems.setdefault(path, []).extend(found)
+    for path, found in lint_links(root).items():
+        problems.setdefault(path, []).extend(found)
+    index_problems = lint_index(root)
+    if index_problems:
+        problems["skills.json"] = index_problems
     return problems
 
 
 def main(argv: list[str] | None = None) -> int:
     _force_utf8_output()
-    parser = argparse.ArgumentParser(description="Lint de frontmatter y manifiestos.")
+    parser = argparse.ArgumentParser(description="Lint de frontmatter, manifiestos, enlaces e índice.")
     parser.add_argument("--root", default=str(ROOT), help="Raíz del repositorio")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -172,7 +286,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"\n{len(problems)} fichero(s) con problemas.")
     else:
         total = len(iter_skill_files(root))
-        print(f"OK: {total} SKILL.md y sus manifiestos coherentes.")
+        print(f"OK: {total} SKILL.md, sus manifiestos, enlaces relativos e índice coherentes.")
 
     return 0 if not problems else 1
 

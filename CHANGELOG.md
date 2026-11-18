@@ -8,6 +8,22 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-18 · `finops-auditor` 2.0, `db-architect`, `api-contract-guard`, `refactor-surgeon` y `docs-sync-engine`
+
+#### Añadido
+- **`finops-auditor` 2.0 (6 skills):** `finops-scan` y `finops-rightsize` más `finops-llm-scan` (coste de llamadas a LLM), `finops-infra-scan` (Terraform y Kubernetes) y `finops-ci-opt` (GitHub Actions), con `llm_cost_scan.py`, `infra_cost_scan.py` y `ci_cost_scan.py`, 18 pruebas y guía bilingüe.
+- **`db-architect` (5 skills):** maestro + `db-schema-audit`, `db-migration-guard`, `db-query-trace` y `db-seed-gen`, con `schema_audit.py`, `migration_guard.py`, `query_trace.py` y `seed_gen.py`, 18 pruebas y guía bilingüe.
+- **`api-contract-guard` (4 skills):** maestro + `api-diff`, `api-code-sync` y `api-mock-server`, con `contract_diff.py` (impacto SemVer), `code_sync.py` (rutas backend/frontend) y `mock_server.py` (loopback), 11 pruebas y guía bilingüe.
+- **`refactor-surgeon` (5 skills):** maestro + `refactor-metrics`, `refactor-harness`, `refactor-slice` y `refactor-verify`, con `code_metrics.py`, `golden_harness.py` y `slice_analyzer.py`, 12 pruebas y guía bilingüe.
+- **`docs-sync-engine` (4 skills):** maestro + `docs-drift-check`, `docs-arch-gen` y `docs-changelog`, con `docs_drift.py`, `arch_gen.py` y `changelog_gen.py`, 11 pruebas y guía bilingüe.
+- **Lint ampliado:** `tests/lint_frontmatter.py` comprueba además los enlaces relativos de todos los Markdown y que el índice raíz cuadre con el disco (`skills_total`, skills por paquete y cobertura de cada `SKILL.md`), con 7 pruebas nuevas en `tests/test_lint_links.py`.
+
+#### Cambiado
+- **`run_tests.py`:** las cinco suites nuevas (`api-contract-guard`, `db-architect`, `docs-sync-engine`, `finops-auditor`, `refactor-surgeon`) se ejecutan con el resto: 13 suites y 567 pruebas.
+- **Índice raíz `skills.json`:** 12 paquetes y **67 skills**, versión 3.2.0.
+- **`README.md` y `docs/index.md`:** recuentos, filas de los cinco paquetes, tablas de sub-skills y enlaces a las guías nuevas, en español e inglés.
+- **`tests/phrases.json`:** frases de activación para las 13 skills nuevas, verificadas contra el router antes de escribirlas.
+
 ### - 2026-11-18 · `skill-evals` 1.0 y puertas de calidad en CI
 
 #### Añadido
@@ -161,6 +177,22 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-18 · `finops-auditor` 2.0, `db-architect`, `api-contract-guard`, `refactor-surgeon` and `docs-sync-engine`
+
+#### Added
+- **`finops-auditor` 2.0 (6 skills):** `finops-scan` and `finops-rightsize` plus `finops-llm-scan` (LLM call cost), `finops-infra-scan` (Terraform and Kubernetes) and `finops-ci-opt` (GitHub Actions), with `llm_cost_scan.py`, `infra_cost_scan.py` and `ci_cost_scan.py`, 18 tests and a bilingual guide.
+- **`db-architect` (5 skills):** master + `db-schema-audit`, `db-migration-guard`, `db-query-trace` and `db-seed-gen`, with `schema_audit.py`, `migration_guard.py`, `query_trace.py` and `seed_gen.py`, 18 tests and a bilingual guide.
+- **`api-contract-guard` (4 skills):** master + `api-diff`, `api-code-sync` and `api-mock-server`, with `contract_diff.py` (SemVer impact), `code_sync.py` (backend/frontend routes) and `mock_server.py` (loopback), 11 tests and a bilingual guide.
+- **`refactor-surgeon` (5 skills):** master + `refactor-metrics`, `refactor-harness`, `refactor-slice` and `refactor-verify`, with `code_metrics.py`, `golden_harness.py` and `slice_analyzer.py`, 12 tests and a bilingual guide.
+- **`docs-sync-engine` (4 skills):** master + `docs-drift-check`, `docs-arch-gen` and `docs-changelog`, with `docs_drift.py`, `arch_gen.py` and `changelog_gen.py`, 11 tests and a bilingual guide.
+- **Wider lint:** `tests/lint_frontmatter.py` now also checks every relative link in every Markdown file and that the root index matches the disk (`skills_total`, skills per package and coverage of every `SKILL.md`), with 7 new tests in `tests/test_lint_links.py`.
+
+#### Changed
+- **`run_tests.py`:** the five new suites (`api-contract-guard`, `db-architect`, `docs-sync-engine`, `finops-auditor`, `refactor-surgeon`) run with the rest: 13 suites and 567 tests.
+- **Root index `skills.json`:** 12 packages and **67 skills**, version 3.2.0.
+- **`README.md` and `docs/index.md`:** counts, rows for the five packages, sub-skill tables and links to the new guides, in Spanish and English.
+- **`tests/phrases.json`:** activation phrases for the 13 new skills, verified against the router before being written.
 
 ### - 2026-11-18 · `skill-evals` 1.0 and quality gates in CI
 

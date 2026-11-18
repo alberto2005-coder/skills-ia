@@ -8,9 +8,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 SUITES = (
     ("agent-red-team", "unittest"),
+    ("api-contract-guard", "unittest"),
     ("appsec-audit", "unittest"),
+    ("db-architect", "unittest"),
+    ("docs-sync-engine", "unittest"),
+    ("finops-auditor", "unittest"),
     ("humanizador-anti-ia", "unittest"),
     ("premium-web-designer", "custom"),
+    ("refactor-surgeon", "unittest"),
     ("replica", "unittest"),
     ("seo-auditor", "unittest"),
     ("skill-evals", "unittest"),

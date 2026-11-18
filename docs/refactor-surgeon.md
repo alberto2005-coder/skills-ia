@@ -1,0 +1,176 @@
+# Refactor Surgeon
+
+> Refactorizar con red: medir complejidad, congelar la conducta con casos dorados, cortar por el grafo de llamadas y verificar que nada cambió.
+> Refactoring with a safety net: measure complexity, freeze behaviour with golden cases, cut along the call graph and verify nothing moved.
+
+[Español](#español) · [English](#english)
+
+---
+
+## Español
+
+### Índice
+1. Propósito
+2. Modos
+3. Arquitectura
+4. Umbrales
+5. Herramientas
+6. Instalación y uso
+7. Tests
+8. Límites
+
+### Propósito
+`refactor-surgeon` cambia la forma del código sin cambiar lo que hace. El método es siempre el mismo: medir, congelar la conducta, cortar un grupo por vez y comprobar que los mismos casos devuelven lo mismo. La ejecución del código ajeno es una decisión explícita (`--allow-exec`), no un efecto colateral.
+
+### Modos
+El maestro no usa flags: el alcance de la petición fija las fases.
+
+| Modo | Fases | Entrega |
+|---|---|---|
+| **Diagnóstico** | `refactor-metrics` | Complejidad, anidamiento y mantenibilidad |
+| **Red de seguridad** | `refactor-harness` | Casos dorados grabados |
+| **Corte** | `refactor-slice` + `refactor-metrics` | Grupos a extraer y métricas del después |
+| **Cierre** | `refactor-verify` | Veredicto con o sin discrepancias |
+
+### Arquitectura
+Un maestro y cuatro sub-skills con scripts compartidos. Se instala la carpeta completa.
+
+| Sub-skill | Qué hace |
+|---|---|
+| `refactor-surgeon` | Maestro: ordena medir, congelar, cortar y verificar |
+| `refactor-metrics` | `V(G)`, anidamiento, parámetros, líneas y nota de mantenibilidad |
+| `refactor-harness` | Graba y reproduce casos dorados antes y después |
+| `refactor-slice` | Componentes conexas del grafo de llamadas como cortes |
+| `refactor-verify` | Compara la conducta contra el snapshot |
+
+### Umbrales
+| Métrica | Límite por defecto |
+|---|---|
+| Complejidad `V(G)` | 10 |
+| Anidamiento | 4 |
+| Parámetros | 6 |
+| Líneas por función | 60 |
+
+Superar el doble del límite convierte el hallazgo en severidad alta; la nota de mantenibilidad parte de 100 y penaliza complejidad y anidamiento, así que sirve para comparar el mismo módulo antes y después, no entre proyectos.
+
+### Herramientas
+
+```bash
+py refactor-surgeon/scripts/code_metrics.py --path src/ --json --fail-on medium
+py refactor-surgeon/scripts/golden_harness.py --cases cases.json --snapshot golden.json --record --allow-exec
+py refactor-surgeon/scripts/golden_harness.py --cases cases.json --snapshot golden.json --verify --allow-exec
+py refactor-surgeon/scripts/slice_analyzer.py --path src/grande.py --json
+```
+
+El fichero de casos declara el módulo y las llamadas:
+
+```json
+{"module": "src/app.py", "cases": [{"function": "sumar", "args": [1, 2]}]}
+```
+
+Sin `--allow-exec` el arnés solo valida el fichero y no importa nada. Una excepción se graba como conducta observable, con su tipo y mensaje.
+
+Códigos de salida: `0` limpio o verificado · `1` umbral superado o discrepancia · `2` ruta o snapshot ilegible.
+
+### Instalación y uso
+Copia la carpeta `refactor-surgeon/` completa. Ejemplos de petición:
+- «Mide la complejidad de este módulo y dime por dónde empezar».
+- «Graba casos dorados antes de que toque nada».
+- «Divide este fichero de 900 líneas en módulos».
+- «Verifica que el refactor no cambió el comportamiento».
+
+### Tests
+
+```bash
+uv run python -m unittest discover -s refactor-surgeon/tests -t refactor-surgeon/tests
+```
+
+12 pruebas: función simple limpia, función anidada por encima de los límites, `--fail-on none`, firma ancha, ruta ausente, grupos del grafo, fichero que no parsea, grabación y verificación sin discrepancias, cambio de conducta detectado, ejecución sin permiso y snapshot ausente.
+
+### Límites
+Las métricas se calculan sobre la sintaxis, no ejecutando el código; no miden acoplamiento entre módulos ni cobertura. El grafo solo ve llamadas por nombre dentro del mismo fichero: métodos, imports y llamadas dinámicas no aparecen. El arnés ejecuta en el proceso actual, sin aislamiento ni límite de tiempo propio, y compara resultados serializados, así que un objeto no serializable se compara como texto.
+
+---
+
+## English
+
+### Index
+1. Purpose
+2. Modes
+3. Architecture
+4. Thresholds
+5. Tools
+6. Install and use
+7. Tests
+8. Limits
+
+### Purpose
+`refactor-surgeon` changes the shape of the code without changing what it does. The method never varies: measure, freeze behaviour, cut one group at a time and check that the same cases return the same results. Running someone else's code is an explicit decision (`--allow-exec`), never a side effect.
+
+### Modes
+The master takes no flags: the request's scope sets the phases.
+
+| Mode | Phases | Deliverable |
+|---|---|---|
+| **Diagnosis** | `refactor-metrics` | Complexity, nesting and maintainability |
+| **Safety net** | `refactor-harness` | Golden cases recorded |
+| **Cut** | `refactor-slice` + `refactor-metrics` | Groups to extract and after metrics |
+| **Close** | `refactor-verify` | Verdict with or without mismatches |
+
+### Architecture
+One master and four sub-skills with shared scripts. The whole folder is installed.
+
+| Sub-skill | What it does |
+|---|---|
+| `refactor-surgeon` | Master: orders measure, freeze, cut and verify |
+| `refactor-metrics` | `V(G)`, nesting, parameters, lines and maintainability score |
+| `refactor-harness` | Records and replays golden cases before and after |
+| `refactor-slice` | Connected components of the call graph as cuts |
+| `refactor-verify` | Compares behaviour against the snapshot |
+
+### Thresholds
+| Metric | Default limit |
+|---|---|
+| `V(G)` complexity | 10 |
+| Nesting | 4 |
+| Parameters | 6 |
+| Lines per function | 60 |
+
+Exceeding twice the limit raises the finding to high severity; the maintainability score starts at 100 and penalises complexity and nesting, so it compares the same module before and after, not across projects.
+
+### Tools
+
+```bash
+py refactor-surgeon/scripts/code_metrics.py --path src/ --json --fail-on medium
+py refactor-surgeon/scripts/golden_harness.py --cases cases.json --snapshot golden.json --record --allow-exec
+py refactor-surgeon/scripts/golden_harness.py --cases cases.json --snapshot golden.json --verify --allow-exec
+py refactor-surgeon/scripts/slice_analyzer.py --path src/grande.py --json
+```
+
+The cases file declares the module and the calls:
+
+```json
+{"module": "src/app.py", "cases": [{"function": "sumar", "args": [1, 2]}]}
+```
+
+Without `--allow-exec` the harness only validates the file and imports nothing. An exception is recorded as observable behaviour, with its type and message.
+
+Exit codes: `0` clean or verified · `1` threshold exceeded or mismatch · `2` unreadable path or snapshot.
+
+### Install and use
+Copy the whole `refactor-surgeon/` folder. Example requests:
+- "Measure this module's complexity and tell me where to start".
+- "Record golden cases before anything is touched".
+- "Split this 900-line file into modules".
+- "Verify the refactor did not change behaviour".
+
+### Tests
+
+```bash
+uv run python -m unittest discover -s refactor-surgeon/tests -t refactor-surgeon/tests
+```
+
+12 tests: clean simple function, nested function over the limits, `--fail-on none`, wide signature, missing path, call-graph groups, unparsable file, record and verify with no mismatches, changed behaviour detected, execution without permission and missing snapshot.
+
+### Limits
+Metrics come from the syntax, not from running the code; they measure neither module coupling nor coverage. The graph only sees name-based calls inside the same file: methods, imports and dynamic calls are invisible. The harness runs in the current process, with no isolation and no per-case timeout, and compares serialised results, so a non-serialisable object is compared as text.

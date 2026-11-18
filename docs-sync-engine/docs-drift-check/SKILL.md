@@ -29,7 +29,7 @@ py docs-sync-engine/scripts/docs_drift.py --docs docs/ --root . --json
 | Origen | Ejemplo |
 |---|---|
 | Rutas entre backticks | `` `pkg/scripts/x.py` `` |
-| Enlaces relativos | `[guía](guia.md)` |
+| Enlaces relativos | `[guía](../SKILL.md)` |
 | Enlaces externos | Se ignoran |
 
 ## Límites

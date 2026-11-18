@@ -33,13 +33,16 @@ El maestro no usa flags: el modo lo fija el alcance de la petición.
 El modo Escaneo sirve para responder «cuánto estamos tirando» en una sola pasada. El modo Informe es el que se entrega a dirección: añade el plan de redimensionado y separa ahorro confirmado de ahorro potencial.
 
 ### Arquitectura
-Un maestro y dos sub-skills con assets compartidos (`references/`, `scripts/`, `templates/`). Se instala la carpeta completa.
+Un maestro y cinco sub-skills con assets compartidos (`references/`, `scripts/`, `templates/`). Se instala la carpeta completa.
 
 | Sub-skill | Qué hace |
 |---|---|
 | `finops-auditor` | Maestro: elige el modo, ordena las fases y firma el informe |
 | `finops-scan` | Inventario, recursos ociosos, subutilización y anomalías de coste |
 | `finops-rightsize` | Redimensionado por recurso con ahorro, riesgo y métrica de verificación |
+| `finops-llm-scan` | Coste de llamadas a LLM: `max_tokens`, modelo caro como clasificador y bucles sin tope |
+| `finops-infra-scan` | Terraform y Kubernetes: buckets sin ciclo de vida, logs sin retención y contenedores sin límites |
+| `finops-ci-opt` | GitHub Actions: caché de dependencias y ejecución duplicada de push y pull_request |
 
 `finops-scan` entrega el JSON de hallazgos a `finops-rightsize`; el maestro recibe ambos y el informe. Los umbrales viven en [`cloud-pricing-rules.md`](../finops-auditor/references/cloud-pricing-rules.md) y la plantilla en [`report-template.md`](../finops-auditor/templates/report-template.md).
 
@@ -58,6 +61,9 @@ El 50 % de la segunda regla es una convención declarada —bajar de tier a la m
 
 ```bash
 py finops-auditor/scripts/finops_analyzer.py --input inventory.json
+py finops-auditor/scripts/llm_cost_scan.py --path src/ --fail-on medium
+py finops-auditor/scripts/infra_cost_scan.py --path infra/ --json
+py finops-auditor/scripts/ci_cost_scan.py --path .github/workflows/ --json
 ```
 
 Salida JSON con `total_monthly_cost`, `total_estimated_waste`, `finops_score` y la lista de `findings`:
@@ -121,13 +127,16 @@ The master uses no flags: the request's scope sets the mode.
 Scan mode answers "how much are we wasting" in one pass. Report mode is the one you hand to leadership: it adds the rightsizing plan and separates confirmed from potential savings.
 
 ### Architecture
-One master and two sub-skills sharing assets (`references/`, `scripts/`, `templates/`). The whole folder is installed.
+One master and five sub-skills sharing assets (`references/`, `scripts/`, `templates/`). The whole folder is installed.
 
 | Sub-skill | What it does |
 |---|---|
 | `finops-auditor` | Master: picks the mode, orders the phases and signs the report |
 | `finops-scan` | Inventory, idle resources, underutilisation and cost anomalies |
 | `finops-rightsize` | Per-resource rightsizing with savings, risk and a verification metric |
+| `finops-llm-scan` | LLM call cost: `max_tokens`, expensive model as classifier and unbounded loops |
+| `finops-infra-scan` | Terraform and Kubernetes: buckets without lifecycle, logs without retention and containers without limits |
+| `finops-ci-opt` | GitHub Actions: dependency cache and duplicated push and pull_request runs |
 
 `finops-scan` hands the findings JSON to `finops-rightsize`; the master receives both plus the report. Thresholds live in [`cloud-pricing-rules.md`](../finops-auditor/references/cloud-pricing-rules.md) and the template in [`report-template.md`](../finops-auditor/templates/report-template.md).
 
@@ -146,6 +155,9 @@ The 50 % in the second rule is a declared convention —a one-tier drop— not a
 
 ```bash
 py finops-auditor/scripts/finops_analyzer.py --input inventory.json
+py finops-auditor/scripts/llm_cost_scan.py --path src/ --fail-on medium
+py finops-auditor/scripts/infra_cost_scan.py --path infra/ --json
+py finops-auditor/scripts/ci_cost_scan.py --path .github/workflows/ --json
 ```
 
 JSON output with `total_monthly_cost`, `total_estimated_waste`, `finops_score` and the `findings` list:
