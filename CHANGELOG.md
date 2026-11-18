@@ -8,6 +8,55 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-18 · `refactor-surgeon` 1.4 — `refactor-hotspots`
+
+#### Añadido
+- **Sub-skill `refactor-hotspots`:** ordena los ficheros por churn de `git log` desde una fecha obligatoria multiplicado por su complejidad, para empezar el refactor por lo que más devuelve por hora.
+- **`scripts/hotspots.py`:** churn desde `--since` (una fecha sin hora se normaliza a `T00:00:00`, porque git la redondearía a la hora de la consulta), `V(G)` del fichero con las comprensiones contadas por sus `if`, y score = churn × complejidad; `--top`, `--json`, `--fail-on hotspot` con `--min-score`. Sin fecha, fuera de un repositorio o en un clon shallow devuelve `measured: false` y salida 2 en lugar de un número falso; los ficheros borrados se cuentan en `skipped` y no entran en el ranking.
+- **8 pruebas** en `refactor-surgeon/tests/test_hotspots.py` contra repositorios git temporales: sin `--since`, sin repositorio, churn y complejidad medidos, fecha sin hora normalizada a medianoche, ventana que filtra, orden y `--top`, `--fail-on hotspot` y clon shallow.
+- **Frases de activación:** 3 positivas y 2 negativas en `tests/phrases.json`, verificadas contra el router antes de escribirlas.
+
+#### Cambiado
+- **Índice raíz `skills.json`:** de **78 a 79 skills**, versión 4.1.0; `refactor-surgeon` pasa a 1.4.0 con 9 skills.
+- **`docs/refactor-surgeon.md` y `README.md`:** modo Priorización, comando, fila nueva y 42 pruebas por paquete.
+
+### - 2026-11-18 · `docs-sync-engine` 1.1 — `docs-terms` y `docs-env`
+
+#### Añadido
+- **Sub-skill `docs-terms`:** glosario versionado con `accept.txt` (grafía canónica) y `reject.txt` (términos prohibidos, con `malo => bueno` para sugerir el reemplazo).
+- **`scripts/terms_check.py`:** reglas `termino-rechazado` (media) y `grafia-no-canonica` (baja), que muestra la variante encontrada en el texto (`found`) y no repite la canónica; bloques de código y `código en línea` se ignoran conservando los números de línea, y `--fail-on` acepta `low|medium|high|none`.
+- **Sub-skill `docs-env`:** cada variable que lee el código debe estar en `.env.example` y en la documentación, y lo declarado que nadie usa se reporta.
+- **`scripts/env_check.py`:** reconoce `os.environ[...]`, `os.environ.get`, `os.getenv`, `process.env.X` e `import.meta.env.X`, y en el ejemplo acepta `CLAVE=` y `export CLAVE=`; reglas `env-sin-ejemplo`, `env-sin-documentar` (media) y `ejemplo-sin-uso` (baja).
+- **16 pruebas** repartidas entre `docs-sync-engine/tests/test_terms_check.py` y `test_env_check.py` (8 cada uno): glosario limpio, rechazado con reemplazo, grafía no canónica con la variante real, fences sin desplazar líneas, `export`, `process.env`, `import.meta.env`, `--fail-on none` y rutas o glosarios ausentes.
+
+#### Cambiado
+- **Índice raíz `skills.json`:** de **76 a 78 skills**, versión 4.0.0; `docs-sync-engine` pasa a 1.1.0 con 6 skills.
+- **Maestro y `docs/docs-sync-engine.md`:** fases Terminología y Entorno, filas y comandos nuevos, y 27 pruebas por paquete.
+
+### - 2026-11-18 · `api-contract-guard` 1.1 — `api-auth-coverage`
+
+#### Añadido
+- **Sub-skill `api-auth-coverage`:** cruza el `security` del contrato con las guardas reales de las rutas, para que un endpoint que se documenta como protegido no quede abierto.
+- **`scripts/auth_coverage.py`:** hereda el `security` global, normaliza `<int:id>` a `{id}`, reconoce rutas de FastAPI y Flask y guardas por nombre de decorador; reglas `ruta-sin-guarda` (alta), `ruta-sin-spec`, `spec-sin-security` (media) y `spec-sin-codigo` (baja), con `--json` y `--fail-on medium`.
+- **9 pruebas** en `api-contract-guard/tests/test_auth_coverage.py`: rutas con guarda, contrato sin guarda, guarda sin `security`, ruta fuera del contrato, operación sin código, seguridad global heredada, Flask con parámetros normalizados, `--fail-on none` y contrato ausente.
+
+#### Cambiado
+- **Índice raíz `skills.json`:** de **75 a 76 skills**, versión 3.9.0; `api-contract-guard` pasa a 1.1.0 con 5 skills.
+- **Maestro y `docs/api-contract-guard.md`:** fase Cobertura, fila, comando y 20 pruebas por paquete.
+
+### - 2026-11-18 · `db-architect` 1.2 — `db-expand-contract` y `db-sql-lint`
+
+#### Añadido
+- **Sub-skill `db-expand-contract`:** parte una migración en fase aditiva (`expand`) y de retirada (`contract`) para desplegar sin ventana de mantenimiento.
+- **`scripts/expand_contract.py`:** clasifica cada sentencia y avisa de lo que no se puede repartir (`columna-obligatoria-en-un-paso`, `rename-no-divisible`, `reescritura-no-divisible`); lo que no reconoce (`DROP INDEX`, `INSERT`, …) va a `phases.unknown` con aviso `sentencia-desconocida` y nunca a `expand`, y el separador de sentencias respeta cadenas y cuerpos `$$` de funciones. `--json` y `--fail-on unsafe|none`.
+- **Sub-skill `db-sql-lint`:** estilo SQL antes del guardián de riesgo, con reglas acotadas.
+- **`scripts/sql_lint.py`:** `tabla-sin-clave`, `select-asterisco` (media), `palabra-clave-minuscula`, `identificador-no-snake`, `comparacion-distinta`, `linea-larga`, `tabulador` (baja); los comentarios de línea no cuentan para identificadores ni comparaciones, y un `CREATE TABLE` sin `;` final también se revisa.
+- **18 pruebas** repartidas entre `db-architect/tests/test_expand_contract.py` y `test_sql_lint.py` (10 y 8): aditivo, destructivo con `DROP CONSTRAINT`, mezcla, columna obligatoria, cambio de tipo, `rename`, cuerpo de función con `;`, sentencia desconocida, fichero limpio, cada regla de estilo, `--fail-on none` y rutas ausentes.
+
+#### Cambiado
+- **Índice raíz `skills.json`:** de **73 a 75 skills**, versión 3.8.0; `db-architect` pasa a 1.2.0 con 9 skills.
+- **Maestro y `docs/db-architect.md`:** fase Plan, `db-sql-lint` en Audit, filas, comandos y 48 pruebas por paquete.
+
 ### - 2026-11-18 · `finops-auditor` 1.3 — `finops-diff`
 
 #### Añadido
@@ -218,6 +267,55 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-18 · `refactor-surgeon` 1.4 — `refactor-hotspots`
+
+#### Added
+- **`refactor-hotspots` sub-skill:** ranks files by `git log` churn since a mandatory date times their complexity, so a refactor starts where it pays back most.
+- **`scripts/hotspots.py`:** churn from `--since` (a bare date is normalised to `T00:00:00`, because git would round it to the time of the query), per-file `V(G)` with comprehensions counted by their `if`, and score = churn × complexity; `--top`, `--json`, `--fail-on hotspot` with `--min-score`. Without a date, outside a repository or in a shallow clone it returns `measured: false` and exit 2 instead of a false number; deleted files are counted in `skipped` and stay out of the ranking.
+- **8 tests** in `refactor-surgeon/tests/test_hotspots.py` against temporary git repositories: no `--since`, not a repository, churn and complexity measured, bare date normalised to midnight, filtering window, ordering and `--top`, `--fail-on hotspot` and a shallow clone.
+- **Activation phrases:** 3 positives and 2 negatives in `tests/phrases.json`, verified against the router before being written.
+
+#### Changed
+- **Root index `skills.json`:** from **78 to 79 skills**, version 4.1.0; `refactor-surgeon` moves to 1.4.0 with 9 skills.
+- **`docs/refactor-surgeon.md` and `README.md`:** Prioritisation mode, command, new row and 42 tests per package.
+
+### - 2026-11-18 · `docs-sync-engine` 1.1 — `docs-terms` and `docs-env`
+
+#### Added
+- **`docs-terms` sub-skill:** versioned glossary with `accept.txt` (canonical spelling) and `reject.txt` (banned terms, with `bad => good` to suggest the replacement).
+- **`scripts/terms_check.py`:** rules `termino-rechazado` (medium) and `grafia-no-canonica` (low), which reports the variant found in the text (`found`) instead of repeating the canonical one; code blocks and inline code are ignored while keeping line numbers, and `--fail-on` accepts `low|medium|high|none`.
+- **`docs-env` sub-skill:** every variable the code reads must be in `.env.example` and in the docs, and declared ones nothing reads are reported.
+- **`scripts/env_check.py`:** recognises `os.environ[...]`, `os.environ.get`, `os.getenv`, `process.env.X` and `import.meta.env.X`, and accepts both `KEY=` and `export KEY=` in the example; rules `env-sin-ejemplo`, `env-sin-documentar` (medium) and `ejemplo-sin-uso` (low).
+- **16 tests** split between `docs-sync-engine/tests/test_terms_check.py` and `test_env_check.py` (8 each): clean glossary, rejected term with replacement, non-canonical spelling with the real variant, fences without shifting lines, `export`, `process.env`, `import.meta.env`, `--fail-on none` and missing paths or glossaries.
+
+#### Changed
+- **Root index `skills.json`:** from **76 to 78 skills**, version 4.0.0; `docs-sync-engine` moves to 1.1.0 with 6 skills.
+- **Master and `docs/docs-sync-engine.md`:** Terminology and Environment phases, new rows and commands, and 27 tests per package.
+
+### - 2026-11-18 · `api-contract-guard` 1.1 — `api-auth-coverage`
+
+#### Added
+- **`api-auth-coverage` sub-skill:** crosses the contract's `security` with the real guards on the routes, so an endpoint documented as protected does not stay open.
+- **`scripts/auth_coverage.py`:** inherits global `security`, normalises `<int:id>` to `{id}`, recognises FastAPI and Flask routes and guard decorators; rules `ruta-sin-guarda` (high), `ruta-sin-spec`, `spec-sin-security` (medium) and `spec-sin-codigo` (low), with `--json` and `--fail-on medium`.
+- **9 tests** in `api-contract-guard/tests/test_auth_coverage.py`: guarded routes, contract without a guard, guard without `security`, route outside the contract, operation without code, inherited global security, Flask with normalised parameters, `--fail-on none` and missing contract.
+
+#### Changed
+- **Root index `skills.json`:** from **75 to 76 skills**, version 3.9.0; `api-contract-guard` moves to 1.1.0 with 5 skills.
+- **Master and `docs/api-contract-guard.md`:** Coverage phase, row, command and 20 tests per package.
+
+### - 2026-11-18 · `db-architect` 1.2 — `db-expand-contract` and `db-sql-lint`
+
+#### Added
+- **`db-expand-contract` sub-skill:** splits a migration into an additive phase (`expand`) and a removal phase (`contract`) so it can ship without a maintenance window.
+- **`scripts/expand_contract.py`:** classifies every statement and warns about what cannot be staged (`columna-obligatoria-en-un-paso`, `rename-no-divisible`, `reescritura-no-divisible`); anything it does not recognise (`DROP INDEX`, `INSERT`, …) goes to `phases.unknown` with a `sentencia-desconocida` warning and never to `expand`, and the statement splitter respects strings and `$$` function bodies. `--json` and `--fail-on unsafe|none`.
+- **`db-sql-lint` sub-skill:** SQL style before the risk guard, with a bounded rule set.
+- **`scripts/sql_lint.py`:** `tabla-sin-clave`, `select-asterisco` (medium), `palabra-clave-minuscula`, `identificador-no-snake`, `comparacion-distinta`, `linea-larga`, `tabulador` (low); line comments do not count for identifiers or comparisons, and a `CREATE TABLE` without a trailing `;` is still checked.
+- **18 tests** split between `db-architect/tests/test_expand_contract.py` and `test_sql_lint.py` (10 and 8): additive, destructive with `DROP CONSTRAINT`, mixed, mandatory column, type change, `rename`, function body with `;`, unknown statement, clean file, every style rule, `--fail-on none` and missing paths.
+
+#### Changed
+- **Root index `skills.json`:** from **73 to 75 skills**, version 3.8.0; `db-architect` moves to 1.2.0 with 9 skills.
+- **Master and `docs/db-architect.md`:** Plan phase, `db-sql-lint` in Audit, rows, commands and 48 tests per package.
 
 ### - 2026-11-18 · `finops-auditor` 1.3 — `finops-diff`
 
