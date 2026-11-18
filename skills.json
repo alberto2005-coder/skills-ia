@@ -2,9 +2,9 @@
   "format": "skills-ia-index",
   "format_version": "1.0",
   "updated": "2026-11-18",
-  "version": "3.9.0",
+  "version": "4.0.0",
   "description": "Índice vendor-neutral de los paquetes de Skills IA. Cualquier agente (Claude, Codex, Cursor, Gemini, OpenCode...) puede descubrir las skills escaneando **/SKILL.md; este índice da además el mapa de paquetes y permite varias skills por carpeta.",
-  "skills_total": 76,
+  "skills_total": 78,
   "packages": [
     {
       "name": "replica",
@@ -180,12 +180,14 @@
     {
       "name": "docs-sync-engine",
       "path": "docs-sync-engine",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "manifest": "docs-sync-engine/skills.json",
-      "skill_count": 4,
+      "skill_count": 6,
       "skills": [
         "docs-sync-engine",
         "docs-drift-check",
+        "docs-terms",
+        "docs-env",
         "docs-arch-gen",
         "docs-changelog"
       ]

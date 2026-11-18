@@ -4,7 +4,7 @@ description: Genera un borrador del documento de arquitectura leyendo el árbol 
 license: MIT
 metadata:
   package: docs-sync-engine
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Docs Arch Gen

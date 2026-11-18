@@ -1323,6 +1323,40 @@
           "winner": "api-code-sync"
         }
       ]
+    },
+    "docs-terms": {
+      "positives": [
+        "revisa la terminología de la documentación con el glosario",
+        "detecta términos prohibidos en los documentos",
+        "avisa cuando un término no usa la grafía canónica"
+      ],
+      "negatives": [
+        {
+          "phrase": "agrupa los commits convencionales en el changelog",
+          "winner": "docs-changelog"
+        },
+        {
+          "phrase": "regenera el documento de arquitectura desde los ast",
+          "winner": "docs-arch-gen"
+        }
+      ]
+    },
+    "docs-env": {
+      "positives": [
+        "cruza las variables de entorno del código con el .env.example",
+        "detecta variables de entorno sin documentar",
+        "comprueba que el readme documente las variables de entorno"
+      ],
+      "negatives": [
+        {
+          "phrase": "regenera el documento de arquitectura desde los ast",
+          "winner": "docs-arch-gen"
+        },
+        {
+          "phrase": "detecta términos prohibidos en los documentos",
+          "winner": "docs-terms"
+        }
+      ]
     }
   },
   "out_of_domain": [

@@ -20,7 +20,7 @@
 ### Visión General
 **Skills IA** es una colección de habilidades modulares, deterministas e independientes diseñadas para ser integradas en cualquier asistente de Inteligencia Artificial (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Cada habilidad es autosuficiente y opera sin alterar paquetes globales ni requerir dependencias complejas.
 
-Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica, varias sub-skills con un corte de uso real. Se instalan juntas y comparten assets sin duplicarlos. El índice máquina-legible está en [`skills.json`](skills.json): 12 paquetes, 76 skills.
+Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica, varias sub-skills con un corte de uso real. Se instalan juntas y comparten assets sin duplicarlos. El índice máquina-legible está en [`skills.json`](skills.json): 12 paquetes, 78 skills.
 
 ### Módulos y Sub-skills
 
@@ -37,7 +37,7 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | **[`db-architect`](db-architect/)** | Auditoría de bases de datos sin motor: esquema, riesgo y bloqueo de migraciones, plan de dos fases, deriva, estilo SQL, consultas N+1 y datos de siembra. | 9 |
 | **[`api-contract-guard`](api-contract-guard/)** | Defensa del contrato de API: impacto SemVer, cruce de rutas backend/frontend, cobertura de autenticación y mock local. | 5 |
 | **[`refactor-surgeon`](refactor-surgeon/)** | Refactor con red: métricas de complejidad, código muerto, detección de clones, ciclos de imports, casos dorados, cortes por grafo de llamadas y verificación. | 8 |
-| **[`docs-sync-engine`](docs-sync-engine/)** | Documentación sincronizada con el código: referencias, arquitectura regenerable y CHANGELOG. | 4 |
+| **[`docs-sync-engine`](docs-sync-engine/)** | Documentación sincronizada con el código: referencias, glosario, variables de entorno, arquitectura regenerable y CHANGELOG. | 6 |
 
 #### `replica` — maestro + 13 fases
 
@@ -142,12 +142,14 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | `refactor-slice` | Componentes conexas del grafo de llamadas como cortes. |
 | `refactor-verify` | Conducta sin cambios contra el snapshot. |
 
-#### `docs-sync-engine` — maestro + 3 sub-skills
+#### `docs-sync-engine` — maestro + 5 sub-skills
 
 | Sub-skill | Qué hace |
 |---|---|
 | `docs-sync-engine` | Maestro: verificar, regenerar y cerrar la documentación. |
 | `docs-drift-check` | Referencias de la doc frente al árbol: rutas y enlaces. |
+| `docs-terms` | Glosario accept/reject y grafía canónica de cada término. |
+| `docs-env` | Variables de entorno frente a `.env.example` y los documentos. |
 | `docs-arch-gen` | Borrador de arquitectura desde docstrings y entradas. |
 | `docs-changelog` | CHANGELOG agrupado desde commits convencionales. |
 
@@ -209,7 +211,7 @@ Las guías completas de cada módulo se encuentran en la carpeta [`docs/`](docs/
 - Los tests usan `unittest`; las herramientas de pruebas y calidad (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) están en el grupo `dev` de `pyproject.toml` y se gestionan con [`uv`](https://docs.astral.sh/uv/).
 - Para preparar el entorno `.venv` y ejecutar todos los tests desde la raíz: `uv sync` y `uv run python run_tests.py`.
 - GitHub Actions ejecuta todas las suites en cada `push` mediante `.github/workflows/tests.yml`.
-- Tests transversales en `tests/`: activación de las 76 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
+- Tests transversales en `tests/`: activación de las 78 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
 
 ### Licencia
 Distribuido bajo la [Licencia MIT](LICENSE).
@@ -229,7 +231,7 @@ Distribuido bajo la [Licencia MIT](LICENSE).
 ### Overview
 **Skills IA** is a collection of modular, deterministic, and self-contained agent skills designed for integration with any AI assistant (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Each skill is independent and operates without modifying global packages or requiring third-party libraries.
 
-Each folder is a **package**: one master skill that orchestrates and, where applicable, sub-skills split by real usage boundaries. Packages share assets without duplication. The machine-readable index is [`skills.json`](skills.json): 12 packages, 76 skills.
+Each folder is a **package**: one master skill that orchestrates and, where applicable, sub-skills split by real usage boundaries. Packages share assets without duplication. The machine-readable index is [`skills.json`](skills.json): 12 packages, 78 skills.
 
 ### Modules and Sub-skills
 
@@ -246,7 +248,7 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | **[`db-architect`](db-architect/)** | Database audit without an engine: schema, migration risk and locking, two-phase plans, drift, SQL style, N+1 queries and seed data. | 9 |
 | **[`api-contract-guard`](api-contract-guard/)** | API contract defence: SemVer impact, backend/frontend route sync, authentication coverage and a local mock. | 5 |
 | **[`refactor-surgeon`](refactor-surgeon/)** | Refactoring with a safety net: complexity metrics, dead code, clone detection, import cycles, golden cases, call-graph cuts and verification. | 8 |
-| **[`docs-sync-engine`](docs-sync-engine/)** | Documentation synced with the code: references, regenerable architecture and CHANGELOG. | 4 |
+| **[`docs-sync-engine`](docs-sync-engine/)** | Documentation synced with the code: references, glossary, environment variables, regenerable architecture and CHANGELOG. | 6 |
 
 #### `replica` — master + 13 phases
 
@@ -351,12 +353,14 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | `refactor-slice` | Connected components of the call graph as cuts. |
 | `refactor-verify` | Unchanged behaviour against the snapshot. |
 
-#### `docs-sync-engine` — master + 3 sub-skills
+#### `docs-sync-engine` — master + 5 sub-skills
 
 | Sub-skill | Purpose |
 |---|---|
 | `docs-sync-engine` | Master: verify, regenerate and close the documentation. |
 | `docs-drift-check` | Doc references against the tree: paths and links. |
+| `docs-terms` | Accept/reject glossary and canonical spelling per term. |
+| `docs-env` | Environment variables against `.env.example` and the docs. |
 | `docs-arch-gen` | Architecture draft from docstrings and entry functions. |
 | `docs-changelog` | CHANGELOG grouped from conventional commits. |
 
@@ -418,7 +422,7 @@ Comprehensive module documentation is available in the [`docs/`](docs/) director
 - Tests use `unittest`; test and quality tools (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) are in the `dev` group in `pyproject.toml` and managed by [`uv`](https://docs.astral.sh/uv/).
 - Prepare `.venv` and run every test from the repository root with `uv sync` and `uv run python run_tests.py`.
 - GitHub Actions runs all suites on every `push` via `.github/workflows/tests.yml`.
-- Cross-cutting tests in `tests/`: activation for all 76 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
+- Cross-cutting tests in `tests/`: activation for all 78 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
 
 ### License
 Distributed under the [MIT License](LICENSE).

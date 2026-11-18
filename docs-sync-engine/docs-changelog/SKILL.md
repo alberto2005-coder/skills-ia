@@ -4,7 +4,7 @@ description: Arma el borrador del CHANGELOG agrupando commits convencionales por
 license: MIT
 metadata:
   package: docs-sync-engine
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Docs Changelog
