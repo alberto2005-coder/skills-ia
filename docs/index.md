@@ -22,7 +22,7 @@
 - [**Premium Web Designer**](premium-web-designer.md): diseño y desarrollo de sitios web premium con dirección de arte, UX/UI y QA independiente.
 
 ### Paquetes y Sub-skills
-**7 paquetes, 43 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
+**8 paquetes, 46 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
 
 | Paquete | Skills | Maestro | Sub-skills |
 |---|---:|---|---|
@@ -33,6 +33,7 @@
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
 | `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
 | `skill-evals` | 4 | `skill-evals` | `eval-design`, `eval-run`, `eval-report` |
+| `finops-auditor` | 3 | `finops-auditor` | `finops-scan`, `finops-rightsize` |
 
 Cada maestro elige el modo, fija los límites y reparte el trabajo; `premium-web-designer` suma `premium-qa` para auditar webs ya construidas y `appsec-audit` reparte la auditoría entre reconocimiento, código, infraestructura, LLM, amenazas, dependencias, CI, remediación, informe y escala, y `skill-evals` reparte el ciclo entre diseño de casos, ejecución e informe.
 
@@ -81,7 +82,7 @@ uv run python run_tests.py
 - [**Premium Web Designer**](premium-web-designer.md): premium website design and development with art direction, UX/UI and independent QA.
 
 ### Packages and Sub-skills
-**7 packages, 43 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
+**8 packages, 46 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
 
 | Package | Skills | Master | Sub-skills |
 |---|---:|---|---|
@@ -92,6 +93,7 @@ uv run python run_tests.py
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
 | `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
 | `skill-evals` | 4 | `skill-evals` | `eval-design`, `eval-run`, `eval-report` |
+| `finops-auditor` | 3 | `finops-auditor` | `finops-scan`, `finops-rightsize` |
 
 Each master picks the mode, sets boundaries and splits the work; `premium-web-designer` adds `premium-qa` to audit sites that already exist and `appsec-audit` splits the audit across recon, code, infrastructure, LLM, threats, dependencies, CI, remediation, report and scale, while `skill-evals` splits the loop across case design, run and report.
 

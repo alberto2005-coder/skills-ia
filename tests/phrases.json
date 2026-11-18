@@ -770,6 +770,46 @@
           "winner": "eval-run"
         }
       ]
+    },
+    "finops-auditor": {
+      "positives": [
+        "auditoría de costes cloud: recursos huérfanos y sobreaprovisionamiento de instancias",
+        "haz un informe de costes cloud con recomendaciones de optimización FinOps",
+        "cloud cost audit: orphaned resources, overprovisioning and FinOps optimization"
+      ],
+      "negatives": [
+        {
+          "phrase": "detecta si este texto lo ha escrito una IA y reescríbelo",
+          "winner": "detector-ia"
+        }
+      ]
+    },
+    "finops-scan": {
+      "positives": [
+        "escanea el inventario de recursos cloud: instancias, bases de datos y almacenamiento, y detecta desperdicios y anomalías de coste",
+        "recopila el inventario completo de recursos cloud y detecta desperdicios de coste",
+        "inventario completo de instancias, bases de datos, almacenamiento e ips con sus desperdicios"
+      ],
+      "negatives": [
+        {
+          "phrase": "revisa los permisos iam públicos del bucket",
+          "winner": "appsec-infra"
+        }
+      ]
+    },
+    "finops-rightsize": {
+      "positives": [
+        "recomienda el cambio de tamaño de instancias de cómputo y bases de datos según métricas de rendimiento real",
+        "propone recomendaciones de right-sizing para instancias de cómputo sobreaprovisionadas",
+        "cambio de tamaño de bases de datos e instancias de cómputo con métricas de rendimiento",
+        "rightsize compute instances and databases based on real performance metrics"
+      ],
+      "negatives": [
+        {
+          "phrase": "estima horas y coste por fase de una auditoría de seguridad",
+          "winner": "appsec-scale"
+        }
+      ]
     }
   },
   "out_of_domain": [

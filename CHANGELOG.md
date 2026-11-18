@@ -8,6 +8,20 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-18 · `skill-evals` 1.0 y puertas de calidad en CI
+
+#### Añadido
+- **Paquete `skill-evals` (4 skills):** maestro + `eval-design`, `eval-run` y `eval-report`, con `scripts/evalkit.py` (casos, métricas, colisiones, presupuesto y diff), `design.py`, `run.py`, `report.py` y `optimize.py`, más `references/competitors.md`, `references/metrics.md`, `templates/` y 42 pruebas. Cierra el ciclo de skill-creator, skill-reach y SkillEvaluator sin modelo ni red.
+- **Optimizador de descripciones:** candidatos solo desde fallos de *train*, filtro en *train*, selección final en *test*, diff y `--apply` explícito; nunca reescribe un `SKILL.md` por su cuenta.
+- **Informe reproducible:** Markdown o HTML autónomo con tabla de fallos, colisiones, presupuesto de contexto y diff contra la línea base.
+- **Paquete `finops-auditor` (3 skills):** se incorpora al catálogo la auditoría de costes cloud con recursos huérfanos, sobreaprovisionamiento y derechosizing. `finops-scan` y `finops-rightsize` pasan de ficheros sueltos en `sub-skills/` a carpetas con su `SKILL.md`, `## Gate de salida` y `## Handoff`, con manifiesto, `license`/`metadata`, frases de activación y el arreglo del import en sus tests.
+- **Gate en CI:** el job de lint ejecuta `design.py --from-phrases tests/phrases.json --out skill-evals/reports/cases.json` y `run.py --fail-under precision=0.95 --fail-under recall=0.98 --fail-under mrr=0.98`, así que una descripción que rompa el routing falla el workflow.
+
+#### Cambiado
+- **Lint de frontmatter más estricto:** `name` en minúsculas de 64 caracteres como máximo, descripción de 20 a 1024 y cuerpo por debajo de 500 líneas; los 44 `SKILL.md` llevan `license: MIT` y `metadata.package`/`metadata.version` mantenidos por `tests/sync_skill_metadata.py --check`.
+- **Workflow de CI:** además de `push` corre en `pull_request`, con `permissions: contents: read`, `timeout-minutes`, cancelación por concurrencia y `ruff` (E4/E7/E9/F) junto a la suite.
+- **Suite de pruebas:** 490 pruebas; los recuentos y las listas de skills se derivan de `skills.json` y del sistema de ficheros, así que una skill nueva no obliga a editar constantes.
+
 ### - 2026-11-17 · `appsec-audit` 1.4 — CI, remediación y escala
 
 #### Añadido
@@ -147,6 +161,20 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-18 · `skill-evals` 1.0 and quality gates in CI
+
+#### Added
+- **`skill-evals` package (4 skills):** master + `eval-design`, `eval-run` and `eval-report`, with `scripts/evalkit.py` (cases, metrics, collisions, budget and diff), `design.py`, `run.py`, `report.py` and `optimize.py`, plus `references/competitors.md`, `references/metrics.md`, `templates/` and 42 tests. It closes the skill-creator, skill-reach and SkillEvaluator loop without a model or a network.
+- **Description optimizer:** candidates only from *train* failures, filtered on *train*, picked on *test*, with a diff and an explicit `--apply`; it never rewrites a `SKILL.md` on its own.
+- **Reproducible report:** Markdown or standalone HTML with the failure table, collisions, context budget and a diff against the baseline.
+- **`finops-auditor` package (3 skills):** the cloud cost audit for orphaned resources, overprovisioning and rightsizing joins the catalogue. `finops-scan` and `finops-rightsize` move from loose files in `sub-skills/` to their own `SKILL.md` folders with `## Gate de salida` and `## Handoff`, plus manifest, `license`/`metadata`, trigger phrases and the import fix in their tests.
+- **CI gate:** the lint job runs `design.py --from-phrases tests/phrases.json --out skill-evals/reports/cases.json` and `run.py --fail-under precision=0.95 --fail-under recall=0.98 --fail-under mrr=0.98`, so a description that breaks routing fails the workflow.
+
+#### Changed
+- **Stricter frontmatter lint:** lowercase `name` of at most 64 characters, description between 20 and 1024 characters and body under 500 lines; all 44 `SKILL.md` files carry `license: MIT` plus `metadata.package`/`metadata.version`, kept in sync by `tests/sync_skill_metadata.py --check`.
+- **CI workflow:** runs on `pull_request` as well as `push`, with `permissions: contents: read`, `timeout-minutes`, concurrency cancellation and `ruff` (E4/E7/E9/F) next to the suite.
+- **Test suite:** 490 tests; counts and skill lists derive from `skills.json` and the filesystem, so a new skill needs no constant edits.
 
 ### - 2026-11-17 · `appsec-audit` 1.4 — CI, remediation and scale
 
