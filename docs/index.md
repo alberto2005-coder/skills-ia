@@ -25,6 +25,7 @@
 - [**API Contract Guard**](api-contract-guard.md): impacto SemVer de un cambio de contrato, cruce de rutas backend/frontend y mock local.
 - [**Refactor Surgeon**](refactor-surgeon.md): refactor con métricas, casos dorados, cortes por grafo de llamadas y verificación de conducta.
 - [**Docs Sync Engine**](docs-sync-engine.md): referencias de la documentación verificadas, arquitectura regenerable y CHANGELOG desde commits.
+- [**Skill Evals**](skill-evals.md): evaluación offline del catálogo con casos desde frases reales, puertas de precisión/recall/MRR, informe reproducible y optimización de descripciones.
 
 ### Paquetes y Sub-skills
 **12 paquetes, 67 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
@@ -94,6 +95,7 @@ uv run python run_tests.py
 - [**API Contract Guard**](api-contract-guard.md): SemVer impact of a contract change, backend/frontend route sync and a local mock.
 - [**Refactor Surgeon**](refactor-surgeon.md): refactoring with metrics, golden cases, call-graph cuts and behaviour verification.
 - [**Docs Sync Engine**](docs-sync-engine.md): verified documentation references, regenerable architecture and a CHANGELOG from commits.
+- [**Skill Evals**](skill-evals.md): offline catalog evaluation with cases from real phrases, precision/recall/MRR gates, a reproducible report and description optimisation.
 
 ### Packages and Sub-skills
 **12 packages, 67 skills.** The machine-readable index lives in [`skills.json`](../skills.json).

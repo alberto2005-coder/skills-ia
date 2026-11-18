@@ -193,6 +193,7 @@ Las guías completas de cada módulo se encuentran en la carpeta [`docs/`](docs/
 - [Guía de API Contract Guard](docs/api-contract-guard.md)
 - [Guía de Refactor Surgeon](docs/refactor-surgeon.md)
 - [Guía de Docs Sync Engine](docs/docs-sync-engine.md)
+- [Guía de Skill Evals](docs/skill-evals.md)
 
 ### Requisitos y Filosofía de Cero Dependencias
 - **Python 3.9+** (utiliza únicamente la librería estándar de Python: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).
@@ -392,6 +393,7 @@ Comprehensive module documentation is available in the [`docs/`](docs/) director
 - [API Contract Guard Guide](docs/api-contract-guard.md)
 - [Refactor Surgeon Guide](docs/refactor-surgeon.md)
 - [Docs Sync Engine Guide](docs/docs-sync-engine.md)
+- [Skill Evals Guide](docs/skill-evals.md)
 
 ### Requirements and Zero-Dependency Philosophy
 - **Python 3.9+** (uses only standard library modules: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).
