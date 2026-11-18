@@ -13,6 +13,8 @@ Comprueba, sin dependencias:
 3. Cada enlace relativo de cada Markdown resuelve a un fichero existente.
 4. El índice raíz `skills.json` cuadra con el disco: `skills_total`, el número
    de skills por paquete y la cobertura de todos los `SKILL.md`.
+5. Cada paquete del índice tiene su guía `docs/<paquete>.md` y un enlace a ella
+   en `README.md` y en `docs/index.md`.
 
 Es la puerta de CI independiente de `unittest`.
 
@@ -250,6 +252,45 @@ def lint_index(root: Path) -> list[str]:
     return problems
 
 
+def lint_package_docs(root: Path) -> dict[str, list[str]]:
+    """Cada paquete del índice debe tener guía en `docs/` y estar enlazado en README e índice."""
+    index_path = root / "skills.json"
+    if not index_path.is_file():
+        return {}
+
+    try:
+        packages = json.loads(index_path.read_text(encoding="utf-8")).get("packages") or []
+    except json.JSONDecodeError:
+        return {}
+
+    problems: dict[str, list[str]] = {}
+    for package in packages:
+        name = package.get("name")
+        if not name:
+            continue
+        guide = root / "docs" / f"{name}.md"
+        if not guide.is_file():
+            problems.setdefault("docs/", []).append(f"falta la guía docs/{name}.md")
+
+    for document_name, mentions in (("README.md", "docs/{name}.md"), ("docs/index.md", None)):
+        document = root / document_name
+        text = document.read_text(encoding="utf-8") if document.is_file() else ""
+        for package in packages:
+            package_name = package.get("name")
+            if not package_name:
+                continue
+            if mentions is None:
+                linked = f"({package_name}.md)" in text
+            else:
+                linked = mentions.format(name=package_name) in text
+            if not linked:
+                problems.setdefault(document_name, []).append(
+                    f"el paquete «{package_name}» no tiene enlace a su guía"
+                )
+
+    return problems
+
+
 def lint_repository(root: Path = ROOT) -> dict[str, list[str]]:
     problems: dict[str, list[str]] = {}
     for path in iter_skill_files(root):
@@ -259,6 +300,8 @@ def lint_repository(root: Path = ROOT) -> dict[str, list[str]]:
     for path, found in lint_manifests(root).items():
         problems.setdefault(path, []).extend(found)
     for path, found in lint_links(root).items():
+        problems.setdefault(path, []).extend(found)
+    for path, found in lint_package_docs(root).items():
         problems.setdefault(path, []).extend(found)
     index_problems = lint_index(root)
     if index_problems:

@@ -88,5 +88,62 @@ class TestLintIndex(unittest.TestCase):
         self.assertTrue(any("falta el SKILL.md" in item for item in problems))
 
 
+class TestLintPackageDocs(unittest.TestCase):
+    def _repo(self, tmp, *, guide=True, readme_link=True, index_link=True):
+        root = Path(tmp)
+        (root / "paquete" / "demo").mkdir(parents=True)
+        (root / "paquete" / "SKILL.md").write_text("---\nname: paquete\n---\n", encoding="utf-8")
+        (root / "paquete" / "demo" / "SKILL.md").write_text("---\nname: demo\n---\n", encoding="utf-8")
+        (root / "paquete" / "skills.json").write_text(
+            json.dumps({"skills": [
+                {"name": "paquete", "path": "SKILL.md"},
+                {"name": "demo", "path": "demo/SKILL.md"},
+            ]}),
+            encoding="utf-8",
+        )
+        (root / "skills.json").write_text(
+            json.dumps({"skills_total": 2, "packages": [{
+                "name": "paquete", "path": "paquete", "manifest": "paquete/skills.json",
+                "skill_count": 2, "skills": ["paquete", "demo"],
+            }]}),
+            encoding="utf-8",
+        )
+        (root / "docs").mkdir()
+        if guide:
+            (root / "docs" / "paquete.md").write_text("# Paquete\n", encoding="utf-8")
+        readme = "- [Guía](docs/paquete.md)\n" if readme_link else "# Sin enlaces\n"
+        (root / "README.md").write_text(readme, encoding="utf-8")
+        index = "- [**Paquete**](paquete.md)\n" if index_link else "# Índice\n"
+        (root / "docs" / "index.md").write_text(index, encoding="utf-8")
+        return root
+
+    def test_documented_package_is_clean(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(lint_frontmatter.lint_package_docs(self._repo(tmp)), {})
+
+    def test_missing_guide_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            problems = lint_frontmatter.lint_package_docs(self._repo(tmp, guide=False))
+
+        self.assertIn("docs/", problems)
+        self.assertIn("falta la guía docs/paquete.md", problems["docs/"])
+
+    def test_missing_readme_link_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            problems = lint_frontmatter.lint_package_docs(self._repo(tmp, readme_link=False))
+
+        self.assertIn("README.md", problems)
+        self.assertIn("el paquete «paquete» no tiene enlace a su guía", problems["README.md"])
+
+    def test_missing_index_link_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            problems = lint_frontmatter.lint_package_docs(self._repo(tmp, index_link=False))
+
+        self.assertIn("docs/index.md", problems)
+
+    def test_repository_packages_are_documented(self):
+        self.assertEqual(lint_frontmatter.lint_package_docs(ROOT), {})
+
+
 if __name__ == "__main__":
     unittest.main()
