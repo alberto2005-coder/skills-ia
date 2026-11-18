@@ -781,6 +781,10 @@
         {
           "phrase": "detecta si este texto lo ha escrito una IA y reescríbelo",
           "winner": "detector-ia"
+        },
+        {
+          "phrase": "audita la seguridad de esta api antes de publicarla",
+          "winner": "appsec-audit"
         }
       ]
     },
@@ -794,6 +798,10 @@
         {
           "phrase": "revisa los permisos iam públicos del bucket",
           "winner": "appsec-infra"
+        },
+        {
+          "phrase": "genera un sbom cyclonedx y revisa cves de dependencias",
+          "winner": "appsec-deps"
         }
       ]
     },
@@ -808,6 +816,10 @@
         {
           "phrase": "estima horas y coste por fase de una auditoría de seguridad",
           "winner": "appsec-scale"
+        },
+        {
+          "phrase": "revisa la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
         }
       ]
     }

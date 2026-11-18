@@ -88,7 +88,14 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | `skill-evals` | Maestro: diseño de casos, ejecución, puertas, comparación e informe. |
 | `eval-design` | Casos desde `phrases.json`, límites, cobertura y split train/test. |
 | `eval-run` | Precisión, recall, MRR, colisiones, presupuesto, regresiones y puertas. |
-| `eval-report` | Informe Markdown/HTML con fallos, colisiones, presupuesto y veredicto. |
+
+#### `finops-auditor` — maestro + 2 sub-skills
+
+| Sub-skill | Qué hace |
+|---|---|
+| `finops-auditor` | Maestro: modo, fases, rúbrica y entrega del informe. |
+| `finops-scan` | Inventario de recursos, huérfanos, subutilización y anomalías de coste. |
+| `finops-rightsize` | Redimensionado con ahorro, riesgo y métrica de verificación. |
 
 #### `agent-red-team` — maestro + 2 sub-skills
 
@@ -230,7 +237,14 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | `skill-evals` | Master: case design, run, gates, baseline comparison and report. |
 | `eval-design` | Cases from `phrases.json`, boundary cases, coverage and train/test split. |
 | `eval-run` | Precision, recall, MRR, collisions, budget, regressions and gates. |
-| `eval-report` | Markdown/HTML report with failures, collisions, budget and verdict. |
+
+#### `finops-auditor` — master + 2 sub-skills
+
+| Sub-skill | Purpose |
+|---|---|
+| `finops-auditor` | Master: mode, phases, rubric and report delivery. |
+| `finops-scan` | Resource inventory, orphans, underutilisation and cost anomalies. |
+| `finops-rightsize` | Rightsizing with savings, risk and verification metric. |
 
 #### `agent-red-team` — master + 2 sub-skills
 

@@ -19,6 +19,7 @@
 - [**Replica**](replica.md): reconstrucción funcional *clean-room* por fases, con evidencia obligatoria, paridad y rebrand.
 - [**SEO Auditor**](seo-auditor.md): auditoría SEO/GEO con rúbrica 0–100, simulador de SERP y evidencia reproducible.
 - [**AppSec Audit**](appsec-audit.md): auditoría de ciberseguridad integral con trazado fuente→sumidero, tribunal de validación, nota A–F y parches en diff.
+- [**FinOps Auditor**](finops-auditor.md): auditoría de costes cloud con recursos huérfanos, derechosizing, rúbrica 0–100 y ahorro mensual reproducible.
 - [**Premium Web Designer**](premium-web-designer.md): diseño y desarrollo de sitios web premium con dirección de arte, UX/UI y QA independiente.
 
 ### Paquetes y Sub-skills
@@ -79,6 +80,7 @@ uv run python run_tests.py
 - [**Replica**](replica.md): clean-room functional reconstruction by phases, with mandatory evidence, parity and rebrand.
 - [**SEO Auditor**](seo-auditor.md): SEO/GEO audit with a 0–100 rubric, SERP simulator and reproducible evidence.
 - [**AppSec Audit**](appsec-audit.md): end-to-end security audit with source-to-sink tracing, a validation tribunal, an A–F grade and diff patches.
+- [**FinOps Auditor**](finops-auditor.md): cloud cost audit with orphaned resources, rightsizing, a 0–100 rubric and reproducible monthly savings.
 - [**Premium Web Designer**](premium-web-designer.md): premium website design and development with art direction, UX/UI and independent QA.
 
 ### Packages and Sub-skills
