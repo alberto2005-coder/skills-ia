@@ -1173,6 +1173,56 @@
           "winner": "api-contract-guard"
         }
       ]
+    },
+    "refactor-clones": {
+      "positives": [
+        "detecta funciones duplicadas en el código",
+        "detecta duplicación entre funciones con shingles normalizados del ast",
+        "encuentra bloques duplicados que solo cambian los nombres de las variables"
+      ],
+      "negatives": [
+        {
+          "phrase": "mide la complejidad ciclomática y el anidamiento de las funciones",
+          "winner": "refactor-metrics"
+        },
+        {
+          "phrase": "graba casos dorados antes de refactorizar y reprodúcelos después",
+          "winner": "refactor-harness"
+        }
+      ]
+    },
+    "db-lock-audit": {
+      "positives": [
+        "detecta las migraciones que bloquean la tabla",
+        "audita el bloqueo de la tabla antes de desplegar la migración"
+      ],
+      "negatives": [
+        {
+          "phrase": "audita el esquema de la base de datos y sus índices",
+          "winner": "db-schema-audit"
+        },
+        {
+          "phrase": "revisa la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        }
+      ]
+    },
+    "db-drift": {
+      "positives": [
+        "compara el esquema declarado con las migraciones reproducidas",
+        "detecta deriva entre el esquema sql y las migraciones",
+        "compara lo que dice el esquema con lo que construyen las migraciones"
+      ],
+      "negatives": [
+        {
+          "phrase": "genera el seed de la base de datos de pruebas",
+          "winner": "db-seed-gen"
+        },
+        {
+          "phrase": "corrige los tests que fallan en el pipeline",
+          "winner": "eval-run"
+        }
+      ]
     }
   },
   "out_of_domain": [

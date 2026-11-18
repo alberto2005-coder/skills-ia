@@ -33,13 +33,14 @@ El maestro no usa flags: el alcance de la petición fija las fases.
 | **Cierre** | `refactor-verify` | Veredicto con o sin discrepancias |
 
 ### Arquitectura
-Un maestro y cuatro sub-skills con scripts compartidos. Se instala la carpeta completa.
+Un maestro y cinco sub-skills con scripts compartidos. Se instala la carpeta completa.
 
 | Sub-skill | Qué hace |
 |---|---|
 | `refactor-surgeon` | Maestro: ordena medir, congelar, cortar y verificar |
 | `refactor-metrics` | `V(G)`, anidamiento, parámetros, líneas y nota de mantenibilidad |
 | `refactor-harness` | Graba y reproduce casos dorados antes y después |
+| `refactor-clones` | Duplicación entre funciones por shingles normalizados del AST |
 | `refactor-slice` | Componentes conexas del grafo de llamadas como cortes |
 | `refactor-verify` | Compara la conducta contra el snapshot |
 
@@ -60,6 +61,7 @@ py refactor-surgeon/scripts/code_metrics.py --path src/ --json --fail-on medium
 py refactor-surgeon/scripts/golden_harness.py --cases cases.json --snapshot golden.json --record --allow-exec
 py refactor-surgeon/scripts/golden_harness.py --cases cases.json --snapshot golden.json --verify --allow-exec
 py refactor-surgeon/scripts/slice_analyzer.py --path src/grande.py --json
+py refactor-surgeon/scripts/clone_detect.py --path src/ --json
 ```
 
 El fichero de casos declara el módulo y las llamadas:
@@ -85,7 +87,7 @@ Copia la carpeta `refactor-surgeon/` completa. Ejemplos de petición:
 uv run python -m unittest discover -s refactor-surgeon/tests -t refactor-surgeon/tests
 ```
 
-12 pruebas: función simple limpia, función anidada por encima de los límites, `--fail-on none`, firma ancha, ruta ausente, grupos del grafo, fichero que no parsea, grabación y verificación sin discrepancias, cambio de conducta detectado, ejecución sin permiso y snapshot ausente.
+19 pruebas: función simple limpia, función anidada por encima de los límites, `--fail-on none`, firma ancha, ruta ausente, grupos del grafo, fichero que no parsea, grabación y verificación sin discrepancias, cambio de conducta detectado, ejecución sin permiso, snapshot ausente y seis del detector de clones (renombrado como clon exacto, funciones distintas sin hallazgos, funciones diminutas ignoradas, umbral que filtra el par, `--fail-on none` y ruta ausente).
 
 ### Límites
 Las métricas se calculan sobre la sintaxis, no ejecutando el código; no miden acoplamiento entre módulos ni cobertura. El grafo solo ve llamadas por nombre dentro del mismo fichero: métodos, imports y llamadas dinámicas no aparecen. El arnés ejecuta en el proceso actual, sin aislamiento ni límite de tiempo propio, y compara resultados serializados, así que un objeto no serializable se compara como texto.
@@ -118,13 +120,14 @@ The master takes no flags: the request's scope sets the phases.
 | **Close** | `refactor-verify` | Verdict with or without mismatches |
 
 ### Architecture
-One master and four sub-skills with shared scripts. The whole folder is installed.
+One master and five sub-skills with shared scripts. The whole folder is installed.
 
 | Sub-skill | What it does |
 |---|---|
 | `refactor-surgeon` | Master: orders measure, freeze, cut and verify |
 | `refactor-metrics` | `V(G)`, nesting, parameters, lines and maintainability score |
 | `refactor-harness` | Records and replays golden cases before and after |
+| `refactor-clones` | Duplication between functions by normalised AST shingles |
 | `refactor-slice` | Connected components of the call graph as cuts |
 | `refactor-verify` | Compares behaviour against the snapshot |
 
@@ -145,6 +148,7 @@ py refactor-surgeon/scripts/code_metrics.py --path src/ --json --fail-on medium
 py refactor-surgeon/scripts/golden_harness.py --cases cases.json --snapshot golden.json --record --allow-exec
 py refactor-surgeon/scripts/golden_harness.py --cases cases.json --snapshot golden.json --verify --allow-exec
 py refactor-surgeon/scripts/slice_analyzer.py --path src/grande.py --json
+py refactor-surgeon/scripts/clone_detect.py --path src/ --json
 ```
 
 The cases file declares the module and the calls:
@@ -170,7 +174,7 @@ Copy the whole `refactor-surgeon/` folder. Example requests:
 uv run python -m unittest discover -s refactor-surgeon/tests -t refactor-surgeon/tests
 ```
 
-12 tests: clean simple function, nested function over the limits, `--fail-on none`, wide signature, missing path, call-graph groups, unparsable file, record and verify with no mismatches, changed behaviour detected, execution without permission and missing snapshot.
+19 tests: clean simple function, nested function over the limits, `--fail-on none`, wide signature, missing path, call-graph groups, unparsable file, record and verify with no mismatches, changed behaviour detected, execution without permission, missing snapshot and six for the clone detector (rename as exact clone, distinct functions clean, tiny functions ignored, threshold filtering the pair, `--fail-on none` and missing path).
 
 ### Limits
 Metrics come from the syntax, not from running the code; they measure neither module coupling nor coverage. The graph only sees name-based calls inside the same file: methods, imports and dynamic calls are invisible. The harness runs in the current process, with no isolation and no per-case timeout, and compares serialised results, so a non-serialisable object is compared as text.

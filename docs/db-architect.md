@@ -35,13 +35,15 @@ El maestro no usa flags: el alcance de la petición fija las fases.
 Los cuatro modos comparten la misma lectura estática, así que se pueden encadenar en una sola sesión.
 
 ### Arquitectura
-Un maestro y cuatro sub-skills con scripts compartidos. Se instala la carpeta completa.
+Un maestro y seis sub-skills con scripts compartidos. Se instala la carpeta completa.
 
 | Sub-skill | Qué hace |
 |---|---|
 | `db-architect` | Maestro: elige el modo, ordena las fases y firma el informe |
 | `db-schema-audit` | Tablas sin clave primaria, claves foráneas sin índice, tipos y restricciones |
 | `db-migration-guard` | `DROP TABLE`, `DROP COLUMN`, columnas obligatorias y ausencia de reversión |
+| `db-lock-audit` | Bloqueo y reescritura por operación, con su alternativa segura |
+| `db-drift` | Esquema declarado frente a migraciones reproducidas |
 | `db-query-trace` | Consultas al ORM dentro de bucles (N+1) con fichero y línea |
 | `db-seed-gen` | Datos de siembra deterministas desde el esquema, con semilla |
 
@@ -52,6 +54,9 @@ Un maestro y cuatro sub-skills con scripts compartidos. Se instala la carpeta co
 | `fk-sin-indice` | `schema_audit.py` | media |
 | `drop-table`, `drop-column` | `migration_guard.py` | crítica |
 | `sin-reversion` | `migration_guard.py` | aviso |
+| `indice-sin-concurrently`, `rename-inseguro` | `lock_audit.py` | media |
+| `reescritura-de-tipo`, `set-not-null` | `lock_audit.py` | alta |
+| `deriva` (`tabla-*`, `columna-*`, `tipo-distinto`) | `drift.py` | media/alta |
 | `consulta-en-bucle` | `query_trace.py` | media |
 
 Cada hallazgo lleva fichero, línea, tabla o función afectada y un mensaje que explica por qué importa.
@@ -62,6 +67,8 @@ Cada hallazgo lleva fichero, línea, tabla o función afectada y un mensaje que 
 py db-architect/scripts/schema_audit.py --path schema.sql --json
 py db-architect/scripts/migration_guard.py --path migrations/ --fail-on critical
 py db-architect/scripts/query_trace.py --path src/ --json
+py db-architect/scripts/lock_audit.py --path migrations/ --fail-on high
+py db-architect/scripts/drift.py --schema schema.sql --migrations migrations/ --json
 py db-architect/scripts/seed_gen.py --schema schema.sql --rows 5 --seed 7 --format sql
 ```
 
@@ -92,7 +99,7 @@ Copia la carpeta `db-architect/` completa. Ejemplos de petición:
 uv run python -m unittest discover -s db-architect/tests -t db-architect/tests
 ```
 
-18 pruebas: esquema limpio frente a esquema con hallazgos, migración destructiva frente a reversible, N+1 detectado y no detectado, siembra determinista con la misma semilla y códigos de salida de los cuatro scripts.
+30 pruebas: esquema limpio frente a esquema con hallazgos, migración destructiva frente a reversible, N+1 detectado y no detectado, siembra determinista con la misma semilla, códigos de salida de los seis scripts, y doce sobre bloqueos (cada regla, migración segura, comentarios ignorados, umbral y `--fail-on none`) y deriva (esquema que cuadra, columnas y tablas que sobran o faltan, tipos distintos y renombrado intermedio).
 
 ### Límites
 El análisis es textual y heurístico: no valida el SQL contra un motor real, no conoce dialectos y no modela planes de ejecución. Un esquema generado por ORM sin `.sql` no se audita hasta exportarlo, y la detección de N+1 solo ve consultas escritas dentro del bucle, no las que dispara el ORM por carga diferida. `seed_gen` genera datos sintéticos, nunca extrae datos reales.
@@ -127,13 +134,15 @@ The master takes no flags: the request's scope sets the phases.
 All four modes share the same static reading, so they can be chained in one session.
 
 ### Architecture
-One master and four sub-skills with shared scripts. The whole folder is installed.
+One master and six sub-skills with shared scripts. The whole folder is installed.
 
 | Sub-skill | What it does |
 |---|---|
 | `db-architect` | Master: picks the mode, orders the phases and signs the report |
 | `db-schema-audit` | Tables without a primary key, foreign keys without an index, types and constraints |
 | `db-migration-guard` | `DROP TABLE`, `DROP COLUMN`, mandatory columns and missing rollback |
+| `db-lock-audit` | Locking and rewrite per operation, with its safe alternative |
+| `db-drift` | Declared schema against replayed migrations |
 | `db-query-trace` | ORM queries inside loops (N+1) with file and line |
 | `db-seed-gen` | Deterministic seed data from the schema, with a seed |
 
@@ -144,6 +153,9 @@ One master and four sub-skills with shared scripts. The whole folder is installe
 | `fk-sin-indice` | `schema_audit.py` | medium |
 | `drop-table`, `drop-column` | `migration_guard.py` | critical |
 | `sin-reversion` | `migration_guard.py` | warning |
+| `indice-sin-concurrently`, `rename-inseguro` | `lock_audit.py` | medium |
+| `reescritura-de-tipo`, `set-not-null` | `lock_audit.py` | high |
+| `deriva` (`tabla-*`, `columna-*`, `tipo-distinto`) | `drift.py` | medium/high |
 | `consulta-en-bucle` | `query_trace.py` | medium |
 
 Every finding carries file, line, affected table or function and a message explaining why it matters.
@@ -154,6 +166,8 @@ Every finding carries file, line, affected table or function and a message expla
 py db-architect/scripts/schema_audit.py --path schema.sql --json
 py db-architect/scripts/migration_guard.py --path migrations/ --fail-on critical
 py db-architect/scripts/query_trace.py --path src/ --json
+py db-architect/scripts/lock_audit.py --path migrations/ --fail-on high
+py db-architect/scripts/drift.py --schema schema.sql --migrations migrations/ --json
 py db-architect/scripts/seed_gen.py --schema schema.sql --rows 5 --seed 7 --format sql
 ```
 
@@ -184,7 +198,7 @@ Copy the whole `db-architect/` folder. Example requests:
 uv run python -m unittest discover -s db-architect/tests -t db-architect/tests
 ```
 
-18 tests: clean schema versus schema with findings, destructive versus reversible migration, N+1 detected and not detected, deterministic seeding with the same seed, and exit codes for all four scripts.
+30 tests: clean schema versus schema with findings, destructive versus reversible migration, N+1 detected and not detected, deterministic seeding with the same seed, exit codes for all six scripts, and twelve covering locks (every rule, a safe migration, ignored comments, thresholds and `--fail-on none`) and drift (matching schema, extra or missing columns and tables, type mismatches and an intermediate rename).
 
 ### Limits
 The analysis is textual and heuristic: it does not validate SQL against a real engine, knows no dialects and models no execution plans. An ORM-generated schema without `.sql` is not audited until exported, and N+1 detection only sees queries written inside the loop, not those triggered by lazy loading. `seed_gen` produces synthetic data and never extracts real records.

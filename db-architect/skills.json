@@ -2,8 +2,8 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "db-architect",
-  "version": "1.0.0",
-  "description": "Auditoría de bases de datos: esquema, migraciones, consultas N+1 y datos de siembra deterministas.",
+  "version": "1.1.0",
+  "description": "Auditoría de bases de datos: esquema, migraciones, bloqueos, deriva, consultas N+1 y datos de siembra deterministas.",
   "skills": [
     {
       "name": "db-architect",
@@ -19,6 +19,16 @@
       "name": "db-migration-guard",
       "path": "db-migration-guard/SKILL.md",
       "description": "Riesgo por operación y exigencia de DOWN/downgrade()."
+    },
+    {
+      "name": "db-lock-audit",
+      "path": "db-lock-audit/SKILL.md",
+      "description": "Bloqueo y reescritura por operación, con alternativa segura."
+    },
+    {
+      "name": "db-drift",
+      "path": "db-drift/SKILL.md",
+      "description": "Esquema declarado frente a migraciones reproducidas."
     },
     {
       "name": "db-query-trace",
