@@ -70,6 +70,17 @@ def apply_create(tables: dict, name: str, block: str) -> None:
     tables[name.lower()] = columns
 
 
+_MODEL_OPERATIONS = (
+    (CREATE_TABLE, "create"),
+    (RENAME_TABLE, "rename_table"),
+    (RENAME_COLUMN, "rename_column"),
+    (DROP_COLUMN, "drop_column"),
+    (ALTER_TYPE, "alter_type"),
+    (ADD_COLUMN, "add_column"),
+    (DROP_TABLE, "drop_table"),
+)
+
+
 def build_model(text: str, tables: dict | None = None) -> dict:
     """Aplica las sentencias en el ORDEN DEL TEXTO, no por categorías.
 
@@ -79,47 +90,62 @@ def build_model(text: str, tables: dict | None = None) -> dict:
     """
     tables = {} if tables is None else tables
     operations: list[tuple[int, str, tuple]] = []
-    for match in CREATE_TABLE.finditer(text):
-        operations.append((match.start(), "create", match.groups()))
-    for match in RENAME_TABLE.finditer(text):
-        operations.append((match.start(), "rename_table", match.groups()))
-    for match in RENAME_COLUMN.finditer(text):
-        operations.append((match.start(), "rename_column", match.groups()))
-    for match in DROP_COLUMN.finditer(text):
-        operations.append((match.start(), "drop_column", match.groups()))
-    for match in ALTER_TYPE.finditer(text):
-        operations.append((match.start(), "alter_type", match.groups()))
-    for match in ADD_COLUMN.finditer(text):
-        operations.append((match.start(), "add_column", match.groups()))
-    for match in DROP_TABLE.finditer(text):
-        operations.append((match.start(), "drop_table", match.groups()))
+    for pattern, kind in _MODEL_OPERATIONS:
+        for match in pattern.finditer(text):
+            operations.append((match.start(), kind, match.groups()))
 
     for _, kind, groups in sorted(operations, key=lambda item: item[0]):
-        if kind == "create":
-            apply_create(tables, groups[0], groups[1])
-        elif kind == "rename_table":
-            old, new = groups
-            if old.lower() in tables:
-                tables[new.lower()] = tables.pop(old.lower())
-        elif kind == "rename_column":
-            table, old, new = groups
-            columns = tables.get(table.lower())
-            if columns and old.lower() in columns:
-                columns[new.lower()] = columns.pop(old.lower())
-        elif kind == "drop_column":
-            table, column = groups
-            tables.get(table.lower(), {}).pop(column.lower(), None)
-        elif kind == "alter_type":
-            table, column, new_type = groups
-            columns = tables.get(table.lower())
-            if columns and column.lower() in columns:
-                columns[column.lower()] = re.sub(r"\s+", "", new_type.lower())
-        elif kind == "add_column":
-            table, column, new_type = groups
-            tables.setdefault(table.lower(), {})[column.lower()] = re.sub(r"\s+", "", new_type.lower())
-        elif kind == "drop_table":
-            tables.pop(groups[0].lower(), None)
+        _OPERATION_APPLIERS[kind](tables, groups)
     return tables
+
+
+def _op_create(tables: dict, groups: tuple) -> None:
+    apply_create(tables, groups[0], groups[1])
+
+
+def _op_rename_table(tables: dict, groups: tuple) -> None:
+    old, new = groups
+    if old.lower() in tables:
+        tables[new.lower()] = tables.pop(old.lower())
+
+
+def _op_rename_column(tables: dict, groups: tuple) -> None:
+    table, old, new = groups
+    columns = tables.get(table.lower())
+    if columns and old.lower() in columns:
+        columns[new.lower()] = columns.pop(old.lower())
+
+
+def _op_drop_column(tables: dict, groups: tuple) -> None:
+    table, column = groups
+    tables.get(table.lower(), {}).pop(column.lower(), None)
+
+
+def _op_alter_type(tables: dict, groups: tuple) -> None:
+    table, column, new_type = groups
+    columns = tables.get(table.lower())
+    if columns and column.lower() in columns:
+        columns[column.lower()] = re.sub(r"\s+", "", new_type.lower())
+
+
+def _op_add_column(tables: dict, groups: tuple) -> None:
+    table, column, new_type = groups
+    tables.setdefault(table.lower(), {})[column.lower()] = re.sub(r"\s+", "", new_type.lower())
+
+
+def _op_drop_table(tables: dict, groups: tuple) -> None:
+    tables.pop(groups[0].lower(), None)
+
+
+_OPERATION_APPLIERS = {
+    "create": _op_create,
+    "rename_table": _op_rename_table,
+    "rename_column": _op_rename_column,
+    "drop_column": _op_drop_column,
+    "alter_type": _op_alter_type,
+    "add_column": _op_add_column,
+    "drop_table": _op_drop_table,
+}
 
 
 # --- Migraciones Alembic -----------------------------------------------------
