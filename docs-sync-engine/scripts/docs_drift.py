@@ -21,7 +21,7 @@ from pathlib import Path
 
 SEVERITIES = {"low": 1, "medium": 2, "high": 3}
 CODE_PATH = re.compile(r"""`([A-Za-z0-9_.\-/]+\.(?:py|md|json|yml|yaml|toml))`""")
-LINK = re.compile(r"""\]\(([^)#:]+)\)""")
+LINK = re.compile(r"""\]\(([^)]+)\)""")
 SKIP_PARTS = {"__pycache__", ".venv", ".git", "node_modules"}
 
 
@@ -33,7 +33,11 @@ def references(markdown: Path) -> list[tuple[str, int]]:
         for match in LINK.findall(line):
             if match.startswith(("http://", "https://", "mailto:")) or match.startswith("/"):
                 continue
-            found.append((match.split("?", 1)[0], number))
+            # Ancla y query no forman parte de la ruta: `guia.md#paso` y
+            # `guia.md?x=1` apuntan a `guia.md`.
+            clean = match.split("#", 1)[0].split("?", 1)[0].strip()
+            if clean:
+                found.append((clean, number))
     return found
 
 
@@ -44,8 +48,13 @@ def check(docs: Path, root: Path) -> list[dict]:
             candidates = [root / reference, docs / reference, markdown.parent / reference]
             if any(candidate.exists() for candidate in candidates):
                 continue
+            try:
+                shown = markdown.relative_to(root).as_posix()
+            except ValueError:
+                # `--docs` fuera de `--root`: antes reventaba con ValueError.
+                shown = markdown.as_posix()
             findings.append({
-                "file": markdown.relative_to(root).as_posix(),
+                "file": shown,
                 "line": line,
                 "rule": "referencia-rota",
                 "severity": "high",
@@ -59,7 +68,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--docs", required=True, help="carpeta o fichero Markdown")
     parser.add_argument("--root", default=".", help="raíz contra la que resolver las rutas")
     parser.add_argument("--json", action="store_true")
-    parser.add_argument("--fail-on", default="high", choices=["low", "medium", "high", "none"])
+    # Una referencia rota es siempre `high`: `low` y `medium` no existían.
+    parser.add_argument("--fail-on", default="high", choices=["high", "none"])
     parser.add_argument("--exclude", action="append", default=[], help="subcadena de fichero a ignorar")
     args = parser.parse_args(argv)
 

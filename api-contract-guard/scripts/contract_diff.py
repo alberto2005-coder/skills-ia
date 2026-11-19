@@ -5,7 +5,8 @@ Uso:
         [--json] [--fail-on major]
 
 Niveles: `major` para lo que rompe consumidores, `minor` para lo aditivo,
-`patch` para cambios de documentación.
+`patch` para cambios de documentación y `none` cuando no hay ningún cambio
+(dos contratos idénticos salen 0 aunque se pase `--fail-on patch`).
 
 Código de salida: 0 por debajo del umbral · 1 umbral alcanzado · 2 contrato
 ilegible.
@@ -66,11 +67,18 @@ def diff(old: dict, new: dict) -> list[dict]:
 
 
 def verdict(changes: list[dict]) -> str:
+    """Nivel de impacto. Sin cambios no hay impacto: no es un `patch`.
+
+    Devolver `patch` para una lista vacía hacía que dos contratos idénticos
+    dieran exit 1 con `--fail-on patch`.
+    """
+    if not changes:
+        return "none"
     level = "patch"
     for change in changes:
         if LEVELS[change["level"]] > LEVELS[level]:
             level = change["level"]
-    return level if changes else "patch"
+    return level
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -97,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"[{change['level']}] {change['path']}: {change['detail']}")
         print(f"impacto: {level.upper()} · cambios: {len(changes)}")
 
-    if args.fail_on == "none":
+    if args.fail_on == "none" or level == "none":
         return 0
     return 1 if LEVELS[level] >= LEVELS[args.fail_on] else 0
 

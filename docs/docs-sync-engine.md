@@ -10,6 +10,7 @@
 ## Español
 
 ### Índice
+
 1. Propósito
 2. Modos
 3. Arquitectura
@@ -20,9 +21,11 @@
 8. Límites
 
 ### Propósito
+
 `docs-sync-engine` evita que la documentación mienta. Comprueba que cada ruta citada exista, regenera la tabla de arquitectura desde los AST y arma el CHANGELOG desde los commits convencionales. Nada se reescribe a mano: si el borrador difiere del documento vigente, manda el código.
 
 ### Modos
+
 El maestro no usa flags: el alcance de la petición fija las fases.
 
 | Modo | Fases | Entrega |
@@ -34,6 +37,7 @@ El maestro no usa flags: el alcance de la petición fija las fases.
 | **Release** | `docs-changelog` | CHANGELOG agrupado por tipo y versión |
 
 ### Arquitectura
+
 Un maestro y cinco sub-skills con scripts compartidos. Se instala la carpeta completa.
 
 | Sub-skill | Qué hace |
@@ -46,6 +50,7 @@ Un maestro y cinco sub-skills con scripts compartidos. Se instala la carpeta com
 | `docs-changelog` | Agrupa commits convencionales por sección |
 
 ### Referencias
+
 Se revisan dos formas de cita:
 
 | Origen | Ejemplo |
@@ -80,7 +85,9 @@ El cuarto script de la familia es el propio lint del repositorio, que comparte l
 Códigos de salida: `0` limpio · `1` umbral superado · `2` ruta o entrada ilegible. Sin red: `changelog_gen.py` lee `git log` local o un fichero de commits.
 
 ### Instalación y uso
+
 Copia la carpeta `docs-sync-engine/` completa. Ejemplos de petición:
+
 - «Comprueba que la documentación no cita ficheros que ya no existen».
 - «Regenera el documento de arquitectura del paquete».
 - «Arma el CHANGELOG de esta release desde los commits».
@@ -95,6 +102,7 @@ uv run python -m unittest discover -s docs-sync-engine/tests -t docs-sync-engine
 27 pruebas: referencia existente limpia, referencia ausente detectada con su línea, enlaces externos ignorados, ruta de docs inexistente, tabla de arquitectura con docstring y entradas, módulos de `tests/` excluidos, escritura a fichero, commits agrupados por tipo, commits sin convención en `Otros`, entrada vacía, fichero de commits ausente, y dieciséis del glosario (documento limpio, término rechazado con su reemplazo, grafía no canónica, bloques y código en línea ignorados, `--fail-on none`, documento y glosario ausentes) y de entorno (variable consistente, sin ejemplo, sin documentar, ejemplo sin uso, `process.env`, `import.meta.env`, `--fail-on none` y ruta ausente).
 
 ### Límites
+
 El drift comprueba existencia, no contenido: un comando obsoleto dentro de un fichero existente sigue pasando. No resuelve anclas (`#seccion`) ni rutas absolutas. `arch_gen` solo lee docstrings de módulo de Python e ignora las carpetas de entorno y `tests/`; no dibuja diagramas ni describe el flujo entre módulos. `changelog_gen` no calcula la versión: la recibe y no la deduce de los commits.
 
 ---
@@ -102,6 +110,7 @@ El drift comprueba existencia, no contenido: un comando obsoleto dentro de un fi
 ## English
 
 ### Index
+
 1. Purpose
 2. Modes
 3. Architecture
@@ -112,9 +121,11 @@ El drift comprueba existencia, no contenido: un comando obsoleto dentro de un fi
 8. Limits
 
 ### Purpose
+
 `docs-sync-engine` keeps documentation from lying. It checks that every cited path exists, regenerates the architecture table from the ASTs and builds the CHANGELOG from conventional commits. Nothing is rewritten by hand: if the draft differs from the document in force, the code wins.
 
 ### Modes
+
 The master takes no flags: the request's scope sets the phases.
 
 | Mode | Phases | Deliverable |
@@ -126,6 +137,7 @@ The master takes no flags: the request's scope sets the phases.
 | **Release** | `docs-changelog` | CHANGELOG grouped by type and version |
 
 ### Architecture
+
 One master and five sub-skills with shared scripts. The whole folder is installed.
 
 | Sub-skill | What it does |
@@ -138,6 +150,7 @@ One master and five sub-skills with shared scripts. The whole folder is installe
 | `docs-changelog` | Groups conventional commits by section |
 
 ### References
+
 Two kinds of citation are checked:
 
 | Source | Example |
@@ -172,7 +185,9 @@ The repository lint is the fourth member of the family and shares the link check
 Exit codes: `0` clean · `1` threshold exceeded · `2` unreadable path or input. Offline: `changelog_gen.py` reads local `git log` or a commits file.
 
 ### Install and use
+
 Copy the whole `docs-sync-engine/` folder. Example requests:
+
 - "Check the docs do not cite files that no longer exist".
 - "Regenerate the package architecture document".
 - "Build this release's CHANGELOG from the commits".
@@ -187,4 +202,5 @@ uv run python -m unittest discover -s docs-sync-engine/tests -t docs-sync-engine
 27 tests: existing reference clean, missing reference detected with its line, external links ignored, missing docs path, architecture table with docstring and entries, `tests/` modules excluded, writing to a file, commits grouped by type, commits without convention under `Otros`, empty entry, missing commits file, and sixteen for the glossary (clean document, rejected term with its replacement, non-canonical spelling, code fences and inline code ignored, `--fail-on none`, missing document and glossary) and for the environment check (consistent variable, missing example, missing docs, example without use, `process.env`, `import.meta.env`, `--fail-on none` and missing path).
 
 ### Limits
+
 Drift checks existence, not content: an obsolete command inside an existing file still passes. It resolves neither anchors (`#section`) nor absolute paths. `arch_gen` reads Python module docstrings only and ignores environment folders and `tests/`; it draws no diagrams and describes no data flow. `changelog_gen` does not compute the version: it receives it instead of inferring it from commits.

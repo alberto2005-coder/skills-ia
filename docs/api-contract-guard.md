@@ -10,6 +10,7 @@
 ## Español
 
 ### Índice
+
 1. Propósito
 2. Modos
 3. Arquitectura
@@ -20,9 +21,11 @@
 8. Límites
 
 ### Propósito
+
 `api-contract-guard` responde a tres preguntas antes de publicar: ¿este cambio rompe a quien consume la API?, ¿queda alguna llamada del frontend apuntando a una ruta que ya no existe?, ¿puedo probar el cliente sin levantar el backend? Todo es estático y local; lo único que escucha es un servidor mock en `127.0.0.1`.
 
 ### Modos
+
 El maestro no usa flags: el alcance de la petición fija las fases.
 
 | Modo | Fases | Entrega |
@@ -33,6 +36,7 @@ El maestro no usa flags: el alcance de la petición fija las fases.
 | **Prueba** | `api-mock-server` | Servidor local con los ejemplos del contrato |
 
 ### Arquitectura
+
 Un maestro y cuatro sub-skills con assets compartidos. Se instala la carpeta completa.
 
 | Sub-skill | Qué hace |
@@ -44,6 +48,7 @@ Un maestro y cuatro sub-skills con assets compartidos. Se instala la carpeta com
 | `api-mock-server` | Sirve los ejemplos del contrato desde loopback |
 
 ### Clasificación
+
 | Cambio | Nivel |
 |---|---|
 | Endpoint o método eliminado | `major` |
@@ -78,7 +83,9 @@ Salida del cruce: `findings` con `route`, `method`, `rule`, `severity` y `messag
 Códigos de salida: `0` limpio o por debajo del umbral · `1` umbral superado · `2` contrato o ruta ilegible. El mock acepta `serve(spec)` para tests y devuelve el puerto efímero que asigna.
 
 ### Instalación y uso
+
 Copia la carpeta `api-contract-guard/` completa. Ejemplos de petición:
+
 - «Compara este contrato con el publicado y dime si el cambio es major».
 - «¿Queda alguna llamada del frontend a rutas que ya no existen?».
 - «Levántame un mock con el contrato para probar el cliente».
@@ -93,6 +100,7 @@ uv run python -m unittest discover -s api-contract-guard/tests -t api-contract-g
 20 pruebas: endpoint eliminado como `major`, aditivo como `minor`, tipo de respuesta cambiado, JSON ilegible, rutas que cuadran, `dead-call` que rompe la puerta, `--fail-on none`, fichero ausente el mock sirviendo ejemplos, devolviendo 404 y sin salir de loopback, y nueve de la cobertura (rutas con guarda, contrato sin guarda, guarda sin `security`, ruta fuera del contrato, operación sin código, seguridad global heredada, Flask con parámetros normalizados, `--fail-on none` y contrato ausente).
 
 ### Límites
+
 Compara JSON OpenAPI, no YAML, y no resuelve `$ref` externos: solo clasifica el primer código de respuesta (`200`/`201`). El cruce lee decoradores y `fetch`/`axios`/`XHR` por expresión regular, así que una ruta construida dinámicamente aparece como `dead-call` y hay que declararla. El mock no valida cuerpos ni aplica reglas de negocio: es un mock, no un emulador. La cobertura reconoce la guarda por el texto del decorador: una comprobación dentro del cuerpo o un middleware global no aparecen y hay que declararlos.
 
 ---
@@ -100,6 +108,7 @@ Compara JSON OpenAPI, no YAML, y no resuelve `$ref` externos: solo clasifica el 
 ## English
 
 ### Index
+
 1. Purpose
 2. Modes
 3. Architecture
@@ -110,9 +119,11 @@ Compara JSON OpenAPI, no YAML, y no resuelve `$ref` externos: solo clasifica el 
 8. Limits
 
 ### Purpose
+
 `api-contract-guard` answers three questions before publishing: does this change break API consumers, is any frontend call still pointing at a route that no longer exists, and can I test the client without starting the backend? Everything is static and local; the only thing listening is a mock server on `127.0.0.1`.
 
 ### Modes
+
 The master takes no flags: the request's scope sets the phases.
 
 | Mode | Phases | Deliverable |
@@ -123,6 +134,7 @@ The master takes no flags: the request's scope sets the phases.
 | **Test** | `api-mock-server` | Local server serving the contract examples |
 
 ### Architecture
+
 One master and four sub-skills with shared assets. The whole folder is installed.
 
 | Sub-skill | What it does |
@@ -134,6 +146,7 @@ One master and four sub-skills with shared assets. The whole folder is installed
 | `api-mock-server` | Serves the contract examples from loopback |
 
 ### Classification
+
 | Change | Level |
 |---|---|
 | Endpoint or method removed | `major` |
@@ -168,7 +181,9 @@ Sync output: `findings` with `route`, `method`, `rule`, `severity` and `message`
 Exit codes: `0` clean or below threshold · `1` threshold exceeded · `2` unreadable contract or path. The mock exposes `serve(spec)` for tests and returns the ephemeral port it picked.
 
 ### Install and use
+
 Copy the whole `api-contract-guard/` folder. Example requests:
+
 - "Compare this contract with the published one and tell me whether the change is major".
 - "Any frontend call left pointing at routes that no longer exist?".
 - "Spin up a mock from the contract so I can test the client".
@@ -183,4 +198,5 @@ uv run python -m unittest discover -s api-contract-guard/tests -t api-contract-g
 20 tests: removed endpoint as `major`, additive as `minor`, changed response type, unreadable JSON, matching routes, `dead-call` failing the gate, `--fail-on none`, missing file, the mock serving examples, returning 404 and staying on loopback, and nine for coverage (guarded routes, contract without a guard, guard without `security`, route outside the contract, operation without code, inherited global security, Flask with normalised parameters, `--fail-on none` and missing contract).
 
 ### Limits
+
 It compares JSON OpenAPI, not YAML, and does not resolve external `$ref`: it only classifies the first response code (`200`/`201`). The sync reads decorators and `fetch`/`axios`/`XHR` through regex, so a dynamically built route shows up as `dead-call` and must be declared. The mock validates no bodies and applies no business rules: it is a mock, not an emulator. Coverage recognises a guard by the decorator text: a check inside the body or a global middleware does not appear and must be declared.

@@ -30,7 +30,9 @@ def glossary(path: Path | None) -> list[tuple[str, str]]:
     if path is None:
         return []
     entries = []
-    for raw in path.read_text(encoding="utf-8").splitlines():
+    # `utf-8-sig` quita el BOM (que se colaba como parte del primer término) y
+    # `errors="replace"` evita el traceback con un glosario en latin-1.
+    for raw in path.read_text(encoding="utf-8-sig", errors="replace").splitlines():
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
@@ -57,7 +59,7 @@ def markdown_files(root: Path) -> list[Path]:
 def check(root: Path, accepted: list[tuple[str, str]], rejected: list[tuple[str, str]]) -> list[dict]:
     findings = []
     for path in markdown_files(root):
-        original = path.read_text(encoding="utf-8", errors="replace")
+        original = path.read_text(encoding="utf-8-sig", errors="replace")
         text = visible_text(original)
         lines = text.splitlines()
         for term, replacement in rejected:

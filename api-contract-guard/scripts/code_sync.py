@@ -23,7 +23,10 @@ from pathlib import Path
 SEVERITIES = {"low": 1, "medium": 2, "high": 3}
 BACKEND = re.compile(r"""@(?:app|router)\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']""", re.I)
 EXPRESS = re.compile(r"""\b(?:app|router)\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']""", re.I)
-FETCH = re.compile(r"""\bfetch\(\s*[`"']([^`"']+)[`"']""", re.I)
+# El método de `fetch` va en el segundo argumento; asumir GET marcaba
+# `metodo-distinto` contra cualquier POST real.
+FETCH = re.compile(r"""\bfetch\(\s*[`"']([^`"']+)[`"']([^;]{0,200})""", re.I | re.S)
+FETCH_METHOD = re.compile(r"""\bmethod\s*:\s*["'](GET|POST|PUT|PATCH|DELETE)["']""", re.I)
 AXIOS = re.compile(r"""\baxios\.(get|post|put|patch|delete)\(\s*[`"']([^`"']+)[`"']""", re.I)
 CALL = re.compile(r"""\.open\(\s*["'](GET|POST|PUT|PATCH|DELETE)["']\s*,\s*[`"']([^`"']+)""", re.I)
 
@@ -33,24 +36,29 @@ def normalize(path: str) -> str:
     return path or "/"
 
 
-def backend_routes(path: Path) -> dict[str, str]:
+def backend_routes(path: Path) -> dict[str, set[str]]:
+    """Ruta → conjunto de métodos. Guardar un solo método perdía el segundo:
+    `GET /items` y `POST /items` en el mismo path se pisaban entre sí.
+    """
     text = path.read_text(encoding="utf-8", errors="replace")
-    routes: dict[str, str] = {}
+    routes: dict[str, set[str]] = {}
     for pattern in (BACKEND, EXPRESS):
         for method, route in pattern.findall(text):
-            routes[normalize(route)] = method.upper()
+            routes.setdefault(normalize(route), set()).add(method.upper())
     return routes
 
 
-def frontend_calls(path: Path) -> dict[str, str]:
+def frontend_calls(path: Path) -> dict[str, set[str]]:
     text = path.read_text(encoding="utf-8", errors="replace")
-    calls: dict[str, str] = {}
-    for route in FETCH.findall(text):
-        calls[normalize(route)] = "GET"
+    calls: dict[str, set[str]] = {}
+    for route, tail in FETCH.findall(text):
+        match = FETCH_METHOD.search(tail)
+        calls.setdefault(normalize(route), set()).add(
+            match.group(1).upper() if match else "GET")
     for method, route in AXIOS.findall(text):
-        calls[normalize(route)] = method.upper()
+        calls.setdefault(normalize(route), set()).add(method.upper())
     for method, route in CALL.findall(text):
-        calls[normalize(route)] = method.upper()
+        calls.setdefault(normalize(route), set()).add(method.upper())
     return calls
 
 
@@ -70,17 +78,22 @@ def main(argv: list[str] | None = None) -> int:
     routes = backend_routes(backend_path)
     calls = frontend_calls(frontend_path)
     findings = []
-    for route, method in sorted(calls.items()):
-        if route not in routes:
-            findings.append({"route": route, "method": method, "rule": "dead-call", "severity": "high",
-                             "message": f"el frontend llama a {method} {route}, que el backend no declara"})
-        elif routes[route] != method:
-            findings.append({"route": route, "method": method, "rule": "metodo-distinto", "severity": "medium",
-                             "message": f"el frontend usa {method} y el backend declara {routes[route]}"})
-    for route, method in sorted(routes.items()):
-        if route not in calls:
-            findings.append({"route": route, "method": method, "rule": "sin-consumidor", "severity": "low",
-                             "message": f"{method} {route} no tiene consumidor en el frontend"})
+    for route, methods in sorted(calls.items()):
+        for method in sorted(methods):
+            if route not in routes:
+                findings.append({"route": route, "method": method, "rule": "dead-call", "severity": "high",
+                                 "message": f"el frontend llama a {method} {route}, que el backend no declara"})
+            elif method not in routes[route]:
+                declarados = ", ".join(sorted(routes[route]))
+                findings.append({"route": route, "method": method, "rule": "metodo-distinto",
+                                 "severity": "medium",
+                                 "message": f"el frontend usa {method} y el backend declara {declarados}"})
+    for route, methods in sorted(routes.items()):
+        for method in sorted(methods):
+            if method not in calls.get(route, set()):
+                findings.append({"route": route, "method": method, "rule": "sin-consumidor",
+                                 "severity": "low",
+                                 "message": f"{method} {route} no tiene consumidor en el frontend"})
     findings.sort(key=lambda item: (item["route"], item["method"], item["rule"]))
     by_severity = {name: sum(1 for item in findings if item["severity"] == name) for name in SEVERITIES}
 

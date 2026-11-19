@@ -36,8 +36,11 @@ CONVENTIONAL = re.compile(r"""^(?P<type>[a-z]+)(?:\((?P<scope>[^)]+)\))?!?:\s*(?
 def collect(range_spec: str | None, input_file: Path | None) -> list[str]:
     if input_file is not None:
         return [line.strip() for line in input_file.read_text(encoding="utf-8").splitlines() if line.strip()]
+    # `text=True` decodifica con la página de códigos de la consola: en Windows
+    # (cp1252) un asunto con acentos o emoji rompía la lectura.
     result = subprocess.run(["git", "log", "--no-merges", "--pretty=%s", range_spec or "HEAD"],
-                            capture_output=True, text=True, check=False)
+                            capture_output=True, text=True, check=False,
+                            encoding="utf-8", errors="replace")
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip() or "git log falló")
     return [line.strip() for line in result.stdout.splitlines() if line.strip()]

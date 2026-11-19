@@ -13,10 +13,25 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+
+
+def match_path(spec: dict, path: str) -> str | None:
+    """Ruta declarada que corresponde a `path`, con `{param}` como comodín."""
+    paths = spec.get("paths", {})
+    if path in paths:
+        return path
+    for template in paths:
+        if "{" not in template:
+            continue
+        pattern = "^" + re.sub(r"\{[^/]+\}", "[^/]+", re.escape(template).replace(r"\{", "{").replace(r"\}", "}")) + "$"
+        if re.match(pattern, path):
+            return template
+    return None
 
 
 def example_for(spec: dict, method: str, path: str) -> dict:
@@ -39,11 +54,14 @@ def build_handler(spec: dict) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
         def _reply(self, method: str) -> None:
             path = self.path.split("?", 1)[0].rstrip("/") or "/"
-            operations = spec.get("paths", {}).get(path)
+            # Coincidencia exacta o por plantilla (`/items/{id}`): antes solo
+            # valían rutas literales y cualquier parámetro daba 404.
+            declared = match_path(spec, path)
+            operations = spec.get("paths", {}).get(declared) if declared else None
             if not operations or method.lower() not in operations:
                 self.send_error(404, "ruta no declarada en el contrato")
                 return
-            payload = json.dumps(example_for(spec, method, path), ensure_ascii=False).encode("utf-8")
+            payload = json.dumps(example_for(spec, method, declared), ensure_ascii=False).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(payload)))
@@ -55,6 +73,21 @@ def build_handler(spec: dict) -> type[BaseHTTPRequestHandler]:
 
         def do_POST(self) -> None:  # noqa: N802
             self._reply("POST")
+
+        def do_PUT(self) -> None:  # noqa: N802
+            self._reply("PUT")
+
+        def do_PATCH(self) -> None:  # noqa: N802
+            self._reply("PATCH")
+
+        def do_DELETE(self) -> None:  # noqa: N802
+            self._reply("DELETE")
+
+        def do_HEAD(self) -> None:  # noqa: N802
+            self._reply("HEAD")
+
+        def do_OPTIONS(self) -> None:  # noqa: N802
+            self._reply("OPTIONS")
 
         def log_message(self, *args) -> None:
             return

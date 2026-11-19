@@ -24,7 +24,10 @@ from pathlib import Path
 
 METHODS = {"get", "put", "post", "delete", "patch", "head", "options"}
 SEVERITIES = {"low": 1, "medium": 2, "high": 3}
-GUARD_WORDS = ("auth", "login", "jwt", "permission", "token", "guard", "security", "require")
+# Se comparan como palabras del identificador, no como subcadena: `author_only`
+# contiene "auth" y contaba como guarda de autenticación.
+GUARD_WORDS = {"auth", "login", "jwt", "permission", "token", "guard", "security", "require"}
+TOKEN = re.compile(r"[A-Za-z][A-Za-z0-9]*")
 SKIP_PARTS = {"__pycache__", ".venv", ".git", "node_modules"}
 ROUTE_DECORATORS = {"get", "post", "put", "delete", "patch", "head", "options", "route"}
 PARAM = re.compile(r"<(?:\w+:)?(\w+)>")
@@ -55,22 +58,29 @@ def spec_operations(spec: dict) -> dict[tuple[str, str], bool]:
 def python_files(root: Path) -> list[Path]:
     if root.is_file():
         return [root] if root.suffix == ".py" else []
+    # Partes RELATIVAS: mirar el path absoluto descartaba todo si la raíz del
+    # proyecto se llamaba `dist`, `build` o `vendor`.
     return sorted(item for item in root.rglob("*.py")
-                  if item.is_file() and not SKIP_PARTS & set(item.parts))
+                  if item.is_file() and not SKIP_PARTS & set(item.relative_to(root).parts))
 
 
 def is_guard(node: ast.expr) -> bool:
     if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) \
             and node.func.attr.lower() in ROUTE_DECORATORS:
         return False
-    text = ast.unparse(node).lower()
-    return any(word in text for word in GUARD_WORDS)
+    tokens = {token.lower() for token in TOKEN.findall(ast.unparse(node))}
+    return bool(tokens & GUARD_WORDS)
 
 
 def code_routes(root: Path) -> dict[tuple[str, str], dict]:
     routes: dict[tuple[str, str], dict] = {}
     for path in python_files(root):
-        tree = ast.parse(path.read_text(encoding="utf-8", errors="replace"))
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8", errors="replace"))
+        except SyntaxError as error:
+            # Un fichero a medio escribir reventaba el CLI con traceback.
+            print(f"no se pudo parsear {path}: {error}", file=sys.stderr)
+            continue
         for node in ast.walk(tree):
             if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 continue

@@ -37,7 +37,8 @@ def code_files(root: Path) -> list[Path]:
     if root.is_file():
         return [root]
     return sorted(item for item in root.rglob("*")
-                  if item.is_file() and item.suffix in CODE_SUFFIXES and not SKIP_PARTS & set(item.parts))
+                  if item.is_file() and item.suffix in CODE_SUFFIXES
+                  and not SKIP_PARTS & set(item.relative_to(root).parts))
 
 
 def used_variables(root: Path) -> dict[str, list[str]]:
