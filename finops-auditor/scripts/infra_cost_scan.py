@@ -18,6 +18,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from finops_util import iter_files
 
 SEVERITIES = {"low": 1, "medium": 2, "high": 3}
 SKIP_PARTS = {"tests", "fixtures", "__pycache__", ".venv", ".git", "node_modules"}
@@ -32,17 +33,6 @@ TERRAFORM_RULES = (
 )
 CONTAINERS = re.compile(r"^\s*containers:\s*$", re.M)
 LIMITS = re.compile(r"^\s*limits:\s*$", re.M)
-
-
-def iter_files(path: Path) -> list[Path]:
-    if path.is_file():
-        return [path]
-    return sorted(
-        item for item in path.rglob("*")
-        if item.is_file()
-        and item.suffix in {".tf", ".yaml", ".yml"}
-        and not SKIP_PARTS & set(item.relative_to(path).parts)
-    )
 
 
 def scan_terraform(path: Path, text: str) -> list[dict]:
@@ -102,7 +92,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ruta inexistente: {target}")
         return 2
 
-    files = iter_files(target)
+    files = iter_files(target, {".tf", ".yaml", ".yml"}, frozenset(SKIP_PARTS))
     findings = [item for path in files for item in scan_file(path)]
     findings.sort(key=lambda item: (item["file"], item["line"], item["rule"]))
     by_severity = {name: sum(1 for item in findings if item["severity"] == name) for name in SEVERITIES}

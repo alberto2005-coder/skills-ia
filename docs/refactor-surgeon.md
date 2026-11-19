@@ -10,6 +10,7 @@
 ## Español
 
 ### Índice
+
 1. Propósito
 2. Modos
 3. Arquitectura
@@ -20,9 +21,11 @@
 8. Límites
 
 ### Propósito
+
 `refactor-surgeon` cambia la forma del código sin cambiar lo que hace. El método es siempre el mismo: medir, congelar la conducta, cortar un grupo por vez y comprobar que los mismos casos devuelven lo mismo. La ejecución del código ajeno es una decisión explícita (`--allow-exec`), no un efecto colateral.
 
 ### Modos
+
 El maestro no usa flags: el alcance de la petición fija las fases.
 
 | Modo | Fases | Entrega |
@@ -36,6 +39,7 @@ El maestro no usa flags: el alcance de la petición fija las fases.
 | **Cierre** | `refactor-verify` | Veredicto con o sin discrepancias |
 
 ### Arquitectura
+
 Un maestro y ocho sub-skills con scripts compartidos. Se instala la carpeta completa.
 
 | Sub-skill | Qué hace |
@@ -51,6 +55,7 @@ Un maestro y ocho sub-skills con scripts compartidos. Se instala la carpeta comp
 | `refactor-verify` | Compara la conducta contra el snapshot |
 
 ### Umbrales
+
 | Métrica | Límite por defecto |
 |---|---|
 | Complejidad `V(G)` | 10 |
@@ -84,7 +89,9 @@ Sin `--allow-exec` el arnés solo valida el fichero y no importa nada. Una excep
 Códigos de salida: `0` limpio o verificado · `1` umbral superado o discrepancia · `2` ruta o snapshot ilegible.
 
 ### Instalación y uso
+
 Copia la carpeta `refactor-surgeon/` completa. Ejemplos de petición:
+
 - «Mide la complejidad de este módulo y dime por dónde empezar».
 - «Graba casos dorados antes de que toque nada».
 - «Divide este fichero de 900 líneas en módulos».
@@ -96,9 +103,10 @@ Copia la carpeta `refactor-surgeon/` completa. Ejemplos de petición:
 uv run python -m unittest discover -s refactor-surgeon/tests -t refactor-surgeon/tests
 ```
 
-42 pruebas: función simple limpia, función anidada por encima de los límites, `--fail-on none`, firma ancha, ruta ausente, grupos del grafo, fichero que no parsea, grabación y verificación sin discrepancias, cambio de conducta detectado, ejecución sin permiso, snapshot ausente y seis del detector de clones (renombrado como clon exacto, funciones distintas sin hallazgos, funciones diminutas ignoradas, umbral que filtra el par, `--fail-on none` y ruta ausente) y ocho del detector de código muerto (módulo limpio, import sin uso con su línea, `# noqa`, función privada muerta, función viva desde otro fichero, definición pública oculta sin `--include-public`, `--fail-on none` y ruta ausente) y siete del detector de ciclos (imports lineales limpios, ciclo de dos módulos, ciclo de tres, imports relativos dentro de un paquete, autoimport ignorado, `--fail-on none` y ruta ausente) y ocho de hotspots (sin `--since`, sin repositorio, churn y complejidad medidos, fecha sin hora normalizada a medianoche, ventana que filtra, orden y `--top`, `--fail-on hotspot` y clon shallow).
+44 pruebas: función simple limpia, función anidada por encima de los límites, `--fail-on none`, firma ancha, ruta ausente, grupos del grafo, fichero que no parsea, grabación y verificación sin discrepancias, cambio de conducta detectado, ejecución sin permiso, snapshot ausente y seis del detector de clones (renombrado como clon exacto, funciones distintas sin hallazgos, funciones diminutas ignoradas, umbral que filtra el par, `--fail-on none` y ruta ausente) y ocho del detector de código muerto (módulo limpio, import sin uso con su línea, `# noqa`, función privada muerta, función viva desde otro fichero, definición pública oculta sin `--include-public`, `--fail-on none` y ruta ausente) y siete del detector de ciclos (imports lineales limpios, ciclo de dos módulos, ciclo de tres, imports relativos dentro de un paquete, autoimport ignorado, `--fail-on none` y ruta ausente) y ocho de hotspots (sin `--since`, sin repositorio, churn y complejidad medidos, fecha sin hora normalizada a medianoche, ventana que filtra, orden y `--top`, `--fail-on hotspot` y clon shallow).
 
 ### Límites
+
 Las métricas se calculan sobre la sintaxis, no ejecutando el código; no miden acoplamiento entre módulos ni cobertura. El grafo solo ve llamadas por nombre dentro del mismo fichero: métodos, imports y llamadas dinámicas no aparecen. El detector de código muerto cuenta identificadores, así que `importlib`, `eval`, plugins cargados por cadena y usos desde fuera del árbol quedan fuera. `hotspots` normaliza un `--since` de solo fecha a las 00:00 para que git no lo redondee a la hora de la consulta. El arnés ejecuta en el proceso actual, sin aislamiento ni límite de tiempo propio, y compara resultados serializados, así que un objeto no serializable se compara como texto.
 
 ---
@@ -106,6 +114,7 @@ Las métricas se calculan sobre la sintaxis, no ejecutando el código; no miden 
 ## English
 
 ### Index
+
 1. Purpose
 2. Modes
 3. Architecture
@@ -116,9 +125,11 @@ Las métricas se calculan sobre la sintaxis, no ejecutando el código; no miden 
 8. Limits
 
 ### Purpose
+
 `refactor-surgeon` changes the shape of the code without changing what it does. The method never varies: measure, freeze behaviour, cut one group at a time and check that the same cases return the same results. Running someone else's code is an explicit decision (`--allow-exec`), never a side effect.
 
 ### Modes
+
 The master takes no flags: the request's scope sets the phases.
 
 | Mode | Phases | Deliverable |
@@ -132,6 +143,7 @@ The master takes no flags: the request's scope sets the phases.
 | **Close** | `refactor-verify` | Verdict with or without mismatches |
 
 ### Architecture
+
 One master and eight sub-skills with shared scripts. The whole folder is installed.
 
 | Sub-skill | What it does |
@@ -147,6 +159,7 @@ One master and eight sub-skills with shared scripts. The whole folder is install
 | `refactor-verify` | Compares behaviour against the snapshot |
 
 ### Thresholds
+
 | Metric | Default limit |
 |---|---|
 | `V(G)` complexity | 10 |
@@ -180,7 +193,9 @@ Without `--allow-exec` the harness only validates the file and imports nothing. 
 Exit codes: `0` clean or verified · `1` threshold exceeded or mismatch · `2` unreadable path or snapshot.
 
 ### Install and use
+
 Copy the whole `refactor-surgeon/` folder. Example requests:
+
 - "Measure this module's complexity and tell me where to start".
 - "Record golden cases before anything is touched".
 - "Split this 900-line file into modules".
@@ -192,7 +207,8 @@ Copy the whole `refactor-surgeon/` folder. Example requests:
 uv run python -m unittest discover -s refactor-surgeon/tests -t refactor-surgeon/tests
 ```
 
-42 tests: clean simple function, nested function over the limits, `--fail-on none`, wide signature, missing path, call-graph groups, unparsable file, record and verify with no mismatches, changed behaviour detected, execution without permission, missing snapshot and six for the clone detector (rename as exact clone, distinct functions clean, tiny functions ignored, threshold filtering the pair, `--fail-on none` and missing path) and eight for the dead-code detector (clean module, unused import with its line, `# noqa`, dead private function, live function from another file, public definition hidden without `--include-public`, `--fail-on none` and missing path) and seven for the cycle detector (clean linear imports, two-module cycle, three-module cycle, relative imports inside a package, self-import ignored, `--fail-on none` and missing path) and eight for hotspots (no `--since`, not a repository, churn and complexity measured, bare date normalised to midnight, window filtering, ordering and `--top`, `--fail-on hotspot` and a shallow clone).
+44 tests: clean simple function, nested function over the limits, `--fail-on none`, wide signature, missing path, call-graph groups, unparsable file, record and verify with no mismatches, changed behaviour detected, execution without permission, missing snapshot and six for the clone detector (rename as exact clone, distinct functions clean, tiny functions ignored, threshold filtering the pair, `--fail-on none` and missing path) and eight for the dead-code detector (clean module, unused import with its line, `# noqa`, dead private function, live function from another file, public definition hidden without `--include-public`, `--fail-on none` and missing path) and seven for the cycle detector (clean linear imports, two-module cycle, three-module cycle, relative imports inside a package, self-import ignored, `--fail-on none` and missing path) and eight for hotspots (no `--since`, not a repository, churn and complexity measured, bare date normalised to midnight, window filtering, ordering and `--top`, `--fail-on hotspot` and a shallow clone).
 
 ### Limits
+
 Metrics come from the syntax, not from running the code; they measure neither module coupling nor coverage. The graph only sees name-based calls inside the same file: methods, imports and dynamic calls are invisible. The dead-code detector counts identifiers, so `importlib`, `eval`, plugin loading by string and uses from outside the tree stay out of reach. `hotspots` normalises a bare `--since` date to 00:00 so git does not round it to the time of the query. The harness runs in the current process, with no isolation and no per-case timeout, and compares serialised results, so a non-serialisable object is compared as text.

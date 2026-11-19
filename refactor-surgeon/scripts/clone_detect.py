@@ -67,7 +67,7 @@ def shingles(tokens: list[str], size: int) -> set[tuple[str, ...]]:
 def collect(path: Path, size: int, min_tokens: int) -> tuple[int, list[dict]]:
     files = [path] if path.is_file() else sorted(
         item for item in path.rglob("*.py")
-        if item.is_file() and not SKIP_PARTS & set(item.parts)
+        if item.is_file() and not SKIP_PARTS & set(item.relative_to(path).parts)
     )
     functions: list[dict] = []
     for file in files:

@@ -11,6 +11,7 @@
 
 | ID de Recurso | Tipo | Problema Detectado | Ahorro Potencial Mensual |
 | :--- | :--- | :--- | :--- |
+<!-- markdownlint-disable-next-line MD055 MD056 -->
 {findings_rows}
 
 ---

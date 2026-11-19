@@ -30,6 +30,34 @@ def main():
     enviar({})
 '''
 
+# Dos llamadores que comparten un helper (`a → h ← b`): en el grafo no
+# dirigido forman una sola componente aunque no haya arista entre a y b.
+COMPARTEN_HELPER = '''
+def alpha():
+    return helper(1)
+
+def beta():
+    return helper(2)
+
+def helper(n):
+    return n + 1
+'''
+
+# Dos clústeres sin ninguna llamada entre sí: deben seguir separados.
+CLUSTERES_SEPARADOS = '''
+def izquierda():
+    return detalle_izq()
+
+def detalle_izq():
+    return 1
+
+def derecha():
+    return detalle_der()
+
+def detalle_der():
+    return 2
+'''
+
 
 def run(argv):
     out = io.StringIO()
@@ -51,8 +79,33 @@ class TestSliceAnalyzer(unittest.TestCase):
             code, output = run(["--path", str(path), "--json"])
             report = json.loads(output)
             self.assertEqual(code, 0)
-            self.assertEqual(report["groups"], [["cargar", "parsear"], ["enviar", "formatear"], ["main"]])
+            # Componentes conexas sobre el grafo NO dirigido: `main` une las
+            # dos ramas, así que el fichero entero es una sola componente
+            # (el DFS sobre aristas dirigidas lo partía en tres grupos).
+            self.assertEqual(report["groups"], [["cargar", "enviar", "formatear", "main", "parsear"]])
             self.assertEqual(report["entry_points"], ["main"])
+
+    def test_comparten_un_helper_quedan_en_la_misma_componente(self):
+        """`alpha → helper ← beta`: deben ir juntas, no en dos grupos."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._write(tmp, COMPARTEN_HELPER, "comparten.py")
+            code, output = run(["--path", str(path), "--json"])
+            report = json.loads(output)
+            self.assertEqual(code, 0)
+            self.assertEqual(report["groups"], [["alpha", "beta", "helper"]])
+            self.assertEqual(report["entry_points"], ["alpha", "beta"])
+
+    def test_clusters_sin_llamadas_siguen_separados(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._write(tmp, CLUSTERES_SEPARADOS, "clusters.py")
+            code, output = run(["--path", str(path), "--json"])
+            report = json.loads(output)
+            self.assertEqual(code, 0)
+            self.assertEqual(
+                report["groups"],
+                [["derecha", "detalle_der"], ["detalle_izq", "izquierda"]],
+            )
+            self.assertEqual(report["entry_points"], ["derecha", "izquierda"])
 
     def test_unreadable_file_exits_two(self):
         with tempfile.TemporaryDirectory() as tmp:

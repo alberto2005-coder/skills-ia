@@ -10,6 +10,7 @@
 ## Español
 
 ### Índice
+
 1. Propósito
 2. Modos
 3. Arquitectura
@@ -20,9 +21,11 @@
 8. Límites
 
 ### Propósito
+
 `finops-auditor` convierte un inventario de recursos cloud —con su coste mensual, su estado y su utilización— en tres cosas: el desperdicio estimado, una recomendación de redimensionado por recurso y un informe ejecutivo con la puntuación FinOps. No consulta la factura del proveedor ni métricas en vivo: mide lo que el inventario declara y separa lo medido de lo supuesto.
 
 ### Modos
+
 El maestro no usa flags: el modo lo fija el alcance de la petición.
 
 | Modo | Fases que ejecuta | Entrega |
@@ -33,6 +36,7 @@ El maestro no usa flags: el modo lo fija el alcance de la petición.
 El modo Escaneo sirve para responder «cuánto estamos tirando» en una sola pasada. El modo Informe es el que se entrega a dirección: añade el plan de redimensionado y separa ahorro confirmado de ahorro potencial.
 
 ### Arquitectura
+
 Un maestro y seis sub-skills con assets compartidos (`references/`, `scripts/`, `templates/`). Se instala la carpeta completa.
 
 | Sub-skill | Qué hace |
@@ -48,6 +52,7 @@ Un maestro y seis sub-skills con assets compartidos (`references/`, `scripts/`, 
 `finops-scan` entrega el JSON de hallazgos a `finops-rightsize`; el maestro recibe ambos y el informe. Los umbrales viven en [`cloud-pricing-rules.md`](../finops-auditor/references/cloud-pricing-rules.md) y la plantilla en [`report-template.md`](../finops-auditor/templates/report-template.md).
 
 ### Rúbrica
+
 La puntuación es determinista: `finops_score = max(0, 100 − desperdicio / coste total × 100)`, redondeada hacia abajo. Sin coste inventariado la puntuación es 100 y no se inventan ahorros.
 
 | Regla | Señal en el inventario | Desperdicio que suma |
@@ -84,7 +89,9 @@ Salida JSON con `total_monthly_cost`, `total_estimated_waste`, `finops_score` y 
 Códigos de salida: `0` análisis correcto · `1` entrada ilegible o JSON inválido, con `{"error": "..."}`. Solo stdlib, sin dependencias y sin llamadas de red.
 
 ### Instalación y uso
+
 Copia la carpeta `finops-auditor/` completa. Ejemplos de petición:
+
 - «Audita los costes de esta infraestructura y dime cuánto desperdiciamos».
 - «Detecta volúmenes desasociados e IPs elásticas sin usar».
 - «Propón derechosizing para las instancias con CPU por debajo del 10 %».
@@ -99,6 +106,7 @@ uv run python -m unittest discover -s finops-auditor/tests -t finops-auditor/tes
 Dos pruebas propias sobre el analizador (y 26 en el paquete, con las de los escáneres y el diff): una infraestructura limpia puntúa 100 sin desperdicio y una con un recurso huérfano y una instancia al 3 % detecta los dos hallazgos y baja la nota.
 
 ### Límites
+
 Solo analiza el inventario que se le entrega: no consulta facturación ni métricas en vivo, no aplica cambios y no convierte monedas. La estimación de subutilización asume una bajada de tier del 50 %, y un recurso sin precio o sin métricas se declara ausente en lugar de estimarse. No sustituye a la herramienta de costes del proveedor; la complementa con una segunda lectura reproducible.
 
 ---
@@ -106,6 +114,7 @@ Solo analiza el inventario que se le entrega: no consulta facturación ni métri
 ## English
 
 ### Index
+
 1. Purpose
 2. Modes
 3. Architecture
@@ -116,9 +125,11 @@ Solo analiza el inventario que se le entrega: no consulta facturación ni métri
 8. Limits
 
 ### Purpose
+
 `finops-auditor` turns a cloud resource inventory —monthly cost, status and utilisation— into three things: estimated waste, a rightsizing recommendation per resource and an executive report with the FinOps score. It never queries the provider's bill or live metrics: it measures what the inventory states and separates measured from assumed.
 
 ### Modes
+
 The master uses no flags: the request's scope sets the mode.
 
 | Mode | Phases it runs | Deliverable |
@@ -129,6 +140,7 @@ The master uses no flags: the request's scope sets the mode.
 Scan mode answers "how much are we wasting" in one pass. Report mode is the one you hand to leadership: it adds the rightsizing plan and separates confirmed from potential savings.
 
 ### Architecture
+
 One master and six sub-skills sharing assets (`references/`, `scripts/`, `templates/`). The whole folder is installed.
 
 | Sub-skill | What it does |
@@ -144,6 +156,7 @@ One master and six sub-skills sharing assets (`references/`, `scripts/`, `templa
 `finops-scan` hands the findings JSON to `finops-rightsize`; the master receives both plus the report. Thresholds live in [`cloud-pricing-rules.md`](../finops-auditor/references/cloud-pricing-rules.md) and the template in [`report-template.md`](../finops-auditor/templates/report-template.md).
 
 ### Rubric
+
 The score is deterministic: `finops_score = max(0, 100 − waste / total cost × 100)`, rounded down. With no inventoried cost the score is 100 and no savings are invented.
 
 | Rule | Signal in the inventory | Waste it adds |
@@ -180,7 +193,9 @@ JSON output with `total_monthly_cost`, `total_estimated_waste`, `finops_score` a
 Exit codes: `0` analysis ok · `1` unreadable input or invalid JSON, with `{"error": "..."}`. Stdlib only, no dependencies, no network calls.
 
 ### Install and use
+
 Copy the whole `finops-auditor/` folder. Example requests:
+
 - "Audit the cost of this infrastructure and tell me how much we waste".
 - "Find unattached volumes and unused elastic IPs".
 - "Propose rightsizing for instances under 10 % CPU".
@@ -195,4 +210,5 @@ uv run python -m unittest discover -s finops-auditor/tests -t finops-auditor/tes
 Two tests over the analyzer (26 in the package, including the scanners and the diff): a clean infrastructure scores 100 with zero waste, and one with an orphaned resource plus an instance at 3 % finds both findings and lowers the score.
 
 ### Limits
+
 It only reads the inventory it is given: no billing or live metrics, it applies no changes and converts no currencies. The underutilisation estimate assumes a 50 % tier drop, and a resource without price or metrics is reported as missing instead of estimated. It does not replace the provider's cost tool; it complements it with a reproducible second reading.

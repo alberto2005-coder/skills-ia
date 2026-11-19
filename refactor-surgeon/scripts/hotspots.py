@@ -25,8 +25,17 @@ import subprocess
 import sys
 from pathlib import Path
 
-DECISIONS = (ast.If, ast.For, ast.AsyncFor, ast.While, ast.Try, ast.IfExp,
-             ast.Assert, ast.With, ast.AsyncWith)
+# Una sola definición de V(G) en el paquete: la de `code_metrics`.
+# Duplicarla aquí (con `Try`/`IfExp` y contando `BoolOp` por valores) daba dos
+# números distintos para la misma función según el script que la midiera.
+try:
+    from .code_metrics import DECISIONS as VG_DECISIONS
+except (ImportError, ValueError):
+    try:
+        from code_metrics import DECISIONS as VG_DECISIONS
+    except ImportError:  # pragma: no cover - solo si se copia el script suelto
+        VG_DECISIONS = (ast.If, ast.For, ast.AsyncFor, ast.While, ast.ExceptHandler,
+                        ast.With, ast.AsyncWith, ast.Assert, ast.comprehension, ast.BoolOp)
 
 
 def normalize_since(value: str) -> str:
@@ -36,7 +45,12 @@ def normalize_since(value: str) -> str:
 
 
 def git(path: Path, *args: str) -> subprocess.CompletedProcess:
-    return subprocess.run(["git", "-C", str(path), *args], capture_output=True, text=True)
+    try:
+        return subprocess.run(["git", "-C", str(path), *args], capture_output=True,
+                              text=True, encoding="utf-8", errors="replace")
+    except OSError as error:
+        # Sin `git` instalado, `subprocess.run` lanzaba FileNotFoundError.
+        return subprocess.CompletedProcess(["git", *args], 127, "", str(error))
 
 
 def not_measured(reason: str, as_json: bool) -> int:
@@ -57,13 +71,9 @@ def complexity(path: Path) -> int:
     total = 0
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            total += 1
-        elif isinstance(node, DECISIONS):
-            total += 1
-        elif isinstance(node, ast.comprehension):
-            total += len(node.ifs)
-        elif isinstance(node, ast.BoolOp):
-            total += len(node.values) - 1
+            decisions = sum(1 for item in ast.walk(node)
+                            if isinstance(item, VG_DECISIONS) and item is not node)
+            total += 1 + decisions
     return max(1, total)
 
 
@@ -87,15 +97,23 @@ def churn_per_file(root: Path, since: str) -> tuple[dict[str, int], int]:
 
 def measure(root: Path, since: str, top: int) -> dict:
     churn, commits = churn_per_file(root, since)
+    # `git log` da rutas relativas a la RAÍZ del repositorio, no a `--path`:
+    # con `--path src/`, `root / name` buscaba `src/src/x.py` y descartaba todo.
+    top_level = git(root, "rev-parse", "--show-toplevel").stdout.strip()
+    repo_root = Path(top_level) if top_level else root
     files, skipped = [], []
     for name, lines in churn.items():
-        target = root / name
+        target = repo_root / name
         if not target.exists():
             skipped.append(name)
             continue
         value = complexity(target)
+        try:
+            shown = target.relative_to(root).as_posix()
+        except ValueError:
+            shown = name
         files.append({
-            "path": name,
+            "path": shown,
             "churn": lines,
             "complexity": value,
             "score": lines * value,

@@ -18,16 +18,24 @@ import ast
 import json
 import sys
 from pathlib import Path
+from finops_util import iter_files
 
 SEVERITIES = {"low": 1, "medium": 2, "high": 3}
+# Nombres que no son de nadie más: identifican una llamada al modelo por sí
+# solos.
 LLM_CALLS = {
-    "create",
-    "complete",
     "completions",
     "generate_content",
     "invoke_model",
     "responses",
 }
+# `create`/`complete` son demasiado genéricos: `Model.create()` de un ORM
+# disparaba `llm-sin-limite-tokens` con severidad alta y rompía CI. Solo
+# cuentan si el receptor es de un cliente de IA (`client.chat.completions`,
+# `llm.create`, `anthropic.messages`).
+GENERIC_LLM_CALLS = {"create", "complete"}
+LLM_RECEIVERS = {"chat", "completions", "completion", "messages", "llm",
+                 "openai", "anthropic", "gemini", "bedrock", "ai"}
 TOKEN_LIMITS = {"max_tokens", "max_output_tokens", "max_completion_tokens", "maxTokens"}
 EXPENSIVE_MODELS = ("opus", "gpt-4", "o1", "o3", "pro")
 CLASSIFIERS = {"classify", "classifier", "extract", "tag", "route", "label", "summarize_short"}
@@ -40,6 +48,33 @@ def _attr_name(node: ast.AST) -> str:
     if isinstance(node, ast.Name):
         return node.id
     return ""
+
+
+def _receiver_names(node: ast.Call) -> set[str]:
+    """Tokens de la cadena a la izquierda de la llamada (`client.chat.create`)."""
+    names: set[str] = set()
+    current: ast.AST | None = node.func.value if isinstance(node.func, ast.Attribute) else None
+    while current is not None:
+        if isinstance(current, ast.Attribute):
+            names.add(current.attr.lower())
+            current = current.value
+        elif isinstance(current, ast.Call):
+            current = current.func
+        elif isinstance(current, ast.Name):
+            names.add(current.id.lower())
+            current = None
+        else:
+            current = None
+    return names
+
+
+def _is_llm_call(node: ast.Call) -> bool:
+    name = _attr_name(node.func)
+    if name in LLM_CALLS:
+        return True
+    if name in GENERIC_LLM_CALLS:
+        return bool(_receiver_names(node) & LLM_RECEIVERS)
+    return False
 
 
 def _string_keyword(node: ast.Call, name: str, min_len: int = 0) -> str:
@@ -77,9 +112,8 @@ class Visitor(ast.NodeVisitor):
         self.visit_FunctionDef(node)  # type: ignore[arg-type]
 
     def visit_Call(self, node: ast.Call) -> None:
-        name = _attr_name(node.func)
-        if name in LLM_CALLS:
-            self._check_call(node, name)
+        if _is_llm_call(node):
+            self._check_call(node, _attr_name(node.func))
         self.generic_visit(node)
 
     def _check_call(self, node: ast.Call, name: str) -> None:
@@ -99,22 +133,11 @@ class Visitor(ast.NodeVisitor):
     def visit_While(self, node: ast.While) -> None:
         endless = isinstance(node.test, ast.Constant) and node.test.value is True
         has_break = any(isinstance(item, ast.Break) for item in ast.walk(node))
-        has_call = any(
-            isinstance(item, ast.Call) and _attr_name(item.func) in LLM_CALLS for item in ast.walk(node)
-        )
+        has_call = any(isinstance(item, ast.Call) and _is_llm_call(item) for item in ast.walk(node))
         if endless and not has_break and has_call:
             self.add(node, "bucle-sin-tope", "high",
                      "bucle while True con llamadas al modelo y sin break")
         self.generic_visit(node)
-
-
-def iter_files(path: Path) -> list[Path]:
-    if path.is_file():
-        return [path]
-    return sorted(
-        item for item in path.rglob("*.py")
-        if not SKIP_PARTS & set(item.relative_to(path).parts if item != path else ())
-    )
 
 
 def scan_file(path: Path) -> list[dict]:
@@ -140,7 +163,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ruta inexistente: {target}")
         return 2
 
-    files = iter_files(target)
+    files = iter_files(target, {".py"}, frozenset(SKIP_PARTS))
     findings = [item for path in files for item in scan_file(path)]
     findings.sort(key=lambda item: (item["file"], item["line"], item["rule"]))
     by_severity = {name: sum(1 for item in findings if item["severity"] == name) for name in SEVERITIES}

@@ -18,23 +18,16 @@ import json
 import re
 import sys
 from pathlib import Path
+from finops_util import iter_files
 
 SEVERITIES = {"low": 1, "medium": 2, "high": 3}
 CACHE = re.compile(r"actions/cache|enable-cache:\s*true|cache:\s*[\"']?true|setup-uv@|cache-dependency-path")
+# La indentación de un YAML válido no es siempre de dos espacios.
 TRIGGERS = {
-    "push": re.compile(r"^\s{2}push:\s*$", re.M),
-    "pull_request": re.compile(r"^\s{2}pull_request:\s*$", re.M),
+    "push": re.compile(r"^\s*push:\s*(?:\{\s*\})?\s*$", re.M),
+    "pull_request": re.compile(r"^\s*pull_request:\s*(?:\{\s*\})?\s*$", re.M),
 }
 CONCURRENCY = re.compile(r"^\s*concurrency:", re.M)
-
-
-def iter_files(path: Path) -> list[Path]:
-    if path.is_file():
-        return [path]
-    return sorted(
-        item for item in path.rglob("*")
-        if item.is_file() and item.suffix in {".yml", ".yaml"}
-    )
 
 
 def scan_file(path: Path) -> list[dict]:
@@ -73,7 +66,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ruta inexistente: {target}")
         return 2
 
-    files = iter_files(target)
+    files = iter_files(target, {".yml", ".yaml"})
     findings = [item for path in files for item in scan_file(path)]
     findings.sort(key=lambda item: (item["file"], item["line"], item["rule"]))
     by_severity = {name: sum(1 for item in findings if item["severity"] == name) for name in SEVERITIES}

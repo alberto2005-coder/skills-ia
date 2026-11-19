@@ -3,6 +3,15 @@ import json
 import argparse
 import sys
 
+def _cpu(resource):
+    """CPU media del inventario, o None si falta o no es numérica."""
+    value = resource.get("avg_cpu_utilization", 50)
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def analyze_resources(data):
     total_cost = 0.0
     waste_cost = 0.0
@@ -22,8 +31,20 @@ def analyze_resources(data):
                 "potential_savings": cost
             })
         
+        # Regla 3: subutilización moderada (10%-25%). El SKILL prometía
+        # reportarla sin puntuarla; antes no se emitía ninguna señal.
+        elif resource.get("type") == "compute" and _cpu(resource) is not None \
+                and 10 <= _cpu(resource) < 25:
+            findings.append({
+                "id": resource.get("id"),
+                "type": resource.get("type"),
+                "issue": "Subutilización moderada (CPU 10%-25%): revisar, no puntúa",
+                "potential_savings": 0.0,
+                "review": True,
+            })
+
         # Regla 2: Sobreaprovisionamiento (CPU promedio < 10% en el último mes)
-        elif resource.get("avg_cpu_utilization", 50) < 10 and resource.get("type") == "compute":
+        elif _cpu(resource) is not None and _cpu(resource) < 10 and resource.get("type") == "compute":
             potential_saving = cost * 0.5 # Se asume bajada de tier (50% ahorro)
             waste_cost += potential_saving
             findings.append({

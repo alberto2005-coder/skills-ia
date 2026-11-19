@@ -73,9 +73,25 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, json.JSONDecodeError) as error:
         print(f"casos ilegibles: {error}")
         return 2
-    if not config.get("cases"):
+    if not isinstance(config, dict) or not config.get("cases"):
         print("no hay casos declarados")
         return 2
+    cases = config["cases"]
+    if not isinstance(cases, list):
+        print("«cases» debe ser una lista")
+        return 2
+    for index, case in enumerate(cases, start=1):
+        # Un caso sin `function` reventaba con KeyError al ejecutarlo.
+        if not isinstance(case, dict) or not isinstance(case.get("function"), str) \
+                or not case["function"].strip():
+            print(f"caso {index}: falta «function» o no es una cadena")
+            return 2
+        if not isinstance(case.get("args", []), list):
+            print(f"caso {index}: «args» debe ser una lista")
+            return 2
+        if not isinstance(case.get("kwargs", {}), dict):
+            print(f"caso {index}: «kwargs» debe ser un objeto")
+            return 2
     if not args.allow_exec:
         print(f"validado: {len(config['cases'])} casos, módulo {config.get('module')} sin ejecutar")
         return 0
@@ -100,9 +116,13 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     try:
-        golden = read_json(snapshot_path)["results"]
+        snapshot = read_json(snapshot_path)
+        golden = snapshot["results"] if isinstance(snapshot, dict) else None
     except (OSError, KeyError, json.JSONDecodeError) as error:
         print(f"snapshot ilegible: {error}")
+        return 2
+    if not isinstance(golden, list):
+        print("snapshot ilegible: «results» debe ser una lista")
         return 2
 
     diffs = []

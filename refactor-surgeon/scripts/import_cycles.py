@@ -27,7 +27,7 @@ def python_files(root: Path) -> list[Path]:
     if root.is_file():
         return [root] if root.suffix == ".py" else []
     return sorted(item for item in root.rglob("*.py")
-                  if item.is_file() and not SKIP_PARTS & set(item.parts))
+                  if item.is_file() and not SKIP_PARTS & set(item.relative_to(root).parts))
 
 
 def module_name(path: Path, root: Path) -> str:

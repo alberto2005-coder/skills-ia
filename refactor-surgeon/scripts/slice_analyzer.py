@@ -36,9 +36,21 @@ def call_edges(tree: ast.AST, names: set[str]) -> dict[str, set[str]]:
 
 
 def components(edges: dict[str, set[str]]) -> list[list[str]]:
+    """Componentes conexas del grafo de llamadas, tratado como NO DIRIGIDO.
+
+    Se añaden las aristas inversas antes de recorrer: dos llamadores que
+    comparten un helper (`a → h ← b`) forman una sola componente aunque no
+    exista arista entre `a` y `b`. Con el DFS sobre aristas dirigidas en
+    orden de aparición quedaban en grupos distintos y el corte propuesto
+    rompía el archivo por la mitad.
+    """
+    neighbors: dict[str, set[str]] = {name: set(targets) for name, targets in edges.items()}
+    for name, targets in edges.items():
+        for target in targets:
+            neighbors.setdefault(target, set()).add(name)
     seen: set[str] = set()
     groups: list[list[str]] = []
-    for start in sorted(edges):
+    for start in sorted(neighbors):
         if start in seen:
             continue
         stack = [start]
@@ -49,7 +61,7 @@ def components(edges: dict[str, set[str]]) -> list[list[str]]:
                 continue
             seen.add(current)
             group.append(current)
-            stack.extend(sorted(edges[current] - seen))
+            stack.extend(sorted(neighbors[current] - seen))
         groups.append(sorted(group))
     return sorted(groups, key=lambda group: (-len(group), group))
 

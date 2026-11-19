@@ -23,9 +23,16 @@ from pathlib import Path
 
 def load(path: Path) -> dict[str, float]:
     data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or not isinstance(data.get("resources", []), list):
+        raise ValueError("el inventario debe ser un objeto con una lista «resources»")
     costs: dict[str, float] = {}
     for resource in data.get("resources", []):
+        if not isinstance(resource, dict):
+            raise ValueError("cada recurso debe ser un objeto")
         identifier = str(resource.get("id") or resource.get("name") or f"recurso_{len(costs)}")
+        if identifier in costs:
+            # Dos recursos con el mismo id se pisaban: uno desaparecía del diff.
+            raise ValueError(f"id duplicado en el inventario: {identifier}")
         costs[identifier] = float(resource.get("monthly_cost", 0.0) or 0.0)
     return costs
 

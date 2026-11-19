@@ -31,7 +31,7 @@ def python_files(root: Path) -> list[Path]:
     if root.is_file():
         return [root] if root.suffix == ".py" else []
     return sorted(item for item in root.rglob("*.py")
-                  if item.is_file() and not SKIP_PARTS & set(item.parts))
+                  if item.is_file() and not SKIP_PARTS & set(item.relative_to(root).parts))
 
 
 def exported_names(tree: ast.AST) -> set[str]:
@@ -75,6 +75,10 @@ def imported_bindings(tree: ast.AST) -> list[tuple[str, int]]:
             for alias in node.names:
                 bindings.append((alias.asname or alias.name.split(".")[0], node.lineno))
         elif isinstance(node, ast.ImportFrom):
+            if node.module == "__future__":
+                # Directiva de compilación: su presencia es el efecto, no un
+                # nombre que se "use", así que nunca es código muerto.
+                continue
             for alias in node.names:
                 if alias.name != "*":
                     bindings.append((alias.asname or alias.name, node.lineno))
