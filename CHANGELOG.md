@@ -8,6 +8,22 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-19 · El lint de frontmatter valida con PyYAML
+
+#### Cambiado
+
+- **`tests/lint_frontmatter.py`:** deja de partir el bloque línea a línea y lo valida con `yaml.safe_load`, así que un YAML inválido (por ejemplo una `description` con «English: …» dentro) es un problema del lint y no un falso OK. `name` y `description` deben ser texto, y la longitud de la descripción se mide sin el salto que añade el escalar plegado.
+- **Dependencia:** PyYAML ya estaba en el grupo `dev` de `pyproject.toml`, así que no hizo falta añadir nada ni tocar `uv.lock`.
+
+#### Añadido
+
+- **Dos tests** en `tests/test_lint_frontmatter.py`: el bloque con dos puntos y espacio dentro de `description` se reporta como YAML inválido, y la descripción plegada `>` se acepta.
+
+#### Verificado
+
+- El lint sobre los 79 `SKILL.md` que le toca → OK; `parse_frontmatter` sobre los 81 del repo, fixtures incluidas → 81 válidos.
+- `run_tests.py` → **689 tests, 13/13 suites**; `ruff check .` limpio.
+
 ### - 2026-11-19 · Frontmatter válido en YAML: 41 `SKILL.md` corregidos
 
 #### Corregido
@@ -398,6 +414,22 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-19 · Frontmatter lint validates with PyYAML
+
+#### Changed
+
+- **`tests/lint_frontmatter.py`:** it no longer splits the block line by line and validates it with `yaml.safe_load`, so invalid YAML (for example a `description` containing "English: …") is a lint problem instead of a false OK. `name` and `description` must be text, and the description length is measured without the newline the folded scalar adds.
+- **Dependency:** PyYAML was already in the `dev` group of `pyproject.toml`, so nothing had to be added and `uv.lock` is untouched.
+
+#### Added
+
+- **Two tests** in `tests/test_lint_frontmatter.py`: the block with a colon and a space inside `description` is reported as invalid YAML, and the folded `>` description is accepted.
+
+#### Verified
+
+- The lint over the 79 `SKILL.md` it covers → OK; `parse_frontmatter` over all 81 in the repo, fixtures included → 81 valid.
+- `run_tests.py` → **689 tests, 13/13 suites**; `ruff check .` clean.
 
 ### - 2026-11-19 · Valid YAML frontmatter: 41 `SKILL.md` files fixed
 
