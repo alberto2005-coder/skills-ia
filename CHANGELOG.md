@@ -8,6 +8,20 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-19 · Corregido el workflow de tags (no cargaba)
+
+#### Corregido
+
+- **`tag-release.yml` no se cargaba en GitHub:** el `if` del job `release-packages` usaba `matrix.package`, y `matrix` no existe en `jobs.<id>.if` (solo `github`, `inputs`, `needs` y `vars`). GitHub rechazaba el workflow entero: el push a `main` dejó un run fallido "Tag releases" con cero jobs y sin crear ningún tag. Ahora el `if` compara `needs.plan.outputs.packages != '[]'` y la matriz sale de un output aparte (`matrix`, con centinela para no quedar vacía).
+
+#### Añadido
+
+- **`tests/test_release_workflows.py`:** dos tests más (seis en total), incluido el que falla si un `if` de job vuelve a usar `matrix` y el que fija que la matriz sale del output centinela.
+
+#### Verificado
+
+- `actionlint` (el validador de GitHub Actions) sobre los cuatro workflows: 0 errores (antes: `context "matrix" is not allowed here` en la línea 92).
+
 ### - 2026-11-19 · Corregido el tag del bundle en `tag-release.yml`
 
 #### Corregido
@@ -493,6 +507,20 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-19 · Fixed the tag workflow (it never loaded)
+
+#### Fixed
+
+- **`tag-release.yml` failed to load on GitHub:** the `release-packages` job `if` used `matrix.package`, and `matrix` does not exist in `jobs.<id>.if` (only `github`, `inputs`, `needs` and `vars`). GitHub rejected the whole workflow: the push to `main` left a failed "Tag releases" run with zero jobs and no tags. The `if` now compares `needs.plan.outputs.packages != '[]'` and the matrix comes from its own output (`matrix`, with a sentinel so it is never empty).
+
+#### Added
+
+- **`tests/test_release_workflows.py`:** two more tests (six in total), including the one that fails if a job-level `if` uses `matrix` again and the one pinning the matrix to the sentinel output.
+
+#### Verified
+
+- `actionlint` (GitHub Actions' own validator) over the four workflows: 0 errors (before: `context "matrix" is not allowed here` on line 92).
 
 ### - 2026-11-19 · Fixed the bundle tag in `tag-release.yml`
 
