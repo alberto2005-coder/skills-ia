@@ -8,6 +8,22 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-19 · Techo de métricas a cero: dieciocho funciones partidas en seis paquetes
+
+#### Cambiado (interno)
+
+- **`seo-auditor`:** `render_markdown` (V(G) 29), `render_html` (24 y 178 líneas), `audit_web` (40 y 184 líneas), `handle_starttag` (23 con anidamiento 12), `rich_preview` (25), `audit_headers` (21), `build` (154 líneas), `build_plan` (24) y los dos `analyze` de `indexcheck` (22) y `hreflang` (22) quedan partidos por responsabilidad: cabecera, grupos y datos medidos en el informe; ajustes, robots, cabeceras, canonical, sitemap y presencia en el índice; carga de robots, sondeo de `llms.txt`, crawl, sitemap y ensamblado de checks en el rastreo. Los dos `handle_starttag` despachan por etiqueta con una tabla en lugar de anidar ramas.
+- **`agent-red-team`:** `_validate_rules` (27), `analyze_python_ast` (33 con anidamiento 8) y `scan_target` (24) se reparten en validadores por sección de las reglas, hallazgos por tipo de nodo del AST y escaneo por fichero.
+- **`appsec-audit`:** los `main` de `apply_patch` (25) y `sbom` (22) delegan en un helper por subcomando y `validate_ledger` (34) valida raíz, unidad y listas por separado.
+- **`db-architect`:** `build_model` (21 con anidamiento 8) aplica cada tipo de sentencia con su propio aplicador detrás de una tabla, sin cambiar el orden de texto del que depende `drift`.
+- **`premium-web-designer`:** `check_page` (28 y 160 líneas) agrupa sus quince comprobaciones por concern y `handle_starttag` (anidamiento 9) despacha por etiqueta.
+- **`replica`:** `read_png` (27) separa lectura de chunks, validación de IHDR y reconstrucción de filtros; `check_platform` (26) separa longitud, keywords, capturas y términos vetados.
+- **`tests/metrics_baseline.json`:** el techo de hallazgos `high` baja de **26 a 0**. Los recuentos por función no cambian de comportamiento: los informes, los códigos de salida y los mensajes de error son los que fijan las suites.
+
+#### Verificado
+
+- `run_tests.py` → **687 tests, 13/13 suites**; `ruff check .` limpio; `tests/lint_frontmatter.py` OK con 79 `SKILL.md`; `tests/metrics_gate.py` → **0 hallazgos `high` y 0 clones**.
+
 ### - 2026-11-19 · `pytest` en CI, una sola escala de severidad y helpers por paquete
 
 #### Añadido
@@ -374,6 +390,22 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-19 · Metrics ceiling down to zero: eighteen functions split across six packages
+
+#### Changed (internal)
+
+- **`seo-auditor`:** `render_markdown` (V(G) 29), `render_html` (24 and 178 lines), `audit_web` (40 and 184 lines), `handle_starttag` (23 with nesting 12), `rich_preview` (25), `audit_headers` (21), `build` (154 lines), `build_plan` (24) and both `analyze` functions in `indexcheck` (22) and `hreflang` (22) are split by responsibility: header, groups and measured data in the report; directives, robots, headers, canonical, sitemap and presence in the index; robots loading, `llms.txt` probing, crawl, sitemap and check assembly in the crawler. Both `handle_starttag` implementations dispatch by tag through a table instead of nesting branches.
+- **`agent-red-team`:** `_validate_rules` (27), `analyze_python_ast` (33 with nesting 8) and `scan_target` (24) become validators per rules section, findings per AST node type and a scan per file.
+- **`appsec-audit`:** the `main` functions in `apply_patch` (25) and `sbom` (22) delegate to one helper per subcommand, and `validate_ledger` (34) validates the root, each unit and its lists separately.
+- **`db-architect`:** `build_model` (21 with nesting 8) applies each statement kind through its own applier behind a table, without changing the text order `drift` depends on.
+- **`premium-web-designer`:** `check_page` (28 and 160 lines) groups its fifteen checks by concern, and `handle_starttag` (nesting 9) dispatches by tag.
+- **`replica`:** `read_png` (27) separates chunk reading, IHDR validation and filter reconstruction; `check_platform` (26) separates length, keyword, screenshot and avoid-term checks.
+- **`tests/metrics_baseline.json`:** the `high` ceiling drops from **26 to 0**. Behaviour is unchanged: reports, exit codes and error messages are the ones the suites pin.
+
+#### Verified
+
+- `run_tests.py` → **687 tests, 13/13 suites**; `ruff check .` clean; `tests/lint_frontmatter.py` OK with 79 `SKILL.md`; `tests/metrics_gate.py` → **0 `high` findings and 0 clones**.
 
 ### - 2026-11-19 · `pytest` in CI, a single severity scale and per-package helpers
 
