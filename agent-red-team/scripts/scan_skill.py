@@ -172,53 +172,75 @@ def _validate_rules(rules: Dict[str, Any]) -> None:
 
     for key in ("prompt_injection_patterns", "shell_danger_patterns",
                 "comment_injection_patterns"):
-        for entry in rules.get(key, []):
-            # El consumidor desempaqueta (patrón, severidad, descripción).
-            if not (isinstance(entry, (list, tuple)) and len(entry) >= 3):
-                raise ValueError(f"entrada malformada en «{key}»: {entry!r}")
-            try:
-                re.compile(entry[0])
-            except re.error as error:
-                raise ValueError(f"regex inválida en «{key}»: {entry[0]!r} ({error})") from error
-            canonical_severity(entry[1])
+        _validate_entries(rules.get(key, []), key)
 
     for key in ("sensitive_paths", "base64_suspicious_keywords"):
-        for entry in rules.get(key, []):
-            if key == "sensitive_paths":
-                try:
-                    re.compile(entry)
-                except re.error as error:
-                    raise ValueError(f"regex inválida en «{key}»: {entry!r} ({error})") from error
+        _validate_paths(rules.get(key, []), key)
 
     for combo in rules.get("reject_combos", []):
-        if not isinstance(combo, dict):
-            raise ValueError(f"combo malformado: {combo!r}")
-        combo_id = combo.get("id", "?")
-        groups = combo.get("grupos")
-        if not isinstance(groups, list) or not groups:
-            raise ValueError(f"combo «{combo_id}» sin campo «grupos» o vacío")
-        for grupo in groups:
-            if not isinstance(grupo, dict) or not grupo.get("patrones"):
-                raise ValueError(f"combo «{combo_id}» con grupo sin «patrones»")
-            for patron in grupo["patrones"]:
-                try:
-                    re.compile(patron)
-                except re.error as error:
-                    raise ValueError(
-                        f"regex inválida en combo «{combo_id}»: {patron!r} ({error})"
-                    ) from error
+        _validate_combo(combo)
 
     for key in ("dangerous_imports", "network_imports", "dangerous_calls"):
         # `network_imports` es una lista y las otras dos son mapas; omitir una
         # clave opcional no puede invalidar el fichero entero.
-        value = rules.get(key, [] if key == "network_imports" else {})
-        if key == "network_imports" and not isinstance(value, list):
+        _validate_mapping(rules.get(key, [] if key == "network_imports" else {}), key)
+
+
+def _validate_entries(entries, key):
+    for entry in entries:
+        # El consumidor desempaqueta (patrón, severidad, descripción).
+        if not (isinstance(entry, (list, tuple)) and len(entry) >= 3):
+            raise ValueError(f"entrada malformada en «{key}»: {entry!r}")
+        _compile_pattern(entry[0], key)
+        canonical_severity(entry[1])
+
+
+def _validate_paths(entries, key):
+    if key != "sensitive_paths":
+        return
+    for entry in entries:
+        _compile_pattern(entry, key)
+
+
+def _compile_pattern(pattern, label):
+    try:
+        re.compile(pattern)
+    except re.error as error:
+        raise ValueError(f"regex inválida en «{label}»: {pattern!r} ({error})") from error
+
+
+def _validate_combo(combo):
+    if not isinstance(combo, dict):
+        raise ValueError(f"combo malformado: {combo!r}")
+    combo_id = combo.get("id", "?")
+    groups = combo.get("grupos")
+    if not isinstance(groups, list) or not groups:
+        raise ValueError(f"combo «{combo_id}» sin campo «grupos» o vacío")
+    for grupo in groups:
+        _validate_combo_group(grupo, combo_id)
+
+
+def _validate_combo_group(grupo, combo_id):
+    if not isinstance(grupo, dict) or not grupo.get("patrones"):
+        raise ValueError(f"combo «{combo_id}» con grupo sin «patrones»")
+    for patron in grupo["patrones"]:
+        try:
+            re.compile(patron)
+        except re.error as error:
+            raise ValueError(
+                f"regex inválida en combo «{combo_id}»: {patron!r} ({error})"
+            ) from error
+
+
+def _validate_mapping(value, key):
+    if key == "network_imports":
+        if not isinstance(value, list):
             raise ValueError("«network_imports» debe ser una lista")
-        if key != "network_imports" and not isinstance(value, dict):
-            raise ValueError(f"«{key}» debe ser un objeto")
-        if key != "network_imports":
-            for severity in value.values():
-                canonical_severity(severity)
+        return
+    if not isinstance(value, dict):
+        raise ValueError(f"«{key}» debe ser un objeto")
+    for severity in value.values():
+        canonical_severity(severity)
 
 
 def _canonicalize_severities(rules: Dict[str, Any]) -> None:
@@ -387,100 +409,122 @@ def analyze_python_ast(code: str, rel_path: str, rules: Dict[str, Any]) -> List[
 
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
-            for alias in node.names:
-                mod = alias.name
-                base_mod = mod.split(".")[0]
-                if mod in dangerous_imports or base_mod in dangerous_imports:
-                    sev = dangerous_imports.get(mod, dangerous_imports.get(base_mod, "medium"))
-                    findings.append({
-                        "severity": sev,
-                        "file": rel_path,
-                        "line": node.lineno,
-                        "category": "AST Dangerous Import",
-                        "evidence": f"import {mod}",
-                        "description": f"Importación de módulo con capacidad de ejecución de comandos, memoria o red baja ({mod}).",
-                    })
-                elif mod in network_imports or base_mod in network_imports:
-                    findings.append({
-                        "severity": "medium",
-                        "file": rel_path,
-                        "line": node.lineno,
-                        "category": "AST Network Capability",
-                        "evidence": f"import {mod}",
-                        "description": f"El script importa librerías de red ({mod}). Verificar si la Skill realmente requiere salida a Internet.",
-                    })
-
+            findings.extend(_import_findings(node, rel_path, dangerous_imports, network_imports))
         elif isinstance(node, ast.ImportFrom) and node.module:
-            mod = node.module
-            base_mod = mod.split(".")[0]
-            if mod in dangerous_imports or base_mod in dangerous_imports:
-                sev = dangerous_imports.get(mod, dangerous_imports.get(base_mod, "medium"))
-                findings.append({
-                    "severity": sev,
-                    "file": rel_path,
-                    "line": node.lineno,
-                    "category": "AST Dangerous ImportFrom",
-                    "evidence": f"from {mod} import ...",
-                    "description": f"Importación desde módulo crítico ({mod}).",
-                })
-            elif mod in network_imports or base_mod in network_imports:
-                findings.append({
-                    "severity": "medium",
-                    "file": rel_path,
-                    "line": node.lineno,
-                    "category": "AST Network Capability",
-                    "evidence": f"from {mod} import ...",
-                    "description": f"Capacidad de red detectada vía {mod}.",
-                })
-
+            findings.extend(_importfrom_findings(node, rel_path, dangerous_imports, network_imports))
         elif isinstance(node, ast.Call):
-            call_name = ""
-            if isinstance(node.func, ast.Name):
-                call_name = node.func.id
-            elif isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
-                call_name = f"{node.func.value.id}.{node.func.attr}"
-
-            if call_name in dangerous_calls:
-                sev = dangerous_calls[call_name]
-                extra = ""
-                if call_name.startswith("subprocess."):
-                    for kw in node.keywords:
-                        if kw.arg == "shell" and isinstance(kw.value, ast.Constant) and kw.value.value is True:
-                            sev = "critical"
-                            extra = " con shell=True (riesgo de Command Injection)"
-                findings.append({
-                    "severity": sev,
-                    "file": rel_path,
-                    "line": node.lineno,
-                    "category": "AST Critical Function Call",
-                    "evidence": f"{call_name}(...)",
-                    "description": f"Llamada potencialmente peligrosa a '{call_name}'{extra}.",
-                })
-
-            if call_name == "getattr" and len(node.args) >= 2:
-                if isinstance(node.args[1], ast.Constant) and str(node.args[1].value) in reflection_targets:
-                    findings.append({
-                        "severity": "critical",
-                        "file": rel_path,
-                        "line": node.lineno,
-                        "category": "AST Reflection Obfuscation",
-                        "evidence": f"getattr(..., '{node.args[1].value}')",
-                        "description": "Uso de getattr() para evadir detección estática de llamadas peligrosas.",
-                    })
-
+            findings.extend(_call_findings(node, rel_path, dangerous_calls, reflection_targets))
         elif isinstance(node, ast.Constant) and isinstance(node.value, str):
-            val = node.value
-            if re.match(r"^https?://", val.strip(), re.IGNORECASE):
-                findings.append({
-                    "severity": "low",
-                    "file": rel_path,
-                    "line": node.lineno,
-                    "category": "AST Hardcoded URL",
-                    "evidence": val[:100],
-                    "description": "URL hardcodeada dentro del código Python; confirmar que sea un endpoint legítimo y documentado.",
-                })
+            findings.extend(_url_findings(node, rel_path))
 
     return findings
+
+
+def _import_findings(node, rel_path, dangerous_imports, network_imports):
+    findings = []
+    for alias in node.names:
+        mod = alias.name
+        base_mod = mod.split(".")[0]
+        if mod in dangerous_imports or base_mod in dangerous_imports:
+            sev = dangerous_imports.get(mod, dangerous_imports.get(base_mod, "medium"))
+            findings.append({
+                "severity": sev,
+                "file": rel_path,
+                "line": node.lineno,
+                "category": "AST Dangerous Import",
+                "evidence": f"import {mod}",
+                "description": f"Importación de módulo con capacidad de ejecución de comandos, memoria o red baja ({mod}).",
+            })
+        elif mod in network_imports or base_mod in network_imports:
+            findings.append({
+                "severity": "medium",
+                "file": rel_path,
+                "line": node.lineno,
+                "category": "AST Network Capability",
+                "evidence": f"import {mod}",
+                "description": f"El script importa librerías de red ({mod}). Verificar si la Skill realmente requiere salida a Internet.",
+            })
+    return findings
+
+
+def _importfrom_findings(node, rel_path, dangerous_imports, network_imports):
+    mod = node.module
+    base_mod = mod.split(".")[0]
+    if mod in dangerous_imports or base_mod in dangerous_imports:
+        sev = dangerous_imports.get(mod, dangerous_imports.get(base_mod, "medium"))
+        return [{
+            "severity": sev,
+            "file": rel_path,
+            "line": node.lineno,
+            "category": "AST Dangerous ImportFrom",
+            "evidence": f"from {mod} import ...",
+            "description": f"Importación desde módulo crítico ({mod}).",
+        }]
+    if mod in network_imports or base_mod in network_imports:
+        return [{
+            "severity": "medium",
+            "file": rel_path,
+            "line": node.lineno,
+            "category": "AST Network Capability",
+            "evidence": f"from {mod} import ...",
+            "description": f"Capacidad de red detectada vía {mod}.",
+        }]
+    return []
+
+
+def _call_name(node):
+    if isinstance(node.func, ast.Name):
+        return node.func.id
+    if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
+        return f"{node.func.value.id}.{node.func.attr}"
+    return ""
+
+
+def _call_findings(node, rel_path, dangerous_calls, reflection_targets):
+    call_name = _call_name(node)
+    findings = []
+    if call_name in dangerous_calls:
+        sev = dangerous_calls[call_name]
+        extra = ""
+        if call_name.startswith("subprocess."):
+            for kw in node.keywords:
+                if kw.arg == "shell" and isinstance(kw.value, ast.Constant) and kw.value.value is True:
+                    sev = "critical"
+                    extra = " con shell=True (riesgo de Command Injection)"
+        findings.append({
+            "severity": sev,
+            "file": rel_path,
+            "line": node.lineno,
+            "category": "AST Critical Function Call",
+            "evidence": f"{call_name}(...)",
+            "description": f"Llamada potencialmente peligrosa a '{call_name}'{extra}.",
+        })
+
+    if call_name == "getattr" and len(node.args) >= 2:
+        if isinstance(node.args[1], ast.Constant) and str(node.args[1].value) in reflection_targets:
+            findings.append({
+                "severity": "critical",
+                "file": rel_path,
+                "line": node.lineno,
+                "category": "AST Reflection Obfuscation",
+                "evidence": f"getattr(..., '{node.args[1].value}')",
+                "description": "Uso de getattr() para evadir detección estática de llamadas peligrosas.",
+            })
+    return findings
+
+
+def _url_findings(node, rel_path):
+    val = node.value
+    if not re.match(r"^https?://", val.strip(), re.IGNORECASE):
+        return []
+    return [{
+        "severity": "low",
+        "file": rel_path,
+        "line": node.lineno,
+        "category": "AST Hardcoded URL",
+        "evidence": val[:100],
+        "description": "URL hardcodeada dentro del código Python; confirmar que sea un endpoint legítimo y documentado.",
+    }]
 
 
 def _iter_pattern_hits(pattern: str, text: str) -> List[Tuple[int, str]]:
@@ -615,22 +659,7 @@ def scan_target(target_path: str, rules_path: Optional[str] = None) -> Dict[str,
     if not target.exists():
         return {"error": f"La ruta no existe: {target}"}
 
-    files_to_scan = []
-    if target.is_file():
-        files_to_scan.append(target)
-        base_root = target.parent
-    else:
-        base_root = target
-        for root, dirs, files in os.walk(target):
-            # Podar directorios de dependencias/artefactos: sin esto, un
-            # __pycache__/mod.pyc normal se clasifica como "binario opaco
-            # CRÍTICA" y bloquea una skill limpia (falso BLOQUEADO).
-            dirs[:] = [d for d in dirs if d not in PRUNE_DIRS]
-            for fname in files:
-                if fname.endswith((".pyc", ".pyo")):
-                    continue
-                files_to_scan.append(Path(root) / fname)
-
+    base_root, files_to_scan = _collect_target_files(target)
     all_findings: List[Dict[str, Any]] = []
     scanned_files = []
     binary_files = []
@@ -642,55 +671,13 @@ def scan_target(target_path: str, rules_path: Optional[str] = None) -> Dict[str,
         if fpath.name == "SKILL.md":
             has_skill_md = True
 
-        ext = fpath.suffix.lower()
-        if ext in (".exe", ".dll", ".so", ".dylib", ".bin", ".pyc", ".pyo", ".jar", ".wasm"):
+        file_findings, kind, fences = _scan_one_file(fpath, rel_path, rules)
+        all_findings.extend(file_findings)
+        fences_maskados += fences
+        if kind == "binary":
             binary_files.append(rel_path)
-            all_findings.append({
-                "severity": "critical",
-                "file": rel_path,
-                "line": 0,
-                "category": "Opaque Binary Artifact",
-                "evidence": fpath.name,
-                "description": "Binario compilado dentro de una Agent Skill; no es auditable en texto plano.",
-            })
-            continue
-
-        try:
-            content = fpath.read_text(encoding="utf-8")
-        except UnicodeDecodeError:
-            binary_files.append(rel_path)
-            all_findings.append({
-                "severity": "high",
-                "file": rel_path,
-                "line": 0,
-                "category": "Non-UTF8 / Binary File",
-                "evidence": fpath.name,
-                "description": "Archivo no legible como UTF-8; inspeccionar manualmente antes de confiar.",
-            })
-            continue
-
-        scanned_files.append(rel_path)
-
-        if ext in MARKDOWN_EXTS:
-            prose, live, exec_only = build_markdown_views(content)
-            if live != content:
-                fences_maskados += 1
-        else:
-            prose = live = exec_only = content
-
-        all_findings.extend(detect_unicode_anomalies(content, rel_path))
-        # Una sola pasada: la llamada duplicada inflaba el score (cada
-        # hallazgo contaba el doble y podía cruzar el umbral solo).
-        # `live` = prosa + fences ejecutables, o sea el fichero entero: con
-        # `exec_only` una señal puesta fuera de un fence nunca combinaba con
-        # otra dentro, contra lo que promete SKILL.md:108 ("por fichero").
-        all_findings.extend(inspect_base64_blobs(prose, rel_path, rules))
-        all_findings.extend(inspect_hex_blobs(prose, rel_path, rules))
-        all_findings.extend(scan_text_patterns(prose, rel_path, ext, rules, live_text=live, exec_text=exec_only))
-        all_findings.extend(detect_reject_combos(live, rel_path, rules))
-
-        if ext == ".py":
-            all_findings.extend(analyze_python_ast(content, rel_path, rules))
+        elif kind == "scanned":
+            scanned_files.append(rel_path)
 
     if target.is_dir() and not has_skill_md:
         all_findings.append({
@@ -706,16 +693,9 @@ def scan_target(target_path: str, rules_path: Optional[str] = None) -> Dict[str,
     raw_score = sum(SEVERITY_WEIGHTS.get(f["severity"], 0) for f in all_findings)
     risk_score = min(100, raw_score)
 
-    if reject_findings or risk_score >= 50 or any(f["severity"] == "critical" for f in all_findings):
-        verdict = "BLOQUEADO - MALICIOSO / CRÍTICO"
-    elif risk_score >= 16:
-        verdict = "PRECAUCIÓN - REVISIÓN MANUAL"
-    else:
-        verdict = "APROBADO"
-
     return {
         "target": str(target),
-        "verdict": verdict,
+        "verdict": _verdict(all_findings, risk_score, reject_findings),
         "risk_score": risk_score,
         "files_scanned_count": len(scanned_files),
         "scanned_files": scanned_files,
@@ -726,6 +706,84 @@ def scan_target(target_path: str, rules_path: Optional[str] = None) -> Dict[str,
         "findings_count": len(all_findings),
         "findings": all_findings,
     }
+
+
+def _collect_target_files(target):
+    files_to_scan = []
+    if target.is_file():
+        files_to_scan.append(target)
+        return target.parent, files_to_scan
+    for root, dirs, files in os.walk(target):
+        # Podar directorios de dependencias/artefactos: sin esto, un
+        # __pycache__/mod.pyc normal se clasifica como "binario opaco
+        # CRÍTICA" y bloquea una skill limpia (falso BLOQUEADO).
+        dirs[:] = [d for d in dirs if d not in PRUNE_DIRS]
+        for fname in files:
+            if fname.endswith((".pyc", ".pyo")):
+                continue
+            files_to_scan.append(Path(root) / fname)
+    return target, files_to_scan
+
+
+def _scan_one_file(fpath, rel_path, rules):
+    """Devuelve (hallazgos, tipo, fences enmascarados)."""
+    ext = fpath.suffix.lower()
+    if ext in (".exe", ".dll", ".so", ".dylib", ".bin", ".pyc", ".pyo", ".jar", ".wasm"):
+        return ([{
+            "severity": "critical",
+            "file": rel_path,
+            "line": 0,
+            "category": "Opaque Binary Artifact",
+            "evidence": fpath.name,
+            "description": "Binario compilado dentro de una Agent Skill; no es auditable en texto plano.",
+        }], "binary", 0)
+
+    try:
+        content = fpath.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return ([{
+            "severity": "high",
+            "file": rel_path,
+            "line": 0,
+            "category": "Non-UTF8 / Binary File",
+            "evidence": fpath.name,
+            "description": "Archivo no legible como UTF-8; inspeccionar manualmente antes de confiar.",
+        }], "binary", 0)
+
+    findings, fences = _content_findings(content, rel_path, ext, rules)
+    return findings, "scanned", fences
+
+
+def _content_findings(content, rel_path, ext, rules):
+    if ext in MARKDOWN_EXTS:
+        prose, live, exec_only = build_markdown_views(content)
+        fences = 1 if live != content else 0
+    else:
+        prose = live = exec_only = content
+        fences = 0
+
+    findings = []
+    findings.extend(detect_unicode_anomalies(content, rel_path))
+    # Una sola pasada: la llamada duplicada inflaba el score (cada
+    # hallazgo contaba el doble y podía cruzar el umbral solo).
+    # `live` = prosa + fences ejecutables, o sea el fichero entero: con
+    # `exec_only` una señal puesta fuera de un fence nunca combinaba con
+    # otra dentro, contra lo que promete SKILL.md:108 ("por fichero").
+    findings.extend(inspect_base64_blobs(prose, rel_path, rules))
+    findings.extend(inspect_hex_blobs(prose, rel_path, rules))
+    findings.extend(scan_text_patterns(prose, rel_path, ext, rules, live_text=live, exec_text=exec_only))
+    findings.extend(detect_reject_combos(live, rel_path, rules))
+    if ext == ".py":
+        findings.extend(analyze_python_ast(content, rel_path, rules))
+    return findings, fences
+
+
+def _verdict(all_findings, risk_score, reject_findings):
+    if reject_findings or risk_score >= 50 or any(f["severity"] == "critical" for f in all_findings):
+        return "BLOQUEADO - MALICIOSO / CRÍTICO"
+    if risk_score >= 16:
+        return "PRECAUCIÓN - REVISIÓN MANUAL"
+    return "APROBADO"
 
 
 def _configurar_salida_utf8() -> None:
