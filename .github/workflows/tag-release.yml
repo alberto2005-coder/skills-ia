@@ -27,6 +27,7 @@ jobs:
     timeout-minutes: 10
     outputs:
       packages: ${{ steps.plan.outputs.packages }}
+      matrix: ${{ steps.plan.outputs.matrix }}
       bundle: ${{ steps.plan.outputs.bundle }}
       direct: ${{ steps.plan.outputs.direct }}
     steps:
@@ -54,13 +55,15 @@ jobs:
           plan=$(uv run --locked python tests/version_guard.py --plan --base "$BASE_SHA")
           printf '%s\n' "$plan" > release-plan.json
           printf '%s\n' "$plan"
-          # Una matriz vacía falla al expandirse, así que el plan se publica con un
-          # centinela y el job de release se salta esa entrada con un `if`.
+          # `matrix` no existe en el `if` de un job, así que el `if` usa la lista real
+          # y la matriz sale aparte, con un centinela para no quedar vacía.
           packages=$(jq -c '.packages' release-plan.json)
-          if [ "$packages" = "[]" ]; then
-            packages='[{"package":"-","version":"0.0.0","tag":"-"}]'
-          fi
           echo "packages=$packages" >> "$GITHUB_OUTPUT"
+          if [ "$packages" = "[]" ]; then
+            echo 'matrix=[{"package":"-","version":"0.0.0","tag":"-"}]' >> "$GITHUB_OUTPUT"
+          else
+            echo "matrix=$packages" >> "$GITHUB_OUTPUT"
+          fi
           echo "bundle=$(jq -r '.bundle.version // ""' release-plan.json)" >> "$GITHUB_OUTPUT"
           if [ "$HAS_TOKEN" = "true" ]; then
             echo "direct=false" >> "$GITHUB_OUTPUT"
@@ -89,11 +92,11 @@ jobs:
   release-packages:
     name: Release ${{ matrix.package }} ${{ matrix.version }}
     needs: plan
-    if: ${{ needs.plan.outputs.direct == 'true' && matrix.package != '-' }}
+    if: ${{ needs.plan.outputs.direct == 'true' && needs.plan.outputs.packages != '[]' }}
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.plan.outputs.packages) }}
+        include: ${{ fromJson(needs.plan.outputs.matrix) }}
     uses: ./.github/workflows/release-package.yml
     with:
       package: ${{ matrix.package }}

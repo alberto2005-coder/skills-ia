@@ -55,6 +55,26 @@ class TagReleaseContractTests(unittest.TestCase):
         self.assertEqual(sorted(inputs), ["package", "tag", "version"])
         self.assertEqual(sorted(call), sorted(inputs))
 
+    def test_no_job_level_if_uses_the_matrix_context(self):
+        # `matrix` no existe en `jobs.<id>.if`: GitHub rechaza el workflow entero.
+        for name, job in load("tag-release.yml")["jobs"].items():
+            self.assertNotIn("matrix", str(job.get("if", "")), name)
+
+    def test_the_matrix_comes_from_its_own_never_empty_output(self):
+        job = load("tag-release.yml")["jobs"]["release-packages"]
+        script = plan_script()
+
+        self.assertEqual(
+            job["strategy"]["matrix"]["include"],
+            "${{ fromJson(needs.plan.outputs.matrix) }}",
+        )
+        self.assertIn("needs.plan.outputs.packages != '[]'", job["if"])
+        self.assertEqual(
+            load("tag-release.yml")["jobs"]["plan"]["outputs"]["matrix"],
+            "${{ steps.plan.outputs.matrix }}",
+        )
+        self.assertIn('matrix=[{"package":"-"', script)
+
 
 if __name__ == "__main__":
     unittest.main()
