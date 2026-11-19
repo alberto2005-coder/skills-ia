@@ -39,8 +39,9 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: "1"
 
-      # code_metrics: los 26 hallazgos `high` son deuda real (funciones de 120-184 lineas,
-      # V(G) 21-40) y estan aceptados en tests/metrics_baseline.json; el gate falla si crecen.
+      # code_metrics: el techo de hallazgos `high` vive en tests/metrics_baseline.json y hoy
+      # es 0: cualquier funcion que duplique un limite (120 lineas, V(G) 20, anidamiento 8,
+      # 12 parametros) rompe el gate en vez de engordar la deuda aceptada.
       # clone_detect: con los defaults (20 tokens) marca 803 clones de helpers de 5 lineas que
       # el empaquetado autocontenido por carpeta obliga a duplicar; aqui se exige ademas tamano
       # y similitud altos para que solo cuente la duplicacion sustancial.
