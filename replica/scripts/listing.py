@@ -65,6 +65,18 @@ def find_avoid(texts: dict[str, str], terms: list[str]) -> list[tuple[str, str]]
 
 def check_platform(platform: str, data: dict, avoid: list[str]) -> dict:
     limits = LIMITS[platform]
+    errors, warnings = _check_fields(limits, data)
+
+    keyword_errors, keyword_warnings = _check_keywords(data, platform)
+    errors += keyword_errors
+    warnings += keyword_warnings
+
+    warnings += _check_screenshots(data, platform)
+    errors += _check_avoid(data, avoid)
+    return {"platform": platform, "errors": errors, "warnings": warnings}
+
+
+def _check_fields(limits: dict, data: dict) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
 
@@ -84,32 +96,53 @@ def check_platform(platform: str, data: dict, avoid: list[str]) -> dict:
         if field in {"title", "subtitle", "short_description"} and RANKING_CLAIMS.search(value):
             warnings.append(f"{label}: claim de ranking ('{RANKING_CLAIMS.search(value).group(0)}'), suele provocar rechazo")
 
+    return errors, warnings
+
+
+def _check_keywords(data: dict, platform: str) -> tuple[list[str], list[str]]:
     keywords = (data.get("keywords") or "").strip()
-    if platform == "ios" and keywords:
-        if re.search(r",\s", keywords):
-            errors.append("Keywords: hay espacios tras las comas, App Store los cuenta")
-        items = [k.strip().lower() for k in keywords.split(",") if k.strip()]
-        duplicates = sorted({k for k in items if items.count(k) > 1})
-        if duplicates:
-            errors.append(f"Keywords repetidas: {', '.join(duplicates)}")
-        title_words = {w.lower() for w in re.findall(r"[A-Za-z0-9]+", data.get("title", ""))}
-        overlap = sorted(set(items) & title_words)
-        if overlap:
-            warnings.append(f"Keywords ya presentes en el title (desperdician espacio): {', '.join(overlap)}")
-        if len(set(items)) < 3:
-            warnings.append("Keywords: menos de 3 terminos distintos")
+    if platform != "ios" or not keywords:
+        return [], []
+    return _ios_keyword_errors(keywords), _ios_keyword_warnings(data, keywords)
 
+
+def _ios_keyword_errors(keywords: str) -> list[str]:
+    errors = []
+    if re.search(r",\s", keywords):
+        errors.append("Keywords: hay espacios tras las comas, App Store los cuenta")
+    items = [k.strip().lower() for k in keywords.split(",") if k.strip()]
+    duplicates = sorted({k for k in items if items.count(k) > 1})
+    if duplicates:
+        errors.append(f"Keywords repetidas: {', '.join(duplicates)}")
+    return errors
+
+
+def _ios_keyword_warnings(data: dict, keywords: str) -> list[str]:
+    warnings = []
+    items = [k.strip().lower() for k in keywords.split(",") if k.strip()]
+    title_words = {w.lower() for w in re.findall(r"[A-Za-z0-9]+", data.get("title", ""))}
+    overlap = sorted(set(items) & title_words)
+    if overlap:
+        warnings.append(f"Keywords ya presentes en el title (desperdician espacio): {', '.join(overlap)}")
+    if len(set(items)) < 3:
+        warnings.append("Keywords: menos de 3 terminos distintos")
+    return warnings
+
+
+def _check_screenshots(data: dict, platform: str) -> list[str]:
     shots = data.get("screenshots")
-    if isinstance(shots, int):
-        low, high = SCREENSHOT_RANGES[platform]
-        if not low <= shots <= high:
-            warnings.append(f"Capturas: {shots} (recomendado {low}-{high} para {platform})")
+    if not isinstance(shots, int):
+        return []
+    low, high = SCREENSHOT_RANGES[platform]
+    if low <= shots <= high:
+        return []
+    return [f"Capturas: {shots} (recomendado {low}-{high} para {platform})"]
 
+
+def _check_avoid(data: dict, avoid: list[str]) -> list[str]:
     texts = {k: v for k, v in data.items() if isinstance(v, str)}
-    for field, term in find_avoid(texts, avoid):
-        errors.append(f"{field}: contiene '{term}', rastro de la app original")
-
-    return {"platform": platform, "errors": errors, "warnings": warnings}
+    return [f"{field}: contiene '{term}', rastro de la app original"
+            for field, term in find_avoid(texts, avoid)]
 
 
 def main(argv: list[str] | None = None) -> int:

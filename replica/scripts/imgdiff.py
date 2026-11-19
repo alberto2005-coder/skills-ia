@@ -34,30 +34,8 @@ def read_png(path: str) -> tuple[int, int, int, bytes]:
     if data[:8] != PNG_SIG:
         raise ValueError(f"{path}: no es un PNG")
 
-    pos, idat = 8, []
-    width = height = depth = color_type = None
-    while pos + 8 <= len(data):
-        length = struct.unpack(">I", data[pos:pos + 4])[0]
-        ctype = data[pos + 4:pos + 8]
-        chunk = data[pos + 8:pos + 8 + length]
-        pos += 12 + length
-        if ctype == b"IHDR":
-            # Un IHDR truncado daba `struct.error` fuera del `except` del CLI.
-            if len(chunk) < 13:
-                raise ValueError(f"{path}: IHDR truncado ({len(chunk)} bytes)")
-            try:
-                width, height, depth, color_type, _, _, interlace = struct.unpack(">IIBBBBB", chunk[:13])
-            except struct.error as error:
-                raise ValueError(f"{path}: IHDR inválido ({error})")
-            if interlace:
-                raise ValueError(f"{path}: PNG entrelazado no soportado")
-        elif ctype == b"IDAT":
-            idat.append(chunk)
-        elif ctype == b"IEND":
-            break
+    width, height, depth, color_type, idat = _read_chunks(data, path)
 
-    if width is None or height is None:
-        raise ValueError(f"{path}: IHDR ausente")
     if depth != 8:
         raise ValueError(f"{path}: solo 8 bits por canal (es {depth})")
     if color_type not in CHANNELS:
@@ -74,6 +52,44 @@ def read_png(path: str) -> tuple[int, int, int, bytes]:
     expected = height * (stride + 1)
     if len(raw) < expected:
         raise ValueError(f"{path}: IDAT truncado ({len(raw)} de {expected} bytes)")
+    return width, height, bpp, _unfilter(raw, width, height, bpp, path)
+
+
+def _read_chunks(data: bytes, path: str) -> tuple[int, int, int, int, list]:
+    pos, idat = 8, []
+    width = height = depth = color_type = None
+    while pos + 8 <= len(data):
+        length = struct.unpack(">I", data[pos:pos + 4])[0]
+        ctype = data[pos + 4:pos + 8]
+        chunk = data[pos + 8:pos + 8 + length]
+        pos += 12 + length
+        if ctype == b"IHDR":
+            width, height, depth, color_type = _parse_ihdr(chunk, path)
+        elif ctype == b"IDAT":
+            idat.append(chunk)
+        elif ctype == b"IEND":
+            break
+
+    if width is None or height is None:
+        raise ValueError(f"{path}: IHDR ausente")
+    return width, height, depth, color_type, idat
+
+
+def _parse_ihdr(chunk: bytes, path: str) -> tuple[int, int, int, int]:
+    # Un IHDR truncado daba `struct.error` fuera del `except` del CLI.
+    if len(chunk) < 13:
+        raise ValueError(f"{path}: IHDR truncado ({len(chunk)} bytes)")
+    try:
+        width, height, depth, color_type, _, _, interlace = struct.unpack(">IIBBBBB", chunk[:13])
+    except struct.error as error:
+        raise ValueError(f"{path}: IHDR inválido ({error})")
+    if interlace:
+        raise ValueError(f"{path}: PNG entrelazado no soportado")
+    return width, height, depth, color_type
+
+
+def _unfilter(raw: bytes, width: int, height: int, bpp: int, path: str) -> bytes:
+    stride = width * bpp
     out = bytearray(height * stride)
     prev = bytearray(stride)
     offset = 0
@@ -83,31 +99,42 @@ def read_png(path: str) -> tuple[int, int, int, bytes]:
         offset += 1
         line = bytearray(raw[offset:offset + stride])
         offset += stride
-        if filt == 1:
-            for i in range(bpp, stride):
-                line[i] = (line[i] + line[i - bpp]) & 0xFF
-        elif filt == 2:
-            for i in range(stride):
-                line[i] = (line[i] + prev[i]) & 0xFF
-        elif filt == 3:
-            for i in range(stride):
-                left = line[i - bpp] if i >= bpp else 0
-                line[i] = (line[i] + ((left + prev[i]) >> 1)) & 0xFF
-        elif filt == 4:
-            for i in range(stride):
-                left = line[i - bpp] if i >= bpp else 0
-                up = prev[i]
-                upleft = prev[i - bpp] if i >= bpp else 0
-                p = left + up - upleft
-                pa, pb, pc = abs(p - left), abs(p - up), abs(p - upleft)
-                pred = left if (pa <= pb and pa <= pc) else (up if pb <= pc else upleft)
-                line[i] = (line[i] + pred) & 0xFF
-        elif filt != 0:
-            raise ValueError(f"{path}: filtro PNG {filt} invalido")
+        _apply_filter(line, prev, filt, bpp, path)
         out[y * stride:(y + 1) * stride] = line
         prev = line
 
-    return width, height, bpp, bytes(out)
+    return bytes(out)
+
+
+def _apply_filter(line: bytearray, prev: bytearray, filt: int, bpp: int, path: str) -> None:
+    stride = len(line)
+    if filt == 0:
+        return
+    if filt == 1:
+        for i in range(bpp, stride):
+            line[i] = (line[i] + line[i - bpp]) & 0xFF
+    elif filt == 2:
+        for i in range(stride):
+            line[i] = (line[i] + prev[i]) & 0xFF
+    elif filt == 3:
+        for i in range(stride):
+            left = line[i - bpp] if i >= bpp else 0
+            line[i] = (line[i] + ((left + prev[i]) >> 1)) & 0xFF
+    elif filt == 4:
+        for i in range(stride):
+            _paeth(line, prev, i, bpp)
+    else:
+        raise ValueError(f"{path}: filtro PNG {filt} invalido")
+
+
+def _paeth(line: bytearray, prev: bytearray, i: int, bpp: int) -> None:
+    left = line[i - bpp] if i >= bpp else 0
+    up = prev[i]
+    upleft = prev[i - bpp] if i >= bpp else 0
+    p = left + up - upleft
+    pa, pb, pc = abs(p - left), abs(p - up), abs(p - upleft)
+    pred = left if (pa <= pb and pa <= pc) else (up if pb <= pc else upleft)
+    line[i] = (line[i] + pred) & 0xFF
 
 
 def luma_map(width: int, height: int, bpp: int, pixels: bytes) -> list[float]:
