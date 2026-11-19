@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # la guardia de versiones compara contra el commit anterior
 
       - name: Set up uv and Python
         uses: astral-sh/setup-uv@v7
@@ -28,6 +30,12 @@ jobs:
 
       - name: Sync environment
         run: uv sync --locked
+
+      - name: Version guard (package changes need a version bump)
+        run: uv run --locked python tests/version_guard.py --base "$BASE_REF"
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+          PYTHONDONTWRITEBYTECODE: "1"
 
       - name: Lint frontmatter and manifests
         run: uv run --locked python tests/lint_frontmatter.py

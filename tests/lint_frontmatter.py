@@ -10,10 +10,12 @@ Comprueba, con el parser YAML del entorno (PyYAML, dependencia de desarrollo):
    1024 caracteres y cuerpo por debajo de 500 líneas.
 2. Cada entrada de los `skills.json` de paquete resuelve a un fichero con el
    nombre declarado.
-3. Cada enlace relativo de cada Markdown resuelve a un fichero existente.
-4. El índice raíz `skills.json` cuadra con el disco: `skills_total`, el número
+3. La versión de cada paquete sale de su manifiesto: el índice raíz y el
+   `metadata.version` de cada `SKILL.md` dicen lo mismo que `skills.json`.
+4. Cada enlace relativo de cada Markdown resuelve a un fichero existente.
+5. El índice raíz `skills.json` cuadra con el disco: `skills_total`, el número
    de skills por paquete y la cobertura de todos los `SKILL.md`.
-5. Cada paquete del índice tiene su guía `docs/<paquete>.md` y un enlace a ella
+6. Cada paquete del índice tiene su guía `docs/<paquete>.md` y un enlace a ella
    en `README.md` y en `docs/index.md`.
 
 Es la puerta de CI independiente de `unittest`.
@@ -177,6 +179,62 @@ def lint_manifests(root: Path) -> dict[str, list[str]]:
     return problems
 
 
+SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
+
+
+def lint_versions(root: Path) -> dict[str, list[str]]:
+    """El manifiesto del paquete es la única fuente de la versión.
+
+    El índice raíz y el `metadata.version` de cada `SKILL.md` tienen que decir
+    lo mismo que `skills.json`; si divergen, la publicación etiquetaría una
+    versión distinta de la que declara el paquete.
+    """
+    index_path = root / "skills.json"
+    if not index_path.is_file():
+        return {}
+    try:
+        index = json.loads(index_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        return {"skills.json": ["JSON inválido: %s" % error]}
+
+    problems: dict[str, list[str]] = {}
+    for entry in index.get("packages") or []:
+        relative = entry.get("path") or entry.get("name")
+        if not relative:
+            continue
+        manifest_path = root / relative / "skills.json"
+        manifest_name = manifest_path.relative_to(root).as_posix()
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            problems.setdefault(manifest_name, []).append("no se pudo leer el manifiesto: %s" % error)
+            continue
+        version = manifest.get("version")
+        if not isinstance(version, str) or not SEMVER.match(version):
+            problems.setdefault(manifest_name, []).append("version %r no es X.Y.Z" % (version,))
+            continue
+        if entry.get("version") != version:
+            problems.setdefault("skills.json", []).append(
+                "«%s»: el índice declara %r y el manifiesto %r"
+                % (entry.get("name"), entry.get("version"), version)
+            )
+        for skill_md in sorted(manifest_path.parent.glob("**/SKILL.md")):
+            relative_skill = skill_md.relative_to(root)
+            if not skill_md.is_file() or SKIP_PARTS & set(relative_skill.parts):
+                continue
+            match = FRONTMATTER.match(skill_md.read_text(encoding="utf-8"))
+            if not match:
+                continue  # el pase de frontmatter ya lo reporta
+            fields, _ = parse_frontmatter(match.group(1))
+            metadata = fields.get("metadata")
+            declared = metadata.get("version") if isinstance(metadata, dict) else None
+            if str(declared) != version:
+                problems.setdefault(relative_skill.as_posix(), []).append(
+                    "metadata.version %r no coincide con el manifiesto (%s)" % (declared, version)
+                )
+    return problems
+
+
 def lint_index(root: Path) -> list[str]:
     """Cuadra el índice raíz con los SKILL.md y los manifiestos del disco."""
     index_path = root / "skills.json"
@@ -302,9 +360,11 @@ def lint_repository(root: Path = ROOT) -> dict[str, list[str]]:
         problems.setdefault(path, []).extend(found)
     for path, found in lint_package_docs(root).items():
         problems.setdefault(path, []).extend(found)
+    for path, found in lint_versions(root).items():
+        problems.setdefault(path, []).extend(found)
     index_problems = lint_index(root)
     if index_problems:
-        problems["skills.json"] = index_problems
+        problems.setdefault("skills.json", []).extend(index_problems)
     return problems
 
 

@@ -3,10 +3,11 @@
 Uso:
     py tests/sync_skill_metadata.py [--check] [--root RUTA]
 
-Toma el nombre y la versión de cada paquete del `skills.json` raíz y los
-escribe en el frontmatter de cada `SKILL.md`, sin duplicar campos: si
-`license` o el bloque `metadata` ya existen, no se tocan. `--check` no
-escribe nada y sale con 1 si algún fichero quedaría modificado.
+Toma el nombre del `skills.json` raíz y la versión del manifiesto de cada
+paquete, que es la única fuente de verdad, y los escribe en el frontmatter de
+cada `SKILL.md`, sin duplicar campos: si `license` o el bloque `metadata` ya
+existen, no se tocan. `--check` no escribe nada y sale con 1 si algún fichero
+quedaría modificado.
 
 Código de salida: 0 sin cambios pendientes · 1 con cambios (modo --check)
 o error de configuración.
@@ -36,16 +37,22 @@ def _force_utf8_output() -> None:
 
 
 def load_packages(root: Path) -> dict[str, tuple[str, str]]:
-    """Devuelve {carpeta de paquete: (nombre, versión)} desde el índice raíz."""
+    """{carpeta: (nombre, versión)}; la versión sale del manifiesto del paquete."""
     index = json.loads((root / "skills.json").read_text(encoding="utf-8"))
     packages: dict[str, tuple[str, str]] = {}
     for entry in index.get("packages", []):
         name = entry.get("name")
-        version = entry.get("version")
         path = entry.get("path") or name
-        if not name or not version or not path:
+        if not name or not path:
             raise SystemExit(f"entrada de paquete incompleta en skills.json: {entry!r}")
-        packages[path] = (name, str(version))
+        try:
+            manifest = json.loads((root / path / "skills.json").read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise SystemExit(f"{path}/skills.json ilegible: {error}")
+        version = manifest.get("version")
+        if not isinstance(version, str) or not version:
+            raise SystemExit(f"{path}/skills.json sin «version»")
+        packages[path] = (name, version)
     if not packages:
         raise SystemExit("skills.json raíz no declara paquetes")
     return packages

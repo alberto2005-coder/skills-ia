@@ -29,6 +29,18 @@ description: >
 """
 
 
+ALIGNED_SKILL = """---
+name: demo
+description: Describe el paquete y su uso con una frase suficientemente larga.
+metadata:
+  package: demo
+  version: "1.0.0"
+---
+
+# Demo
+"""
+
+
 class TestLintFrontmatter(unittest.TestCase):
     def test_repository_is_clean(self):
         problems = lint_frontmatter.lint_repository(ROOT)
@@ -86,6 +98,44 @@ class TestLintFrontmatter(unittest.TestCase):
             problems = lint_frontmatter.lint_repository(root)
 
         self.assertEqual(problems, {})
+
+    def test_index_version_must_match_the_manifest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            package = root / "demo"
+            package.mkdir()
+            (package / "skills.json").write_text(
+                '{"name": "demo", "version": "1.0.0"}', encoding="utf-8"
+            )
+            (package / "SKILL.md").write_text(ALIGNED_SKILL, encoding="utf-8")
+            (root / "skills.json").write_text(
+                '{"packages": [{"name": "demo", "path": "demo", "version": "2.0.0"}]}',
+                encoding="utf-8",
+            )
+
+            problems = lint_frontmatter.lint_repository(root)
+
+        self.assertIn("skills.json", problems)
+        self.assertTrue(any("índice declara" in item for item in problems["skills.json"]))
+
+    def test_skill_version_must_match_the_manifest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            package = root / "demo"
+            package.mkdir()
+            (package / "skills.json").write_text(
+                '{"name": "demo", "version": "1.1.0"}', encoding="utf-8"
+            )
+            (package / "SKILL.md").write_text(ALIGNED_SKILL, encoding="utf-8")
+            (root / "skills.json").write_text(
+                '{"packages": [{"name": "demo", "path": "demo", "version": "1.1.0"}]}',
+                encoding="utf-8",
+            )
+
+            problems = lint_frontmatter.lint_repository(root)
+
+        self.assertIn("demo/SKILL.md", problems)
+        self.assertTrue(any("metadata.version" in item for item in problems["demo/SKILL.md"]))
 
     def test_manifest_points_to_a_real_file(self):
         with tempfile.TemporaryDirectory() as tmp:
