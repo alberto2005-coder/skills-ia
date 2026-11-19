@@ -1,6 +1,7 @@
 ---
 name: replica-launch
-description: Fase 10 de replica — prepara el lanzamiento comercial: landing, listing de App Store/Play, precios por país (pago local, moneda, factura electrónica, WhatsApp), claims con evidencia y copy nuevo pasado por sweep. Úsala cuando la app vaya a publicarse, cuando haya que escribir el listing o cuando el usuario pregunte cómo cobrar en su país. English: write the landing and the store listing, check character limits and set per-country pricing.
+description: >
+  Fase 10 de replica — prepara el lanzamiento comercial: landing, listing de App Store/Play, precios por país (pago local, moneda, factura electrónica, WhatsApp), claims con evidencia y copy nuevo pasado por sweep. Úsala cuando la app vaya a publicarse, cuando haya que escribir el listing o cuando el usuario pregunte cómo cobrar en su país. English: write the landing and the store listing, check character limits and set per-country pricing.
 license: MIT
 metadata:
   package: replica

@@ -1,6 +1,7 @@
 ---
 name: db-sql-lint
-description: Lint de estilo sobre ficheros SQL con reglas acotadas: palabras clave, SELECT *, tablas sin clave primaria, snake_case, líneas largas, tabuladores y != en lugar de <>.
+description: >
+  Lint de estilo sobre ficheros SQL con reglas acotadas: palabras clave, SELECT *, tablas sin clave primaria, snake_case, líneas largas, tabuladores y != en lugar de <>.
 license: MIT
 metadata:
   package: db-architect

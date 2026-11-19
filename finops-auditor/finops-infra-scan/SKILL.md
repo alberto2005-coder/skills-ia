@@ -1,6 +1,7 @@
 ---
 name: finops-infra-scan
-description: Revisa Terraform y manifiestos Kubernetes: buckets sin ciclo de vida, grupos de logs sin retención, bases de datos sin autoscaling y contenedores sin límites de CPU o memoria, con salida JSON.
+description: >
+  Revisa Terraform y manifiestos Kubernetes: buckets sin ciclo de vida, grupos de logs sin retención, bases de datos sin autoscaling y contenedores sin límites de CPU o memoria, con salida JSON.
 license: MIT
 metadata:
   package: finops-auditor

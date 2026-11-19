@@ -1,6 +1,7 @@
 ---
 name: seo-execute
-description: Aplica los cambios de un plan SEO de forma segura — copia robots.txt, llms.txt y llms-full.txt con backup .bak, deja los snippets de meta tags y JSON-LD para integración manual y verifica después con una nueva auditoría. Úsala cuando el usuario apruebe aplicar el plan o pida escribir los ficheros de SEO en su proyecto. English: apply the plan with --apply, write robots.txt and llms.txt, and keep .bak backups.
+description: >
+  Aplica los cambios de un plan SEO de forma segura — copia robots.txt, llms.txt y llms-full.txt con backup .bak, deja los snippets de meta tags y JSON-LD para integración manual y verifica después con una nueva auditoría. Úsala cuando el usuario apruebe aplicar el plan o pida escribir los ficheros de SEO en su proyecto. English: apply the plan with --apply, write robots.txt and llms.txt, and keep .bak backups.
 license: MIT
 metadata:
   package: seo-auditor

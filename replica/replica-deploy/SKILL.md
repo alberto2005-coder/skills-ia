@@ -1,6 +1,7 @@
 ---
 name: replica-deploy
-description: Fase 11 de replica — preflight y publicación: variables de entorno, migraciones, permisos, backups, dominio, monitorización básica y confirmación explícita del usuario antes de desplegar. Úsala cuando el clon vaya a producción, cuando haya que revisar qué falta antes de publicar o para desplegar con seguridad. English: run preflight checks with backups and rollback, then verify the deployment is live.
+description: >
+  Fase 11 de replica — preflight y publicación: variables de entorno, migraciones, permisos, backups, dominio, monitorización básica y confirmación explícita del usuario antes de desplegar. Úsala cuando el clon vaya a producción, cuando haya que revisar qué falta antes de publicar o para desplegar con seguridad. English: run preflight checks with backups and rollback, then verify the deployment is live.
 license: MIT
 metadata:
   package: replica

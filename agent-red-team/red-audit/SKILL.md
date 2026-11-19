@@ -1,6 +1,7 @@
 ---
 name: red-audit
-description: Auditoría de seguridad completa de una skill, MCP o carpeta de instrucciones — escaneo estático, revisión semántica adversarial, verificación independiente de cada hallazgo (confirmed/needs_validation/rejected), ledger de cobertura y informe JSON validable. Úsala solo cuando el usuario pida explícitamente auditoría completa, informe o auditoría a fondo. English: full audit with independent verification, coverage ledger and validatable JSON report.
+description: >
+  Auditoría de seguridad completa de una skill, MCP o carpeta de instrucciones — escaneo estático, revisión semántica adversarial, verificación independiente de cada hallazgo (confirmed/needs_validation/rejected), ledger de cobertura y informe JSON validable. Úsala solo cuando el usuario pida explícitamente auditoría completa, informe o auditoría a fondo. English: full audit with independent verification, coverage ledger and validatable JSON report.
 license: MIT
 metadata:
   package: agent-red-team

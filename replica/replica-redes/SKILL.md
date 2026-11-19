@@ -1,6 +1,7 @@
 ---
 name: replica-redes
-description: Fase 13 de replica — escribe el contenido social del lanzamiento (3 guiones de Reels, captions por red y banco de ganchos) con claims respaldados por evidencia y sin marca original, y lo pasa por sweep. Úsala cuando el usuario pida guiones, captions o contenido para redes de un clon ya lanzado. English: write three Reels scripts, captions and a hook bank for social networks.
+description: >
+  Fase 13 de replica — escribe el contenido social del lanzamiento (3 guiones de Reels, captions por red y banco de ganchos) con claims respaldados por evidencia y sin marca original, y lo pasa por sweep. Úsala cuando el usuario pida guiones, captions o contenido para redes de un clon ya lanzado. English: write three Reels scripts, captions and a hook bank for social networks.
 license: MIT
 metadata:
   package: replica

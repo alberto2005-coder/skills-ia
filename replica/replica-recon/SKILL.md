@@ -1,6 +1,7 @@
 ---
 name: replica-recon
-description: Fases 0-1 (y 1b) de replica — fija límites legales y alcance, hace reconocimiento de una app por funciones observables con evidencia obligatoria y produce scope.md, recon.md, features.csv y screens/. Úsala para empezar una réplica, decidir qué se puede clonar, levantar el inventario de funciones de una app o especificar software complejo (Word, Figma, suites). Palabras clave: reconocer app, alcance, inventario de funciones, qué puedo clonar, clean-room, apps complejas. English: set the legal scope and boundaries, list the features of the app you want to clone with evidence and confidence, and specify complex apps.
+description: >
+  Fases 0-1 (y 1b) de replica — fija límites legales y alcance, hace reconocimiento de una app por funciones observables con evidencia obligatoria y produce scope.md, recon.md, features.csv y screens/. Úsala para empezar una réplica, decidir qué se puede clonar, levantar el inventario de funciones de una app o especificar software complejo (Word, Figma, suites). Palabras clave: reconocer app, alcance, inventario de funciones, qué puedo clonar, clean-room, apps complejas. English: set the legal scope and boundaries, list the features of the app you want to clone with evidence and confidence, and specify complex apps.
 license: MIT
 metadata:
   package: replica

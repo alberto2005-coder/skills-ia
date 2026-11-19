@@ -1,6 +1,7 @@
 ---
 name: replica
-description: Replica una app comercial por sus funciones y flujos, clean-room y legal. Orquesta el pipeline completo de 14 fases con aprobación fase a fase y estado en progreso.md: reconoce la app (con foco por función y evidencia obligatoria por hallazgo), planifica stack y datos, reconstruye diseño y pantallas, añade auth/pagos, prueba, mide paridad, lee reseñas reales para mejorar, rebrandea, prepara el lanzamiento (países y redes) y despliega. Úsala cuando el usuario quiera clonar, replicar, reconstruir, ejecutar el pipeline completo o "hacer algo como X" app, o medir paridad/rastros de marca de un clon. Usa el comando maestro /replica para retomar el pipeline donde lo dejamos, con el estado en progreso.md. English: run the clean-room replica pipeline phase by phase, continue it from progress.md and ask for approval before each phase.
+description: >
+  Replica una app comercial por sus funciones y flujos, clean-room y legal. Orquesta el pipeline completo de 14 fases con aprobación fase a fase y estado en progreso.md: reconoce la app (con foco por función y evidencia obligatoria por hallazgo), planifica stack y datos, reconstruye diseño y pantallas, añade auth/pagos, prueba, mide paridad, lee reseñas reales para mejorar, rebrandea, prepara el lanzamiento (países y redes) y despliega. Úsala cuando el usuario quiera clonar, replicar, reconstruir, ejecutar el pipeline completo o "hacer algo como X" app, o medir paridad/rastros de marca de un clon. Usa el comando maestro /replica para retomar el pipeline donde lo dejamos, con el estado en progreso.md. English: run the clean-room replica pipeline phase by phase, continue it from progress.md and ask for approval before each phase.
 license: MIT
 metadata:
   package: replica

@@ -1,6 +1,7 @@
 ---
 name: finops-ci-opt
-description: Revisa workflows de GitHub Actions: falta de caché de dependencias y ejecución duplicada de push y pull_request sin concurrencia, con salida JSON y umbral de fallo para la puerta de CI.
+description: >
+  Revisa workflows de GitHub Actions: falta de caché de dependencias y ejecución duplicada de push y pull_request sin concurrencia, con salida JSON y umbral de fallo para la puerta de CI.
 license: MIT
 metadata:
   package: finops-auditor

@@ -1,6 +1,7 @@
 ---
 name: db-architect
-description: Orquesta la auditoría de bases de datos: esquema, riesgo de migraciones, consultas N+1 y datos de siembra deterministas, con flujo Audit → Guard → Optimize y evidencia reproducible.
+description: >
+  Orquesta la auditoría de bases de datos: esquema, riesgo de migraciones, consultas N+1 y datos de siembra deterministas, con flujo Audit → Guard → Optimize y evidencia reproducible.
 license: MIT
 metadata:
   package: db-architect

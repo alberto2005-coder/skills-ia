@@ -1,6 +1,7 @@
 ---
 name: replica-entrepreneur
-description: Fase 8 de replica — lee reseñas y comentarios públicos reales de la app original, extrae temas con citas literales y URL, descarta muestras insuficientes y convierte lo aprendido en un plan de mejoras propio. Úsala para decidir qué mejorar del clon con voz de usuario real, no con suposiciones. English: read public reviews, extract themes with literal quotes and URLs, and turn the user voice into a fix plan.
+description: >
+  Fase 8 de replica — lee reseñas y comentarios públicos reales de la app original, extrae temas con citas literales y URL, descarta muestras insuficientes y convierte lo aprendido en un plan de mejoras propio. Úsala para decidir qué mejorar del clon con voz de usuario real, no con suposiciones. English: read public reviews, extract themes with literal quotes and URLs, and turn the user voice into a fix plan.
 license: MIT
 metadata:
   package: replica

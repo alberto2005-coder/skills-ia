@@ -1,6 +1,7 @@
 ---
 name: db-schema-audit
-description: Audita esquemas SQL con SQLite en memoria: claves primarias ausentes, claves foráneas sin índice y sintaxis inválida, con severidad y salida JSON para la puerta de CI.
+description: >
+  Audita esquemas SQL con SQLite en memoria: claves primarias ausentes, claves foráneas sin índice y sintaxis inválida, con severidad y salida JSON para la puerta de CI.
 license: MIT
 metadata:
   package: db-architect

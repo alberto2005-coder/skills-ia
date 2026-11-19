@@ -1,6 +1,7 @@
 ---
 name: replica-brand
-description: Fase 9 de replica — rebrandea el clon por completo (nombre, paleta, logo, copy y voz) y limpia cualquier rastro del original en el código, verificándolo con sweep y contraste. Úsala antes de publicar cualquier clon, cuando haya que poner marca propia o cuando queden restos de la app original. English: rebrand name, palette, logo and copy, then drive sweep.py to zero brand leftovers.
+description: >
+  Fase 9 de replica — rebrandea el clon por completo (nombre, paleta, logo, copy y voz) y limpia cualquier rastro del original en el código, verificándolo con sweep y contraste. Úsala antes de publicar cualquier clon, cuando haya que poner marca propia o cuando queden restos de la app original. English: rebrand name, palette, logo and copy, then drive sweep.py to zero brand leftovers.
 license: MIT
 metadata:
   package: replica

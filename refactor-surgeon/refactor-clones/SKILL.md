@@ -1,6 +1,7 @@
 ---
 name: refactor-clones
-description: Detecta funciones duplicadas con shingles normalizados del AST: dos bloques que solo cambian nombres de variables cuentan como clon exacto, y cada par sale con su similitud y su ubicación.
+description: >
+  Detecta funciones duplicadas con shingles normalizados del AST: dos bloques que solo cambian nombres de variables cuentan como clon exacto, y cada par sale con su similitud y su ubicación.
 license: MIT
 metadata:
   package: refactor-surgeon

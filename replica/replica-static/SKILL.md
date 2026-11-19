@@ -1,6 +1,7 @@
 ---
 name: replica-static
-description: Fase 12 de replica (opt-in) — análisis estático de binarios o apps propias o autorizadas para extraer strings, rutas y endpoints con herramientas ya instaladas, separando observación de inferencia y con límites declarados. Úsala solo si el usuario lo pide y aporta el artefacto legalmente; nunca para DRM, logins ajenos ni paywalls. English: opt-in static analysis of an authorized artifact to extract strings, routes and endpoints without installing tools.
+description: >
+  Fase 12 de replica (opt-in) — análisis estático de binarios o apps propias o autorizadas para extraer strings, rutas y endpoints con herramientas ya instaladas, separando observación de inferencia y con límites declarados. Úsala solo si el usuario lo pide y aporta el artefacto legalmente; nunca para DRM, logins ajenos ni paywalls. English: opt-in static analysis of an authorized artifact to extract strings, routes and endpoints without installing tools.
 license: MIT
 metadata:
   package: replica

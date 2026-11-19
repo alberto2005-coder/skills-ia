@@ -1,6 +1,7 @@
 ---
 name: db-migration-guard
-description: Clasifica el riesgo de migraciones SQL y Alembic/Django: DROP, TRUNCATE y cambios de tipo como críticos, índices sin CONCURRENTLY como aviso, y exige DOWN o downgrade() para poder revertir.
+description: >
+  Clasifica el riesgo de migraciones SQL y Alembic/Django: DROP, TRUNCATE y cambios de tipo como críticos, índices sin CONCURRENTLY como aviso, y exige DOWN o downgrade() para poder revertir.
 license: MIT
 metadata:
   package: db-architect

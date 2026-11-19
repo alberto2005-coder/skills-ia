@@ -1,6 +1,7 @@
 ---
 name: docs-sync-engine
-description: Mantiene la documentación pegada al código: detecta referencias rotas, genera el borrador de arquitectura y arma el CHANGELOG desde los commits, de forma reproducible.
+description: >
+  Mantiene la documentación pegada al código: detecta referencias rotas, genera el borrador de arquitectura y arma el CHANGELOG desde los commits, de forma reproducible.
 license: MIT
 metadata:
   package: docs-sync-engine

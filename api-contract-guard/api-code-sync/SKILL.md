@@ -1,6 +1,7 @@
 ---
 name: api-code-sync
-description: Cruza rutas del backend con llamadas del frontend con expresiones regulares: detecta dead calls, métodos que no coinciden y endpoints sin consumidor, con salida JSON.
+description: >
+  Cruza rutas del backend con llamadas del frontend con expresiones regulares: detecta dead calls, métodos que no coinciden y endpoints sin consumidor, con salida JSON.
 license: MIT
 metadata:
   package: api-contract-guard

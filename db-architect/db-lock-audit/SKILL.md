@@ -1,6 +1,7 @@
 ---
 name: db-lock-audit
-description: Detecta las operaciones de migración que bloquean la tabla o la reescriben: cambio de tipo, columna NOT NULL con DEFAULT, CREATE INDEX sin CONCURRENTLY, RENAME en un paso y VACUUM FULL.
+description: >
+  Detecta las operaciones de migración que bloquean la tabla o la reescriben: cambio de tipo, columna NOT NULL con DEFAULT, CREATE INDEX sin CONCURRENTLY, RENAME en un paso y VACUUM FULL.
 license: MIT
 metadata:
   package: db-architect
