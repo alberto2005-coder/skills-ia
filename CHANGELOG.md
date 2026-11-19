@@ -8,6 +8,16 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-19 · actionlint en el job de lint
+
+#### Añadido
+
+- **`.github/workflows/tests.yml`:** el job de lint instala `actionlint` 1.7.12 desde su release, comprueba el tarball contra `actionlint_1.7.12_checksums.txt` y ejecuta `actionlint -color` sobre los workflows. Falla el job si alguno no valida, incluido el caso que tumbó `tag-release.yml` (`matrix` en un `if` de job).
+
+#### Verificado
+
+- `actionlint` sin errores en los cuatro workflows; `tests/test_release_workflows.py` comprueba que los dos pasos siguen ahí.
+
 ### - 2026-11-19 · Corregido el workflow de tags (no cargaba)
 
 #### Corregido
@@ -507,6 +517,16 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-19 · actionlint in the lint job
+
+#### Added
+
+- **`.github/workflows/tests.yml`:** the lint job installs `actionlint` 1.7.12 from its release, verifies the tarball against `actionlint_1.7.12_checksums.txt` and runs `actionlint -color` over the workflows. The job fails when any of them does not validate, including the case that broke `tag-release.yml` (`matrix` in a job `if`).
+
+#### Verified
+
+- `actionlint` clean on all four workflows; `tests/test_release_workflows.py` asserts both steps stay in place.
 
 ### - 2026-11-19 · Fixed the tag workflow (it never loaded)
 

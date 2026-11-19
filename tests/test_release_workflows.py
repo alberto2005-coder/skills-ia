@@ -76,5 +76,15 @@ class TagReleaseContractTests(unittest.TestCase):
         self.assertIn('matrix=[{"package":"-"', script)
 
 
+    def test_lint_job_validates_workflows_with_actionlint(self):
+        steps = load("tests.yml")["jobs"]["lint"]["steps"]
+        scripts = [step.get("run", "") for step in steps]
+
+        install = [s for s in scripts if "actionlint" in s and "sha256sum -c -" in s]
+        check = [s for s in scripts if s.strip() == "actionlint -color"]
+        self.assertTrue(install, "falta el paso que instala actionlint con checksum")
+        self.assertTrue(check, "falta el paso que ejecuta actionlint")
+
+
 if __name__ == "__main__":
     unittest.main()

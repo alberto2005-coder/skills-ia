@@ -22,6 +22,30 @@ jobs:
         with:
           fetch-depth: 0  # la guardia de versiones compara contra el commit anterior
 
+      # actionlint valida los workflows con las mismas reglas que GitHub al cargarlos:
+      # un `matrix` en un `if` de job, por ejemplo, tumbaba tag-release.yml entero.
+      - name: Install actionlint
+        working-directory: ${{ runner.temp }}
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+        run: |
+          base="https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}"
+          tarball="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl -fsSL -o "$tarball" "${base}/${tarball}"
+          curl -fsSL -o checksums.txt "${base}/actionlint_${ACTIONLINT_VERSION}_checksums.txt"
+          line=$(grep -F "  ${tarball}" checksums.txt || true)
+          if [ -z "$line" ]; then
+            echo "::error::checksums.txt no lista ${tarball}"
+            exit 1
+          fi
+          printf '%s\n' "$line" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/bin"
+          tar -xzf "$tarball" -C "$RUNNER_TEMP/bin" actionlint
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Validate workflows with actionlint
+        run: actionlint -color
+
       - name: Set up uv and Python
         uses: astral-sh/setup-uv@v7
         with:
