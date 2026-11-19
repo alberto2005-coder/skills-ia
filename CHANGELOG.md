@@ -8,6 +8,16 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-19 · Corregido el tag del bundle en `tag-release.yml`
+
+#### Corregido
+
+- **Doble prefijo en la llamada directa a `release-bundle.yml`:** el output `bundle` guardaba `bundle-v<versión>` y el job volvía a prefijarlo, así que el workflow recibía `version: bundle-v5.1.0` y `tag: bundle-vbundle-v5.1.0` y fallaba la comprobación contra `skills.json`. El output lleva ahora solo la versión y el tag se construye una única vez.
+
+#### Añadido
+
+- **`tests/test_release_workflows.py`:** cuatro tests de contrato entre `tag-release.yml` y los workflows reutilizables: el output sale de `.bundle.version`, el `with` no vuelve a prefijar la versión y los inputs pasados coinciden con los declarados.
+
 ### - 2026-11-19 · Fase 3: tags automáticos y releases por paquete
 
 #### Añadido
@@ -483,6 +493,16 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-19 · Fixed the bundle tag in `tag-release.yml`
+
+#### Fixed
+
+- **Double prefix on the direct call to `release-bundle.yml`:** the `bundle` output stored `bundle-v<version>` and the job prefixed it again, so the workflow received `version: bundle-v5.1.0` and `tag: bundle-vbundle-v5.1.0` and the check against `skills.json` failed. The output now carries only the version and the tag is built once.
+
+#### Added
+
+- **`tests/test_release_workflows.py`:** four contract tests between `tag-release.yml` and the reusable workflows: the output comes from `.bundle.version`, the `with` block does not prefix the version again, and the inputs passed match the declared ones.
 
 ### - 2026-11-19 · Phase 3: automatic tags and per-package releases
 
