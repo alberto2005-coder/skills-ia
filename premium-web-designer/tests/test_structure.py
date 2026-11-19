@@ -1,6 +1,6 @@
 import unittest
 
-from config import REQUIRED_FILES, SKILL_ROOT, read_file
+from pwd_config import REQUIRED_FILES, SKILL_ROOT, read_file
 
 
 class TestStructure(unittest.TestCase):

@@ -1,7 +1,7 @@
 import re
 import unittest
 
-from config import SKILL_ROOT, all_markdown_files
+from pwd_config import SKILL_ROOT, all_markdown_files
 
 
 LINK_PATTERN = re.compile(

@@ -4,7 +4,7 @@ import unittest
 
 from datetime import datetime, timezone
 
-from config import REPORT_DIR, TEST_DIR, ensure_report_directory
+from pwd_config import REPORT_DIR, TEST_DIR, ensure_report_directory
 
 
 class TestResult(unittest.TextTestResult):

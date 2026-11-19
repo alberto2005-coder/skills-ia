@@ -2,7 +2,7 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "premium-web-designer",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Sistema de diseño y desarrollo de webs premium con dirección de arte, UX/UI y QA independiente medible.",
   "skills": [
     {

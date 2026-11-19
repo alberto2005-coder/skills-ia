@@ -21,6 +21,7 @@ visual, functional, responsive, accessibility and technical concerns.
 ### VISUAL QUALITY
 
 Check:
+
 - Typography.
 - Spacing.
 - Alignment.
@@ -34,6 +35,7 @@ Check:
 ### FUNCTIONALITY
 
 Check:
+
 - Navigation.
 - Buttons.
 - Links.
@@ -48,6 +50,7 @@ Check:
 ### RESPONSIVE DESIGN
 
 Check:
+
 - Mobile.
 - Tablet.
 - Desktop.
@@ -60,6 +63,7 @@ Check:
 ### ACCESSIBILITY
 
 Check:
+
 - Semantic structure.
 - Keyboard navigation.
 - Focus states.
@@ -71,6 +75,7 @@ Check:
 ### TECHNICAL QUALITY
 
 Check:
+
 - Build.
 - Console errors.
 - Broken assets.
@@ -112,6 +117,7 @@ perform code-level review and disclose the limitation.
 Create qa-report.md.
 
 Include:
+
 - Scope.
 - Environment.
 - Findings.

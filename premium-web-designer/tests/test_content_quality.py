@@ -1,6 +1,6 @@
 import unittest
 
-from config import read_file
+from pwd_config import read_file
 
 
 class TestContentQuality(unittest.TestCase):

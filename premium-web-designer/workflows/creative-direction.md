@@ -10,6 +10,7 @@ Establish a distinctive visual concept.
 ### 1. Project understanding
 
 Review:
+
 - Project brief.
 - Brand personality.
 - Audience.
@@ -23,6 +24,7 @@ Research references when tools are available.
 Explore different visual approaches.
 
 Consider:
+
 - Editorial.
 - Minimalist.
 - Luxury.
@@ -40,6 +42,7 @@ These are creative possibilities, not fixed templates.
 Develop three internal creative concepts.
 
 For each concept evaluate:
+
 - Brand suitability.
 - Distinctiveness.
 - Usability.
@@ -51,6 +54,7 @@ Select the strongest direction.
 ### 4. Design system
 
 Define:
+
 - Colors.
 - Typography.
 - Grid.

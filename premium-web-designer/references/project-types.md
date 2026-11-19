@@ -4,12 +4,14 @@
 ## CORPORATE WEBSITES
 
 ### Objectives
+
 - Brand positioning.
 - Trust.
 - Service discovery.
 - Lead generation.
 
 ### Priorities
+
 - Value proposition.
 - Brand identity.
 - Services.
@@ -21,11 +23,13 @@
 ## LANDING PAGES
 
 ### Objectives
+
 - One primary conversion goal.
 - Clear communication.
 - Reduced friction.
 
 ### Priorities
+
 - Strong headline.
 - Relevant benefits.
 - Product demonstration.
@@ -39,11 +43,13 @@ Avoid unnecessary navigation.
 ## ECOMMERCE
 
 ### Objectives
+
 - Product discovery.
 - Purchase confidence.
 - Frictionless checkout.
 
 ### Priorities
+
 - Catalog.
 - Search.
 - Filters.
@@ -60,11 +66,13 @@ Follow references/ecommerce.md.
 ## CREATIVE WEBSITES
 
 ### Objectives
+
 - Memorable digital experiences.
 - Brand expression.
 - Visual storytelling.
 
 ### Priorities
+
 - Original art direction.
 - Experimental layouts.
 - Motion design.
@@ -77,12 +85,14 @@ for experimental effects.
 ## SAAS WEBSITES
 
 ### Objectives
+
 - Product understanding.
 - Demonstration.
 - Registration.
 - Sales.
 
 ### Priorities
+
 - Product positioning.
 - Features.
 - Screenshots.
@@ -97,11 +107,13 @@ Distinguish marketing pages from the application.
 ## PORTFOLIOS
 
 ### Objectives
+
 - Showcase work.
 - Communicate expertise.
 - Generate opportunities.
 
 ### Priorities
+
 - Personal identity.
 - Selected projects.
 - Case studies.
@@ -117,6 +129,7 @@ Never invent clients or project outcomes.
 Treat the application as a product.
 
 Priorities:
+
 - Information architecture.
 - Authentication.
 - Permissions.

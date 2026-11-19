@@ -8,6 +8,7 @@ Build trustworthy and functional shopping experiences.
 ## DISCOVERY
 
 Understand:
+
 - Product catalog.
 - Customer segments.
 - Markets.
@@ -21,6 +22,7 @@ Understand:
 ## PRODUCT DISCOVERY
 
 Implement where required:
+
 - Categories.
 - Search.
 - Filters.
@@ -32,6 +34,7 @@ Implement where required:
 ## PRODUCT DETAIL
 
 Include:
+
 - Accurate descriptions.
 - Product photography.
 - Pricing.
@@ -44,6 +47,7 @@ Include:
 ## SHOPPING EXPERIENCE
 
 Implement:
+
 - Cart.
 - Checkout.
 - Customer accounts.
@@ -72,6 +76,7 @@ without verifying the integration.
 ## TRUST
 
 Never fabricate:
+
 - Reviews.
 - Ratings.
 - Sales figures.

@@ -51,12 +51,14 @@ and design system.
 ## PARALLEL EXECUTION
 
 Safe parallel tasks include:
+
 - Independent research.
 - Separate page content analysis.
 - Independent asset evaluation.
 - Independent technical investigation.
 
 Sequential tasks include:
+
 - Finalizing design before implementation.
 - Shared architecture modifications.
 - Integration-dependent development.
@@ -89,6 +91,7 @@ Use templates/task-handoff.md.
 The Orchestrator makes final decisions.
 
 Prioritize:
+
 1. User requirements.
 2. Security.
 3. Accessibility.

@@ -1,6 +1,6 @@
 import unittest
 
-from config import WORKFLOWS, read_file
+from pwd_config import WORKFLOWS, read_file
 
 
 class TestWorkflows(unittest.TestCase):

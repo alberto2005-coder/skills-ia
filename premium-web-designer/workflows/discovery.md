@@ -8,7 +8,9 @@ Understand the project before designing or coding.
 ## PROCESS
 
 ### 1. Request analysis
+
 Identify:
+
 - Website type.
 - Business or product.
 - Main objective.
@@ -18,6 +20,7 @@ Identify:
 ### 2. Repository inspection
 
 When an existing project is available:
+
 - Inspect its directory structure.
 - Identify the framework.
 - Inspect dependencies.
@@ -30,6 +33,7 @@ Never overwrite existing work without understanding it.
 ### 3. Business analysis
 
 Identify:
+
 - Value proposition.
 - Products or services.
 - Competitive positioning.
@@ -41,6 +45,7 @@ Do not invent business information.
 ### 4. Scope definition
 
 Define:
+
 - Pages.
 - Sections.
 - Features.

@@ -1,6 +1,6 @@
 import unittest
 
-from config import SKILL_ROOT, read_file
+from pwd_config import read_file
 
 
 class TestPortability(unittest.TestCase):
@@ -36,9 +36,9 @@ class TestPortability(unittest.TestCase):
         self.assertIn("inspect the existing repository", content)
 
     def test_platform_specific_installation_is_not_required(self):
-        content = (SKILL_ROOT.parent / "docs" / "premium-web-designer.md").read_text(
-            encoding="utf-8"
-        ).lower()
+        # La comprobación vive dentro de la skill: leer `docs/` del repositorio
+        # hacía que el test dependiera de un fichero fuera de su carpeta.
+        content = read_file("references/tech-stack.md").lower()
 
         self.assertIn("host platform", content)
         self.assertIn("native", content)

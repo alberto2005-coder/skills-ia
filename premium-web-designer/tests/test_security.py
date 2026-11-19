@@ -1,7 +1,7 @@
 import re
 import unittest
 
-from config import all_markdown_files, read_file
+from pwd_config import all_markdown_files, read_file
 
 
 SECRET_PATTERNS = [

@@ -122,7 +122,9 @@ Footer:
 ## PROJECT-SPECIFIC RULES
 
 DO:
+
 - [Rule]
 
 AVOID:
+
 - [Rule]

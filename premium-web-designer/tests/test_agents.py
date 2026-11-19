@@ -1,6 +1,6 @@
 import unittest
 
-from config import SPECIALISTS, read_file
+from pwd_config import SPECIALISTS, read_file
 
 
 class TestAgents(unittest.TestCase):

@@ -7,8 +7,9 @@ Sin `--public` la puerta asume un prototipo local y deja en aviso el mínimo de 
 sitio publicado (canonical, Open Graph con imagen, robots.txt y sitemap.xml).
 Con `--public` esos cuatro pasan a `must` y bloquean la entrega.
 
-Código de salida: 0 si no falla ninguna comprobación `must`, 1 si falla alguna,
-2 si la carpeta no existe o no contiene HTML.
+Código de salida: 0 si no falla ninguna comprobación `must`, 1 si falla alguna
+(incluido HTML-000 cuando la carpeta no contiene HTML), 2 si la carpeta no
+existe.
 
 Solo cubre lo estático. Desbordamiento, líneas del titular, solapes y foco se
 miden en el navegador con el protocolo de `premium-qa`.
@@ -24,6 +25,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 MUST, SHOULD, NICE = "must", "should", "nice"
+GATE_SEVERITY = {MUST: "high", SHOULD: "medium", NICE: "low"}
 
 HEADER_FILES = ("_headers", "netlify.toml", "vercel.json")
 SKIP_DIRS = {"node_modules", ".git", "dist", "build", ".cache", "vendor"}
@@ -50,6 +52,7 @@ class Page(HTMLParser):
         self.images = 0
         self.images_without_alt = 0
         self.jsonld: list[str] = []
+        self.styles: list[str] = []
         self.first_anchor: dict[str, str] | None = None
         self._buffer: list[str] = []
         self._capture: str | None = None
@@ -73,6 +76,9 @@ class Page(HTMLParser):
                 self._jsonld = True
                 self._capture = "jsonld"
                 self._buffer = []
+        elif tag == "style":
+            self._capture = "style"
+            self._buffer = []
         elif tag in {"h1", "h2", "h3", "h4", "h5", "h6"}:
             self._capture = "heading"
             self._buffer = []
@@ -90,6 +96,9 @@ class Page(HTMLParser):
         elif tag == "script" and self._jsonld:
             self.jsonld.append("".join(self._buffer))
             self._jsonld = False
+            self._capture = None
+        elif tag == "style" and self._capture == "style":
+            self.styles.append("".join(self._buffer))
             self._capture = None
         elif tag in {"h1", "h2", "h3", "h4", "h5", "h6"} and self._capture == "heading":
             text = " ".join("".join(self._buffer).split())
@@ -109,7 +118,8 @@ class Result:
         self.items.append(
             {
                 "id": check_id,
-                "severity": severity,
+                "severity": GATE_SEVERITY.get(severity, "medium"),
+                "gate": severity,
                 "ok": ok,
                 "title": title,
                 "detail": detail,
@@ -121,13 +131,20 @@ class Result:
         return [item for item in self.items if not item["ok"]]
 
     def must_failures(self) -> list[dict[str, str]]:
-        return [item for item in self.failures if item["severity"] == MUST]
+        return [item for item in self.failures if item["gate"] == MUST]
 
 
 def find_files(root: Path, suffix: str) -> list[Path]:
     found = []
     for path in root.rglob(f"*{suffix}"):
-        if any(part in SKIP_DIRS for part in path.parts):
+        # Solo las partes RELATIVAS a la carpeta entregada: si la raíz era
+        # `.../dist/site`, el "dist" del path absoluto descartaba todo el HTML
+        # y la puerta fallaba con HTML-000 sobre un sitio correcto.
+        try:
+            parts = path.relative_to(root).parts
+        except ValueError:
+            parts = path.parts
+        if any(part in SKIP_DIRS for part in parts):
             continue
         found.append(path)
     return sorted(found)
@@ -197,7 +214,9 @@ def check_page(root: Path, result: Result, public: bool = False) -> None:
     )
     result.add(
         "HTML-004",
-        SHOULD,
+        # En un sitio publicado la meta description es parte del mínimo: con
+        # `--public` avisaba pero no bloqueaba.
+        MUST if public else SHOULD,
         bool(description.strip()),
         "Meta description",
         f"{len(description)} caracteres" if description else "ausente",
@@ -301,7 +320,19 @@ def check_page(root: Path, result: Result, public: bool = False) -> None:
 
 
 def check_css(root: Path, result: Result) -> None:
-    css = "\n".join(read_text(path) for path in find_files(root, ".css"))
+    css_files = "\n".join(read_text(path) for path in find_files(root, ".css"))
+    # Los estilos `<style>` no pasaban por ninguna comprobación: un sitio que
+    # declaraba `:focus-visible` inline fallaba CSS-001 igualmente.
+    inline = []
+    for path in find_files(root, ".html"):
+        page = Page()
+        try:
+            page.feed(read_text(path))
+            page.close()
+        except Exception:
+            continue
+        inline.extend(page.styles)
+    css = css_files + "\n" + "\n".join(inline)
 
     if not css.strip():
         result.add("CSS-000", NICE, False, "Sin hojas de estilo locales", "la comprobación de estilos se omite")
@@ -431,11 +462,11 @@ def render(root: Path, result: Result, public: bool = False) -> str:
     for item in result.items:
         marker = icons[item["ok"]]
         detail = f" · {item['detail']}" if item["detail"] else ""
-        lines.append(f"[{marker}] {item['severity']:<6} {item['id']} {item['title']}{detail}")
+        lines.append(f"[{marker}] {item['gate']:<6} {item['id']} {item['title']}{detail}")
 
     must_failed = result.must_failures()
-    should_failed = [item for item in result.failures if item["severity"] == SHOULD]
-    nice_failed = [item for item in result.failures if item["severity"] == NICE]
+    should_failed = [item for item in result.failures if item["gate"] == SHOULD]
+    nice_failed = [item for item in result.failures if item["gate"] == NICE]
 
     lines += [
         "",

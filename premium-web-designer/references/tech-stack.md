@@ -13,6 +13,7 @@ Inspect the existing repository first.
 ## FRONTEND
 
 Possible technologies:
+
 - React.
 - Next.js.
 - Astro.
@@ -26,6 +27,7 @@ Possible technologies:
 ## STYLING
 
 Possible approaches:
+
 - Modern CSS.
 - CSS Modules.
 - Tailwind CSS.
@@ -34,6 +36,7 @@ Possible approaches:
 ## ANIMATION
 
 Possible tools:
+
 - CSS transitions.
 - Framer Motion.
 - GSAP.
@@ -43,6 +46,7 @@ Use animation libraries only when justified.
 ## BACKEND
 
 Possible technologies:
+
 - Node.js.
 - Existing backend frameworks.
 - PostgreSQL.
@@ -52,6 +56,7 @@ Possible technologies:
 ## CMS
 
 Possible solutions:
+
 - Sanity.
 - Strapi.
 - WordPress.
@@ -60,10 +65,18 @@ Possible solutions:
 ## ECOMMERCE
 
 Consider:
+
 - Shopify.
 - WooCommerce.
 - Established commerce platforms.
 - Custom commerce only when justified.
+
+## PORTABILITY
+
+The skill requires no particular language or framework. Discovery and delegation
+depend on the host platform: portable instructions do not guarantee native
+execution on every agent. The delivery gate uses only the Python 3.9+ standard
+library, so no native dependency has to be installed to run it.
 
 ## RULES
 

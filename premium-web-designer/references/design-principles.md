@@ -14,6 +14,7 @@ Understand the business, audience and content first.
 Define a coherent typographic system.
 
 Include:
+
 - Display.
 - Headings.
 - Body.
@@ -47,6 +48,7 @@ Check readability and contrast.
 ## 4. COMPOSITION
 
 Use:
+
 - Visual rhythm.
 - Whitespace.
 - Grid variation.
@@ -69,6 +71,7 @@ They should not make every section visually identical.
 Prioritize relevant, high-quality imagery.
 
 Use:
+
 - Authentic photography.
 - Product imagery.
 - Editorial photography.
@@ -83,6 +86,7 @@ the actual product.
 ## 7. ANIMATION
 
 Use animation for:
+
 - Feedback.
 - Transitions.
 - Navigation.
@@ -98,6 +102,7 @@ Respect reduced-motion preferences.
 Use specific copy and meaningful details.
 
 Never invent:
+
 - Testimonials.
 - Customer logos.
 - Certifications.

@@ -16,6 +16,7 @@ Optimize images for different screens.
 ## MOBILE
 
 Review:
+
 - Navigation.
 - Reading order.
 - Content density.
@@ -31,6 +32,7 @@ Do not simply compress desktop layouts.
 ## TABLET
 
 Reconsider:
+
 - Column counts.
 - Navigation.
 - Grid structure.
@@ -41,6 +43,7 @@ Reconsider:
 ## DESKTOP
 
 Consider:
+
 - Maximum content width.
 - Long text lines.
 - Large-screen composition.

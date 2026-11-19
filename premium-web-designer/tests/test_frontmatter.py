@@ -1,7 +1,7 @@
 import re
 import unittest
 
-from config import read_file
+from pwd_config import read_file
 
 
 class TestFrontmatter(unittest.TestCase):

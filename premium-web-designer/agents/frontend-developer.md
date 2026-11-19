@@ -64,6 +64,7 @@ unless explicitly requested.
 ## VALIDATION
 
 Run available:
+
 - Build checks.
 - Type checks.
 - Linting.

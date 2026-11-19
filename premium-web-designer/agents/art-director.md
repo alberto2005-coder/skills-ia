@@ -38,6 +38,7 @@ memorable digital experiences.
 ## VISUAL EXPECTATIONS
 
 Use:
+
 - Intentional typography.
 - Strong visual hierarchy.
 - Distinctive compositions.
@@ -47,6 +48,7 @@ Use:
 - Meaningful visual details.
 
 Avoid:
+
 - Generic template aesthetics.
 - Unmotivated gradients.
 - Excessive decorative elements.

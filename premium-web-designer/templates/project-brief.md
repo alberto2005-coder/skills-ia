@@ -46,20 +46,24 @@ Visual references:
 ## WEBSITE STRUCTURE
 
 Required pages:
+
 - [Page 1]
 - [Page 2]
 
 Required sections:
+
 - [Section 1]
 - [Section 2]
 
 ## FUNCTIONALITY
 
 Required features:
+
 - [Feature 1]
 - [Feature 2]
 
 Integrations:
+
 - [Integration 1]
 
 ## CONTENT AND ASSETS

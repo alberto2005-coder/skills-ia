@@ -13,6 +13,7 @@ independent inspection and corrective iterations.
 Inspect the rendered website when possible.
 
 Review:
+
 - Homepage.
 - Important internal pages.
 - Navigation.
@@ -22,6 +23,7 @@ Review:
 ### 2. Visual audit
 
 Identify:
+
 - Inconsistent typography.
 - Poor spacing.
 - Weak hierarchy.
@@ -40,6 +42,7 @@ Verify actual behavior.
 ### 4. Technical audit
 
 Review:
+
 - Console.
 - Build.
 - Accessibility.

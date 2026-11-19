@@ -17,6 +17,7 @@ and incrementally.
 ## PHASE 2 — PLANNING
 
 Define:
+
 - Component architecture.
 - Page structure.
 - Design tokens.
@@ -28,6 +29,7 @@ Define:
 ## PHASE 3 — FOUNDATION
 
 Implement:
+
 - Global styles.
 - Typography.
 - Color tokens.
@@ -45,6 +47,7 @@ Use real project content when available.
 ## PHASE 5 — FUNCTIONALITY
 
 Implement:
+
 - Navigation.
 - Forms.
 - Interactive elements.
@@ -57,6 +60,7 @@ Implement:
 ## PHASE 6 — RESPONSIVE
 
 Review:
+
 - Mobile.
 - Tablet.
 - Desktop.
@@ -65,6 +69,7 @@ Review:
 ## PHASE 7 — TECHNICAL VALIDATION
 
 Run available:
+
 - Build.
 - Type checking.
 - Linting.
