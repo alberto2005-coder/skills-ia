@@ -8,6 +8,14 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-19 · Frontmatter válido en YAML: 41 `SKILL.md` corregidos
+
+#### Corregido
+
+- **`description` con dos puntos:** 41 de los 81 `SKILL.md` declaraban la descripción como escalar plano con dos puntos y espacio dentro, casi siempre el sufijo «English: …». Para un parser YAML real el bloque era inválido (`mapping values are not allowed here`), así que la app rechazaba el paquete con «SKILL.md must open with a YAML frontmatter block».
+- **Forma adoptada:** esas descripciones pasan a escalar plegado `description: >` con el texto indentado dos espacios, el mismo formato que ya usaban `premium-web-designer` y `skill-evals`. El texto no cambia: el valor es la misma cadena.
+- **Verificado:** `safe_load` de PyYAML sobre los 81 bloques → **81/81 válidos**; `name` y el resto de claves intactos; CRLF preservado.
+
 ### - 2026-11-19 · Techo de métricas a cero: dieciocho funciones partidas en seis paquetes
 
 #### Cambiado (interno)
@@ -390,6 +398,14 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-19 · Valid YAML frontmatter: 41 `SKILL.md` files fixed
+
+#### Fixed
+
+- **`description` containing a colon:** 41 of the 81 `SKILL.md` files declared the description as a plain scalar with a colon and a space inside it, mostly the "English: …" suffix. A real YAML parser rejected the block (`mapping values are not allowed here`), so the app refused the package with "SKILL.md must open with a YAML frontmatter block".
+- **Shape adopted:** those descriptions become a folded scalar `description: >` with the text indented by two spaces, the format `premium-web-designer` and `skill-evals` already used. The text does not change: the value is the same string.
+- **Verified:** PyYAML `safe_load` over the 81 blocks → **81/81 valid**; `name` and the remaining keys untouched; CRLF preserved.
 
 ### - 2026-11-19 · Metrics ceiling down to zero: eighteen functions split across six packages
 
