@@ -70,7 +70,13 @@ Las sub-skills **no duplican assets**: referencian `../references/`, `../scripts
 ```bash
 uv sync
 uv run python run_tests.py
+uv run pytest -q
+uv run ruff check .
+uv run python tests/lint_frontmatter.py
+uv run python tests/metrics_gate.py
 ```
+
+`tests/lint_frontmatter.py` valida el bloque de cada `SKILL.md` con un parser YAML real (PyYAML, del grupo `dev`), además de `name`, `description`, manifiestos, enlaces relativos e índice. `tests/metrics_gate.py` falla si crecen los hallazgos `high` o los clones respecto al techo de `tests/metrics_baseline.json`. GitHub Actions ejecuta las puertas de lint en Python 3.14 y las suites en la matriz 3.9/3.14 sobre Linux, macOS y Windows; `markdownlint-cli2` es una comprobación local opcional.
 
 ### Severidad y `--fail-on`
 
@@ -174,7 +180,13 @@ Sub-skills **do not duplicate assets**: they reference `../references/`, `../scr
 ```bash
 uv sync
 uv run python run_tests.py
+uv run pytest -q
+uv run ruff check .
+uv run python tests/lint_frontmatter.py
+uv run python tests/metrics_gate.py
 ```
+
+`tests/lint_frontmatter.py` validates every `SKILL.md` block with a real YAML parser (PyYAML, from the `dev` group), plus `name`, `description`, manifests, relative links and the index. `tests/metrics_gate.py` fails when `high` findings or clones grow past the ceiling in `tests/metrics_baseline.json`. GitHub Actions runs the lint gates on Python 3.14 and the suites on the 3.9/3.14 matrix across Linux, macOS and Windows; `markdownlint-cli2` is an optional local check.
 
 ### Severity and `--fail-on`
 

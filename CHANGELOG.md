@@ -8,6 +8,16 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-19 · Puertas de CI documentadas en el índice
+
+#### Cambiado
+
+- **`docs/index.md`:** la sección «Tests» deja de listar solo `run_tests.py` y enumera los comandos del workflow (`pytest`, `ruff`, `tests/lint_frontmatter.py`, `tests/metrics_gate.py`), con qué valida cada uno: frontmatter por PyYAML, techo de métricas en `tests/metrics_baseline.json` y matriz 3.9/3.14 en Linux, macOS y Windows.
+
+#### Verificado
+
+- `run_tests.py` y `pytest -q` → **689 tests, 13/13 suites**; `ruff check .` limpio; `tests/lint_frontmatter.py` OK con 79 `SKILL.md`; `tests/metrics_gate.py` → **0 hallazgos `high` y 0 clones**; `markdownlint-cli2` → 0 avisos en 189 Markdown.
+
 ### - 2026-11-19 · El lint de frontmatter valida con PyYAML
 
 #### Cambiado
@@ -414,6 +424,16 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-19 · CI gates documented in the index
+
+#### Changed
+
+- **`docs/index.md`:** the "Tests" section no longer lists only `run_tests.py`; it names the workflow commands (`pytest`, `ruff`, `tests/lint_frontmatter.py`, `tests/metrics_gate.py`) and what each one checks: frontmatter through PyYAML, the metrics ceiling in `tests/metrics_baseline.json`, and the 3.9/3.14 matrix on Linux, macOS and Windows.
+
+#### Verified
+
+- `run_tests.py` and `pytest -q` → **689 tests, 13/13 suites**; `ruff check .` clean; `tests/lint_frontmatter.py` OK with 79 `SKILL.md`; `tests/metrics_gate.py` → **0 `high` findings and 0 clones**; `markdownlint-cli2` → 0 issues across 189 Markdown files.
 
 ### - 2026-11-19 · Frontmatter lint validates with PyYAML
 
