@@ -1,16 +1,16 @@
 {
   "prompt_injection_patterns": [
-    ["ignore\\s+(all\\s+)?(previous|prior|above)\\s+instructions", "CRÍTICA", "LLM01: Override directo de instrucciones del sistema"],
-    ["disregard\\s+(all\\s+)?(previous|prior|system)\\s+", "CRÍTICA", "LLM01: Anulación de reglas previas"],
-    ["you\\s+are\\s+now\\s+(in\\s+)?(developer|jailbreak|dan|unrestricted)\\s+mode", "CRÍTICA", "LLM01: Intento de Jailbreak / cambio de rol"],
-    ["(do\\s+not|never|don't)\\s+(tell|inform|mention|show|alert)\\s+(the\\s+)?user", "ALTA", "LLM01: Instrucción encubierta para ocultar acciones al usuario"],
-    ["silently\\s+(execute|run|send|upload|post|exfiltrate|read)", "CRÍTICA", "LLM01: Ejecución o exfiltración silenciosa"],
-    ["<!--[\\s\\S]*?(ignore|system|execute|curl|http|password|secret|token|ssh|env)[\\s\\S]*?-->", "ALTA", "LLM01: Comentario HTML oculto con directivas sospechosas"],
-    ["!\\[.*?\\]\\(https?://[^\\)]*(\\{|%7B|\\$|query=|data=|token=|key=|secret=)", "CRÍTICA", "LLM02: Posible exfiltración Markdown vía parámetros URL"],
-    ["(printenv|env\\b|set\\b)\\s*\\|\\s*(curl|wget|nc|netcat|bash|sh|python)", "CRÍTICA", "Exfiltración directa de variables de entorno"],
-    ["(ignora|olvida|descarta)\\s+(todas\\s+)?(las\\s+)?(instrucciones|reglas)\\s+(anteriores|previas|del\\s+sistema)", "CRÍTICA", "LLM01: Override de instrucciones (variante en español)"],
-    ["no\\s+(se\\s+lo\\s+)?(digas|cuentes|informes|menciones|reveles)\\s+(al\\s+)?usuario", "ALTA", "LLM01: Instrucción encubierta para ocultar acciones (español)"],
-    ["(ejecuta|env[íi]a|sube|copia)\\s+silenciosamente", "CRÍTICA", "LLM01: Ejecución o exfiltración silenciosa (español)"]
+    ["ignore\\s+(all\\s+)?(previous|prior|above)\\s+instructions", "critical", "LLM01: Override directo de instrucciones del sistema"],
+    ["disregard\\s+(all\\s+)?(previous|prior|system)\\s+", "critical", "LLM01: Anulación de reglas previas"],
+    ["you\\s+are\\s+now\\s+(in\\s+)?(developer|jailbreak|dan|unrestricted)\\s+mode", "critical", "LLM01: Intento de Jailbreak / cambio de rol"],
+    ["(do\\s+not|never|don't)\\s+(tell|inform|mention|show|alert)\\s+(the\\s+)?user", "high", "LLM01: Instrucción encubierta para ocultar acciones al usuario"],
+    ["silently\\s+(execute|run|send|upload|post|exfiltrate|read)", "critical", "LLM01: Ejecución o exfiltración silenciosa"],
+    ["<!--[\\s\\S]*?(ignore|system|execute|curl|http|password|secret|token|ssh|env)[\\s\\S]*?-->", "high", "LLM01: Comentario HTML oculto con directivas sospechosas"],
+    ["!\\[.*?\\]\\(https?://[^\\)]*(\\{|%7B|\\$|query=|data=|token=|key=|secret=)", "critical", "LLM02: Posible exfiltración Markdown vía parámetros URL"],
+    ["(printenv|env\\b|set\\b)\\s*\\|\\s*(curl|wget|nc|netcat|bash|sh|python)", "critical", "Exfiltración directa de variables de entorno"],
+    ["(ignora|olvida|descarta)\\s+(todas\\s+)?(las\\s+)?(instrucciones|reglas)\\s+(anteriores|previas|del\\s+sistema)", "critical", "LLM01: Override de instrucciones (variante en español)"],
+    ["no\\s+(se\\s+lo\\s+)?(digas|cuentes|informes|menciones|reveles)\\s+(al\\s+)?usuario", "high", "LLM01: Instrucción encubierta para ocultar acciones (español)"],
+    ["(ejecuta|env[íi]a|sube|copia)\\s+silenciosamente", "critical", "LLM01: Ejecución o exfiltración silenciosa (español)"]
   ],
   "sensitive_paths": [
     "~/\\.ssh", "/\\.ssh/", "id_rsa", "id_ed25519", "authorized_keys",
@@ -23,24 +23,24 @@
     "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "AWS_SECRET_ACCESS_KEY", "GITHUB_TOKEN"
   ],
   "shell_danger_patterns": [
-    ["(curl|wget)\\s+[^\\n]*\\|\\s*(bash|sh|zsh|python|perl|ruby)", "CRÍTICA", "Ejecución remota arbitraria (Pipe to Shell)"],
-    ["/dev/tcp/\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+", "CRÍTICA", "Reverse Shell vía /dev/tcp"],
-    ["\\b(nc|ncat|netcat)\\s+.*(-e|-c)\\s+", "CRÍTICA", "Reverse Shell con Netcat"],
-    ["base64\\s+(-d|--decode)", "ALTA", "Decodificación Base64 en shell (posible drop/payload)"],
-    ["chmod\\s+(\\+x|777)\\s+", "MEDIA", "Asignación de permisos de ejecución/globales"],
-    ["(crontab|systemctl\\s+enable|/etc/cron|~/\\.bashrc|~/\\.zshrc)", "ALTA", "Mecanismo de persistencia en sistema"]
+    ["(curl|wget)\\s+[^\\n]*\\|\\s*(bash|sh|zsh|python|perl|ruby)", "critical", "Ejecución remota arbitraria (Pipe to Shell)"],
+    ["/dev/tcp/\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+", "critical", "Reverse Shell vía /dev/tcp"],
+    ["\\b(nc|ncat|netcat)\\s+.*(-e|-c)\\s+", "critical", "Reverse Shell con Netcat"],
+    ["base64\\s+(-d|--decode)", "high", "Decodificación Base64 en shell (posible drop/payload)"],
+    ["chmod\\s+(\\+x|777)\\s+", "medium", "Asignación de permisos de ejecución/globales"],
+    ["(crontab|systemctl\\s+enable|/etc/cron|~/\\.bashrc|~/\\.zshrc)", "high", "Mecanismo de persistencia en sistema"]
   ],
   "dangerous_imports": {
-    "subprocess": "ALTA", "pty": "CRÍTICA", "socket": "ALTA", "ctypes": "CRÍTICA",
-    "pickle": "ALTA", "marshal": "ALTA", "telnetlib": "ALTA", "ftplib": "ALTA",
-    "paramiko": "ALTA", "webbrowser": "MEDIA"
+    "subprocess": "high", "pty": "critical", "socket": "high", "ctypes": "critical",
+    "pickle": "high", "marshal": "high", "telnetlib": "high", "ftplib": "high",
+    "paramiko": "high", "webbrowser": "medium"
   },
   "network_imports": ["requests", "urllib", "urllib3", "httpx", "aiohttp", "http.client", "websocket"],
   "dangerous_calls": {
-    "eval": "CRÍTICA", "exec": "CRÍTICA", "compile": "ALTA", "__import__": "CRÍTICA",
-    "os.system": "CRÍTICA", "os.popen": "CRÍTICA", "os.execve": "CRÍTICA", "os.spawnl": "CRÍTICA",
-    "subprocess.Popen": "ALTA", "subprocess.run": "MEDIA", "subprocess.call": "ALTA",
-    "subprocess.check_output": "ALTA", "pickle.loads": "CRÍTICA", "yaml.load": "ALTA"
+    "eval": "critical", "exec": "critical", "compile": "high", "__import__": "critical",
+    "os.system": "critical", "os.popen": "critical", "os.execve": "critical", "os.spawnl": "critical",
+    "subprocess.Popen": "high", "subprocess.run": "medium", "subprocess.call": "high",
+    "subprocess.check_output": "high", "pickle.loads": "critical", "yaml.load": "high"
   },
   "base64_suspicious_keywords": [
     "http://", "https://", "/bin/sh", "/bin/bash", "ignore", "system",

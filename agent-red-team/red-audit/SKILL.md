@@ -4,14 +4,14 @@ description: Auditoría de seguridad completa de una skill, MCP o carpeta de ins
 license: MIT
 metadata:
   package: agent-red-team
-  version: "2.1.0"
+  version: "3.0.0"
 ---
 
 # Red Team · Auditoría completa (full audit)
 
 Solo se activa **a petición explícita**. Crea los ficheros que el usuario pida, nunca más.
 
-Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio**.
 
 ## Cuándo se usa
 

@@ -47,6 +47,7 @@ patrón, y cuyo objetivo era **refutarlo** (encontrar la explicación benigna).
 - **confirmed:** se intentó refutar y no se pudo; la explicación benigna no aplica.
 - **needs_validation:** no se pudo ni refutar ni confirmar (falta contexto, cadena
   ofuscada ilegible, fichero binario, dependencia externa).
+
 - **rejected:** existe una explicación benigna verificable; queda registrado igualmente.
 
 **Un informe con cualquier `needs_validation` no puede emitirse como APROBADO.**
@@ -111,7 +112,7 @@ El informe debe poder entregarse también como JSON validable contra
 ```json
 {
   "herramienta": "agent-red-team",
-  "version": "1.2.0",
+  "version": "3.0.0",
   "target": "{{target_path}}",
   "fecha": "{{fecha_utc}}",
   "modo": "auditoria_completa",

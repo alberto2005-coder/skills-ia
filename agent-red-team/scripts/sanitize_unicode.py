@@ -9,6 +9,7 @@ Uso:
 
 import argparse
 import re
+import sys
 from pathlib import Path
 from typing import Tuple
 
@@ -33,25 +34,43 @@ def sanitize_content(text: str) -> Tuple[str, int, int]:
     return step2, removed_unicode, removed_comments
 
 
-def main():
+def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Elimina caracteres Unicode invisibles y comentarios HTML ocultos.")
     parser.add_argument("--file", required=True, help="Archivo Markdown o texto a sanear")
-    args = parser.parse_args()
+    parser.add_argument("--force", action="store_true",
+                        help="Sobrescribe el .sanitized si ya existe")
+    args = parser.parse_args(argv)
 
     src = Path(args.file)
-    if not src.exists():
-        print(f"ERROR: No existe {src}")
-        return
+    if not src.is_file():
+        # Un directorio o una ruta inexistente NO es un saneamiento correcto:
+        # devolver 0 aquí ocultaba el error (un dir daba IsADirectoryError).
+        print(f"ERROR: No existe el fichero {src}", file=sys.stderr)
+        return 2
 
-    original = src.read_text(encoding="utf-8")
+    try:
+        original = src.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as error:
+        print(f"ERROR: No se pudo leer {src}: {error}", file=sys.stderr)
+        return 2
+
     clean_text, u_count, c_count = sanitize_content(original)
 
     out_path = src.with_suffix(src.suffix + ".sanitized")
-    out_path.write_text(clean_text, encoding="utf-8")
+    if out_path.exists() and not args.force:
+        print(f"ERROR: Ya existe {out_path}; usa --force para sobrescribirlo",
+              file=sys.stderr)
+        return 1
+    try:
+        out_path.write_text(clean_text, encoding="utf-8")
+    except OSError as error:
+        print(f"ERROR: No se pudo escribir {out_path}: {error}", file=sys.stderr)
+        return 2
     print(f"Archivo saneado guardado en: {out_path}")
     print(f"Caracteres Unicode ocultos eliminados: {u_count}")
     print(f"Comentarios HTML eliminados: {c_count}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

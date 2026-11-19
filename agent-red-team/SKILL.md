@@ -4,7 +4,7 @@ description: Auditor de seguridad ofensiva y cadena de suministro (Supply Chain 
 license: MIT
 metadata:
   package: agent-red-team
-  version: "2.1.0"
+  version: "3.0.0"
 ---
 
 # Agent Red Team — Auditor de Seguridad de Skills
@@ -146,11 +146,11 @@ En Markdown, el texto dentro de un fence **no** es un hallazgo vivo para las cat
 
 `id`, `titulo`, `severidad` (`critical`/`high`/`medium`/`low`), `nivel` (`REJECT`/`normal`), `categoria`, `fichero`, `linea`, `evidencia`, `verificacion` (`confirmed`/`needs_validation`/`rejected`), `justificacion_verificacion` y `recomendacion`.
 
-Correspondencia: `RECHAZO`→`critical` + `nivel: REJECT`; `CRÍTICA`→`critical`; `ALTA`→`high`; `MEDIA`→`medium`; `BAJA`→`low`.
+El motor emite siempre esa escala; el informe rotula `critical` como CRÍTICA, `high` como ALTA, `medium` como MEDIA y `low` como BAJA, y `reject` como RECHAZO.
 
 ## Comandos
 
-Todos los comandos se ejecutan desde la **raíz del repositorio** (`skills-ia-main/`).
+Todos los comandos se ejecutan desde la **raíz del repositorio**.
 
 ```bash
 # Escaneo (texto)

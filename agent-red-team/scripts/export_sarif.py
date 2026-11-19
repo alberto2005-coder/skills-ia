@@ -22,7 +22,7 @@ from pathlib import Path
 
 SARIF_SCHEMA = "https://json.schemastore.org/sarif-2.1.0.json"
 SARIF_VERSION = "2.1.0"
-LEVELS = {"critical": "error", "high": "error", "medium": "warning", "low": "note"}
+LEVELS = {"reject": "error", "critical": "error", "high": "error", "medium": "warning", "low": "note"}
 
 
 def _force_utf8_output() -> None:
@@ -177,7 +177,13 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.output:
         out = Path(args.output)
-        out.write_text(payload, encoding="utf-8")
+        try:
+            out.write_text(payload, encoding="utf-8")
+        except OSError as error:
+            # Sin esto el directorio inexistente daba traceback en vez del
+            # código de salida 2 documentado en la docstring.
+            print(f"No se pudo escribir {out}: {error}", file=sys.stderr)
+            return 2
         count = len(sarif["runs"][0]["results"])
         print(f"SARIF escrito en {out} ({count} resultado(s))")
     else:

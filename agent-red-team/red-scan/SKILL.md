@@ -4,14 +4,14 @@ description: Escaneo rápido de seguridad de una skill, MCP o carpeta de instruc
 license: MIT
 metadata:
   package: agent-red-team
-  version: "2.1.0"
+  version: "3.0.0"
 ---
 
 # Red Team · Scan rápido (guidance)
 
 Modo **guidance**: responde en el chat y no escribe nada en disco. Es el modo por defecto.
 
-Assets compartidos del paquete: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos del paquete: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio**.
 
 ## Cuándo se usa
 
@@ -30,7 +30,7 @@ py agent-red-team/scripts/scan_skill.py --target <ruta_carpeta_o_archivo>
 py agent-red-team/scripts/scan_skill.py --target <ruta> --json
 ```
 
-2. Lee el resultado con la escala de severidad: `RECHAZO` → `CRÍTICA` → `ALTA` → `MEDIA` → `BAJA`.
+2. Lee el resultado con la escala de severidad: `reject` → `critical` → `high` → `medium` → `low` (el informe las rotula RECHAZO/CRÍTICA/ALTA/MEDIA/BAJA).
 3. Revisa a mano lo que las regex no ven, usando `../references/threat-matrix.md` para clasificar y `../references/attack-catalog.md` para reconocer el patrón:
    - contradicción entre el propósito declarado y lo que pide hacer;
    - exfiltración por canal lateral (datos en URLs de imágenes o enlaces);
