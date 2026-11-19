@@ -153,8 +153,7 @@ def _run_verification(command: str, sandbox: str | None) -> dict:
     }
 
 
-def main(argv: list[str] | None = None) -> int:
-    force_utf8_output()
+def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Aplica un parche con dry-run por defecto.")
     parser.add_argument("file")
     parser.add_argument("--diff", required=True)
@@ -165,7 +164,100 @@ def main(argv: list[str] | None = None) -> int:
                              "de registro, NO crea aislamiento real)")
     parser.add_argument("--verify", help="Comando de verificación posterior")
     parser.add_argument("--json", action="store_true")
-    args = parser.parse_args(argv)
+    return parser
+
+
+def _read_inputs(target: Path, diff_path: Path) -> tuple[list[str], list[dict]]:
+    # newline="" conserva los finales de línea tal cual: con la lectura
+    # universal por defecto un CRLF se convertía en LF y newline_of() no
+    # lo detectaba nunca, reescribiendo el fichero entero como LF.
+    with target.open(encoding="utf-8", newline="") as handle:
+        content = handle.read().splitlines(keepends=True)
+    return content, parse_hunks(diff_path.read_text(encoding="utf-8"))
+
+
+def _emit(report: dict, args: argparse.Namespace) -> None:
+    if args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+
+
+def _rejected(report: dict, errors: list[str], args: argparse.Namespace) -> int:
+    if args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+    else:
+        print(f"RECHAZADO: el parche no aplica ({len(errors)} problema(s))")
+        for error in errors:
+            print(f"  - {error}")
+    return 1
+
+
+def _dry_run(report: dict, args: argparse.Namespace) -> int:
+    report["status"] = "dry-run"
+    if args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+    else:
+        print(f"DRY-RUN: el parche aplica limpio ({report['changed_lines']} línea(s) afectadas)")
+        print("No se ha escrito nada. Para aplicarlo: --apply --yes")
+    return 0
+
+
+def _refused(report: dict, args: argparse.Namespace, message: str) -> int:
+    report["status"] = "refused"
+    if args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+    else:
+        print(message, file=sys.stderr)
+    return 1
+
+
+def _run_verify(report: dict, args: argparse.Namespace, target: Path, backup: Path) -> None:
+    report["verification"] = _run_verification(args.verify, args.sandbox)
+    status = report["verification"].get("status", "verification_failed")
+    report["status"] = "applied" if status == "ok" else "verification_failed"
+    if status == "timeout":
+        # El parche quedó escrito pero la verificación no terminó:
+        # se restaura el backup para no dejar el árbol a medias.
+        shutil.copyfile(backup, target)
+        report["status"] = "rolled_back"
+
+
+def _report_applied(report: dict, args: argparse.Namespace, target: Path, backup: Path) -> None:
+    if args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+        return
+    if report["status"] == "rolled_back":
+        print(f"Verificación agotó el timeout; backup restaurado en {target}",
+              file=sys.stderr)
+    else:
+        print(f"Aplicado en {target} (backup {backup.name})")
+    if not args.verify:
+        return
+    verification = report["verification"]
+    exit_code = verification.get("returncode")
+    exit_label = f"exit {exit_code}" if exit_code is not None else verification["status"]
+    print(f"Verificación declarada en «{verification['sandbox']}»: {exit_label}")
+    if verification["output"]:
+        print(verification["output"])
+
+
+def _apply(report: dict, args: argparse.Namespace, target: Path, result: list[str]) -> int:
+    backup = target.with_suffix(target.suffix + ".orig")
+    shutil.copyfile(target, backup)
+    # newline="" para no traducir los finales de línea ya detectados (CRLF).
+    with target.open("w", encoding="utf-8", newline="") as handle:
+        handle.write(render(result))
+    report["status"] = "applied"
+    report["backup"] = str(backup)
+
+    if args.verify:
+        _run_verify(report, args, target, backup)
+    _report_applied(report, args, target, backup)
+    return 0 if report["status"] == "applied" else 1
+
+
+def main(argv: list[str] | None = None) -> int:
+    force_utf8_output()
+    args = _build_parser().parse_args(argv)
 
     target = Path(args.file)
     diff_path = Path(args.diff)
@@ -177,12 +269,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     try:
-        # newline="" conserva los finales de línea tal cual: con la lectura
-        # universal por defecto un CRLF se convertía en LF y newline_of() no
-        # lo detectaba nunca, reescribiendo el fichero entero como LF.
-        with target.open(encoding="utf-8", newline="") as handle:
-            content = handle.read().splitlines(keepends=True)
-        hunks = parse_hunks(diff_path.read_text(encoding="utf-8"))
+        content, hunks = _read_inputs(target, diff_path)
     except (OSError, ValueError) as error:
         print(f"No se pudo leer la entrada: {error}", file=sys.stderr)
         return 2
@@ -204,74 +291,16 @@ def main(argv: list[str] | None = None) -> int:
     }
 
     if errors:
-        if args.json:
-            print(json.dumps(report, indent=2, ensure_ascii=False))
-        else:
-            print(f"RECHAZADO: el parche no aplica ({len(errors)} problema(s))")
-            for error in errors:
-                print(f"  - {error}")
-        return 1
-
+        return _rejected(report, errors, args)
     if not args.apply:
-        report["status"] = "dry-run"
-        if args.json:
-            print(json.dumps(report, indent=2, ensure_ascii=False))
-        else:
-            print(f"DRY-RUN: el parche aplica limpio ({report['changed_lines']} línea(s) afectadas)")
-            print("No se ha escrito nada. Para aplicarlo: --apply --yes")
-        return 0
-
+        return _dry_run(report, args)
     if not args.yes:
-        report["status"] = "refused"
-        if args.json:
-            print(json.dumps(report, indent=2, ensure_ascii=False))
-        else:
-            print("RECHAZADO: --apply exige confirmación explícita con --yes", file=sys.stderr)
-        return 1
-
+        return _refused(report, args,
+                        "RECHAZADO: --apply exige confirmación explícita con --yes")
     if args.verify and not args.sandbox:
-        report["status"] = "refused"
-        if args.json:
-            print(json.dumps(report, indent=2, ensure_ascii=False))
-        else:
-            print("RECHAZADO: la verificación ejecuta un comando y exige --sandbox declarado",
-                  file=sys.stderr)
-        return 1
-
-    backup = target.with_suffix(target.suffix + ".orig")
-    shutil.copyfile(target, backup)
-    # newline="" para no traducir los finales de línea ya detectados (CRLF).
-    with target.open("w", encoding="utf-8", newline="") as handle:
-        handle.write(render(result))
-    report["status"] = "applied"
-    report["backup"] = str(backup)
-
-    if args.verify:
-        report["verification"] = _run_verification(args.verify, args.sandbox)
-        status = report["verification"].get("status", "verification_failed")
-        report["status"] = "applied" if status == "ok" else "verification_failed"
-        if status == "timeout":
-            # El parche quedó escrito pero la verificación no terminó:
-            # se restaura el backup para no dejar el árbol a medias.
-            shutil.copyfile(backup, target)
-            report["status"] = "rolled_back"
-
-    if args.json:
-        print(json.dumps(report, indent=2, ensure_ascii=False))
-    else:
-        if report["status"] == "rolled_back":
-            print(f"Verificación agotó el timeout; backup restaurado en {target}",
-                  file=sys.stderr)
-        else:
-            print(f"Aplicado en {target} (backup {backup.name})")
-        if args.verify:
-            verification = report["verification"]
-            exit_code = verification.get("returncode")
-            exit_label = f"exit {exit_code}" if exit_code is not None else verification["status"]
-            print(f"Verificación declarada en «{verification['sandbox']}»: {exit_label}")
-            if verification["output"]:
-                print(verification["output"])
-    return 0 if report["status"] == "applied" else 1
+        return _refused(report, args,
+                        "RECHAZADO: la verificación ejecuta un comando y exige --sandbox declarado")
+    return _apply(report, args, target, result)
 
 
 if __name__ == "__main__":

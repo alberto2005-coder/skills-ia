@@ -76,13 +76,7 @@ def validate_ledger(data: object) -> list[str]:
     if not isinstance(data, dict):
         return ["la raíz debe ser un objeto JSON"]
 
-    allowed_top = set(schema["properties"])
-    for key in data:
-        if key not in allowed_top:
-            errors.append(f"campo no permitido en la raíz: «{key}»")
-    for key in schema["required"]:
-        if key not in data:
-            errors.append(f"falta el campo obligatorio «{key}»")
+    _validate_top(data, schema, errors)
 
     units = data.get("units")
     if not isinstance(units, list):
@@ -93,56 +87,84 @@ def validate_ledger(data: object) -> list[str]:
     seen: set[str] = set()
 
     for position, unit in enumerate(units, start=1):
-        if not isinstance(unit, dict):
-            errors.append(f"units[{position}]: no es un objeto")
-            continue
-
-        label = unit.get("id") if isinstance(unit.get("id"), str) else f"units[{position}]"
-
-        for key in unit:
-            if key not in allowed_unit:
-                errors.append(f"{label}: campo no permitido «{key}»")
-        for key in REQUIRED_UNIT:
-            if key not in unit:
-                errors.append(f"{label}: falta el campo «{key}»")
-
-        unit_id = unit.get("id")
-        if isinstance(unit_id, str):
-            if not ID_RE.match(unit_id):
-                errors.append(f"{label}: id inválido, formato U-000")
-            if unit_id in seen:
-                errors.append(f"{label}: id duplicado")
-            seen.add(unit_id)
-
-        for key in ("surface", "subsystem"):
-            value = unit.get(key)
-            if not isinstance(value, str) or not value.strip():
-                errors.append(f"{label}: «{key}» vacío")
-
-        if unit.get("attack_class") not in ATTACK_CLASSES:
-            errors.append(f"{label}: attack_class fuera de la lista permitida")
-        if unit.get("status") not in STATUSES:
-            errors.append(f"{label}: status debe ser {' | '.join(STATUSES)}")
-
-        checks = unit.get("checks", [])
-        if not isinstance(checks, list) or not all(isinstance(item, str) and item.strip() for item in checks):
-            errors.append(f"{label}: «checks» debe ser una lista de textos")
-            checks = []
-
-        findings = unit.get("findings", [])
-        if not isinstance(findings, list) or not all(
-            isinstance(item, str) and FINDING_RE.match(item) for item in findings
-        ):
-            errors.append(f"{label}: «findings» debe ser una lista de ids F-000")
-
-        if unit.get("status") == "covered" and not checks:
-            errors.append(f"{label}: covered exige al menos una comprobación en «checks»")
-        if unit.get("status") == "skipped" and not (
-            isinstance(unit.get("skip_reason"), str) and unit["skip_reason"].strip()
-        ):
-            errors.append(f"{label}: skipped exige «skip_reason»")
+        _validate_unit(unit, position, allowed_unit, seen, errors)
 
     return errors
+
+
+def _validate_top(data: dict, schema: dict, errors: list[str]) -> None:
+    allowed_top = set(schema["properties"])
+    for key in data:
+        if key not in allowed_top:
+            errors.append(f"campo no permitido en la raíz: «{key}»")
+    for key in schema["required"]:
+        if key not in data:
+            errors.append(f"falta el campo obligatorio «{key}»")
+
+
+def _validate_unit(unit: object, position: int, allowed_unit: set, seen: set,
+                   errors: list[str]) -> None:
+    if not isinstance(unit, dict):
+        errors.append(f"units[{position}]: no es un objeto")
+        return
+
+    label = unit.get("id") if isinstance(unit.get("id"), str) else f"units[{position}]"
+
+    for key in unit:
+        if key not in allowed_unit:
+            errors.append(f"{label}: campo no permitido «{key}»")
+    for key in REQUIRED_UNIT:
+        if key not in unit:
+            errors.append(f"{label}: falta el campo «{key}»")
+
+    _validate_unit_id(unit, label, seen, errors)
+    _validate_unit_fields(unit, label, errors)
+    checks = _validate_unit_lists(unit, label, errors)
+    _validate_unit_status(unit, label, checks, errors)
+
+
+def _validate_unit_id(unit: dict, label: str, seen: set, errors: list[str]) -> None:
+    unit_id = unit.get("id")
+    if not isinstance(unit_id, str):
+        return
+    if not ID_RE.match(unit_id):
+        errors.append(f"{label}: id inválido, formato U-000")
+    if unit_id in seen:
+        errors.append(f"{label}: id duplicado")
+    seen.add(unit_id)
+
+
+def _validate_unit_fields(unit: dict, label: str, errors: list[str]) -> None:
+    for key in ("surface", "subsystem"):
+        value = unit.get(key)
+        if not isinstance(value, str) or not value.strip():
+            errors.append(f"{label}: «{key}» vacío")
+
+    if unit.get("attack_class") not in ATTACK_CLASSES:
+        errors.append(f"{label}: attack_class fuera de la lista permitida")
+    if unit.get("status") not in STATUSES:
+        errors.append(f"{label}: status debe ser {' | '.join(STATUSES)}")
+
+
+def _validate_unit_lists(unit: dict, label: str, errors: list[str]) -> list:
+    checks = unit.get("checks", [])
+    if not isinstance(checks, list) or not all(isinstance(item, str) and item.strip() for item in checks):
+        errors.append(f"{label}: «checks» debe ser una lista de textos")
+        checks = []
+
+    findings = unit.get("findings", [])
+    if not isinstance(findings, list) or not all(
+            isinstance(item, str) and FINDING_RE.match(item) for item in findings):
+        errors.append(f"{label}: «findings» debe ser una lista de ids F-000")
+    return checks
+
+
+def _validate_unit_status(unit: dict, label: str, checks: list, errors: list[str]) -> None:
+    if unit.get("status") == "covered" and not checks:
+        errors.append(f"{label}: covered exige al menos una comprobación en «checks»")
+    if unit.get("status") == "skipped" and not (
+            isinstance(unit.get("skip_reason"), str) and unit["skip_reason"].strip()):
+        errors.append(f"{label}: skipped exige «skip_reason»")
 
 
 def find_unit(data: dict, unit_id: str) -> dict:

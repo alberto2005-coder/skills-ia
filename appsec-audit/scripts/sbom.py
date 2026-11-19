@@ -434,8 +434,7 @@ def load_advisories(path: Path) -> list[dict]:
     return data["advisories"]
 
 
-def main(argv: list[str] | None = None) -> int:
-    force_utf8_output()
+def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="SBOM CycloneDX con CVE y alcanzabilidad.")
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -455,26 +454,15 @@ def main(argv: list[str] | None = None) -> int:
     validate = sub.add_parser("validate", help="Valida la estructura mínima del SBOM")
     validate.add_argument("sbom")
     validate.add_argument("--json", action="store_true")
+    return parser
 
-    args = parser.parse_args(argv)
+
+def main(argv: list[str] | None = None) -> int:
+    force_utf8_output()
+    args = _build_parser().parse_args(argv)
 
     if args.command == "build":
-        target = Path(args.target)
-        if not target.is_dir():
-            print(f"No existe el directorio: {target}", file=sys.stderr)
-            return 2
-        bom = build_bom(target, args.now)
-        if not bom["components"]:
-            print("No se encontraron manifiestos legibles (package.json, requirements.txt, "
-                  "pyproject.toml, go.mod)", file=sys.stderr)
-            return 1
-        text = json.dumps(bom, indent=2, ensure_ascii=False) + "\n"
-        if args.output:
-            Path(args.output).write_text(text, encoding="utf-8")
-            print(f"SBOM escrito en {args.output} ({len(bom['components'])} componente(s))")
-        else:
-            print(text, end="")
-        return 0
+        return _command_build(args)
 
     path = Path(args.sbom)
     if not path.is_file():
@@ -482,22 +470,48 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     if args.command == "validate":
-        try:
-            bom = load_json(path)
-        except (json.JSONDecodeError, OSError, ValueError, TypeError, AttributeError) as error:
-            print(f"SBOM ilegible: {error}", file=sys.stderr)
-            return 2
-        errors = validate_bom(bom)
-        if args.json:
-            print(json.dumps({"valid": not errors, "errors": errors}, indent=2, ensure_ascii=False))
-        elif errors:
-            print(f"INVÁLIDO: {len(errors)} problema(s)")
-            for error in errors:
-                print(f"  - {error}")
-        else:
-            print(f"OK: {len(bom.get('components', []))} componente(s) CycloneDX {bom.get('specVersion')}")
-        return 0 if not errors else 1
+        return _command_validate(args, path)
+    return _command_audit(args, path)
 
+
+def _command_build(args: argparse.Namespace) -> int:
+    target = Path(args.target)
+    if not target.is_dir():
+        print(f"No existe el directorio: {target}", file=sys.stderr)
+        return 2
+    bom = build_bom(target, args.now)
+    if not bom["components"]:
+        print("No se encontraron manifiestos legibles (package.json, requirements.txt, "
+              "pyproject.toml, go.mod)", file=sys.stderr)
+        return 1
+    text = json.dumps(bom, indent=2, ensure_ascii=False) + "\n"
+    if args.output:
+        Path(args.output).write_text(text, encoding="utf-8")
+        print(f"SBOM escrito en {args.output} ({len(bom['components'])} componente(s))")
+    else:
+        print(text, end="")
+    return 0
+
+
+def _command_validate(args: argparse.Namespace, path: Path) -> int:
+    try:
+        bom = load_json(path)
+    except (json.JSONDecodeError, OSError, ValueError, TypeError, AttributeError) as error:
+        print(f"SBOM ilegible: {error}", file=sys.stderr)
+        return 2
+    errors = validate_bom(bom)
+    if args.json:
+        print(json.dumps({"valid": not errors, "errors": errors}, indent=2, ensure_ascii=False))
+    elif errors:
+        print(f"INVÁLIDO: {len(errors)} problema(s)")
+        for error in errors:
+            print(f"  - {error}")
+    else:
+        print(f"OK: {len(bom.get('components', []))} componente(s) CycloneDX {bom.get('specVersion')}")
+    return 0 if not errors else 1
+
+
+def _command_audit(args: argparse.Namespace, path: Path) -> int:
     try:
         bom = load_json(path)
         advisories = load_advisories(Path(args.advisories))
@@ -521,22 +535,26 @@ def main(argv: list[str] | None = None) -> int:
     if args.json:
         print(text, end="")
     else:
-        counts = report["counts"]
-        print(f"{counts['components']} componente(s) · {counts['vulnerable_components']} vulnerable(s) · "
-              f"reachable {counts['reachable']} · test-only {counts['test_only']} · "
-              f"not-imported {counts['not_imported']}")
-        for group in report["vulnerable"]:
-            for entry in group["advisories"]:
-                print(f"  {entry['id']} {group['name']}@{group['version']} "
-                      f"({entry['severity']}, {entry['reachability']})")
-        for item in report["unresolved"]:
-            print(f"  ? {item['component']}: {item['advisory']} ({item['reason']})")
-        if report["gate"]["blocked"]:
-            print("BLOQUEADO: hay avisos reachable de severidad alta o crítica")
-        if args.output:
-            print(f"Informe escrito en {args.output}")
+        _print_audit(report, args)
 
     return 1 if report["gate"]["blocked"] else 0
+
+
+def _print_audit(report: dict, args: argparse.Namespace) -> None:
+    counts = report["counts"]
+    print(f"{counts['components']} componente(s) · {counts['vulnerable_components']} vulnerable(s) · "
+          f"reachable {counts['reachable']} · test-only {counts['test_only']} · "
+          f"not-imported {counts['not_imported']}")
+    for group in report["vulnerable"]:
+        for entry in group["advisories"]:
+            print(f"  {entry['id']} {group['name']}@{group['version']} "
+                  f"({entry['severity']}, {entry['reachability']})")
+    for item in report["unresolved"]:
+        print(f"  ? {item['component']}: {item['advisory']} ({item['reason']})")
+    if report["gate"]["blocked"]:
+        print("BLOQUEADO: hay avisos reachable de severidad alta o crítica")
+    if args.output:
+        print(f"Informe escrito en {args.output}")
 
 
 if __name__ == "__main__":
