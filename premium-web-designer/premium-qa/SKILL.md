@@ -15,7 +15,7 @@ description: >
 license: MIT
 metadata:
   package: premium-web-designer
-  version: "3.0.0"
+  version: "3.1.0"
 ---
 
 # Premium QA — auditoría medible de una web
