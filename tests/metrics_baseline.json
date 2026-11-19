@@ -1,7 +1,7 @@
 {
   "comment": "Techo aceptado hoy; tests/metrics_gate.py falla si el repo lo supera. Bajarlo es la mejora esperada; subirlo exige justificar la deuda nueva en el mismo cambio.",
   "code_metrics": {
-    "high": 26
+    "high": 0
   },
   "clone_detect": {
     "clones": 0,
