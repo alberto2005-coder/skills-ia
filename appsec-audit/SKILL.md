@@ -17,7 +17,7 @@ description: >
 license: MIT
 metadata:
   package: appsec-audit
-  version: "1.4.0"
+  version: "2.0.0"
 ---
 
 # AppSec Audit
@@ -70,7 +70,7 @@ Comparten `references/`, `scripts/` y `templates/` de esta carpeta. Se instala e
 
 ## Severidad y nota
 
-Cada hallazgo lleva severidad **crítica / alta / media / baja** según impacto y explotabilidad reales, más `CWE`, `OWASP` y confianza. La nota global **A–F** la calcula `appsec-report` a partir de esos hallazgos validados, no de un recuento bruto.
+Cada hallazgo lleva severidad **`critical` / `high` / `medium` / `low`** (las etiquetas del informe son CRÍTICA/ALTA/MEDIA/BAJA) según impacto y explotabilidad reales, más `CWE`, `OWASP` y confianza. La nota global **A–F** la calcula `appsec-report` a partir de esos hallazgos validados, no de un recuento bruto.
 
 ## Cómo se trabaja
 

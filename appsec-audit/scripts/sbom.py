@@ -18,10 +18,10 @@ import re
 import sys
 import uuid
 from pathlib import Path
+from appsec_util import TOOL_VERSION, force_utf8_output
 
 SPEC_VERSION = "1.5"
-TOOL_VERSION = "1.3.0"
-HIGH_SEVERITIES = ("critical", "high", "critica", "alta")
+HIGH_SEVERITIES = ("critical", "high")
 SOURCE_EXTS = (".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".go")
 SKIP_DIRS = {"node_modules", ".venv", "venv", "dist", "build", "__pycache__", ".git"}
 TEST_HINTS = {"test", "tests", "spec", "__tests__", "testing"}
@@ -31,19 +31,37 @@ REQUIREMENT_RE = re.compile(
     r"^\s*(?P<name>[A-Za-z0-9_.\-]+)\s*(?:\[[^\]]*\])?\s*(?P<spec>.*?)\s*$"
 )
 COMPARATOR_RE = re.compile(r"^(<=|>=|<|>|=)?\s*([0-9][0-9A-Za-z.\-]*)$")
-
-
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
+# Separador de pre-release: `-rc1`, `.dev0`, `-beta.2`, ...
+PRE_RELEASE_RE = re.compile(
+    r"[-.]((?:a|b|c|rc|alpha|beta|dev|pre|snapshot)[-.]?\d*)$", re.I
+)
 
 
 def version_key(value: str) -> tuple[int, ...]:
-    parts = [int(number) for number in re.findall(r"\d+", str(value))]
+    # Cortar el sufijo pre-release: `2.0.0-rc1` no es (2,0,0,1) por encima
+    # de 2.0.0, sino la misma versión todavía no finalizada.
+    text = PRE_RELEASE_RE.split(str(value), 1)[0]
+    parts = [int(number) for number in re.findall(r"\d+", text)]
     return tuple(parts) if parts else (0,)
+
+
+def prerelease_of(value: str) -> tuple[int, ...]:
+    """Sufijo pre-release como clave comparable: menor que la versión base.
+
+    `2.0.0-rc1` debe verse por debajo de `2.0.0`, no por encima. Devuelve
+    `()` para versiones finales, que así ordenan por delante de cualquier
+    pre-release del mismo número.
+    """
+    match = PRE_RELEASE_RE.search(str(value))
+    if not match:
+        return ()
+    suffix = match.group(1)
+    numbers = tuple(int(n) for n in re.findall(r"\d+", suffix))
+    words = {"a": 0, "alpha": 0, "pre": 0, "b": 1, "beta": 1, "c": 2, "rc": 2,
+             "snapshot": 3}
+    key = words.get(re.match(r"[a-z]+", suffix, re.I).group(0).lower(), 9)
+    # Negativo: cuanto más "temprano" el sufijo, menor es la clave.
+    return (-key, -numbers[0] if numbers else 0)
 
 
 def compare_versions(left: str, right: str) -> int:
@@ -51,7 +69,11 @@ def compare_versions(left: str, right: str) -> int:
     width = max(len(a), len(b))
     a += (0,) * (width - len(a))
     b += (0,) * (width - len(b))
-    return (a > b) - (a < b)
+    if a != b:
+        return (a > b) - (a < b)
+    # Mismo número: la final gana al pre-release.
+    pa, pb = prerelease_of(left), prerelease_of(right)
+    return (pa > pb) - (pa < pb)
 
 
 def satisfies(version: str, spec: str) -> bool:
@@ -113,9 +135,17 @@ def component(ecosystem: str, name: str, version: str, source: str, scope: str =
 
 def parse_package_json(path: Path) -> list[dict]:
     data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        # Una raíz en lista/cadena hacía fallar .get con AttributeError.
+        raise ValueError(f"{path.name}: la raíz debe ser un objeto JSON")
     components = []
     for section, scope in (("dependencies", "runtime"), ("devDependencies", "dev")):
-        for name, raw in sorted((data.get(section) or {}).items()):
+        block = data.get(section)
+        if not isinstance(block, dict):
+            # `dependencies` como lista (forma válida en algunos manifiestos)
+            # no debe romper el SBOM entero.
+            continue
+        for name, raw in sorted(block.items()):
             components.append(component("npm", name, clean_version(raw), path.name, scope))
     return components
 
@@ -136,8 +166,18 @@ def parse_requirements(path: Path) -> list[dict]:
 
 
 def parse_pyproject(path: Path) -> list[dict]:
-    text = path.read_text(encoding="utf-8")
-    block = re.search(r"^\[project\][^\[]*?dependencies\s*=\s*\[(.*?)\]", text, re.S | re.M)
+    # utf-8-sig: un BOM de Windows/macOS no debe volver invisible `[project]`.
+    text = path.read_text(encoding="utf-8-sig")
+    # Primero se aísla el bloque [project]: la regex no puede cruzar ningún
+    # `[`, así que un campo como `authors = [{name = "x"}]` antes de
+    # `dependencies` hacía desaparecer todas las dependencias en silencio.
+    section = re.search(r"^\[project\]\s*$", text, re.M)
+    if not section:
+        return []
+    rest = text[section.end():]
+    next_section = re.search(r"^\s*\[", rest, re.M)
+    block_text = rest[:next_section.start()] if next_section else rest
+    block = re.search(r"dependencies\s*=\s*\[(.*?)\]", block_text, re.S)
     if not block:
         return []
     components = []
@@ -395,7 +435,7 @@ def load_advisories(path: Path) -> list[dict]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="SBOM CycloneDX con CVE y alcanzabilidad.")
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -444,7 +484,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "validate":
         try:
             bom = load_json(path)
-        except (json.JSONDecodeError, OSError) as error:
+        except (json.JSONDecodeError, OSError, ValueError, TypeError, AttributeError) as error:
             print(f"SBOM ilegible: {error}", file=sys.stderr)
             return 2
         errors = validate_bom(bom)

@@ -78,7 +78,7 @@ Una pasada nueva no borra la anterior: se conserva el `findings.json`, se compar
 py appsec-audit/scripts/export_sarif.py <findings.json> --output appsec.sarif
 ```
 
-Una regla por `CWE`; `critica` y `alta` salen como `error`, `media` como `warning` y `baja` como `note`. Solo `confirmed`; `--include-pending` añade `needs_validation` como `note`; `rejected` nunca sale. `partialFingerprints` lleva la huella del hallazgo, así que una re-ejecución actualiza el mismo resultado en vez de crear otro.
+Una regla por `CWE`; `critical` y `high` salen como `error`, `medium` como `warning` y `low` como `note`. Solo `confirmed`; `--include-pending` añade `needs_validation` como `note`; `rejected` nunca sale. `partialFingerprints` lleva la huella del hallazgo, así que una re-ejecución actualiza el mismo resultado en vez de crear otro.
 
 ## Baseline y modo diff/PR
 

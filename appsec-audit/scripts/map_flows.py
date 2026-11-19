@@ -17,6 +17,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from appsec_util import force_utf8_output, relative_parts
 
 EXTENSIONS = {
     ".py": "python", ".js": "javascript", ".jsx": "javascript", ".ts": "typescript",
@@ -79,21 +80,15 @@ def scan(root: Path) -> list[dict]:
 
     findings = []
     for path in sorted(root.rglob("*")):
-        if path.is_file() and path.suffix in EXTENSIONS and not any(p in SKIP_DIRS for p in path.parts):
+        if path.is_file() and path.suffix in EXTENSIONS and not any(
+            p in SKIP_DIRS for p in relative_parts(path, root)
+        ):
             findings.extend(scan_file(path))
     return findings
 
 
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
-
-
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="Índice de candidatos fuente → sumidero.")
     parser.add_argument("target", help="Fichero o carpeta")
     parser.add_argument("--json", action="store_true", help="Salida JSON")

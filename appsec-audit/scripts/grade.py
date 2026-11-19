@@ -19,14 +19,18 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from appsec_util import force_utf8_output
 
 MIN_CONFIDENCE = 7
-PENALTY = {"critica": 25, "alta": 10, "media": 3, "baja": 1}
+PENALTY = {"critical": 25, "high": 10, "medium": 3, "low": 1}
 ALIASES = {
-    "critica": "critica", "crítica": "critica", "critical": "critica", "critico": "critica", "crítico": "critica",
-    "alta": "alta", "high": "alta", "alto": "alta",
-    "media": "media", "medium": "media", "medio": "media",
-    "baja": "baja", "low": "baja", "bajo": "baja",
+    # Escala canónica: critical | high | medium | low (las variantes en
+    # español y los adjetivos siguen aceptándose como alias de entrada).
+    "critical": "critical", "critica": "critical", "crítica": "critical",
+    "critico": "critical", "crítico": "critical",
+    "high": "high", "alta": "high", "alto": "high",
+    "medium": "medium", "media": "medium", "medio": "medium",
+    "low": "low", "baja": "low", "bajo": "low",
 }
 THRESHOLDS = ((90, "A"), (80, "B"), (70, "C"), (60, "D"), (50, "E"))
 
@@ -45,8 +49,16 @@ def letter_for(score: float) -> str:
 def load(path: Path) -> list[dict]:
     data = json.loads(path.read_text(encoding="utf-8"))
     if isinstance(data, dict):
-        return list(data.get("findings", []))
-    return list(data)
+        items = data.get("findings", [])
+    elif isinstance(data, list):
+        items = data
+    else:
+        # Una cadena o un número convertido con list() daba una lista de
+        # caracteres/números y un traceback más adelante.
+        raise ValueError(f"findings.json debe ser un objeto o una lista, no {type(data).__name__}")
+    if not isinstance(items, list):
+        raise ValueError("el campo «findings» debe ser una lista")
+    return [item for item in items if isinstance(item, dict)]
 
 
 def grade_findings(findings: list[dict]) -> dict:
@@ -54,7 +66,14 @@ def grade_findings(findings: list[dict]) -> dict:
     discarded = []
 
     for item in findings:
-        confidence = int(item.get("confidence", 10))
+        # `confidence: null` llegaba a int(None) → TypeError en vez de exit 2.
+        raw_confidence = item.get("confidence", 10)
+        try:
+            confidence = int(raw_confidence)
+        except (TypeError, ValueError):
+            discarded.append({"id": item.get("id", "?"),
+                              "reason": f"confianza no numérica: {raw_confidence!r}"})
+            continue
         severity = normalize(item.get("severity", ""))
         if severity is None:
             discarded.append({"id": item.get("id", "?"), "reason": "severidad desconocida"})
@@ -77,16 +96,8 @@ def grade_findings(findings: list[dict]) -> dict:
     }
 
 
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
-
-
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="Nota A-F desde hallazgos validados.")
     parser.add_argument("findings", help="JSON con hallazgos")
     parser.add_argument("--json", action="store_true", help="Salida JSON")
@@ -98,7 +109,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     try:
         findings = load(path)
-    except (json.JSONDecodeError, OSError) as error:
+    except (json.JSONDecodeError, OSError, ValueError, TypeError, AttributeError) as error:
         print(f"JSON inválido: {error}", file=sys.stderr)
         return 2
 
@@ -109,8 +120,8 @@ def main(argv: list[str] | None = None) -> int:
     else:
         counts = result["counts"]
         print(f"Nota: {result['letter']} ({result['score']}/100)")
-        print(f"Críticos: {counts['critica']} · Altos: {counts['alta']} · "
-              f"Medios: {counts['media']} · Bajos: {counts['baja']}")
+        print(f"Críticos: {counts['critical']} · Altos: {counts['high']} · "
+              f"Medios: {counts['medium']} · Bajos: {counts['low']}")
         print(f"Aceptados: {result['accepted']} · Descartados: {len(result['discarded'])}")
         for item in result["discarded"]:
             print(f"  descartado {item['id']}: {item['reason']}")

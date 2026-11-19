@@ -9,7 +9,7 @@ Lista de comprobación con el valor concreto que se busca. Un hallazgo sin esta 
 | Usuario final | `USER` no root o usuario sin privilegios | Escalada dentro del contenedor |
 | Imagen base | Etiqueta fija y mantenida, no `latest` | Superficie desconocida y sin parches |
 | Secretos | Ninguno en `ARG`/`ENV`/capas | Secreto en el registro de imágenes |
-| Instalación | Sin `curl | sh` ni repos sin firmar | Ejecución de código en build |
+| Instalación | Sin `curl \| sh` ni repos sin firmar | Ejecución de código en build |
 | Puertos y montajes | Solo los necesarios, sin socket de Docker | Escape del contenedor |
 | Metadatos | `HEALTHCHECK`, etiquetas de origen | Operación ciega |
 

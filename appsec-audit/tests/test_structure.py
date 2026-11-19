@@ -2,7 +2,7 @@ import json
 import re
 import unittest
 
-from config import MASTER_MAX_LINES, REQUIRED_FILES, SKILL_ROOT, SUB_SKILLS, read_file
+from appsec_config import MASTER_MAX_LINES, REQUIRED_FILES, SKILL_ROOT, SUB_SKILLS, read_file
 
 
 class TestStructure(unittest.TestCase):

@@ -23,20 +23,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import validate_findings as findings_lib  # noqa: E402
+from appsec_util import FORMAT_VERSION, force_utf8_output
 
 DEFAULT_CWE = "CWE-710"
 CWE_RE = re.compile(r"CWE-[0-9]+")
 LEVEL_SEVERITY = {"error": "high", "warning": "medium", "note": "low", "none": "low"}
 SEVERITY_RANK = {"low": 1, "medium": 2, "high": 3, "critical": 4}
 CONFIDENCE = 5
-
-
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
 
 
 def uri_path(uri: object) -> str:
@@ -125,9 +118,15 @@ def normalize(sarif: dict, target: str, audit_id: str) -> dict:
                 skipped += 1
                 continue
             path, line = location
-            rule_id = str(result.get("ruleId") or result.get("rule", {}).get("id") or "desconocida")
+            # `result["rule"]` puede venir como cadena en un SARIF de
+            # terceros: .get sobre str reventaba con AttributeError.
+            raw_rule = result.get("rule")
+            rule_obj = raw_rule if isinstance(raw_rule, dict) else {}
+            rule_id = str(result.get("ruleId") or rule_obj.get("id") or "desconocida")
             rule = rules.get(rule_id, {})
-            message = str((result.get("message") or {}).get("text") or rule_id).strip()
+            raw_message = result.get("message")
+            message_obj = raw_message if isinstance(raw_message, dict) else {}
+            message = str(message_obj.get("text") or rule_id).strip()
             cwe = cwe_of(rule)
             root_cause = f"{tool}:{rule_id}"
             findings.append({
@@ -145,6 +144,7 @@ def normalize(sarif: dict, target: str, audit_id: str) -> dict:
 
     return {
         "audit_id": audit_id,
+        "format_version": FORMAT_VERSION,
         "target": target,
         "findings": findings,
         "skipped_without_location": skipped,
@@ -160,10 +160,17 @@ def check_upload_sarif(sarif: dict) -> list[str]:
     if not isinstance(runs, list) or not runs:
         return errors + ["«runs» debe ser una lista no vacía"]
     for index, run in enumerate(runs, start=1):
-        driver = ((run or {}).get("tool") or {}).get("driver") or {}
+        run_obj = run if isinstance(run, dict) else {}
+        if not isinstance(run, dict):
+            errors.append(f"runs[{index}]: no es un objeto")
+            continue
+        tool = run_obj.get("tool")
+        driver = (tool if isinstance(tool, dict) else {}).get("driver") or {}
+        driver = driver if isinstance(driver, dict) else {}
         if not driver.get("name"):
             errors.append(f"runs[{index}]: driver sin nombre")
-        for position, result in enumerate((run or {}).get("results") or [], start=1):
+        run_results = run_obj.get("results")
+        for position, result in enumerate(run_results if isinstance(run_results, list) else [], start=1):
             if not isinstance(result, dict):
                 errors.append(f"runs[{index}].results[{position}]: no es un objeto")
                 continue
@@ -177,7 +184,7 @@ def check_upload_sarif(sarif: dict) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="Normaliza SARIF externo a findings.json.")
     parser.add_argument("sarif")
     parser.add_argument("--output")
@@ -194,7 +201,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     try:
         sarif = json.loads(path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError) as error:
+    except (json.JSONDecodeError, OSError, ValueError, TypeError, AttributeError) as error:
         print(f"SARIF ilegible: {error}", file=sys.stderr)
         return 2
 

@@ -19,6 +19,7 @@ import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from appsec_util import force_utf8_output
 
 SCHEMA_PATH = Path(__file__).resolve().parent.parent / "schemas" / "coverage-ledger.schema.json"
 
@@ -34,14 +35,6 @@ GAPS = ("planned", "hunting")
 REQUIRED_UNIT = ("id", "surface", "subsystem", "attack_class", "status", "updated_at")
 ID_RE = re.compile(r"^U-[0-9]{3,}$")
 FINDING_RE = re.compile(r"^F-[0-9]{3,}$")
-
-
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
 
 
 def stamp(value: str | None) -> str:
@@ -160,7 +153,13 @@ def find_unit(data: dict, unit_id: str) -> dict:
 
 
 def gaps(data: dict) -> list[dict]:
-    return [unit for unit in data.get("units", []) if unit.get("status") in GAPS]
+    # Unidad no-dict (o sin campos) no debe reventar el CLI con KeyError:
+    # `unit.get` sobre una cadena daba AttributeError y `unit['id']` KeyError.
+    units = data.get("units", []) if isinstance(data, dict) else []
+    return [
+        unit for unit in units
+        if isinstance(unit, dict) and unit.get("status") in GAPS
+    ]
 
 
 def _load_or_exit(path: Path) -> dict:
@@ -169,13 +168,13 @@ def _load_or_exit(path: Path) -> dict:
         raise SystemExit(2)
     try:
         return load_ledger(path)
-    except (json.JSONDecodeError, OSError, ValueError) as error:
+    except (json.JSONDecodeError, OSError, ValueError, TypeError, AttributeError) as error:
         print(f"No se pudo leer el ledger: {error}", file=sys.stderr)
         raise SystemExit(2)
 
 
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="Gestiona el coverage ledger de una auditoría.")
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -267,7 +266,8 @@ def main(argv: list[str] | None = None) -> int:
 
     pending = gaps(data)
     for unit in pending:
-        print(f"{unit['id']}  {unit['status']:8}  {unit['surface']} · {unit['attack_class']}")
+        print(f"{unit.get('id', '?')}  {str(unit.get('status', '?')):8}  "
+              f"{unit.get('surface', '?')} · {unit.get('attack_class', '?')}")
     print(f"\n{len(pending)} hueco(s) de {len(data.get('units', []))} unidad(es).")
     return 1 if args.strict and pending else 0
 

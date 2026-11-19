@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from config import SKILL_ROOT
+from appsec_config import SKILL_ROOT
 
 SCRIPT_DIR = SKILL_ROOT / "scripts"
 sys.path.insert(0, str(SCRIPT_DIR))
@@ -35,7 +35,7 @@ def confirmed(**overrides):
         "title": "SQL injection en /users",
         "verdict": "confirmed",
         "confidence": 9,
-        "severity": "critica",
+        "severity": "critical",
         "cwe": cwe,
         "location": {"file": file, "line": 42},
         "root_cause": cause,
@@ -195,7 +195,7 @@ class TestValidateFindings(ArtifactTest):
     def test_needs_validation_rejects_severity(self):
         result = run(
             "validate_findings.py",
-            self.write_json(payload(needs_validation(severity="alta"))),
+            self.write_json(payload(needs_validation(severity="high"))),
         )
 
         self.assertEqual(result.returncode, 1)

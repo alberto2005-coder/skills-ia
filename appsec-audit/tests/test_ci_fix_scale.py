@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from config import SKILL_ROOT
+from appsec_config import SKILL_ROOT
 
 SCRIPT_DIR = SKILL_ROOT / "scripts"
 sys.path.insert(0, str(SCRIPT_DIR))
@@ -135,7 +135,7 @@ class TestDetectTools(CiFixScaleTest):
         result = run("detect_tools.py", "--workflow", workflow, "--json")
 
         findings = json.loads(result.stdout)["workflow"]["findings"]
-        critical = {item["rule"] for item in findings if item["severity"] == "critica"}
+        critical = {item["rule"] for item in findings if item["severity"] == "critical"}
         self.assertIn("CI-PRTARGET", critical)
         self.assertIn("CI-WRITE-TOKEN", critical)
         self.assertIn("CI-UNTRUSTED-CHECKOUT", critical)
@@ -285,7 +285,7 @@ class TestApplyPatch(CiFixScaleTest):
     def test_verification_without_sandbox_is_refused(self):
         result = run(
             "apply_patch.py", self.file, "--diff", self.patch,
-            "--apply", "--yes", "--verify", "echo ok",
+            "--apply", "--yes", "--verify", f"{sys.executable} -c print('ok')",
         )
 
         self.assertEqual(result.returncode, 1)
@@ -293,10 +293,13 @@ class TestApplyPatch(CiFixScaleTest):
         self.assertEqual(self.content(), ORIGINAL)
 
     def test_verification_runs_only_with_declared_sandbox(self):
+        # Sin shell=True el comando se parte en argumentos literales, así que
+        # se usa el intérprete actual en lugar de `echo` (builtin de cmd.exe).
+        verify = f'{sys.executable} -c "print(\'ok\')"'
         result = run(
             "apply_patch.py", self.file, "--diff", self.patch,
-            "--apply", "--yes", "--sandbox", "contenedor-auditoria", "--verify", "echo ok",
-            "--json",
+            "--apply", "--yes", "--sandbox", "contenedor-auditoria",
+            "--verify", verify, "--json",
         )
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -305,6 +308,22 @@ class TestApplyPatch(CiFixScaleTest):
         self.assertEqual(report["verification"]["sandbox"], "contenedor-auditoria")
         self.assertEqual(report["verification"]["returncode"], 0)
         self.assertIn("ok", report["verification"]["output"])
+
+    def test_verify_does_not_honour_shell_operators(self):
+        """`&&` no debe encadenar: sin shell, solo corre el primer comando."""
+        verify = f"{sys.executable} -c print('uno') && {sys.executable} -c print('dos')"
+        result = run(
+            "apply_patch.py", self.file, "--diff", self.patch,
+            "--apply", "--yes", "--sandbox", "contenedor-auditoria",
+            "--verify", verify, "--json",
+        )
+
+        report = json.loads(result.stdout)
+        output = report["verification"]["output"]
+        # Si hubiera shell, `dos` se habría impreso tras el `&&`.
+        self.assertIn("uno", output)
+        self.assertNotIn("dos", output)
+        self.assertEqual(self.content(), ORIGINAL.replace("x = 1", "x = 2"))
 
     def test_missing_diff_exits_two(self):
         self.assertEqual(
@@ -327,7 +346,7 @@ class TestScaleReport(CiFixScaleTest):
                     "title": "fallo",
                     "verdict": "confirmed" if index < confirmed else "needs_validation",
                     "confidence": 8,
-                    "severity": "alta",
+                    "severity": "high",
                     "cwe": "CWE-89",
                     "location": {"file": "app.py", "line": index + 1},
                     "evidence": "evidencia",

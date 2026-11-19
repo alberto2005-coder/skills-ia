@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from config import FIXTURES, SKILL_ROOT
+from appsec_config import FIXTURES, SKILL_ROOT
 
 sys.path.insert(0, str(SKILL_ROOT / "scripts"))
 
@@ -19,7 +19,7 @@ SCRIPT_DIR = SKILL_ROOT / "scripts"
 class TestScanSecrets(unittest.TestCase):
 
     def test_finds_known_secret_shapes(self):
-        findings = scan_secrets.scan(FIXTURES / "vuln_app")
+        findings, _ = scan_secrets.scan(FIXTURES / "vuln_app")
         kinds = {item["kind"] for item in findings}
 
         self.assertIn("aws_access_key", kinds)
@@ -27,7 +27,7 @@ class TestScanSecrets(unittest.TestCase):
         self.assertIn("private_key", kinds)
 
     def test_never_returns_the_full_secret(self):
-        findings = scan_secrets.scan(FIXTURES / "vuln_app")
+        findings, _ = scan_secrets.scan(FIXTURES / "vuln_app")
 
         for item in findings:
             with self.subTest(kind=item["kind"]):
@@ -35,11 +35,38 @@ class TestScanSecrets(unittest.TestCase):
                 self.assertNotIn("AKIAIOSFODNN7EXAMPLE", item["preview"])
                 self.assertNotIn("ghp_0123456789abcdefghijABCDEFGHIJ0123", item["preview"])
 
+    def test_redaction_hides_most_of_a_short_secret(self):
+        # `4…4` sobre un secreto de 12-16 caracteres dejaba la mitad visible.
+        preview = scan_secrets.redact("abcdefghijklmno")
+        head, tail = preview.split("…")
+
+        self.assertLessEqual(len(head) + len(tail), 4)
+        self.assertNotIn("efghijk", preview)
+
     def test_clean_directory_reports_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:
             (Path(tmp) / "app.py").write_text("print('hola')\n", encoding="utf-8", errors="replace")
 
-            self.assertEqual(scan_secrets.scan(Path(tmp)), [])
+            findings, skipped = scan_secrets.scan(Path(tmp))
+            self.assertEqual(findings, [])
+            self.assertEqual(skipped, 0)
+
+    def test_large_files_are_counted_as_skipped(self):
+        # Un fichero por encima de MAX_BYTES no se escaneaba en silencio.
+        with tempfile.TemporaryDirectory() as tmp:
+            big = Path(tmp) / "huge.py"
+            big.write_text("x = 1\n" * (scan_secrets.MAX_BYTES // 6 + 10),
+                           encoding="utf-8")
+
+            findings, skipped = scan_secrets.scan(Path(tmp))
+            self.assertEqual(findings, [])
+            self.assertEqual(skipped, 1)
+
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT_DIR / "scan_secrets.py"), tmp],
+                capture_output=True, text=True, encoding="utf-8", errors="replace",
+            )
+            self.assertIn("no se han escaneado", result.stdout)
 
     def test_cli_strict_exit_code(self):
         result = subprocess.run(
@@ -88,7 +115,7 @@ class TestGrade(unittest.TestCase):
         self.assertEqual(result["letter"], "A")
 
     def test_penalties_and_letters(self):
-        high = grade.grade_findings([{"severity": "alta", "confidence": 9}])
+        high = grade.grade_findings([{"severity": "high", "confidence": 9}])
         critical = grade.grade_findings([{"severity": "critical", "confidence": 10}])
 
         self.assertEqual(high["score"], 90)
@@ -98,8 +125,8 @@ class TestGrade(unittest.TestCase):
 
     def test_low_confidence_is_discarded(self):
         result = grade.grade_findings([
-            {"id": "F1", "severity": "critica", "confidence": 6},
-            {"id": "F2", "severity": "media", "confidence": 8},
+            {"id": "F1", "severity": "critical", "confidence": 6},
+            {"id": "F2", "severity": "medium", "confidence": 8},
         ])
 
         self.assertEqual(result["accepted"], 1)
@@ -116,7 +143,7 @@ class TestGrade(unittest.TestCase):
     def test_cli_exit_codes(self):
         with tempfile.TemporaryDirectory() as tmp:
             good = Path(tmp) / "ok.json"
-            good.write_text(json.dumps({"findings": [{"severity": "baja", "confidence": 9}]}), encoding="utf-8", errors="replace")
+            good.write_text(json.dumps({"findings": [{"severity": "low", "confidence": 9}]}), encoding="utf-8", errors="replace")
             broken = Path(tmp) / "broken.json"
             broken.write_text("{no json", encoding="utf-8", errors="replace")
 

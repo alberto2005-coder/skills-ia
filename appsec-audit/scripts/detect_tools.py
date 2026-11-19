@@ -23,6 +23,7 @@ import re
 import shutil
 import sys
 from pathlib import Path
+from appsec_util import force_utf8_output
 
 CATALOG = (
     {"name": "semgrep", "kind": "binary", "sarif": True, "note": "SAST multi-lenguaje"},
@@ -46,14 +47,6 @@ PINNED_ACTION = re.compile(r"@[0-9a-f]{40}$")
 UNTRUSTED_INTERPOLATION = re.compile(
     r"\$\{\{\s*github\.event\.(?:pull_request|issue|comment)\.(?:title|body|head\.ref|head\.label)"
 )
-
-
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
 
 
 def detect(tool: dict) -> dict:
@@ -114,7 +107,7 @@ def audit_workflow(text: str) -> list[dict]:
 
     if uses_pull_request_target:
         findings.append({
-            "severity": "critica",
+            "severity": "critical",
             "rule": "CI-PRTARGET",
             "line": next(
                 (i for i, line in enumerate(lines, start=1) if "pull_request_target" in line), 1
@@ -125,14 +118,14 @@ def audit_workflow(text: str) -> list[dict]:
     for position, scope in permissions_write:
         if uses_pull_request_target:
             findings.append({
-                "severity": "critica",
+                "severity": "critical",
                 "rule": "CI-WRITE-TOKEN",
                 "line": position,
                 "message": f"permiso «{scope}: write» junto a pull_request_target: el PR controla código con token de escritura",
             })
         else:
             findings.append({
-                "severity": "media",
+                "severity": "medium",
                 "rule": "CI-WRITE-TOKEN",
                 "line": position,
                 "message": f"permiso «{scope}: write» en un workflow: mínimo privilegio salvo justificación",
@@ -142,28 +135,33 @@ def audit_workflow(text: str) -> list[dict]:
         stripped = line.strip()
         if "ref:" in stripped and "pull_request.head" in stripped:
             findings.append({
-                "severity": "critica" if uses_pull_request_target else "alta",
+                "severity": "critical" if uses_pull_request_target else "high",
                 "rule": "CI-UNTRUSTED-CHECKOUT",
                 "line": position,
                 "message": "checkout del head del PR: el código del contribuyente se ejecuta en el contexto del repositorio",
             })
-        if stripped.startswith("uses:") and not PINNED_ACTION.search(stripped.split("#")[0].strip()):
-            findings.append({
-                "severity": "media",
-                "rule": "CI-ACTION-UNPINNED",
-                "line": position,
-                "message": f"acción sin pin por SHA: {stripped[5:].strip()}",
-            })
+        # En YAML real un paso es `- uses: actions/checkout@v4`, así que hay que
+        # admitir el guion: comprobar solo `uses:` dejaba la regla sin disparar.
+        uses = re.match(r"^-\s*uses:\s*(.+)$", stripped) or re.match(r"^uses:\s*(.+)$", stripped)
+        if uses:
+            action = uses.group(1).split("#")[0].strip()
+            if not PINNED_ACTION.search(action):
+                findings.append({
+                    "severity": "medium",
+                    "rule": "CI-ACTION-UNPINNED",
+                    "line": position,
+                    "message": f"acción sin pin por SHA: {action}",
+                })
         if UNTRUSTED_INTERPOLATION.search(stripped):
             findings.append({
-                "severity": "alta",
+                "severity": "high",
                 "rule": "CI-SCRIPT-INJECTION",
                 "line": position,
                 "message": "interpolación de datos del PR en un paso: inyección de comandos en el runner",
             })
         if uses_pull_request_target and "secrets." in stripped:
             findings.append({
-                "severity": "alta",
+                "severity": "high",
                 "rule": "CI-SECRETS-PRTARGET",
                 "line": position,
                 "message": "un secreto del repositorio base queda expuesto a un workflow disparado por un PR",
@@ -173,7 +171,7 @@ def audit_workflow(text: str) -> list[dict]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="Detecta herramientas y audita un workflow de CI.")
     parser.add_argument("--require", help="Lista separada por comas de herramientas imprescindibles")
     parser.add_argument("--workflow", help="Workflow de GitHub Actions a auditar")
@@ -194,7 +192,7 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         workflow_findings = audit_workflow(path.read_text(encoding="utf-8", errors="replace"))
 
-    critical = [item for item in workflow_findings if item["severity"] == "critica"]
+    critical = [item for item in workflow_findings if item["severity"] == "critical"]
     result = {
         "policy": "las herramientas se detectan por PATH y metadatos; no se instalan ni se ejecutan",
         "tools": tools,

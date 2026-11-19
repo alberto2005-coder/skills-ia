@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from config import SKILL_ROOT
+from appsec_config import SKILL_ROOT
 
 SCRIPT_DIR = SKILL_ROOT / "scripts"
 REPO = SKILL_ROOT.parent
@@ -37,7 +37,7 @@ def confirmed(**overrides):
         "title": "SQL injection en /users",
         "verdict": "confirmed",
         "confidence": 9,
-        "severity": "critica",
+        "severity": "critical",
         "cwe": cwe,
         "location": {"file": file, "line": 42},
         "root_cause": cause,
@@ -168,10 +168,10 @@ class TestSarif(Phase1Test):
     def test_severity_mapping(self):
         sarif = self.export(payload(
             confirmed(id="F-001"),
-            confirmed(id="F-002", severity="alta"),
-            confirmed(id="F-003", severity="media", cwe="CWE-79", location={"file": "a.py", "line": 1},
+            confirmed(id="F-002", severity="high"),
+            confirmed(id="F-003", severity="medium", cwe="CWE-79", location={"file": "a.py", "line": 1},
                       fingerprint=FINGERPRINT("CWE-79", "a.py", "user_id se concatena en la consulta sql")),
-            confirmed(id="F-004", severity="baja", cwe="CWE-20", location={"file": "b.py", "line": 2},
+            confirmed(id="F-004", severity="low", cwe="CWE-20", location={"file": "b.py", "line": 2},
                       fingerprint=FINGERPRINT("CWE-20", "b.py", "user_id se concatena en la consulta sql")),
         ))
 
@@ -331,7 +331,7 @@ class TestReportBaseline(Phase1Test):
         base = payload(confirmed(), pending(), rejected())
         current = payload(
             confirmed(),
-            pending(verdict="confirmed", severity="alta", confidence=8, exploit=["a", "b"], patch="x"),
+            pending(verdict="confirmed", severity="high", confidence=8, exploit=["a", "b"], patch="x"),
             confirmed(id="F-009", title="Command injection", location={"file": "app/run.py", "line": 3},
                       fingerprint=FINGERPRINT("CWE-89", "app/run.py", "user_id se concatena en la consulta sql")),
         )

@@ -19,6 +19,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from appsec_util import force_utf8_output
 
 SCHEMA_PATH = Path(__file__).resolve().parent.parent / "schemas" / "findings.schema.json"
 CONFIRMED_MIN_CONFIDENCE = 7
@@ -27,18 +28,10 @@ REQUIRED_FINDING = (
     "id", "title", "verdict", "confidence", "cwe", "location", "evidence", "fingerprint",
 )
 VERDICTS = ("confirmed", "needs_validation", "rejected")
-SEVERITIES = ("critica", "alta", "media", "baja")
+SEVERITIES = ("critical", "high", "medium", "low")
 ID_RE = re.compile(r"^F-[0-9]{3,}$")
 CWE_RE = re.compile(r"^CWE-[0-9]+$")
 FINGERPRINT_RE = re.compile(r"^sha256:[0-9a-f]{32}$")
-
-
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
 
 
 def fingerprint(cwe: str, file: str, root_cause: str) -> str:
@@ -60,14 +53,7 @@ def _non_empty(value: object) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
-def _check_finding(item: object, allowed: set[str], position: int,
-                   ledger_units: set[str] | None, errors: list[str]) -> str | None:
-    if not isinstance(item, dict):
-        errors.append(f"findings[{position}]: no es un objeto")
-        return None
-
-    label = item.get("id") if isinstance(item.get("id"), str) else f"findings[{position}]"
-
+def _check_fields(item: dict, allowed: set[str], label: str, errors: list[str]) -> None:
     for key in item:
         if key not in allowed:
             errors.append(f"{label}: campo no permitido «{key}»")
@@ -75,89 +61,129 @@ def _check_finding(item: object, allowed: set[str], position: int,
         if key not in item:
             errors.append(f"{label}: falta el campo «{key}»")
 
+
+def _check_identity(item: dict, label: str, errors: list[str]) -> None:
     finding_id = item.get("id")
     if isinstance(finding_id, str) and not ID_RE.match(finding_id):
         errors.append(f"{label}: id inválido, formato F-000")
-
     if not _non_empty(item.get("title")):
         errors.append(f"{label}: «title» vacío")
 
-    verdict = item.get("verdict")
-    if verdict not in VERDICTS:
-        errors.append(f"{label}: verdict debe ser {' | '.join(VERDICTS)}")
 
+def _check_verdict(item: dict, label: str, errors: list[str]) -> None:
+    if item.get("verdict") not in VERDICTS:
+        errors.append(f"{label}: verdict debe ser {' | '.join(VERDICTS)}")
     confidence = item.get("confidence")
     if not _is_int(confidence) or not 1 <= confidence <= 10:
         errors.append(f"{label}: confidence debe ser un entero entre 1 y 10")
-
     cwe = item.get("cwe")
     if not isinstance(cwe, str) or not CWE_RE.match(cwe):
         errors.append(f"{label}: cwe debe tener formato CWE-000")
 
-    file = ""
+
+def _check_location(item: dict, label: str, errors: list[str]) -> str:
+    """Valida `location` y devuelve el fichero (cadena vacía si no sirve)."""
     location = item.get("location")
     if not isinstance(location, dict):
         errors.append(f"{label}: «location» debe ser un objeto")
-    else:
-        for key in location:
-            if key not in ("file", "line"):
-                errors.append(f"{label}: location con campo no permitido «{key}»")
-        file = location.get("file") if isinstance(location.get("file"), str) else ""
-        if not file.strip():
-            errors.append(f"{label}: location.file vacío")
-        line = location.get("line")
-        if not _is_int(line) or line < 1:
-            errors.append(f"{label}: location.line debe ser un entero >= 1")
+        return ""
+    for key in location:
+        if key not in ("file", "line"):
+            errors.append(f"{label}: location con campo no permitido «{key}»")
+    file = location.get("file") if isinstance(location.get("file"), str) else ""
+    if not file.strip():
+        errors.append(f"{label}: location.file vacío")
+    line = location.get("line")
+    if not _is_int(line) or line < 1:
+        errors.append(f"{label}: location.line debe ser un entero >= 1")
+    return file
 
-    if not _non_empty(item.get("evidence")):
-        errors.append(f"{label}: «evidence» vacío")
 
+def _check_severity(item: dict, label: str, errors: list[str]) -> object:
     severity = item.get("severity")
     if severity is not None and severity not in SEVERITIES:
-        errors.append(f"{label}: severity debe ser crítica, alta, media o baja")
+        errors.append(f"{label}: severity debe ser critical, high, medium o low")
+    return severity
 
-    if verdict == "confirmed":
-        if severity is None:
-            errors.append(f"{label}: un hallazgo confirmed exige «severity»")
-        if _is_int(confidence) and confidence < CONFIRMED_MIN_CONFIDENCE:
-            errors.append(
-                f"{label}: confirmed exige confidence >= {CONFIRMED_MIN_CONFIDENCE} "
-                f"(tiene {confidence}); por debajo pasa a needs_validation"
-            )
-        steps = item.get("exploit")
-        if not isinstance(steps, list) or len(steps) < 2 or not all(_non_empty(s) for s in steps):
-            errors.append(f"{label}: confirmed exige «exploit» con al menos 2 pasos")
-        if not _non_empty(item.get("patch")):
-            errors.append(f"{label}: confirmed exige «patch»")
 
+def _check_confirmed(item: dict, label: str, verdict: object, severity: object,
+                     confidence: object, errors: list[str]) -> None:
+    if verdict != "confirmed":
+        return
+    if severity is None:
+        errors.append(f"{label}: un hallazgo confirmed exige «severity»")
+    if _is_int(confidence) and confidence < CONFIRMED_MIN_CONFIDENCE:
+        errors.append(
+            f"{label}: confirmed exige confidence >= {CONFIRMED_MIN_CONFIDENCE} "
+            f"(tiene {confidence}); por debajo pasa a needs_validation"
+        )
+    steps = item.get("exploit")
+    if not isinstance(steps, list) or len(steps) < 2 or not all(_non_empty(s) for s in steps):
+        errors.append(f"{label}: confirmed exige «exploit» con al menos 2 pasos")
+    if not _non_empty(item.get("patch")):
+        errors.append(f"{label}: confirmed exige «patch»")
+
+
+def _check_pending(item: dict, label: str, verdict: object, severity: object,
+                   errors: list[str]) -> None:
     if verdict == "needs_validation":
         if severity is not None:
             errors.append(f"{label}: needs_validation no lleva «severity»")
         if not _non_empty(item.get("unresolved")):
             errors.append(f"{label}: needs_validation exige «unresolved» con el dato que falta")
-
     if verdict == "rejected":
         if severity is not None:
             errors.append(f"{label}: rejected no lleva «severity»")
         if not _non_empty(item.get("reason")):
             errors.append(f"{label}: rejected exige «reason»")
 
-    unit = item.get("source_unit")
-    if unit is not None:
-        if ledger_units is not None and unit not in ledger_units:
-            errors.append(f"{label}: source_unit «{unit}» no existe en el ledger")
-        elif not isinstance(unit, str) or not re.match(r"^U-[0-9]{3,}$", unit):
-            errors.append(f"{label}: source_unit con formato U-000")
 
+def _check_source_unit(item: dict, label: str, ledger_units: set[str] | None,
+                       errors: list[str]) -> None:
+    unit = item.get("source_unit")
+    if unit is None:
+        return
+    if ledger_units is not None and unit not in ledger_units:
+        errors.append(f"{label}: source_unit «{unit}» no existe en el ledger")
+    elif not isinstance(unit, str) or not re.match(r"^U-[0-9]{3,}$", unit):
+        errors.append(f"{label}: source_unit con formato U-000")
+
+
+def _check_fingerprint(item: dict, label: str, cwe: object, file: str,
+                       errors: list[str]) -> None:
     stored = item.get("fingerprint")
     if not isinstance(stored, str) or not FINGERPRINT_RE.match(stored):
         errors.append(f"{label}: fingerprint con formato sha256:<32 hex>")
-    elif _non_empty(cwe) and file:
-        cause = item.get("root_cause") if _non_empty(item.get("root_cause")) else item.get("title")
-        expected = fingerprint(cwe, file, cause)
-        if stored != expected:
-            errors.append(f"{label}: fingerprint no coincide (esperado {expected})")
+        return
+    if not (_non_empty(cwe) and file):
+        return
+    cause = item.get("root_cause") if _non_empty(item.get("root_cause")) else item.get("title")
+    expected = fingerprint(cwe, file, cause)
+    if stored != expected:
+        errors.append(f"{label}: fingerprint no coincide (esperado {expected})")
 
+
+def _check_finding(item: object, allowed: set[str], position: int,
+                   ledger_units: set[str] | None, errors: list[str]) -> str | None:
+    if not isinstance(item, dict):
+        errors.append(f"findings[{position}]: no es un objeto")
+        return None
+
+    label = item.get("id") if isinstance(item.get("id"), str) else f"findings[{position}]"
+    _check_fields(item, allowed, label, errors)
+    _check_identity(item, label, errors)
+    _check_verdict(item, label, errors)
+    file = _check_location(item, label, errors)
+    if not _non_empty(item.get("evidence")):
+        errors.append(f"{label}: «evidence» vacío")
+    severity = _check_severity(item, label, errors)
+    _check_confirmed(item, label, item.get("verdict"), severity,
+                     item.get("confidence"), errors)
+    _check_pending(item, label, item.get("verdict"), severity, errors)
+    _check_source_unit(item, label, ledger_units, errors)
+    _check_fingerprint(item, label, item.get("cwe"), file, errors)
+
+    finding_id = item.get("id")
     return finding_id if isinstance(finding_id, str) else None
 
 
@@ -249,7 +275,7 @@ def summarize(payload: object) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="Valida findings.json contra su esquema.")
     parser.add_argument("findings", help="Ruta de findings.json")
     parser.add_argument("--ledger", help="coverage-ledger.json para comprobar source_unit")

@@ -14,7 +14,7 @@ description: >
 license: MIT
 metadata:
   package: appsec-audit
-  version: "1.4.0"
+  version: "2.0.0"
 ---
 
 # AppSec · LLM, agentes y MCP

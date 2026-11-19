@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from config import SKILL_ROOT
+from appsec_config import SKILL_ROOT
 
 SCRIPT_DIR = SKILL_ROOT / "scripts"
 sys.path.insert(0, str(SCRIPT_DIR))

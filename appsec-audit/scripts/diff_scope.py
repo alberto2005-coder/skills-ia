@@ -22,16 +22,9 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from appsec_util import force_utf8_output
 
 HUNK_RE = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@")
-
-
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
 
 
 def normalize_path(target: str) -> str:
@@ -124,13 +117,15 @@ def build_scope(files: dict[str, list[list[int]]], findings: object | None,
         if not isinstance(findings, dict) or not isinstance(findings.get("findings"), list):
             raise ValueError("el fichero de hallazgos no tiene una lista «findings»")
         items = findings["findings"]
+        # Solo los que tengan `id`: un hallazgo sin id metía `None` en las
+        # listas y el `join` del informe en texto reventaba con TypeError.
         inside = [
-            item.get("id") for item in items
-            if isinstance(item, dict) and in_scope(item, files)
+            str(item["id"]) for item in items
+            if isinstance(item, dict) and item.get("id") and in_scope(item, files)
         ]
         outside = [
-            item.get("id") for item in items
-            if isinstance(item, dict) and not in_scope(item, files)
+            str(item["id"]) for item in items
+            if isinstance(item, dict) and item.get("id") and not in_scope(item, files)
         ]
         scope["findings"] = {
             "total": len([item for item in items if isinstance(item, dict)]),
@@ -142,7 +137,7 @@ def build_scope(files: dict[str, list[list[int]]], findings: object | None,
 
 
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="Alcance de auditoría limitado a un diff.")
     origin = parser.add_mutually_exclusive_group(required=True)
     origin.add_argument("--diff", help="Parche unificado (salida de git diff o de un PR)")
@@ -176,7 +171,7 @@ def main(argv: list[str] | None = None) -> int:
         try:
             findings_path = Path(args.findings)
             findings = json.loads(findings_path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError) as error:
+        except (json.JSONDecodeError, OSError, ValueError, TypeError, AttributeError) as error:
             print(f"Hallazgos ilegibles: {error}", file=sys.stderr)
             return 1
 
@@ -188,7 +183,11 @@ def main(argv: list[str] | None = None) -> int:
 
     text = json.dumps(scope, indent=2, ensure_ascii=False) + "\n"
     if args.output:
-        Path(args.output).write_text(text, encoding="utf-8")
+        try:
+            Path(args.output).write_text(text, encoding="utf-8")
+        except OSError as error:
+            print(f"No se pudo escribir {args.output}: {error}", file=sys.stderr)
+            return 2
         print(f"Alcance escrito en {args.output} "
               f"({scope['summary']['files']} fichero(s), "
               f"{scope['summary']['changed_lines']} línea(s) cambiada(s))")
@@ -201,6 +200,8 @@ def main(argv: list[str] | None = None) -> int:
             rendered = ", ".join(f"{start}-{end}" for start, end in ranges)
             print(f"  {path}: {rendered}")
         if "findings" in scope:
+            # `or 'ninguno'` evitaba que una lista vacía mostrara "ninguno",
+            # pero None en la lista reventaba: ya no puede haber None.
             print(f"  en el diff: {', '.join(scope['findings']['in_scope']) or 'ninguno'}")
             print(f"  fuera: {', '.join(scope['findings']['out_of_scope']) or 'ninguno'}")
 

@@ -12,7 +12,7 @@ conocido en nuevo.
 Con `--fail-on new` sale 1 si el informe actual introduce hallazgos `confirmed`
 que no estaban en el baseline: es la puerta de un PR.
 
-Código de salida: 0 sin bloqueo · 1 bloqueado por `--fail-on` o fichero ilegible · 2 fichero ilegible.
+Código de salida: 0 sin bloqueo · 1 bloqueado por `--fail-on` · 2 fichero ilegible.
 """
 
 from __future__ import annotations
@@ -21,14 +21,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-
-
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
+from appsec_util import force_utf8_output
 
 
 def index_by_fingerprint(payload: object) -> dict[str, dict]:
@@ -101,7 +94,7 @@ def load(path: Path) -> dict[str, dict]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="Diff de dos informes por fingerprint.")
     parser.add_argument("baseline", help="Informe de referencia")
     parser.add_argument("current", help="Informe de la pasada actual")

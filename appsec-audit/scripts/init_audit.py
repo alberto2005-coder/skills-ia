@@ -17,6 +17,7 @@ import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from appsec_util import FORMAT_VERSION, force_utf8_output
 
 OUTPUT_DIR = ".appsec-audit"
 PROFILES = ("quick", "standard", "deep")
@@ -41,14 +42,6 @@ ARCHITECTURE = """# Arquitectura y superficie — {target}
 """
 
 
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
-
-
 def stamp(value: str | None) -> str:
     if value:
         return value
@@ -63,6 +56,7 @@ def audit_id_for(target: Path) -> str:
 def build_findings(audit_id: str, target: str, created_at: str, profile: str) -> dict:
     return {
         "audit_id": audit_id,
+        "format_version": FORMAT_VERSION,
         "target": target,
         "created_at": created_at,
         "profile": profile,
@@ -81,7 +75,7 @@ def build_ledger(audit_id: str, target: str, created_at: str) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="Inicializa los artefactos de una auditoría.")
     parser.add_argument("target", help="Carpeta o repositorio que se va a auditar")
     parser.add_argument("--id", help="audit_id explícito (por defecto, derivado del target)")
@@ -105,7 +99,9 @@ def main(argv: list[str] | None = None) -> int:
         "coverage-ledger.json": build_ledger(audit_id, target_label, created_at),
     }
 
-    existing = [name for name in files if (outdir / name).exists()]
+    # architecture.md también se sobrescribe, así que entra en la misma
+    # comprobación: sin esto perderíamos notas de un revisor en silencio.
+    existing = [name for name in (*files, "architecture.md") if (outdir / name).exists()]
     if existing and not args.force:
         print(
             f"Ya existen artefactos en {outdir} ({', '.join(sorted(existing))}). "

@@ -24,6 +24,11 @@
     "profile": {
       "enum": ["quick", "standard", "deep"]
     },
+    "format_version": {
+      "type": "string",
+      "description": "Versión del formato de findings.json; 2.0 desde la escala canónica de severidad (critical/high/medium/low).",
+      "examples": ["2.0"]
+    },
     "findings": {
       "type": "array",
       "items": { "$ref": "#/definitions/finding" }
@@ -48,7 +53,7 @@
         "title": { "type": "string", "minLength": 1 },
         "verdict": { "enum": ["confirmed", "needs_validation", "rejected"] },
         "confidence": { "type": "integer", "minimum": 1, "maximum": 10 },
-        "severity": { "enum": ["critica", "alta", "media", "baja"] },
+        "severity": { "enum": ["critical", "high", "medium", "low"] },
         "cwe": { "type": "string", "pattern": "^CWE-[0-9]+$" },
         "owasp": {
           "type": "string",

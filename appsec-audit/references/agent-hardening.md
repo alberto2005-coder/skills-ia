@@ -25,7 +25,7 @@ Un agente que revisa pull requests ejecuta instrucciones sobre contenido que no 
 | Checkout con `persist-credentials: false` | El token no queda en el `.git/config` del runner |
 | Un job que ejecuta tests del PR no publica artefactos ni despliega | Separar ejecución de publicación evita el puente de confianza |
 
-`detect_tools.py --workflow` marca como **crítica** la combinación `pull_request_target` + permiso de escritura, y como **crítica** el checkout del head del PR en ese contexto; el resto de reglas salen como alta o media.
+`detect_tools.py --workflow` marca como **`critical`** la combinación `pull_request_target` + permiso de escritura, y como **`critical`** el checkout del head del PR en ese contexto; el resto de reglas salen como `high` o `medium`.
 
 ## Reglas del agente
 

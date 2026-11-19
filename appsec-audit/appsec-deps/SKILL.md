@@ -12,7 +12,7 @@ description: >
 license: MIT
 metadata:
   package: appsec-audit
-  version: "1.4.0"
+  version: "2.0.0"
 ---
 
 # AppSec · Dependencias, SBOM y alcanzabilidad
@@ -30,7 +30,7 @@ Un CVE en una dependencia no es un hallazgo: es una pregunta. Solo se convierte 
 1. **Inventario.** `sbom.py build` lee `package.json`, `requirements.txt`, `pyproject.toml` y `go.mod`, y escribe un SBOM CycloneDX 1.5 con un `bom-ref` y un `purl` por componente. Sin versiones inventadas: lo que no está fijado se anota como tal.
 2. **Cruce.** `sbom.py audit` casa cada aviso con el componente por nombre y ecosistema, y compara la versión contra el rango afectado.
 3. **Alcanzabilidad.** El mismo comando busca el import del paquete en el código: `reachable` si aparece en un fichero de producción, `test-only` si solo en pruebas, `not-imported` si no aparece. Sin `--repo`, el estado es `unknown` y no se afirma nada.
-4. **Prioridad.** Un CVE `reachable` con severidad alta o crítica bloquea; `test-only` se documenta y se degrada; `not-imported` se anota como riesgo latente de la cadena de suministro.
+4. **Prioridad.** Un CVE `reachable` con severidad `high` o `critical` bloquea; `test-only` se documenta y se degrada; `not-imported` se anota como riesgo latente de la cadena de suministro.
 
 ```bash
 py appsec-audit/scripts/sbom.py build <dir> --output <dir>/.appsec-audit/sbom.cdx.json

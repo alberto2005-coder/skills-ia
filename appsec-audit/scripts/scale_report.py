@@ -17,6 +17,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from appsec_util import force_utf8_output
 
 PROFILES = {"quick": 1.0, "standard": 2.0, "deep": 4.0}
 BASE_HOURS = {
@@ -30,14 +31,6 @@ BASE_HOURS = {
 }
 DEFAULT_HOURLY = 80.0
 DEFAULT_CURRENCY = "EUR"
-
-
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
 
 
 def load_json(path: Path) -> object:
@@ -59,7 +52,10 @@ def repo_summary(name: str, path: Path) -> dict:
 
     if findings_path.is_file():
         payload = load_json(findings_path)
-        for item in payload.get("findings") or []:
+        # La raíz puede ser una lista o una cadena en un informe ajeno:
+        # payload.get reventaba con AttributeError en vez del exit 2.
+        items = payload.get("findings") if isinstance(payload, dict) else None
+        for item in items or []:
             if not isinstance(item, dict):
                 continue
             verdict = item.get("verdict")
@@ -156,7 +152,7 @@ def cost_breakdown(profile: str, repos: int, vendors: int, hourly: float, curren
 
 
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="Informe de sistema multi-repo con coste.")
     parser.add_argument("--repos", required=True, help="Repos separados por coma (nombre=ruta o ruta)")
     parser.add_argument("--vendor", help="JSON con la lista de terceros")
@@ -182,7 +178,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         try:
             repos.append(repo_summary(name, path))
-        except (json.JSONDecodeError, OSError) as error:
+        except (json.JSONDecodeError, OSError, ValueError, TypeError, AttributeError) as error:
             print(f"Artefactos ilegibles en {path}: {error}", file=sys.stderr)
             return 2
 

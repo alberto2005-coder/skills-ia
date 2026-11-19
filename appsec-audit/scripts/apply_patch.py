@@ -9,6 +9,13 @@ limpio y se muestra el resultado. La verificación posterior ejecuta un comando,
 y por eso exige `--sandbox` con un nombre declarado: sin ese contrato, el
 comando no se lanza aunque se pida.
 
+Aviso honesto: `--sandbox` es un **nombre de contrato declarado**, no un
+aislamiento real. No crea contenedor ni namespace alguno; el comando corre en
+el host con los mismos permisos que este script. Se ejecuta sin shell (lista de
+argumentos vía `shlex.split`), con timeout, y si algo falla se restaura el
+backup. Quien necesite aislamiento de verdad debe invocar el contenedor por su
+cuenta y dejar la verificación fuera de esta herramienta.
+
 Código de salida: 0 correcto · 1 rechazado o verificación fallida · 2 ilegible.
 """
 
@@ -16,19 +23,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
 from pathlib import Path
-
-
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
+from appsec_util import force_utf8_output
 
 
 def parse_hunks(diff_text: str) -> list[dict]:
@@ -102,14 +104,65 @@ def render(result: list[str]) -> str:
     return "".join(result)
 
 
+def _split_command(command: str) -> list[str]:
+    """Parte el comando en argumentos SIN invocar un shell.
+
+    En POSIX se usa `shlex`. En Windows `shlex` con `posix=True` trataría `\\`
+    como carácter de escape y rompería rutas como `C:\\Python\\python.exe`,
+    así que se usan comillas dobles con reglas de cmd.exe (sin interpretar
+    `&&`, `|` ni `>`: eso solo lo haría un shell, que aquí no se lanza).
+    """
+    if os.name != "nt":
+        return shlex.split(command, posix=True)
+    tokens: list[str] = []
+    for quoted, bare in re.findall(r'"([^"]*)"|(\S+)', command):
+        tokens.append(quoted if bare == "" else bare)
+    return tokens
+
+
+def _run_verification(command: str, sandbox: str | None) -> dict:
+    """Ejecuta `--verify` sin shell y con timeout, capturando todo.
+
+    Sin shell=True no hay interpolación ni comandos encadenados: el texto se
+    parte en argumentos literales. `sandbox` viaja solo como etiqueta
+    declarada (ver docstring) y nunca se interpreta aquí.
+    """
+    argv = _split_command(command)
+    if not argv:
+        return {"sandbox": sandbox, "status": "error",
+                "returncode": None, "output": "comando vacío"}
+
+    try:
+        completed = subprocess.run(
+            argv, shell=False, capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=300,
+        )
+    except subprocess.TimeoutExpired:
+        return {"sandbox": sandbox, "status": "timeout", "returncode": None,
+                "output": "la verificación superó los 300 s; backup restaurado"}
+    except OSError as error:
+        return {"sandbox": sandbox, "status": "error", "returncode": None,
+                "output": f"no se pudo lanzar la verificación: {error}"}
+
+    status = "ok" if completed.returncode == 0 else "failed"
+    return {
+        "sandbox": sandbox,
+        "status": status,
+        "returncode": completed.returncode,
+        "output": (completed.stdout + completed.stderr).strip()[:2000],
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="Aplica un parche con dry-run por defecto.")
     parser.add_argument("file")
     parser.add_argument("--diff", required=True)
     parser.add_argument("--apply", action="store_true", help="Escribe el resultado")
     parser.add_argument("--yes", action="store_true", help="Confirmación explícita de la escritura")
-    parser.add_argument("--sandbox", help="Contrato de sandbox donde se ejecuta la verificación")
+    parser.add_argument("--sandbox",
+                        help="Nombre del contrato de sandbox declarado (etiqueta "
+                             "de registro, NO crea aislamiento real)")
     parser.add_argument("--verify", help="Comando de verificación posterior")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -124,7 +177,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     try:
-        content = target.read_text(encoding="utf-8").splitlines(keepends=True)
+        # newline="" conserva los finales de línea tal cual: con la lectura
+        # universal por defecto un CRLF se convertía en LF y newline_of() no
+        # lo detectaba nunca, reescribiendo el fichero entero como LF.
+        with target.open(encoding="utf-8", newline="") as handle:
+            content = handle.read().splitlines(keepends=True)
         hunks = parse_hunks(diff_path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as error:
         print(f"No se pudo leer la entrada: {error}", file=sys.stderr)
@@ -183,30 +240,35 @@ def main(argv: list[str] | None = None) -> int:
 
     backup = target.with_suffix(target.suffix + ".orig")
     shutil.copyfile(target, backup)
-    target.write_text(render(result), encoding="utf-8")
+    # newline="" para no traducir los finales de línea ya detectados (CRLF).
+    with target.open("w", encoding="utf-8", newline="") as handle:
+        handle.write(render(result))
     report["status"] = "applied"
     report["backup"] = str(backup)
 
     if args.verify:
-        completed = subprocess.run(
-            args.verify, shell=True, capture_output=True, text=True,
-            encoding="utf-8", errors="replace", timeout=300,
-        )
-        report["verification"] = {
-            "sandbox": args.sandbox,
-            "returncode": completed.returncode,
-            "output": (completed.stdout + completed.stderr).strip()[:2000],
-        }
-        report["status"] = "applied" if completed.returncode == 0 else "verification_failed"
+        report["verification"] = _run_verification(args.verify, args.sandbox)
+        status = report["verification"].get("status", "verification_failed")
+        report["status"] = "applied" if status == "ok" else "verification_failed"
+        if status == "timeout":
+            # El parche quedó escrito pero la verificación no terminó:
+            # se restaura el backup para no dejar el árbol a medias.
+            shutil.copyfile(backup, target)
+            report["status"] = "rolled_back"
 
     if args.json:
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:
-        print(f"Aplicado en {target} (backup {backup.name})")
+        if report["status"] == "rolled_back":
+            print(f"Verificación agotó el timeout; backup restaurado en {target}",
+                  file=sys.stderr)
+        else:
+            print(f"Aplicado en {target} (backup {backup.name})")
         if args.verify:
             verification = report["verification"]
-            print(f"Verificación en sandbox «{verification['sandbox']}»: "
-                  f"exit {verification['returncode']}")
+            exit_code = verification.get("returncode")
+            exit_label = f"exit {exit_code}" if exit_code is not None else verification["status"]
+            print(f"Verificación declarada en «{verification['sandbox']}»: {exit_label}")
             if verification["output"]:
                 print(verification["output"])
     return 0 if report["status"] == "applied" else 1

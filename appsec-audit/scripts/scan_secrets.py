@@ -19,6 +19,7 @@ import math
 import re
 import sys
 from pathlib import Path
+from appsec_util import force_utf8_output, relative_parts
 
 SKIP_DIRS = {
     ".git", ".hg", "node_modules", "venv", ".venv", "env", "dist", "build",
@@ -53,10 +54,16 @@ def entropy(value: str) -> float:
 
 
 def redact(value: str) -> str:
-    """Deja pistas para localizar el secreto sin publicarlo."""
+    """Deja pistas para localizar el secreto sin publicarlo.
+
+    Como máximo revela 4+4 caracteres y nunca más de una octava parte del
+    valor: `4…4` sobre un secreto de 12-16 caracteres dejaba al descubierto
+    la mitad de la contraseña.
+    """
     if len(value) <= 8:
         return "…"
-    return f"{value[:4]}…{value[-4:]}"
+    keep = max(1, min(4, len(value) // 8))
+    return f"{value[:keep]}…{value[-keep:]}"
 
 
 def scan_file(path: Path) -> list[dict]:
@@ -90,30 +97,34 @@ def scan_file(path: Path) -> list[dict]:
     return findings
 
 
-def scan(root: Path) -> list[dict]:
+def scan(root: Path) -> tuple[list[dict], int]:
+    """(hallazgos, ficheros omitidos por tamaño).
+
+    Los mayores que `MAX_BYTES` se saltaban en silencio: el informe prometía
+    cobertura total sin declarar el hueco.
+    """
     if root.is_file():
-        return scan_file(root)
+        return scan_file(root), 0
 
     findings = []
+    skipped_large = 0
     for path in sorted(root.rglob("*")):
         if not path.is_file():
             continue
-        if any(part in SKIP_DIRS for part in path.parts):
+        if any(part in SKIP_DIRS for part in relative_parts(path, root)):
+            continue
+        try:
+            if path.stat().st_size > MAX_BYTES:
+                skipped_large += 1
+                continue
+        except OSError:
             continue
         findings.extend(scan_file(path))
-    return findings
-
-
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
+    return findings, skipped_large
 
 
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="Barrido de secretos en solo lectura.")
     parser.add_argument("target", help="Fichero o carpeta a revisar")
     parser.add_argument("--json", action="store_true", help="Salida JSON")
@@ -125,10 +136,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"No existe: {root}", file=sys.stderr)
         return 2
 
-    findings = scan(root)
+    findings, skipped_large = scan(root)
 
     if args.json:
-        print(json.dumps({"target": str(root), "count": len(findings), "findings": findings},
+        print(json.dumps({"target": str(root), "count": len(findings),
+                          "skipped_large": skipped_large, "findings": findings},
                          indent=2, ensure_ascii=False))
     else:
         if not findings:
@@ -136,6 +148,9 @@ def main(argv: list[str] | None = None) -> int:
         for item in findings:
             print(f"{item['file']}:{item['line']}  {item['kind']}  {item['preview']}")
         print(f"\nTotal: {len(findings)} hallazgo(s). Valores redactados; no se copia ningún secreto.")
+        if skipped_large:
+            print(f"Aviso: {skipped_large} fichero(s) mayores de {MAX_BYTES} bytes "
+                  f"no se han escaneado.")
 
     return 1 if args.strict and findings else 0
 

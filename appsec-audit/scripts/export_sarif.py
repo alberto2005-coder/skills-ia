@@ -17,18 +17,11 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from appsec_util import FORMAT_VERSION, TOOL_VERSION, force_utf8_output
 
 SARIF_SCHEMA = "https://json.schemastore.org/sarif-2.1.0.json"
 SARIF_VERSION = "2.1.0"
-LEVELS = {"critica": "error", "alta": "error", "media": "warning", "baja": "note"}
-
-
-def _force_utf8_output() -> None:
-    """Emite UTF-8 aunque la consola de Windows use otra pagina de codigos."""
-    for stream in (sys.stdout, sys.stderr):
-        reconfigure = getattr(stream, "reconfigure", None)
-        if reconfigure is not None:
-            reconfigure(encoding="utf-8", errors="replace")
+LEVELS = {"critical": "error", "high": "error", "medium": "warning", "low": "note"}
 
 
 def uri_for(path: object) -> str:
@@ -109,7 +102,7 @@ def build_sarif(payload: dict, include_pending: bool = False) -> dict:
 
     driver = {
         "name": "appsec-audit",
-        "version": str(payload.get("version") or "1.2.0"),
+        "version": TOOL_VERSION,
         "rules": list(rules.values()),
     }
 
@@ -122,6 +115,7 @@ def build_sarif(payload: dict, include_pending: bool = False) -> dict:
                 "results": results,
                 "properties": {
                     "audit_id": payload.get("audit_id"),
+                    "format_version": payload.get("format_version") or FORMAT_VERSION,
                     "target": payload.get("target"),
                     "profile": payload.get("profile"),
                     "generated_at": payload.get("generated_at"),
@@ -141,7 +135,7 @@ def load_payload(path: Path) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    _force_utf8_output()
+    force_utf8_output()
     parser = argparse.ArgumentParser(description="Exporta findings.json a SARIF 2.1.0.")
     parser.add_argument("findings", help="Ruta de findings.json")
     parser.add_argument("--output", help="Fichero .sarif de salida; sin él se imprime en stdout")
@@ -167,7 +161,13 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.output:
         out = Path(args.output)
-        out.write_text(text, encoding="utf-8")
+        try:
+            out.write_text(text, encoding="utf-8")
+        except OSError as error:
+            # Directorio inexistente o sin permisos: exit 2 documentado,
+            # no un traceback.
+            print(f"No se pudo escribir {out}: {error}", file=sys.stderr)
+            return 2
         print(f"SARIF escrito en {out} ({len(sarif['runs'][0]['results'])} resultado(s))")
     else:
         print(text, end="")
