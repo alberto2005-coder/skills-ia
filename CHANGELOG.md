@@ -8,6 +8,25 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-19 · Fase 3: tags automáticos y releases por paquete
+
+#### Añadido
+
+- **`tests/version_guard.py --plan`:** devuelve en JSON el plan de publicación: paquetes con subida (`{package, version, tag}`) y `bundle` cuando cambia la `version` del índice raíz. Tres tests nuevos cubren subidas de paquete, cambio de bundle y plan vacío.
+- **`.github/workflows/tag-release.yml`:** en cada push a `main`, con `concurrency` por rama, calcula el plan contra `github.event.before` y crea y empuja los tags de forma idempotente (`<paquete>-v<version>` y `bundle-v<version>`).
+- **`.github/workflows/release-package.yml`:** con `permissions: contents: write`, valida que el tag coincida con la versión del manifiesto, empaqueta con el script de la fase 2, genera notas con `changelog_gen.py` filtradas por la carpeta del paquete y publica zip + `SHA256SUMS` (`gh release create` o `upload --clobber`).
+- **`.github/workflows/release-bundle.yml`:** empaqueta los 12 paquetes, arma el `SHA256SUMS` global y publica los zips, el índice y las notas.
+
+#### Notas
+
+- Los tags empujados con `GITHUB_TOKEN` no disparan otros workflows: con el secreto `RELEASE_TOKEN` se delega en `push: tags`; sin él, el propio `tag-release.yml` llama a los workflows reutilizables y avisa con `::warning::`.
+- `bundle-v*` también encaja en el patrón `*-v*`, así que el workflow de paquete se salta esos tags con un `if`.
+
+#### Verificado
+
+- Los cuatro workflows parsean como YAML válido y declaran los jobs esperados; el plan sobre el repo actual sale vacío.
+- `run_tests.py` → **708 tests, 13/13 suites**; `pytest`; `ruff check .` limpio; `tests/lint_frontmatter.py` y `tests/metrics_gate.py` en verde.
+
 ### - 2026-11-19 · Fase 2: empaquetado determinista y validado
 
 #### Añadido
@@ -464,6 +483,25 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-19 · Phase 3: automatic tags and per-package releases
+
+#### Added
+
+- **`tests/version_guard.py --plan`:** returns the publishing plan as JSON: bumped packages (`{package, version, tag}`) and `bundle` when the root index `version` changed. Three new tests cover package bumps, bundle changes and an empty plan.
+- **`.github/workflows/tag-release.yml`:** on every push to `main`, with per-branch `concurrency`, computes the plan against `github.event.before` and creates and pushes tags idempotently (`<package>-v<version>` and `bundle-v<version>`).
+- **`.github/workflows/release-package.yml`:** with `permissions: contents: write`, checks the tag matches the manifest version, packages with the phase 2 script, builds notes with `changelog_gen.py` filtered by the package folder, and publishes the zip plus `SHA256SUMS` (`gh release create` or `upload --clobber`).
+- **`.github/workflows/release-bundle.yml`:** packages all 12 packages, builds the global `SHA256SUMS` and publishes the zips, the index and the notes.
+
+#### Notes
+
+- Tags pushed with `GITHUB_TOKEN` do not trigger other workflows: with the `RELEASE_TOKEN` secret the flow delegates to `push: tags`; without it, `tag-release.yml` calls the reusable workflows itself and prints a `::warning::`.
+- `bundle-v*` also matches `*-v*`, so the package workflow skips those tags with an `if`.
+
+#### Verified
+
+- The four workflows parse as valid YAML and declare the expected jobs; the plan on the current repo is empty.
+- `run_tests.py` → **708 tests, 13/13 suites**; `pytest`; `ruff check .` clean; `tests/lint_frontmatter.py` and `tests/metrics_gate.py` green.
 
 ### - 2026-11-19 · Phase 2: deterministic, validated packaging
 

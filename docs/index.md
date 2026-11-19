@@ -88,6 +88,14 @@ make dist PACKAGE=replica # uno solo
 
 `scripts/build_package.py` genera `dist/<paquete>-<version>.zip` con el paquete completo y un `manifest.json` en la raíz (versión, commit y skills incluidas), más un `.sha256` con formato `sha256sum`. Las entradas van ordenadas y con fecha fija, así que dos builds del mismo árbol dan el mismo hash. Excluye `tests/`, `__pycache__`, `.ruff_cache`, `.venv` y las salidas de auditoría, y rechaza cualquier fichero que no sea texto UTF-8. Antes de dar el zip por bueno lo descomprime en un temporal y le pasa `tests/lint_frontmatter.py`; si falla, borra el artefacto y sale con error.
 
+### Publicación
+
+En cada push a `main`, `tag-release.yml` compara el índice y los manifiestos con el commit anterior (`github.event.before`) y crea un tag `<paquete>-v<version>` por cada subida y `bundle-v<version>` si cambió la versión del índice raíz. Los tags son idempotentes: si ya existen, no se reescriben.
+
+`release-package.yml` (tags `<paquete>-v*`) empaqueta y valida ese paquete, genera las notas con `docs-sync-engine/scripts/changelog_gen.py` a partir de los commits que tocaron su carpeta y publica el zip y el `SHA256SUMS`. `release-bundle.yml` (tags `bundle-v*`) hace lo mismo con todos los paquetes y añade `skills.json`. Ambos tienen `permissions: contents: write`, `concurrency` por tag y son idempotentes (`gh release upload --clobber`).
+
+Los tags creados con `GITHUB_TOKEN` no disparan otros workflows. Si existe el secreto `RELEASE_TOKEN` (PAT o token de GitHub App) se usa para empujarlos y el `push: tags` dispara la publicación; si no, `tag-release.yml` llama directamente a los workflows reutilizables y avisa con un `::warning::`. Los dos workflows de release también admiten `workflow_dispatch` con `package`, `version` y `tag`.
+
 ### Severidad y `--fail-on`
 
 La escala canónica de `severity` es **`critical` → `high` → `medium` → `low`**, más `info` donde la herramienta distingue informativo y `reject` en `agent-red-team` (un nivel que bloquea siempre). La salida no mezcla idiomas; las herramientas que leen hallazgos siguen aceptando las variantes antiguas (`critica`, `alta`, `media`, `baja`) como alias de entrada.
@@ -207,6 +215,14 @@ make dist PACKAGE=replica # a single one
 ```
 
 `scripts/build_package.py` writes `dist/<package>-<version>.zip` with the whole package and a root `manifest.json` (version, commit and included skills), plus a `.sha256` file in `sha256sum` format. Entries are sorted and carry a fixed timestamp, so two builds of the same tree produce the same hash. It leaves out `tests/`, `__pycache__`, `.ruff_cache`, `.venv` and audit outputs, and rejects any file that is not UTF-8 text. Before accepting the archive it unpacks it into a temporary directory and runs `tests/lint_frontmatter.py`; on failure it deletes the artifact and exits with an error.
+
+### Publishing
+
+On every push to `main`, `tag-release.yml` compares the index and the manifests against the previous commit (`github.event.before`) and creates one `<package>-v<version>` tag per bump plus `bundle-v<version>` when the root index version changed. Tags are idempotent: existing ones are never rewritten.
+
+`release-package.yml` (tags `<package>-v*`) packages and validates that package, builds the notes with `docs-sync-engine/scripts/changelog_gen.py` from the commits that touched its folder, and publishes the zip plus `SHA256SUMS`. `release-bundle.yml` (tags `bundle-v*`) does the same for every package and adds `skills.json`. Both use `permissions: contents: write`, per-tag `concurrency` and are idempotent (`gh release upload --clobber`).
+
+Tags pushed with `GITHUB_TOKEN` do not trigger other workflows. When the `RELEASE_TOKEN` secret exists (PAT or GitHub App token) it is used to push them and `push: tags` triggers publishing; otherwise `tag-release.yml` calls the reusable workflows directly and prints a `::warning::`. Both release workflows also accept `workflow_dispatch` with `package`, `version` and `tag`.
 
 ### Severity and `--fail-on`
 
