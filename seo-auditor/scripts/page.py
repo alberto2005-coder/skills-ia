@@ -64,6 +64,32 @@ class _PageParser(HTMLParser):
         self.anchors = []
 
     # -- inicio / fin de etiqueta -----------------------------------------
+    # Despacho por etiqueta: mismo parser, pero ninguna rama vive dentro de
+    # las demás (el anidamiento hacía ilegible `handle_starttag`).
+    _START_TAGS = {
+        "html": "_start_html",
+        "title": "_start_title",
+        "meta": "_start_meta",
+        "link": "_start_link",
+        "h1": "_start_heading",
+        "h2": "_start_heading",
+        "h3": "_start_heading",
+        "h4": "_start_heading",
+        "img": "_start_img",
+        "iframe": "_start_media",
+        "video": "_start_media",
+        "audio": "_start_media",
+        "source": "_start_media",
+        "embed": "_start_media",
+        "script": "_start_script",
+        "style": "_start_style",
+        "p": "_start_p",
+        "a": "_start_anchor",
+        "noscript": "_start_skipped",
+        "template": "_start_skipped",
+        "svg": "_start_skipped",
+    }
+
     def handle_starttag(self, tag, attrs):
         tag = tag.lower()
         if self._skip_depth:
@@ -72,56 +98,71 @@ class _PageParser(HTMLParser):
             if tag == self._skip_tag:
                 self._skip_depth += 1
             return
-        a = dict(attrs)
-        if tag == "html":
-            self.html_lang = (a.get("lang") or "").strip()
-        elif tag == "title":
-            self.in_title = True
-        elif tag == "meta":
-            self.meta.append(a)
-        elif tag == "link":
-            self.link_tags.append(a)
-        elif tag in HEADINGS:
-            self._heading_stack.append(tag)
-            self.heading_sequence.append(int(tag[1]))
-            self._heading_buf.append([])
-        elif tag == "img":
-            self.images.append({
-                "src": a.get("src", ""),
-                "alt": a.get("alt") if "alt" in a else None,
-                "width": a.get("width", ""),
-                "height": a.get("height", ""),
-                "loading": a.get("loading", ""),
-            })
-        elif tag in ("iframe", "video", "audio", "source", "embed"):
-            rec = {"tag": tag, "src": a.get("src", "")}
-            if tag == "iframe":
-                self.iframes.append(rec)
-            self.media.append(rec)
-        elif tag == "script":
-            stype = (a.get("type") or "").lower()
-            if stype == "application/ld+json":
-                self._jsonld_active = True
-                self._jsonld_buf = []
-            else:
-                if a.get("src"):
-                    self.scripts.append(a["src"])
-                if self._skip_depth == 0:
-                    self._skip_tag = "script"
-                    self._skip_depth = 1
-        elif tag == "style":
-            self.styles.append("inline")
-            if self._skip_depth == 0:
-                self._skip_tag = "style"
-                self._skip_depth = 1
-        elif tag == "p":
-            self._in_paragraph = True
-            self._paragraph_buf = []
-        elif tag == "a" and a.get("href"):
-            self.anchors.append(a["href"])
-        elif tag in SKIP_TEXT:
-            self._skip_tag = tag
+        handler = self._START_TAGS.get(tag)
+        if handler is not None:
+            getattr(self, handler)(tag, dict(attrs))
+
+    def _start_html(self, tag, a):
+        self.html_lang = (a.get("lang") or "").strip()
+
+    def _start_title(self, tag, a):
+        self.in_title = True
+
+    def _start_meta(self, tag, a):
+        self.meta.append(a)
+
+    def _start_link(self, tag, a):
+        self.link_tags.append(a)
+
+    def _start_heading(self, tag, a):
+        self._heading_stack.append(tag)
+        self.heading_sequence.append(int(tag[1]))
+        self._heading_buf.append([])
+
+    def _start_img(self, tag, a):
+        self.images.append({
+            "src": a.get("src", ""),
+            "alt": a.get("alt") if "alt" in a else None,
+            "width": a.get("width", ""),
+            "height": a.get("height", ""),
+            "loading": a.get("loading", ""),
+        })
+
+    def _start_media(self, tag, a):
+        rec = {"tag": tag, "src": a.get("src", "")}
+        if tag == "iframe":
+            self.iframes.append(rec)
+        self.media.append(rec)
+
+    def _start_script(self, tag, a):
+        stype = (a.get("type") or "").lower()
+        if stype == "application/ld+json":
+            self._jsonld_active = True
+            self._jsonld_buf = []
+            return
+        if a.get("src"):
+            self.scripts.append(a["src"])
+        if self._skip_depth == 0:
+            self._skip_tag = "script"
             self._skip_depth = 1
+
+    def _start_style(self, tag, a):
+        self.styles.append("inline")
+        if self._skip_depth == 0:
+            self._skip_tag = "style"
+            self._skip_depth = 1
+
+    def _start_p(self, tag, a):
+        self._in_paragraph = True
+        self._paragraph_buf = []
+
+    def _start_anchor(self, tag, a):
+        if a.get("href"):
+            self.anchors.append(a["href"])
+
+    def _start_skipped(self, tag, a):
+        self._skip_tag = tag
+        self._skip_depth = 1
 
     def handle_startendtag(self, tag, attrs):
         self.handle_starttag(tag, attrs)

@@ -162,7 +162,6 @@ def fetch_robots(url, timeout=10, allow_local=False):
 def analyze(page, url="", headers=None, robots=None, sitemap_urls=None,
             robots_url="", presence=None):
     """Checks del módulo 1 sobre evidencia ya recogida (sin red)."""
-    checks = []
     data = {"robots_url": robots_url, "robots_sitemaps": list((robots or {}).get("sitemaps", [])),
             "meta_robots": page.robots_meta, "canonicals": list(page.canonicals)}
 
@@ -173,113 +172,132 @@ def analyze(page, url="", headers=None, robots=None, sitemap_urls=None,
     parsed = urlparse(url) if url else None
     path = (parsed.path or "/") if parsed and parsed.scheme else "/"
 
-    if robots is None:
-        checks.append(check("IDX-ROBOTS-001", "skip",
-                            "robots.txt no disponible en este modo.", url))
-        checks.append(check("IDX-ROBOTS-002", "skip",
-                            "robots.txt no disponible en este modo.", url))
-    else:
-        # El UA propio es el que hace las peticiones: decidir con el grupo de
-        # Googlebot daba por permitido lo que a este auditor se le prohíbe.
-        allowed = is_allowed(robots, path, AUDITOR_AGENT)
-        data["robots_allows_url"] = allowed
-        data["robots_allows_googlebot"] = is_allowed(robots, path, "Googlebot")
-        checks.append(check(
-            "IDX-ROBOTS-001", "pass" if allowed else "fail",
-            "%s %s rastrear %s según robots.txt." % (
-                AUDITOR_AGENT, "puede" if allowed else "NO puede", path),
-            url))
-        blocked = global_disallow(robots)
-        checks.append(check(
-            "IDX-ROBOTS-002", "fail" if blocked else "pass",
-            "robots.txt con `Disallow: /` global para `*`." if blocked else
-            "robots.txt accesible sin bloqueo global (%d grupos, %d sitemaps)." % (
-                len(robots.get("groups", [])), len(robots.get("sitemaps", []))),
-            url))
-
     meta_noindex = "noindex" in page.robots_meta.lower()
-    checks.append(check(
+    sitemaps = _collect_sitemaps(sitemap_urls, robots)
+    data["sitemaps"] = sitemaps
+
+    checks = _robots_checks(robots, path, url, data)
+    checks.append(_meta_robots_check(page, meta_noindex, url))
+    checks += _header_checks(headers, page, x_robots, meta_noindex, url)
+    checks += _canonical_checks(page, url, parsed, data)
+    checks.append(_sitemap_check(sitemaps, robots, url))
+    checks.append(_presence_check(presence, url, data))
+    return checks, data
+
+
+def _robots_checks(robots, path, url, data):
+    if robots is None:
+        return [check("IDX-ROBOTS-001", "skip",
+                      "robots.txt no disponible en este modo.", url),
+                check("IDX-ROBOTS-002", "skip",
+                      "robots.txt no disponible en este modo.", url)]
+    # El UA propio es el que hace las peticiones: decidir con el grupo de
+    # Googlebot daba por permitido lo que a este auditor se le prohíbe.
+    allowed = is_allowed(robots, path, AUDITOR_AGENT)
+    data["robots_allows_url"] = allowed
+    data["robots_allows_googlebot"] = is_allowed(robots, path, "Googlebot")
+    blocked = global_disallow(robots)
+    return [
+        check("IDX-ROBOTS-001", "pass" if allowed else "fail",
+              "%s %s rastrear %s según robots.txt." % (
+                  AUDITOR_AGENT, "puede" if allowed else "NO puede", path),
+              url),
+        check("IDX-ROBOTS-002", "fail" if blocked else "pass",
+              "robots.txt con `Disallow: /` global para `*`." if blocked else
+              "robots.txt accesible sin bloqueo global (%d grupos, %d sitemaps)." % (
+                  len(robots.get("groups", [])), len(robots.get("sitemaps", []))),
+              url),
+    ]
+
+
+def _meta_robots_check(page, meta_noindex, url):
+    return check(
         "IDX-META-001", "fail" if meta_noindex else "pass",
         "<meta name=robots content=%r>." % page.robots_meta if page.robots_meta
         else "Sin <meta name=robots> (indexación por defecto).",
-        url))
+        url)
 
+
+def _header_checks(headers, page, x_robots, meta_noindex, url):
     if not headers:
-        checks.append(check("IDX-XROBOTS-001", "skip",
-                            "Sin cabeceras HTTP capturadas.", url))
-        checks.append(check("IDX-CONFLICT-001", "skip",
-                            "Conflicto meta/cabecera no evaluable sin cabeceras.", url))
-    else:
-        header_noindex = "noindex" in x_robots.lower()
-        checks.append(check(
-            "IDX-XROBOTS-001", "fail" if header_noindex else "pass",
-            "X-Robots-Tag: %r." % x_robots if x_robots
-            else "Sin cabecera X-Robots-Tag.", url))
-        if x_robots or page.robots_meta:
-            conflict = meta_noindex != header_noindex
-            checks.append(check(
-                "IDX-CONFLICT-001", "fail" if conflict else "pass",
-                ("Conflicto: meta=%r y X-Robots-Tag=%r apuntan en direcciones "
-                 "distintas." % (page.robots_meta, x_robots)) if conflict
-                else "Meta y cabecera coherentes (noindex=%s)." % meta_noindex,
-                url))
-        else:
-            checks.append(check("IDX-CONFLICT-001", "pass",
-                                "Ni meta ni cabecera imponen directivas.", url))
-
-    # Canonical: coherencia y autorreferencia.
-    if page.canonicals:
-        canonical = page.canonicals[0]
-        data["canonical"] = canonical
-        same = True
-        if url and parsed and parsed.scheme and canonical.startswith(("http://", "https://")):
-            same = normalize_url(canonical) == normalize_url(url)
-        checks.append(check(
-            "IDX-CANON-001", "pass" if same else "fail",
-            ("Canonical autorreferencial: %s." % canonical) if same else
-            ("Canonical apunta a otra URL: %s (página: %s)." % (canonical, url)),
+        return [check("IDX-XROBOTS-001", "skip",
+                      "Sin cabeceras HTTP capturadas.", url),
+                check("IDX-CONFLICT-001", "skip",
+                      "Conflicto meta/cabecera no evaluable sin cabeceras.", url)]
+    header_noindex = "noindex" in x_robots.lower()
+    out = [check(
+        "IDX-XROBOTS-001", "fail" if header_noindex else "pass",
+        "X-Robots-Tag: %r." % x_robots if x_robots
+        else "Sin cabecera X-Robots-Tag.", url)]
+    if x_robots or page.robots_meta:
+        conflict = meta_noindex != header_noindex
+        out.append(check(
+            "IDX-CONFLICT-001", "fail" if conflict else "pass",
+            ("Conflicto: meta=%r y X-Robots-Tag=%r apuntan en direcciones "
+             "distintas." % (page.robots_meta, x_robots)) if conflict
+            else "Meta y cabecera coherentes (noindex=%s)." % meta_noindex,
             url))
     else:
-        if len(page.canonicals) > 1:
-            checks.append(check("SRC-CANON-001", "fail",
-                                "Se detectaron %d canonicals; debe haber uno."
-                                % len(page.canonicals), url))
-        else:
-            checks.append(check("SRC-CANON-001", "fail",
-                                "No se detectó <link rel=canonical>.", url))
+        out.append(check("IDX-CONFLICT-001", "pass",
+                         "Ni meta ni cabecera imponen directivas.", url))
+    return out
 
-    # Sitemap (sin duplicados: el llamador puede pasar los mismos que robots.txt)
+
+def _canonical_checks(page, url, parsed, data):
+    # Canonical: coherencia y autorreferencia.
+    if not page.canonicals:
+        if len(page.canonicals) > 1:
+            return [check("SRC-CANON-001", "fail",
+                          "Se detectaron %d canonicals; debe haber uno."
+                          % len(page.canonicals), url)]
+        return [check("SRC-CANON-001", "fail",
+                      "No se detectó <link rel=canonical>.", url)]
+    canonical = page.canonicals[0]
+    data["canonical"] = canonical
+    same = True
+    if url and parsed and parsed.scheme and canonical.startswith(("http://", "https://")):
+        same = normalize_url(canonical) == normalize_url(url)
+    return [check(
+        "IDX-CANON-001", "pass" if same else "fail",
+        ("Canonical autorreferencial: %s." % canonical) if same else
+        ("Canonical apunta a otra URL: %s (página: %s)." % (canonical, url)),
+        url)]
+
+
+def _collect_sitemaps(sitemap_urls, robots):
+    # Sin duplicados: el llamador puede pasar los mismos que robots.txt.
     sitemaps = []
     for item in list(sitemap_urls or []) + list((robots or {}).get("sitemaps", [])):
         if item and item not in sitemaps:
             sitemaps.append(item)
-    data["sitemaps"] = sitemaps
+    return sitemaps
+
+
+def _sitemap_check(sitemaps, robots, url):
     if sitemaps:
-        checks.append(check("IDX-SITEMAP-001", "pass",
-                            "Sitemap detectado: %s" % ", ".join(sitemaps[:3]), url))
-    elif robots is not None:
-        checks.append(check("IDX-SITEMAP-001", "fail",
-                            "robots.txt no declara ningún `Sitemap:` y no se "
-                            "detectó /sitemap.xml.", url))
-    else:
-        checks.append(check("IDX-SITEMAP-001", "skip",
-                            "Sitemap no comprobable en este modo.", url))
+        return check("IDX-SITEMAP-001", "pass",
+                     "Sitemap detectado: %s" % ", ".join(sitemaps[:3]), url)
+    if robots is not None:
+        return check("IDX-SITEMAP-001", "fail",
+                     "robots.txt no declara ningún `Sitemap:` y no se "
+                     "detectó /sitemap.xml.", url)
+    return check("IDX-SITEMAP-001", "skip",
+                 "Sitemap no comprobable en este modo.", url)
 
-    if presence:
-        data["presence"] = presence
-        found = [p for p in presence if p.get("status") == "found"]
-        checks.append(check(
-            "IDX-PRESENCE-001", "pass" if found else "fail",
-            "Presencia indirecta (`site:`, estimate): %s" % "; ".join(
-                "%s=%s (%s)" % (p["engine"], p["status"], p.get("results", "?"))
-                for p in presence),
-            url, note="estimate"))
-    else:
-        checks.append(check("IDX-PRESENCE-001", "skip",
-                            "Presencia por motor no solicitada (sin API oficial, "
-                            "`site:` es indirecto).", url))
 
-    return checks, data
+def _presence_check(presence, url, data):
+    if not presence:
+        return check("IDX-PRESENCE-001", "skip",
+                     "Presencia por motor no solicitada (sin API oficial, "
+                     "`site:` es indirecto).", url)
+    data["presence"] = presence
+    found = [p for p in presence if p.get("status") == "found"]
+    return check(
+        "IDX-PRESENCE-001", "pass" if found else "fail",
+        "Presencia indirecta (`site:`, estimate): %s" % "; ".join(
+            "%s=%s (%s)" % (p["engine"], p["status"], p.get("results", "?"))
+            for p in presence),
+        url, note="estimate")
 
 
 def _lower_headers(headers):

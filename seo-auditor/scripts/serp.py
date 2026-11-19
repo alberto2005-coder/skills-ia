@@ -131,24 +131,7 @@ def _esc(value):
     return html_mod.escape(str(value or ""))
 
 
-def build(page, url, title=None, description=None):
-    """Devuelve (html, metricas). Autocontenido, sin red."""
-    m = metrics(page, title, description)
-    m["og_missing"] = [key for key in ("og:title", "og:description", "og:image")
-                       if not page.og.get(key)]
-    title_text = m["title"] or "(sin título)"
-    desc_text = m["description"] or "(sin meta description)"
-    host = urlparse(url or "").netloc or "ejemplo.com"
-    letter = host.replace("www.", "")[:1].upper() or "W"
-    crumbs, _ = _crumbs(url)
-    og_image = page.og.get("og:image", "")
-    image_label = og_image or "sin og:image"
-
-    parts = []
-    parts.append("<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"utf-8\">"
-                 "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
-                 "<title>Simulador SERP — %s</title>" % _esc(host))
-    parts.append("""<style>
+_SERP_STYLE = """<style>
 body{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;margin:0;
 background:#f1f3f4;color:#202124}
 header{background:#fff;border-bottom:1px solid #dadce0;padding:16px 24px}
@@ -193,70 +176,123 @@ pre{background:#f8f9fa;border:1px solid #dadce0;border-radius:6px;padding:12px;
 overflow:auto;font-size:12px}
 @media print{body{background:#fff}header{display:none}main{display:block}
 section{page-break-inside:avoid;margin-bottom:12px}}
-</style></head><body>""")
-    parts.append("<header><h1>Simulador de SERP y tarjetas sociales</h1>"
-                 "<div class=\"sub\">%s · vista ilustrativa; los anchos son "
-                 "<strong>estimate</strong>, no el render real de cada motor.</div>"
-                 "</header><main>" % _esc(url or host))
+</style></head><body>"""
 
-    # --- Google escritorio
-    parts.append("<section class=\"serp\"><h2>Google — escritorio</h2>")
-    parts.append("<div><span class=\"favicon\">%s</span><span class=\"g-url\">%s</span></div>"
-                 % (_esc(letter), _esc(crumbs)))
-    parts.append("<div class=\"g-title\">%s</div>" % _esc(
-        _truncate_chars(title_text, 70) if m["title_truncated"] else title_text))
-    parts.append("<div class=\"g-desc\">%s</div>" % _esc(
-        _truncate_chars(desc_text, 170) if m["description_truncated"] else desc_text))
-    parts.append(_meter(m["title_px"], MAX_TITLE_PX, "Título"))
-    parts.append(_meter(m["description_px"], MAX_DESC_PX, "Descripción"))
-    parts.append("</section>")
 
-    # --- Google móvil
-    parts.append("<section class=\"serp mobile\"><h2>Google — móvil</h2>")
-    parts.append("<div><span class=\"favicon\">%s</span><span class=\"g-url\">%s</span></div>"
-                 % (_esc(letter), _esc(host)))
-    parts.append("<div class=\"g-title\">%s</div>" % _esc(_truncate_chars(title_text, 60)))
-    parts.append("<div class=\"g-desc\">%s</div>" % _esc(_truncate_chars(desc_text, 120)))
-    parts.append("</section>")
+def build(page, url, title=None, description=None):
+    """Devuelve (html, metricas). Autocontenido, sin red."""
+    m = metrics(page, title, description)
+    m["og_missing"] = [key for key in ("og:title", "og:description", "og:image")
+                       if not page.og.get(key)]
+    ctx = _render_context(page, url, m)
+    parts = [_serp_head(ctx["host"]), _SERP_STYLE, _serp_header(ctx)]
+    parts += _serp_google_desktop(ctx, m)
+    parts += _serp_google_mobile(ctx)
+    parts += _serp_bing(ctx)
+    parts += _serp_social(page, ctx)
+    parts += _serp_meter(m, ctx, url)
+    parts.append("</main></body></html>")
+    return "\n".join(parts), m
 
-    # --- Bing
-    parts.append("<section class=\"serp\"><h2>Bing</h2>")
-    parts.append("<div class=\"bing-url\">%s</div>" % _esc(crumbs))
-    parts.append("<div class=\"bing-title\">%s</div>" % _esc(title_text))
-    parts.append("<div class=\"g-desc\">%s</div>" % _esc(desc_text))
-    parts.append("</section>")
 
-    # --- Tarjetas sociales
-    social = [
-        ("WhatsApp", "wa"),
-        ("Facebook", ""),
-        ("LinkedIn", ""),
-        ("X (Twitter)", ""),
+def _render_context(page, url, m):
+    host = urlparse(url or "").netloc or "ejemplo.com"
+    crumbs, _ = _crumbs(url)
+    return {
+        "host": host,
+        "url_label": url or host,
+        "letter": host.replace("www.", "")[:1].upper() or "W",
+        "crumbs": crumbs,
+        "image_label": page.og.get("og:image", "") or "sin og:image",
+        "title_text": m["title"] or "(sin título)",
+        "desc_text": m["description"] or "(sin meta description)",
+    }
+
+
+def _serp_head(host):
+    return ("<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"utf-8\">"
+            "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+            "<title>Simulador SERP — %s</title>" % _esc(host))
+
+
+def _serp_header(ctx):
+    return ("<header><h1>Simulador de SERP y tarjetas sociales</h1>"
+            "<div class=\"sub\">%s · vista ilustrativa; los anchos son "
+            "<strong>estimate</strong>, no el render real de cada motor.</div>"
+            "</header><main>" % _esc(ctx["url_label"]))
+
+
+def _serp_google_desktop(ctx, m):
+    return [
+        "<section class=\"serp\"><h2>Google — escritorio</h2>",
+        "<div><span class=\"favicon\">%s</span><span class=\"g-url\">%s</span></div>"
+        % (_esc(ctx["letter"]), _esc(ctx["crumbs"])),
+        "<div class=\"g-title\">%s</div>" % _esc(
+            _truncate_chars(ctx["title_text"], 70) if m["title_truncated"] else ctx["title_text"]),
+        "<div class=\"g-desc\">%s</div>" % _esc(
+            _truncate_chars(ctx["desc_text"], 170) if m["description_truncated"] else ctx["desc_text"]),
+        _meter(m["title_px"], MAX_TITLE_PX, "Título"),
+        _meter(m["description_px"], MAX_DESC_PX, "Descripción"),
+        "</section>",
     ]
-    for name, extra in social:
-        parts.append("<section><h2>%s</h2><div class=\"social\">" % _esc(name))
-        if name == "WhatsApp":
-            parts.append("<div class=\"img\">%s</div><div class=\"body\">"
-                         "<div class=\"s-title\">%s</div><div class=\"s-desc\">%s</div>"
-                         "<div class=\"domain\">%s</div></div>"
-                         % (_esc(image_label), _esc(title_text), _esc(desc_text), _esc(host)))
-        else:
-            parts.append("<div class=\"img\">%s</div><div class=\"body\">"
-                         "<div class=\"domain\">%s</div><div class=\"s-title\">%s</div>"
-                         "<div class=\"s-desc\">%s</div></div>"
-                         % (_esc(image_label), _esc(host),
-                            _esc(page.og.get("og:title") or title_text),
-                            _esc(page.og.get("og:description") or desc_text)))
-        if page.twitter.get("twitter:card"):
-            parts.append("<div class=\"meta\">twitter:card=%s</div>"
-                         % _esc(page.twitter["twitter:card"]))
-        else:
-            parts.append("<div class=\"meta warn\">Sin twitter:card</div>")
-        parts.append("</div></section>")
 
-    # --- Panel de métricas
-    parts.append("<section style=\"grid-column:1/-1\"><h2>Medidor</h2>")
-    parts.append("<table style=\"border-collapse:collapse;font-size:13px\">")
+
+def _serp_google_mobile(ctx):
+    return [
+        "<section class=\"serp mobile\"><h2>Google — móvil</h2>",
+        "<div><span class=\"favicon\">%s</span><span class=\"g-url\">%s</span></div>"
+        % (_esc(ctx["letter"]), _esc(ctx["host"])),
+        "<div class=\"g-title\">%s</div>" % _esc(_truncate_chars(ctx["title_text"], 60)),
+        "<div class=\"g-desc\">%s</div>" % _esc(_truncate_chars(ctx["desc_text"], 120)),
+        "</section>",
+    ]
+
+
+def _serp_bing(ctx):
+    return [
+        "<section class=\"serp\"><h2>Bing</h2>",
+        "<div class=\"bing-url\">%s</div>" % _esc(ctx["crumbs"]),
+        "<div class=\"bing-title\">%s</div>" % _esc(ctx["title_text"]),
+        "<div class=\"g-desc\">%s</div>" % _esc(ctx["desc_text"]),
+        "</section>",
+    ]
+
+
+def _serp_social(page, ctx):
+    parts = []
+    for name in ("WhatsApp", "Facebook", "LinkedIn", "X (Twitter)"):
+        parts.append("<section><h2>%s</h2><div class=\"social\">" % _esc(name))
+        parts.append(_social_card(page, ctx, name))
+        parts.append(_social_twitter(page))
+        parts.append("</div></section>")
+    return parts
+
+
+def _social_card(page, ctx, name):
+    if name == "WhatsApp":
+        return ("<div class=\"img\">%s</div><div class=\"body\">"
+                "<div class=\"s-title\">%s</div><div class=\"s-desc\">%s</div>"
+                "<div class=\"domain\">%s</div></div>"
+                % (_esc(ctx["image_label"]), _esc(ctx["title_text"]),
+                   _esc(ctx["desc_text"]), _esc(ctx["host"])))
+    return ("<div class=\"img\">%s</div><div class=\"body\">"
+            "<div class=\"domain\">%s</div><div class=\"s-title\">%s</div>"
+            "<div class=\"s-desc\">%s</div></div>"
+            % (_esc(ctx["image_label"]), _esc(ctx["host"]),
+               _esc(page.og.get("og:title") or ctx["title_text"]),
+               _esc(page.og.get("og:description") or ctx["desc_text"])))
+
+
+def _social_twitter(page):
+    if page.twitter.get("twitter:card"):
+        return ("<div class=\"meta\">twitter:card=%s</div>"
+                % _esc(page.twitter["twitter:card"]))
+    return "<div class=\"meta warn\">Sin twitter:card</div>"
+
+
+def _serp_meter(m, ctx, url):
+    parts = ["<section style=\"grid-column:1/-1\"><h2>Medidor</h2>",
+             "<table style=\"border-collapse:collapse;font-size:13px\">"]
     rows = [
         ("Título", "%d caracteres · ~%s px (límite ~%d px)" % (
             m["title_chars"], m["title_px"], MAX_TITLE_PX),
@@ -274,17 +310,16 @@ section{page-break-inside:avoid;margin-bottom:12px}}
         parts.append("<tr><td style=\"padding:6px 14px 6px 0\"><strong>%s</strong></td>"
                      "<td style=\"padding:6px 14px 6px 0\">%s</td>"
                      "<td class=\"%s\">%s</td></tr>" % (
-                         _esc(label), _esc(value),
-                         cls, _esc(verdict)))
+                         _esc(label), _esc(value), cls, _esc(verdict)))
     parts.append("</table>")
     parts.append("<p class=\"meta\">%s</p>" % _esc(m["measure"]))
     parts.append("<p class=\"meta\">Para iterar: <code>--title \"...\" "
                  "--description \"...\"</code></p>")
     parts.append("<pre>%s</pre>" % _esc(
-        "Título: %s\nDescripción: %s\nURL: %s" % (title_text, desc_text, url)))
+        "Título: %s\nDescripción: %s\nURL: %s" % (
+            ctx["title_text"], ctx["desc_text"], url)))
     parts.append("</section>")
-    parts.append("</main></body></html>")
-    return "\n".join(parts), m
+    return parts
 
 
 def _truncate_chars(text, limit):

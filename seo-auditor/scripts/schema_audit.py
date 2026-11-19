@@ -222,30 +222,7 @@ def _rating_ok(node):
 
 def rich_preview(blocks, url=""):
     """HTML autocontenido con lo que Google *podría* mostrar y qué falta."""
-    parts = []
-    parts.append("<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"utf-8\">"
-                 "<title>Rich preview — seo-auditor</title>")
-    parts.append("<style>"
-                 "body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;"
-                 "background:#f8f9fa;color:#202124;margin:0;padding:24px}"
-                 ".card{background:#fff;border:1px solid #dadce0;border-radius:8px;"
-                 "padding:16px;margin:16px auto;max-width:680px}"
-                 ".label{font-size:12px;color:#5f6368;text-transform:uppercase;"
-                 "letter-spacing:.04em}"
-                 ".title{color:#1a0dab;font-size:20px;margin:4px 0}"
-                 ".url{color:#006621;font-size:13px}"
-                 ".stars{color:#e7711b;letter-spacing:2px}"
-                 ".price{font-weight:700}"
-                 ".ok{color:#137333}.missing{color:#b3261e}"
-                 "ul{margin:8px 0 0 18px;padding:0}li{margin:2px 0}"
-                 ".tag{display:inline-block;background:#e8f0fe;color:#1967d2;"
-                 "border-radius:10px;padding:1px 8px;font-size:12px;margin-right:4px}"
-                 "</style></head><body>")
-    parts.append("<h1 style=\"font-size:20px\">Rich preview (estimación)</h1>")
-    parts.append("<p class=\"missing\">Vista ilustrativa: la presencia de datos "
-                 "estructurados es un prerrequisito, no una garantía de que el "
-                 "buscador muestre el resultado enriquecido.</p>")
-
+    parts = _preview_head()
     if not blocks:
         parts.append("<div class=\"card\">No se detectó JSON-LD.</div>")
 
@@ -255,73 +232,115 @@ def rich_preview(blocks, url=""):
     articles = find_by_type(blocks, "Article") or find_by_type(blocks, "BlogPosting")
 
     if products:
-        product = products[0]
-        offers = product.get("offers") or {}
-        if isinstance(offers, list):
-            offers = offers[0] if offers else {}
-        parts.append("<div class=\"card\"><div class=\"label\">Producto</div>")
-        parts.append("<div class=\"title\">%s</div>" % html_mod.escape(str(product.get("name", "(sin name)"))))
-        if ratings:
-            r = ratings[0]
-            parts.append("<div class=\"stars\">%s %s <span style=\"color:#5f6368\">(%s)</span></div>"
-                         % ("★" * 5, html_mod.escape(str(r.get("ratingValue", "?"))),
-                            html_mod.escape(str(r.get("ratingCount", "?")))))
-        if offers:
-            parts.append("<div class=\"price\">%s %s</div>" % (
-                html_mod.escape(str(offers.get("price", "?"))),
-                html_mod.escape(str(offers.get("priceCurrency", "")))))
-            if offers.get("availability"):
-                parts.append("<div class=\"url\">%s</div>" % html_mod.escape(
-                    str(offers["availability"]).rsplit("/", 1)[-1]))
-        missing = missing_required(product, "Product")
-        parts.append(_missing_html(missing, "Product"))
-        parts.append("</div>")
-
+        parts += _preview_product(products[0], ratings)
     if faqs:
-        faq = faqs[0]
-        entities = faq.get("mainEntity") or []
-        if isinstance(entities, dict):
-            entities = [entities]
-        parts.append("<div class=\"card\"><div class=\"label\">FAQPage — preguntas desplegables</div>")
-        for item in entities[:6]:
-            if isinstance(item, dict):
-                answer = item.get("acceptedAnswer") or {}
-                text = answer.get("text", "") if isinstance(answer, dict) else str(answer)
-                parts.append("<p><strong>%s</strong><br>%s</p>" % (
-                    html_mod.escape(str(item.get("name", "(sin name)"))),
-                    html_mod.escape(str(text)[:240])))
-        ok, detail = _faq_ok(faq)
-        parts.append("<p class=\"%s\">%s</p>" % ("ok" if ok else "missing",
-                                                 html_mod.escape(detail)))
-        parts.append("</div>")
-
+        parts += _preview_faq(faqs[0])
     if articles:
-        article = articles[0]
-        parts.append("<div class=\"card\"><div class=\"label\">Artículo</div>")
-        parts.append("<div class=\"title\">%s</div>" % html_mod.escape(
-            str(article.get("headline", "(sin headline)"))))
-        parts.append("<div class=\"url\">%s</div>" % html_mod.escape(
-            str(article.get("datePublished", "sin datePublished"))))
-        author = article.get("author")
-        if isinstance(author, dict):
-            author = author.get("name")
-        if isinstance(author, list) and author and isinstance(author[0], dict):
-            author = author[0].get("name")
-        parts.append("<div class=\"url\">Autor: %s</div>" % html_mod.escape(str(author or "ausente")))
-        parts.append(_missing_html(missing_required(article, "Article"), "Article"))
-        parts.append("</div>")
-
+        parts += _preview_article(articles[0])
     if not (products or faqs or articles):
         parts.append("<div class=\"card\">Tipos detectados sin simulación específica. "
                      "Rich results soportados con preview: Product, FAQPage, "
                      "Article y AggregateRating.</div>")
 
-    parts.append("<div class=\"card\"><div class=\"label\">Tipos en la página</div><p>%s</p></div>" % (
+    parts.append(_preview_types(blocks))
+    parts.append("</body></html>")
+    return "\n".join(parts)
+
+
+def _preview_head():
+    return [
+        "<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"utf-8\">"
+        "<title>Rich preview — seo-auditor</title>",
+        "<style>"
+        "body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;"
+        "background:#f8f9fa;color:#202124;margin:0;padding:24px}"
+        ".card{background:#fff;border:1px solid #dadce0;border-radius:8px;"
+        "padding:16px;margin:16px auto;max-width:680px}"
+        ".label{font-size:12px;color:#5f6368;text-transform:uppercase;"
+        "letter-spacing:.04em}"
+        ".title{color:#1a0dab;font-size:20px;margin:4px 0}"
+        ".url{color:#006621;font-size:13px}"
+        ".stars{color:#e7711b;letter-spacing:2px}"
+        ".price{font-weight:700}"
+        ".ok{color:#137333}.missing{color:#b3261e}"
+        "ul{margin:8px 0 0 18px;padding:0}li{margin:2px 0}"
+        ".tag{display:inline-block;background:#e8f0fe;color:#1967d2;"
+        "border-radius:10px;padding:1px 8px;font-size:12px;margin-right:4px}"
+        "</style></head><body>",
+        "<h1 style=\"font-size:20px\">Rich preview (estimación)</h1>",
+        "<p class=\"missing\">Vista ilustrativa: la presencia de datos "
+        "estructurados es un prerrequisito, no una garantía de que el "
+        "buscador muestre el resultado enriquecido.</p>",
+    ]
+
+
+def _preview_product(product, ratings):
+    offers = product.get("offers") or {}
+    if isinstance(offers, list):
+        offers = offers[0] if offers else {}
+    parts = ["<div class=\"card\"><div class=\"label\">Producto</div>"]
+    parts.append("<div class=\"title\">%s</div>"
+                 % html_mod.escape(str(product.get("name", "(sin name)"))))
+    if ratings:
+        r = ratings[0]
+        parts.append("<div class=\"stars\">%s %s <span style=\"color:#5f6368\">(%s)</span></div>"
+                     % ("★" * 5, html_mod.escape(str(r.get("ratingValue", "?"))),
+                        html_mod.escape(str(r.get("ratingCount", "?")))))
+    if offers:
+        parts.append("<div class=\"price\">%s %s</div>" % (
+            html_mod.escape(str(offers.get("price", "?"))),
+            html_mod.escape(str(offers.get("priceCurrency", "")))))
+        if offers.get("availability"):
+            parts.append("<div class=\"url\">%s</div>" % html_mod.escape(
+                str(offers["availability"]).rsplit("/", 1)[-1]))
+    missing = missing_required(product, "Product")
+    parts.append(_missing_html(missing, "Product"))
+    parts.append("</div>")
+    return parts
+
+
+def _preview_faq(faq):
+    entities = faq.get("mainEntity") or []
+    if isinstance(entities, dict):
+        entities = [entities]
+    parts = ["<div class=\"card\"><div class=\"label\">FAQPage — preguntas desplegables</div>"]
+    for item in entities[:6]:
+        if isinstance(item, dict):
+            answer = item.get("acceptedAnswer") or {}
+            text = answer.get("text", "") if isinstance(answer, dict) else str(answer)
+            parts.append("<p><strong>%s</strong><br>%s</p>" % (
+                html_mod.escape(str(item.get("name", "(sin name)"))),
+                html_mod.escape(str(text)[:240])))
+    ok, detail = _faq_ok(faq)
+    parts.append("<p class=\"%s\">%s</p>" % ("ok" if ok else "missing",
+                                             html_mod.escape(detail)))
+    parts.append("</div>")
+    return parts
+
+
+def _preview_article(article):
+    parts = ["<div class=\"card\"><div class=\"label\">Artículo</div>"]
+    parts.append("<div class=\"title\">%s</div>" % html_mod.escape(
+        str(article.get("headline", "(sin headline)"))))
+    parts.append("<div class=\"url\">%s</div>" % html_mod.escape(
+        str(article.get("datePublished", "sin datePublished"))))
+    author = article.get("author")
+    if isinstance(author, dict):
+        author = author.get("name")
+    if isinstance(author, list) and author and isinstance(author[0], dict):
+        author = author[0].get("name")
+    parts.append("<div class=\"url\">Autor: %s</div>"
+                 % html_mod.escape(str(author or "ausente")))
+    parts.append(_missing_html(missing_required(article, "Article"), "Article"))
+    parts.append("</div>")
+    return parts
+
+
+def _preview_types(blocks):
+    return ("<div class=\"card\"><div class=\"label\">Tipos en la página</div><p>%s</p></div>" % (
         " ".join("<span class=\"tag\">%s</span>" % html_mod.escape(t)
                  for t in extract_types([b["data"] for b in blocks if b.get("valid_json")])
                  ) or "ninguno"))
-    parts.append("</body></html>")
-    return "\n".join(parts)
 
 
 def _missing_html(missing, type_name):

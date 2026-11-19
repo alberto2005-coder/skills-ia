@@ -71,15 +71,34 @@ def build_plan(payload, output_dir):
     url = page.canonicals[0] if page.canonicals else (
         (payload.get("data") or {}).get("page", {}).get("url") or "")
     sitemaps = (payload.get("data") or {}).get("index", {}).get("sitemaps") or []
-    sitemap_urls = []
-    for rec in payload.get("pages") or []:
-        candidate = rec if isinstance(rec, str) else (rec or {}).get("url")
-        if candidate and str(candidate).lower().startswith(("http://", "https://")):
-            sitemap_urls.append(candidate)
+    sitemap_urls = [x for x in (_page_url(rec) for rec in payload.get("pages") or []) if x]
 
-    generated = []
+    generated = [_write_robots(out, sitemaps)]
+    generated.append(_write_meta(out, page))
+    generated.append(_write_jsonld(out, payload, page))
+    generated += _write_llms(out, page, url, sitemap_urls)
 
-    # 1) robots.txt
+    # PLAN.md con acciones priorizadas (se genera con lo ya escrito).
+    plan_path = out / "PLAN.md"
+    plan_path.write_text(render_plan(payload, generated), encoding="utf-8")
+    generated.append(str(plan_path))
+
+    return {
+        "output_dir": str(out),
+        "files": generated,
+        "applicable": [name for name in APPLICABLE],
+        "note": "Dry-run: nada se ha escrito fuera de %s." % out,
+    }
+
+
+def _page_url(rec):
+    candidate = rec if isinstance(rec, str) else (rec or {}).get("url")
+    if candidate and str(candidate).lower().startswith(("http://", "https://")):
+        return candidate
+    return None
+
+
+def _write_robots(out, sitemaps):
     robots_lines = ["# DRAFT — propuesta de robots.txt (revisar antes de aplicar)", ""]
     if sitemaps:
         for item in sitemaps[:10]:
@@ -92,9 +111,10 @@ def build_plan(payload, output_dir):
         allow_search=True, allow_user_fetch=True, allow_training=False))
     robots_path = out / "robots.txt.draft"
     robots_path.write_text("\n".join(robots_lines), encoding="utf-8")
-    generated.append(str(robots_path))
+    return str(robots_path)
 
-    # 2) meta tags (snippet)
+
+def _write_meta(out, page):
     title = page.title or "TODO: título único (45–60 caracteres)"
     description = page.description or "TODO: meta description (120–160 caracteres)"
     canonical = page.canonicals[0] if page.canonicals else "TODO: URL canónica absoluta"
@@ -116,37 +136,26 @@ def build_plan(payload, output_dir):
     ]
     meta_path = out / "meta-tags.html.draft"
     meta_path.write_text("\n".join(meta), encoding="utf-8")
-    generated.append(str(meta_path))
+    return str(meta_path)
 
-    # 3) JSON-LD (skeleton con datos observados)
+
+def _write_jsonld(out, payload, page):
     types = (payload.get("data") or {}).get("schema", {}).get("types") or []
     jsonld = _jsonld_skeleton(page, types)
     jsonld_path = out / "jsonld.json.draft"
     jsonld_path.write_text(json.dumps(jsonld, ensure_ascii=False, indent=2),
                            encoding="utf-8")
-    generated.append(str(jsonld_path))
+    return str(jsonld_path)
 
-    # 4) llms.txt / llms-full.txt
-    llms = geo.llms_txt(page, url, sitemap_urls) if (page.title or url) else ""
-    llms_path = out / "llms.txt.draft"
-    llms_path.write_text("# DRAFT — llms.txt\n\n" + llms, encoding="utf-8")
-    generated.append(str(llms_path))
-    llms_full = geo.llms_full_txt(page, url, sitemap_urls) if (page.title or url) else ""
-    llms_full_path = out / "llms-full.txt.draft"
-    llms_full_path.write_text("# DRAFT — llms-full.txt\n\n" + llms_full, encoding="utf-8")
-    generated.append(str(llms_full_path))
 
-    # 5) PLAN.md con acciones priorizadas
-    plan_path = out / "PLAN.md"
-    plan_path.write_text(render_plan(payload, generated), encoding="utf-8")
-    generated.append(str(plan_path))
-
-    return {
-        "output_dir": str(out),
-        "files": generated,
-        "applicable": [name for name in APPLICABLE],
-        "note": "Dry-run: nada se ha escrito fuera de %s." % out,
-    }
+def _write_llms(out, page, url, sitemap_urls):
+    paths = []
+    for name, builder in (("llms.txt", geo.llms_txt), ("llms-full.txt", geo.llms_full_txt)):
+        body = builder(page, url, sitemap_urls) if (page.title or url) else ""
+        path = out / (name + ".draft")
+        path.write_text("# DRAFT — " + name + "\n\n" + body, encoding="utf-8")
+        paths.append(str(path))
+    return paths
 
 
 def _esc(value):

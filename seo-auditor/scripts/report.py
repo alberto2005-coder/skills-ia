@@ -114,9 +114,19 @@ def _sort_checks(items):
 
 
 def render_markdown(payload):
+    lines = _md_header(payload)
+    crawl = payload.get("crawl")
+    if crawl:
+        lines += _md_crawl(crawl)
+    lines += _md_groups(payload)
+    lines += _md_measured(payload)
+    lines += _md_limits(payload)
+    return "\n".join(lines)
+
+
+def _md_header(payload):
     counts = payload.get("counts", {})
-    checks = _sort_checks(payload.get("checks", []))
-    lines = [
+    return [
         "# Informe SEO — %s" % (payload.get("target") or "sitio"),
         "",
         "> **Veredicto:** %s" % payload.get("verdict_line", ""),
@@ -141,54 +151,70 @@ def render_markdown(payload):
         "",
     ]
 
-    crawl = payload.get("crawl")
-    if crawl:
-        lines += [
-            "## Rastreo (declarado)",
-            "",
-            "- Tope de páginas: **%s** · Profundidad: **%s** · Ritmo: **%s req/s**" % (
-                crawl.get("max_pages"), crawl.get("max_depth"),
-                crawl.get("requests_per_second")),
-            "- robots.txt respetado: **%s** · Páginas rastreadas: **%s**" % (
-                "sí" if crawl.get("robots_respected") else "no",
-                crawl.get("pages_fetched")),
-            "",
-        ]
 
-    # Grupos por icono.
-    groups = (
-        ("🔴 Críticos (`must`)", lambda c: c.get("status") == "fail" and c.get("severity_level") == "must"),
-        ("🟡 Avisos (`should`)", lambda c: c.get("status") == "fail" and c.get("severity_level") == "should"),
-        ("🟢 Aprobados y mejoras opcionales", lambda c: c.get("status") == "pass"
-         or (c.get("status") == "fail" and c.get("severity_level") == "nice")),
-        ("⚪ No comprobados (`skip`)", lambda c: c.get("status") == "skip"),
-    )
-    for title, predicate in groups:
+def _md_crawl(crawl):
+    return [
+        "## Rastreo (declarado)",
+        "",
+        "- Tope de páginas: **%s** · Profundidad: **%s** · Ritmo: **%s req/s**" % (
+            crawl.get("max_pages"), crawl.get("max_depth"),
+            crawl.get("requests_per_second")),
+        "- robots.txt respetado: **%s** · Páginas rastreadas: **%s**" % (
+            "sí" if crawl.get("robots_respected") else "no",
+            crawl.get("pages_fetched")),
+        "",
+    ]
+
+
+# Grupos por icono.
+_MD_GROUPS = (
+    ("🔴 Críticos (`must`)", lambda c: c.get("status") == "fail" and c.get("severity_level") == "must"),
+    ("🟡 Avisos (`should`)", lambda c: c.get("status") == "fail" and c.get("severity_level") == "should"),
+    ("🟢 Aprobados y mejoras opcionales", lambda c: c.get("status") == "pass"
+     or (c.get("status") == "fail" and c.get("severity_level") == "nice")),
+    ("⚪ No comprobados (`skip`)", lambda c: c.get("status") == "skip"),
+)
+
+
+def _md_groups(payload):
+    checks = _sort_checks(payload.get("checks", []))
+    lines = []
+    for title, predicate in _MD_GROUPS:
         subset = [c for c in checks if predicate(c)]
         lines += ["## %s — %d" % (title, len(subset)), ""]
         if not subset:
             lines += ["_Sin registros en este grupo._", ""]
             continue
         for rec in subset:
-            icon = checks_mod.icon_for(rec)
-            state = {"pass": "aprobado", "fail": "falla", "skip": "no aplica"}.get(
-                rec.get("status"), rec.get("status"))
-            lines.append("### %s `%s` — %s" % (icon, rec.get("id"), rec.get("title")))
-            lines.append("- Dimensión: %s · Severidad: `%s` (%s) · Estado: %s" % (
-                DIM_LABEL.get(rec.get("dimension"), rec.get("dimension", "")),
-                rec.get("severity_level"), checks_mod.severity_label(rec.get("severity_level")), state))
-            if rec.get("url"):
-                lines.append("- Evidencia en: `%s`" % rec["url"])
-            lines.append("- Evidencia: %s" % (rec.get("evidence") or "—"))
-            if rec.get("status") == "fail":
-                lines.append("- Recomendación: %s" % analyze.recommendation_for(rec.get("id")))
-            if rec.get("citation"):
-                lines.append("- Doc oficial: %s" % rec["citation"])
-            if rec.get("note"):
-                lines.append("- Nota: `%s`" % rec["note"])
-            lines.append("")
+            lines += _md_check(rec)
+    return lines
 
-    lines += ["## Datos medidos", ""]
+
+def _md_check(rec):
+    icon = checks_mod.icon_for(rec)
+    state = {"pass": "aprobado", "fail": "falla", "skip": "no aplica"}.get(
+        rec.get("status"), rec.get("status"))
+    lines = [
+        "### %s `%s` — %s" % (icon, rec.get("id"), rec.get("title")),
+        "- Dimensión: %s · Severidad: `%s` (%s) · Estado: %s" % (
+            DIM_LABEL.get(rec.get("dimension"), rec.get("dimension", "")),
+            rec.get("severity_level"), checks_mod.severity_label(rec.get("severity_level")), state),
+    ]
+    if rec.get("url"):
+        lines.append("- Evidencia en: `%s`" % rec["url"])
+    lines.append("- Evidencia: %s" % (rec.get("evidence") or "—"))
+    if rec.get("status") == "fail":
+        lines.append("- Recomendación: %s" % analyze.recommendation_for(rec.get("id")))
+    if rec.get("citation"):
+        lines.append("- Doc oficial: %s" % rec["citation"])
+    if rec.get("note"):
+        lines.append("- Nota: `%s`" % rec["note"])
+    lines.append("")
+    return lines
+
+
+def _md_measured(payload):
+    lines = ["## Datos medidos", ""]
     data = payload.get("data") or {}
     onpage = data.get("onpage") or {}
     if onpage.get("keyword_density"):
@@ -216,12 +242,15 @@ def render_markdown(payload):
             perf.get("ttfb_ms"), perf.get("html_bytes"),
             perf.get("content_encoding"), perf.get("psi_url")))
     lines.append("")
+    return lines
 
-    lines += ["## Límites y datos no comprobados", ""]
+
+def _md_limits(payload):
+    lines = ["## Límites y datos no comprobados", ""]
     for item in payload.get("limits", []):
         lines.append("- %s" % item)
     lines.append("")
-    return "\n".join(lines)
+    return lines
 
 
 def _fail_by_level(payload, level):
@@ -234,21 +263,7 @@ def _pass_count(payload):
 
 # --- HTML imprimible --------------------------------------------------------
 
-def render_html(payload):
-    checks = _sort_checks(payload.get("checks", []))
-    counts = payload.get("counts", {})
-    must_fail = _fail_by_level(payload, "must")
-    should_fail = _fail_by_level(payload, "should")
-    nice = payload.get("counts_by_level", {}).get("nice", {}).get("fail", 0)
-
-    def esc(value):
-        return html_mod.escape(str(value if value is not None else ""))
-
-    parts = []
-    parts.append("<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"utf-8\">"
-                 "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
-                 "<title>Informe SEO — %s</title>" % esc(payload.get("target")))
-    parts.append("""<style>
+_HTML_STYLE = """<style>
 :root{--rojo:#d93025;--amarillo:#f9ab00;--verde:#1e8e3e;--gris:#5f6368}
 body{font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;margin:0;
 background:#f1f3f4;color:#202124}
@@ -284,85 +299,165 @@ a{color:#1a73e8}
 .bar span{display:block;height:100%;background:#1a73e8}
 @media print{body{background:#fff}.filters,.hint{display:none}th{position:static}
 tr{page-break-inside:avoid}header{padding:0 0 12px 0}}
-</style></head><body>""")
+</style></head><body>"""
 
-    parts.append("<header><h1>Informe SEO — %s</h1>" % esc(payload.get("target")))
-    parts.append("<div class=\"verdict\">%s</div>" % esc(payload.get("verdict_line")))
-    parts.append("<div class=\"score\">%.1f<span style=\"font-size:18px\">/100</span></div>"
-                 % float(payload.get("score") or 0))
-    parts.append("<div style=\"color:var(--gris);font-size:12px\">Modo %s · %s · %s %s</div>"
-                 % (esc(payload.get("mode")), esc(payload.get("generated_at")),
-                    TOOL_NAME, TOOL_VERSION))
-    parts.append("<div class=\"hint\">Para obtener el PDF: <strong>Imprimir</strong> "
-                 "(Ctrl/Cmd+P) → <em>Guardar como PDF</em>. El filtro de abajo no se "
-                 "imprime: se imprimen todas las filas.</div></header>")
+_HTML_SCRIPT = """<script>
+document.querySelectorAll('.filters button').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var f = btn.getAttribute('data-filter');
+    document.querySelectorAll('.filters button').forEach(function(b){b.classList.remove('active')});
+    btn.classList.add('active');
+    document.querySelectorAll('tbody tr').forEach(function(tr){
+      var status = tr.getAttribute('data-status');
+      var severity = tr.getAttribute('data-severity');
+      var show = f === 'all' || (f === 'must' && status === 'fail' && severity === 'must')
+        || (f === 'should' && status === 'fail' && severity === 'should')
+        || (f === 'pass' && status === 'pass') || (f === 'skip' && status === 'skip');
+      tr.style.display = show ? '' : 'none';
+    });
+  });
+});
+</script></body></html>"""
 
-    parts.append("<div class=\"grid\">")
+
+def _esc(value):
+    return html_mod.escape(str(value if value is not None else ""))
+
+
+def render_html(payload):
+    checks = _sort_checks(payload.get("checks", []))
+    counts = payload.get("counts", {})
+    must_fail = _fail_by_level(payload, "must")
+    should_fail = _fail_by_level(payload, "should")
+    nice = payload.get("counts_by_level", {}).get("nice", {}).get("fail", 0)
+    parts = [_html_head(payload), _HTML_STYLE]
+    parts += _html_header(payload)
+    parts += _html_cards(counts, must_fail, should_fail, nice)
+    parts += _html_rubric(payload)
+    crawl = payload.get("crawl")
+    if crawl:
+        parts.append(_html_crawl(crawl))
+    parts.append(_html_filters(len(checks), must_fail, should_fail, counts))
+    parts += _html_table(checks)
+    parts += _html_measured(payload)
+    parts += _html_limits(payload)
+    parts.append(_HTML_SCRIPT)
+    return "\n".join(parts)
+
+
+def _html_head(payload):
+    return ("<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"utf-8\">"
+            "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+            "<title>Informe SEO — %s</title>" % _esc(payload.get("target")))
+
+
+def _html_header(payload):
+    return [
+        "<header><h1>Informe SEO — %s</h1>" % _esc(payload.get("target")),
+        "<div class=\"verdict\">%s</div>" % _esc(payload.get("verdict_line")),
+        "<div class=\"score\">%.1f<span style=\"font-size:18px\">/100</span></div>"
+        % float(payload.get("score") or 0),
+        "<div style=\"color:var(--gris);font-size:12px\">Modo %s · %s · %s %s</div>"
+        % (_esc(payload.get("mode")), _esc(payload.get("generated_at")),
+           TOOL_NAME, TOOL_VERSION),
+        "<div class=\"hint\">Para obtener el PDF: <strong>Imprimir</strong> "
+        "(Ctrl/Cmd+P) → <em>Guardar como PDF</em>. El filtro de abajo no se "
+        "imprime: se imprimen todas las filas.</div></header>",
+    ]
+
+
+def _html_cards(counts, must_fail, should_fail, nice):
     cards = [("🔴 Críticos", bool(must_fail), must_fail), ("🟡 Avisos", bool(should_fail), should_fail),
              ("🟢 Mejoras opcionales", bool(nice), nice), ("✅ Aprobados", counts.get("pass", 0) > 0,
                                                           counts.get("pass", 0)),
              ("⚪ No comprobados", counts.get("skip", 0) > 0, counts.get("skip", 0))]
+    parts = ["<div class=\"grid\">"]
     for label, _flag, number in cards:
         parts.append("<div class=\"card\"><div class=\"n\">%s</div>"
-                     "<div class=\"l\">%s</div></div>" % (esc(number), esc(label)))
+                     "<div class=\"l\">%s</div></div>" % (_esc(number), _esc(label)))
     parts.append("</div>")
+    return parts
 
-    parts.append("<main><h2>Rúbrica por dimensiones</h2><div class=\"card\">")
+
+def _html_rubric(payload):
+    parts = ["<main><h2>Rúbrica por dimensiones</h2><div class=\"card\">"]
     for dim in checks_mod.DIMENSIONS:
         item = payload.get("dimensions", {}).get(dim, {})
         score = item.get("score")
         width = 0 if score is None else max(0, min(100, score))
         parts.append("<div class=\"dim\"><strong>%s</strong> · peso %s · %s"
                      "<div class=\"bar\"><span style=\"width:%s%%\"></span></div></div>" % (
-                         esc(DIM_LABEL.get(dim, dim)), esc(item.get("weight")),
+                         _esc(DIM_LABEL.get(dim, dim)), _esc(item.get("weight")),
                          "sin datos" if score is None else "%s/100" % score, width))
     parts.append("<p style=\"font-size:12px;color:var(--gris)\">%s</p></div>"
-                 % esc(payload.get("rubric", {}).get("formula", "")))
+                 % _esc(payload.get("rubric", {}).get("formula", "")))
+    return parts
 
-    crawl = payload.get("crawl")
-    if crawl:
-        parts.append("<div class=\"hint\">Rastreo declarado: tope <strong>%s</strong> páginas · "
-                     "profundidad <strong>%s</strong> · <strong>%s req/s</strong> · "
-                     "robots.txt respetado: <strong>%s</strong></div>" % (
-                         esc(crawl.get("max_pages")), esc(crawl.get("max_depth")),
-                         esc(crawl.get("requests_per_second")),
-                         "sí" if crawl.get("robots_respected") else "no"))
 
-    parts.append("<div class=\"filters\">"
-                 "<button data-filter=\"all\" class=\"active\">Todo (%d)</button>"
-                 "<button data-filter=\"must\">🔴 Críticos (%d)</button>"
-                 "<button data-filter=\"should\">🟡 Avisos (%d)</button>"
-                 "<button data-filter=\"pass\">🟢 Aprobados (%d)</button>"
-                 "<button data-filter=\"skip\">⚪ No comprobados (%d)</button>"
-                 "</div>" % (len(checks), must_fail, should_fail,
-                             counts.get("pass", 0), counts.get("skip", 0)))
+def _html_crawl(crawl):
+    return ("<div class=\"hint\">Rastreo declarado: tope <strong>%s</strong> páginas · "
+            "profundidad <strong>%s</strong> · <strong>%s req/s</strong> · "
+            "robots.txt respetado: <strong>%s</strong></div>" % (
+                _esc(crawl.get("max_pages")), _esc(crawl.get("max_depth")),
+                _esc(crawl.get("requests_per_second")),
+                "sí" if crawl.get("robots_respected") else "no"))
 
-    parts.append("<table><thead><tr><th>Estado</th><th>ID</th><th>Comprobación</th>"
-                 "<th>Dimensión</th><th>Severidad</th><th>Evidencia</th>"
-                 "<th>Doc oficial</th></tr></thead><tbody>")
+
+def _html_filters(total, must_fail, should_fail, counts):
+    return ("<div class=\"filters\">"
+            "<button data-filter=\"all\" class=\"active\">Todo (%d)</button>"
+            "<button data-filter=\"must\">🔴 Críticos (%d)</button>"
+            "<button data-filter=\"should\">🟡 Avisos (%d)</button>"
+            "<button data-filter=\"pass\">🟢 Aprobados (%d)</button>"
+            "<button data-filter=\"skip\">⚪ No comprobados (%d)</button>"
+            "</div>" % (total, must_fail, should_fail,
+                        counts.get("pass", 0), counts.get("skip", 0)))
+
+
+def _html_table(checks):
+    parts = ["<table><thead><tr><th>Estado</th><th>ID</th><th>Comprobación</th>"
+             "<th>Dimensión</th><th>Severidad</th><th>Evidencia</th>"
+             "<th>Doc oficial</th></tr></thead><tbody>"]
     for rec in checks:
-        status = rec.get("status", "skip")
-        level = rec.get("severity_level", "nice")
-        row_class = status if status != "fail" else "fail " + level
-        badge = {"must": "b-must", "should": "b-should", "nice": "b-nice"}.get(level, "b-nice")
-        parts.append("<tr class=\"%s\" data-status=\"%s\" data-severity=\"%s\">" % (
-            row_class, status, level))
-        parts.append("<td>%s</td><td><code>%s</code></td><td>%s</td><td>%s</td>" % (
-            esc(checks_mod.icon_for(rec)), esc(rec.get("id")), esc(rec.get("title")),
-            esc(DIM_LABEL.get(rec.get("dimension"), rec.get("dimension")))))
-        parts.append("<td><span class=\"badge %s\">%s</span></td>" % (
-            badge, esc(level)))
-        evidence = esc(rec.get("evidence"))
-        if status == "fail":
-            evidence += "<br><em>%s</em>" % esc(analyze.recommendation_for(rec.get("id")))
-        parts.append("<td>%s</td>" % evidence)
-        citation = rec.get("citation") or ""
-        parts.append("<td>%s</td></tr>" % (
-            "<a href=\"%s\" rel=\"noopener\">doc</a>" % esc(citation) if citation else "—"))
+        parts += _html_row(rec)
     parts.append("</tbody></table>")
+    return parts
 
-    parts.append("<h2 style=\"margin-top:28px\">Datos medidos</h2><div class=\"card\">")
+
+def _html_row(rec):
+    status = rec.get("status", "skip")
+    level = rec.get("severity_level", "nice")
+    row_class = status if status != "fail" else "fail " + level
+    badge = {"must": "b-must", "should": "b-should", "nice": "b-nice"}.get(level, "b-nice")
+    evidence = _esc(rec.get("evidence"))
+    if status == "fail":
+        evidence += "<br><em>%s</em>" % _esc(analyze.recommendation_for(rec.get("id")))
+    citation = rec.get("citation") or ""
+    return [
+        "<tr class=\"%s\" data-status=\"%s\" data-severity=\"%s\">" % (
+            row_class, status, level),
+        "<td>%s</td><td><code>%s</code></td><td>%s</td><td>%s</td>" % (
+            _esc(checks_mod.icon_for(rec)), _esc(rec.get("id")), _esc(rec.get("title")),
+            _esc(DIM_LABEL.get(rec.get("dimension"), rec.get("dimension")))),
+        "<td><span class=\"badge %s\">%s</span></td>" % (badge, _esc(level)),
+        "<td>%s</td>" % evidence,
+        "<td>%s</td></tr>" % (
+            "<a href=\"%s\" rel=\"noopener\">doc</a>" % _esc(citation) if citation else "—"),
+    ]
+
+
+def _html_measured(payload):
     data = payload.get("data") or {}
+    parts = ["<h2 style=\"margin-top:28px\">Datos medidos</h2><div class=\"card\">"]
+    for label, value in _measured_rows(data):
+        parts.append("<div><strong>%s:</strong> %s</div>" % (_esc(label), _esc(value)))
+    parts.append("<p><strong>PageSpeed Insights:</strong> %s</p></div>" % (
+        "<a href=\"%s\" rel=\"noopener\">abrir</a>" % _esc((data.get("perf") or {}).get("psi_url"))
+        if (data.get("perf") or {}).get("psi_url") else "sin URL"))
+    return parts
+
+
+def _measured_rows(data):
     rows = []
     onpage = data.get("onpage") or {}
     if onpage:
@@ -383,35 +478,15 @@ tr{page-break-inside:avoid}header{padding:0 0 12px 0}}
         rows.append(("Título", "%s caracteres · ~%s px (estimate)" % (
             data["serp"].get("title_chars"), data["serp"].get("title_px"))))
         rows.append(("Descripción", "%s caracteres" % data["serp"].get("description_chars")))
-    for label, value in rows:
-        parts.append("<div><strong>%s:</strong> %s</div>" % (esc(label), esc(value)))
-    parts.append("<p><strong>PageSpeed Insights:</strong> %s</p></div>" % (
-        "<a href=\"%s\" rel=\"noopener\">abrir</a>" % esc((data.get("perf") or {}).get("psi_url"))
-        if (data.get("perf") or {}).get("psi_url") else "sin URL"))
+    return rows
 
-    parts.append("<h2 style=\"margin-top:28px\">Límites</h2><div class=\"card\"><ul>")
+
+def _html_limits(payload):
+    parts = ["<h2 style=\"margin-top:28px\">Límites</h2><div class=\"card\"><ul>"]
     for item in payload.get("limits", []):
-        parts.append("<li>%s</li>" % esc(item))
+        parts.append("<li>%s</li>" % _esc(item))
     parts.append("</ul></div></main>")
-
-    parts.append("""<script>
-document.querySelectorAll('.filters button').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    var f = btn.getAttribute('data-filter');
-    document.querySelectorAll('.filters button').forEach(function(b){b.classList.remove('active')});
-    btn.classList.add('active');
-    document.querySelectorAll('tbody tr').forEach(function(tr){
-      var status = tr.getAttribute('data-status');
-      var severity = tr.getAttribute('data-severity');
-      var show = f === 'all' || (f === 'must' && status === 'fail' && severity === 'must')
-        || (f === 'should' && status === 'fail' && severity === 'should')
-        || (f === 'pass' && status === 'pass') || (f === 'skip' && status === 'skip');
-      tr.style.display = show ? '' : 'none';
-    });
-  });
-});
-</script></body></html>""")
-    return "\n".join(parts)
+    return parts
 
 
 # --- Escritura / re-score ---------------------------------------------------

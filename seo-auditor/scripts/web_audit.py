@@ -67,6 +67,49 @@ def _origin(url):
 
 def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=False,
               rate=1.0, respect_robots=True):
+    settings = _crawl_settings(start_url, max_pages, timeout, rate, allow_local)
+    robots, robots_url = _load_robots(start_url, timeout, allow_local, respect_robots)
+    llms_status, llms_full_status = _probe_llms(start_url, timeout, allow_local)
+
+    sitemap_urls = list((robots or {}).get("sitemaps", []))
+    crawl = _crawl_pages(start_url, settings, robots, max_depth, respect_robots,
+                         timeout, allow_local)
+    sitemap_count = _sitemap_count(start_url, sitemap_urls, timeout, allow_local)
+
+    data = {
+        "crawl": {
+            "max_pages": settings["limit"],
+            "max_depth": max_depth,
+            "requests_per_second": settings["rate"],
+            "robots_respected": bool(respect_robots),
+            "robots_url": robots_url,
+            "pages_fetched": crawl["fetched"],
+            "skipped_by_robots": len(crawl["skipped"]),
+            "limit_declared": True,
+        },
+        "sitemap": {"urls": sitemap_urls, "loc_count": sitemap_count},
+        "pages": crawl["records"],
+    }
+
+    checks = _page_checks(crawl["parsed_pages"], data, robots, sitemap_urls,
+                          llms_status, llms_full_status)
+    checks.append(_crawl_check(respect_robots, settings, crawl["skipped"], start_url))
+
+    return {
+        "mode": "local" if allow_local else "web",
+        "target": start_url,
+        "start_url": start_url,
+        "pages_scanned": len(crawl["records"]),
+        "pages": crawl["records"],
+        "skipped_by_robots": crawl["skipped"],
+        "crawl": data["crawl"],
+        "checks": checks,
+        "findings": analyze.to_findings(checks),
+        "data": data,
+    }
+
+
+def _crawl_settings(start_url, max_pages, timeout, rate, allow_local):
     validate_target(start_url, allow_local=allow_local)
     limit = max(1, min(int(max_pages), 500))
     if rate is None or float(rate) <= 0:
@@ -74,40 +117,43 @@ def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=Fals
     if timeout is None or int(timeout) <= 0:
         raise ValueError("timeout debe ser mayor que 0 segundos")
     rate = float(rate)
-    interval = 1.0 / rate
+    return {"limit": limit, "rate": rate, "interval": 1.0 / rate,
+            "origin": _origin(start_url), "origin_host": urlparse(start_url).netloc}
 
-    origin = urlparse(start_url)
-    origin_host = origin.netloc
 
-    # robots.txt una sola vez por origen.
-    robots = None
+def _load_robots(start_url, timeout, allow_local, respect_robots):
+    """robots.txt una sola vez por origen."""
     robots_url = _origin(start_url) + "/robots.txt"
-    if respect_robots:
-        try:
-            robots_text, robots_url = indexcheck.fetch_robots(
-                start_url, timeout=timeout, allow_local=allow_local)
-            robots = indexcheck.parse_robots(robots_text)
-        except Exception:
-            robots = None
-
-    sitemap_urls = list((robots or {}).get("sitemaps", []))
-    llms_status = None
-    llms_full_status = None
+    if not respect_robots:
+        return None, robots_url
     try:
-        for name, setter in (("llms.txt", "llms"), ("llms-full.txt", "llms_full")):
-            try:
-                response = fetch(_origin(start_url) + "/" + name, timeout=timeout,
-                                 allow_local=allow_local)
-                ok = 200 <= (response["status"] or 0) < 300 and len(response["body"]) > 0
-            except (HTTPError, URLError, ValueError):
-                ok = False
-            if setter == "llms":
-                llms_status = ok
-            else:
-                llms_full_status = ok
+        robots_text, robots_url = indexcheck.fetch_robots(
+            start_url, timeout=timeout, allow_local=allow_local)
+        return indexcheck.parse_robots(robots_text), robots_url
+    except Exception:
+        return None, robots_url
+
+
+def _llms_available(url, timeout, allow_local):
+    try:
+        response = fetch(url, timeout=timeout, allow_local=allow_local)
+    except (HTTPError, URLError, ValueError):
+        return False
+    return 200 <= (response["status"] or 0) < 300 and len(response["body"]) > 0
+
+
+def _probe_llms(start_url, timeout, allow_local):
+    statuses = {"llms": None, "llms_full": None}
+    try:
+        for name, key in (("llms.txt", "llms"), ("llms-full.txt", "llms_full")):
+            statuses[key] = _llms_available(_origin(start_url) + "/" + name,
+                                            timeout, allow_local)
     except Exception:
         pass
+    return statuses["llms"], statuses["llms_full"]
 
+
+def _crawl_pages(start_url, settings, robots, max_depth, respect_robots, timeout, allow_local):
     queue = deque([(start_url, 0)])
     seen = set()
     records = []
@@ -116,7 +162,7 @@ def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=Fals
     last_request = 0.0
     fetched = 0
 
-    while queue and fetched < limit:
+    while queue and fetched < settings["limit"]:
         url, depth = queue.popleft()
         url = urldefrag(url)[0]
         if url in seen:
@@ -128,7 +174,7 @@ def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=Fals
             skipped.append(url)
             continue
 
-        wait = interval - (time.time() - last_request)
+        wait = settings["interval"] - (time.time() - last_request)
         if last_request and wait > 0:
             time.sleep(wait)
         last_request = time.time()
@@ -159,47 +205,53 @@ def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=Fals
 
         page = parse_html(decode_html(response["body"], response["headers"]))
         parsed_pages.append((url, page, response["headers"], record))
+        _enqueue_anchors(queue, seen, page, response["final_url"], depth, max_depth,
+                         settings["origin_host"])
 
-        if depth < max_depth:
-            for href in page.anchors:
-                absolute = urljoin(response["final_url"], href)
-                parsed = urlparse(absolute)
-                if parsed.scheme in ("http", "https") and parsed.netloc == origin_host:
-                    clean = urldefrag(absolute)[0]
-                    if clean not in seen:
-                        queue.append((clean, depth + 1))
+    return {"records": records, "parsed_pages": parsed_pages,
+            "skipped": skipped, "fetched": fetched}
 
-    # Sitemap: si robots no lo declara, se prueba /sitemap.xml.
-    sitemap_count = None
-    if not sitemap_urls:
-        try:
-            candidate = _origin(start_url) + "/sitemap.xml"
-            response = fetch(candidate, timeout=timeout, allow_local=allow_local)
-            if 200 <= (response["status"] or 0) < 300:
-                text = decode_html(response["body"], response["headers"])
-                sitemap_count = len(re.findall(r"<loc>", text))
-                sitemap_urls.append(candidate)
-        except Exception:
-            sitemap_count = None
 
+def _enqueue_anchors(queue, seen, page, final_url, depth, max_depth, origin_host):
+    if depth >= max_depth:
+        return
+    for href in page.anchors:
+        absolute = urljoin(final_url, href)
+        parsed = urlparse(absolute)
+        if parsed.scheme in ("http", "https") and parsed.netloc == origin_host:
+            clean = urldefrag(absolute)[0]
+            if clean not in seen:
+                queue.append((clean, depth + 1))
+
+
+def _sitemap_count(start_url, sitemap_urls, timeout, allow_local):
+    """Sitemap: si robots no lo declara, se prueba /sitemap.xml."""
+    if sitemap_urls:
+        return None
+    try:
+        candidate = _origin(start_url) + "/sitemap.xml"
+        response = fetch(candidate, timeout=timeout, allow_local=allow_local)
+        if 200 <= (response["status"] or 0) < 300:
+            text = decode_html(response["body"], response["headers"])
+            sitemap_urls.append(candidate)
+            return len(re.findall(r"<loc>", text))
+    except Exception:
+        return None
+    return None
+
+
+def _merge_page_data(data, page_data, perf_data, index):
+    if index != 0:
+        return
+    data.update({k: v for k, v in page_data.items() if k != "page"})
+    data["page"] = page_data["page"]
+    data["perf"] = perf_data
+    data["index"] = page_data.get("index", {})
+
+
+def _page_checks(parsed_pages, data, robots, sitemap_urls, llms_status, llms_full_status):
     page_map = {url: page.hreflangs for url, page, _h, _r in parsed_pages}
-
     checks = []
-    data = {
-        "crawl": {
-            "max_pages": limit,
-            "max_depth": max_depth,
-            "requests_per_second": rate,
-            "robots_respected": bool(respect_robots),
-            "robots_url": robots_url,
-            "pages_fetched": fetched,
-            "skipped_by_robots": len(skipped),
-            "limit_declared": True,
-        },
-        "sitemap": {"urls": sitemap_urls, "loc_count": sitemap_count},
-        "pages": records,
-    }
-
     for index, (url, page, headers, record) in enumerate(parsed_pages):
         page_checks, page_data = analyze.document_checks(
             page, url=url, page_url=record["final_url"], headers=headers,
@@ -212,11 +264,7 @@ def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=Fals
             url=record["final_url"])
         checks.extend(perf_checks)
 
-        if index == 0:
-            data.update({k: v for k, v in page_data.items() if k != "page"})
-            data["page"] = page_data["page"]
-            data["perf"] = perf_data
-            data["index"] = page_data.get("index", {})
+        _merge_page_data(data, page_data, perf_data, index)
         data.setdefault("per_page", []).append({
             "url": url,
             "status": record["status"],
@@ -224,28 +272,17 @@ def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=Fals
             "bytes": record["bytes"],
             "security_score": (page_data.get("security") or {}).get("score"),
         })
+    return checks
 
-    # Crawl respetuoso como check explícito.
-    checks.append({
+
+def _crawl_check(respect_robots, settings, skipped, start_url):
+    return {
         "id": "CRAWL-ROBOTS-001", "status": "pass" if respect_robots else "fail",
         "evidence": "robots.txt respetado=%s; %.1f req/s; tope %d páginas; "
                     "%d URLs omitidas por robots." % (
-                        respect_robots, rate, limit, len(skipped)),
+                        respect_robots, settings["rate"], settings["limit"], len(skipped)),
         "url": start_url, "dimension": "tecnico", "severity_level": "should",
         "citation": "https://developers.google.com/search/docs/crawling-indexing/robots/robots_txt",
         "title": "Crawl respetuoso: robots.txt respetado y 1 petición/segundo",
         "known": True,
-    })
-
-    return {
-        "mode": "local" if allow_local else "web",
-        "target": start_url,
-        "start_url": start_url,
-        "pages_scanned": len(records),
-        "pages": records,
-        "skipped_by_robots": skipped,
-        "crawl": data["crawl"],
-        "checks": checks,
-        "findings": analyze.to_findings(checks),
-        "data": data,
     }

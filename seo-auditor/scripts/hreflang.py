@@ -40,69 +40,70 @@ def analyze(page, page_url="", page_map=None, url=""):
     page_map: {url: [(hreflang, href), ...]} de todas las páginas rastreadas.
     Sin page_map, el retorno bidireccional no se puede verificar -> `skip`.
     """
-    checks = []
+    target = url or page_url
     data = {"entries": [{"hreflang": code, "href": href} for code, href in page.hreflangs],
             "html_lang": page.html_lang}
+    checks = [
+        _lang_check(page, target),
+        _code_check(page, target, data),
+        _self_check(page, page_url, target, data),
+        _xdefault_check(page, target, data),
+        _return_check(page, page_url, page_map, target, data),
+    ]
+    return checks, data
 
-    checks.append(check(
-        "HREF-LANG-001",
-        "pass" if html_lang_valid(page.html_lang) else "fail",
-        "Atributo <html lang>=%r." % (page.html_lang or ""),
-        url or page_url))
 
+def _lang_check(page, target):
+    return check("HREF-LANG-001",
+                 "pass" if html_lang_valid(page.html_lang) else "fail",
+                 "Atributo <html lang>=%r." % (page.html_lang or ""), target)
+
+
+def _code_check(page, target, data):
     bad = [code for code, _ in page.hreflangs if not is_valid_hreflang(code)]
     data["invalid_codes"] = bad
-    if page.hreflangs:
-        checks.append(check(
-            "HREF-CODE-001", "fail" if bad else "pass",
-            ("Códigos no válidos: " + ", ".join(bad)) if bad else
-            "Todos los códigos hreflang son válidos (%d)." % len(page.hreflangs),
-            url or page_url))
-    else:
-        checks.append(check("HREF-CODE-001", "skip",
-                            "La página no declara hreflang.", url or page_url))
+    if not page.hreflangs:
+        return check("HREF-CODE-001", "skip",
+                     "La página no declara hreflang.", target)
+    return check("HREF-CODE-001", "fail" if bad else "pass",
+                 ("Códigos no válidos: " + ", ".join(bad)) if bad else
+                 "Todos los códigos hreflang son válidos (%d)." % len(page.hreflangs),
+                 target)
 
-    if page.hreflangs and page_url:
-        own = normalize_url(page_url)
-        self_refs = [h for _, h in page.hreflangs if normalize_url(h) == own]
-        data["self_reference"] = bool(self_refs)
-        checks.append(check(
-            "HREF-SELF-001", "pass" if self_refs else "fail",
-            ("Autorreferencia hacia %s." % own) if self_refs else
-            "Ningún hreflang apunta a la propia URL (%s)." % own,
-            url or page_url))
-    else:
-        checks.append(check("HREF-SELF-001", "skip",
-                            "Sin URL absoluta de la página o sin hreflang: "
-                            "autorreferencia no verificable.", url or page_url))
 
+def _self_check(page, page_url, target, data):
+    if not (page.hreflangs and page_url):
+        return check("HREF-SELF-001", "skip",
+                     "Sin URL absoluta de la página o sin hreflang: "
+                     "autorreferencia no verificable.", target)
+    own = normalize_url(page_url)
+    self_refs = [h for _, h in page.hreflangs if normalize_url(h) == own]
+    data["self_reference"] = bool(self_refs)
+    return check("HREF-SELF-001", "pass" if self_refs else "fail",
+                 ("Autorreferencia hacia %s." % own) if self_refs else
+                 "Ningún hreflang apunta a la propia URL (%s)." % own, target)
+
+
+def _xdefault_check(page, target, data):
     langs = {code.lower() for code, _ in page.hreflangs}
-    if len([code for code in langs if code != VALID_X_DEFAULT]) > 1:
-        has_default = VALID_X_DEFAULT in langs
-        data["x_default"] = has_default
-        checks.append(check(
-            "HREF-XDEFAULT-001", "pass" if has_default else "fail",
-            "x-default %s." % ("declarado" if has_default else "ausente"),
-            url or page_url))
-    else:
-        checks.append(check("HREF-XDEFAULT-001", "skip",
-                            "Solo un idioma declarado: x-default no es necesario.",
-                            url or page_url))
+    if len([code for code in langs if code != VALID_X_DEFAULT]) <= 1:
+        return check("HREF-XDEFAULT-001", "skip",
+                     "Solo un idioma declarado: x-default no es necesario.", target)
+    has_default = VALID_X_DEFAULT in langs
+    data["x_default"] = has_default
+    return check("HREF-XDEFAULT-001", "pass" if has_default else "fail",
+                 "x-default %s." % ("declarado" if has_default else "ausente"), target)
 
-    if page_map and page_url and len(page_map) > 1:
-        broken = _broken_return(page_map, page_url, page.hreflangs)
-        data["broken_returns"] = broken
-        checks.append(check(
-            "HREF-RETURN-001", "fail" if broken else "pass",
-            ("Sin retorno desde: " + "; ".join(broken[:8])) if broken else
-            "Los %d pares declaran retorno recíproco." % len(page.hreflangs),
-            url or page_url))
-    else:
-        checks.append(check("HREF-RETURN-001", "skip",
-                            "Retorno bidireccional no verificable con una sola página.",
-                            url or page_url))
 
-    return checks, data
+def _return_check(page, page_url, page_map, target, data):
+    if not (page_map and page_url and len(page_map) > 1):
+        return check("HREF-RETURN-001", "skip",
+                     "Retorno bidireccional no verificable con una sola página.", target)
+    broken = _broken_return(page_map, page_url, page.hreflangs)
+    data["broken_returns"] = broken
+    return check("HREF-RETURN-001", "fail" if broken else "pass",
+                 ("Sin retorno desde: " + "; ".join(broken[:8])) if broken else
+                 "Los %d pares declaran retorno recíproco." % len(page.hreflangs), target)
 
 
 def _broken_return(page_map, page_url, entries):

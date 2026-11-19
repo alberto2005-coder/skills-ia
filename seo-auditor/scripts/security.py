@@ -171,63 +171,75 @@ def mixed_content(page, page_url):
     return found
 
 
+_HEADER_VALIDATORS = {
+    "SEC-HSTS-001": hsts_ok,
+    "SEC-CSP-001": csp_ok,
+    "SEC-XCTO-001": xcto_ok,
+    "SEC-RP-001": referrer_ok,
+}
+
+
+def _header_result(rule, low, csp, target):
+    """Un check por cabecera; XFO necesita el CSP para reconocer frame-ancestors."""
+    name = rule["header"]
+    value = low.get(name, "")
+    if rule["id"] == "SEC-XFO-001":
+        ok, detail = xfo_ok(value, csp)
+    else:
+        ok, detail = _HEADER_VALIDATORS.get(rule["id"], permissions_ok)(value)
+    results = {"presente": bool(value), "valor": value, "ok": ok,
+               "detalle": detail, "peso": rule["weight"]}
+    item = check(
+        rule["id"], "pass" if ok else "fail",
+        "%s: %s (peso %d)." % (name, detail, rule["weight"]),
+        target, note="medido")
+    return ok, results, item
+
+
+def _mixed_check(mixed, page, page_url, target):
+    if mixed:
+        return check(
+            "SEC-MIXED-001", "fail",
+            "%d recurso(s) HTTP en página HTTPS: %s" % (
+                len(mixed), ", ".join("%s %s" % (m["tipo"], m["url"]) for m in mixed[:8])),
+            target, note="medido")
+    if page_url and page_url.lower().startswith("https://") and page is not None:
+        return check("SEC-MIXED-001", "pass",
+                     "Ningún recurso http:// en la página HTTPS.",
+                     target, note="medido")
+    return check("SEC-MIXED-001", "skip",
+                 "Mixed content no evaluable (página no HTTPS o sin HTML).",
+                 target)
+
+
 def audit_headers(headers, page=None, url="", page_url=""):
     """Audita las 6 cabeceras + mixed content. Devuelve (checks, data)."""
-    checks = []
+    target = url or page_url
     low = _lower(headers)
     if not low:
-        for rule in HEADER_RULES:
-            checks.append(check(rule["id"], "skip",
-                                "Sin cabeceras HTTP capturadas.", url or page_url))
+        checks = [check(rule["id"], "skip",
+                        "Sin cabeceras HTTP capturadas.", target)
+                  for rule in HEADER_RULES]
         checks.append(check("SEC-MIXED-001", "skip",
                             "Sin HTML/URL HTTPS para evaluar mixed content.",
-                            url or page_url))
+                            target))
         return checks, {"score": None, "headers": {},
                         "formula": "sin cabeceras no hay puntuación"}
 
     csp = low.get("content-security-policy", "")
     results = {}
     score = 0
+    checks = []
     for rule in HEADER_RULES:
-        name = rule["header"]
-        value = low.get(name, "")
-        if rule["id"] == "SEC-HSTS-001":
-            ok, detail = hsts_ok(value)
-        elif rule["id"] == "SEC-CSP-001":
-            ok, detail = csp_ok(value)
-        elif rule["id"] == "SEC-XFO-001":
-            ok, detail = xfo_ok(value, csp)
-        elif rule["id"] == "SEC-XCTO-001":
-            ok, detail = xcto_ok(value)
-        elif rule["id"] == "SEC-RP-001":
-            ok, detail = referrer_ok(value)
-        else:
-            ok, detail = permissions_ok(value)
+        ok, results[rule["header"]], item = _header_result(rule, low, csp, target)
         if ok:
             score += rule["weight"]
-        results[name] = {"presente": bool(value), "valor": value, "ok": ok,
-                         "detalle": detail, "peso": rule["weight"]}
-        checks.append(check(
-            rule["id"], "pass" if ok else "fail",
-            "%s: %s (peso %d)." % (name, detail, rule["weight"]),
-            url or page_url, note="medido"))
+        checks.append(item)
 
     mixed = mixed_content(page, page_url or url)
+    checks.append(_mixed_check(mixed, page, page_url, target))
     if mixed:
         score = max(0, score - 20)
-        checks.append(check(
-            "SEC-MIXED-001", "fail",
-            "%d recurso(s) HTTP en página HTTPS: %s" % (
-                len(mixed), ", ".join("%s %s" % (m["tipo"], m["url"]) for m in mixed[:8])),
-            url or page_url, note="medido"))
-    elif page_url and page_url.lower().startswith("https://") and page is not None:
-        checks.append(check("SEC-MIXED-001", "pass",
-                            "Ningún recurso http:// en la página HTTPS.",
-                            url or page_url, note="medido"))
-    else:
-        checks.append(check("SEC-MIXED-001", "skip",
-                            "Mixed content no evaluable (página no HTTPS o sin HTML).",
-                            url or page_url))
 
     data = {
         "score": score,
