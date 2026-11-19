@@ -30,6 +30,7 @@
 3. **Slice 3:** {{flujo_soporte}}
 
 ## 5. Riesgos Técnicos e Invariantes
+
 - **Idempotencia:** Webhooks de pagos protegidos contra ejecuciones duplicadas.
 - **Zonas horarias:** Fechas almacenadas en UTC en base de datos; conversión local en UI.
 - **Aislamiento multi-inquilino (si aplica):** `tenant_id` obligatorio en todas las consultas.

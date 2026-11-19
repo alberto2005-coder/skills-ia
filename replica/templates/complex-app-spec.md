@@ -1,4 +1,5 @@
 # Especificación de Motor y Subsistemas para App Compleja: {{app_nombre_propio}}
+
 ## App de Referencia: {{app_original}} (Ej. Microsoft Word, Figma, Excel)
 
 ---
@@ -13,7 +14,8 @@ Root
         └── InlineNode (Run de texto, Imagen en línea, Campo dinámico)
 ```
 
-### Invariantes del Modelo:
+### Invariantes del Modelo
+
 1. {{invariante_1}} (ej. Todo bloque de texto termina con un delimitador de párrafo válido).
 2. {{invariante_2}} (ej. Toda celda de tabla pertenece a una fila y columna válidas dentro de la matriz).
 3. {{invariante_3}} (ej. Toda mutación pasa por una transacción invertible en el historial).

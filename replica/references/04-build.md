@@ -3,6 +3,7 @@
 Objetivo: pantallas funcionando, en el orden que reduce riesgo, con la matriz de features como fuente de verdad.
 
 ## Entradas
+
 `replica/architecture.md`, `replica/design/*`, `replica/features.csv`.
 
 ## Pasos
@@ -16,9 +17,11 @@ Objetivo: pantallas funcionando, en el orden que reduce riesgo, con la matriz de
 7. **Rendimiento mínimo.** Imágenes dimensionadas, lazy donde toca, sin bloqueos de render evidentes.
 
 ## Salida
+
 Código de la app + `replica/features.csv` actualizado. Si una decisión de arquitectura cambió, se anota en `architecture.md`.
 
 ## Definición de done por pantalla
+
 - [ ] Happy path completo contra datos reales (no mock).
 - [ ] Vacío, carga, error, sin permisos.
 - [ ] Teclado y foco.
@@ -26,4 +29,5 @@ Código de la app + `replica/features.csv` actualizado. Si una decisión de arqu
 - [ ] `features.csv` refleja la realidad.
 
 ## No hagas
+
 Copiar el DOM, el CSS, los textos o los assets del original. Ni "de momento" con su logo dentro.

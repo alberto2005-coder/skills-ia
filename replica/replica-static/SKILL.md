@@ -11,7 +11,7 @@ metadata:
 
 Amplía el reconocimiento cuando la UI no basta. **No se activa por iniciativa propia.**
 
-Assets compartidos: `../references/`, `../scripts/`. **Comandos desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos: `../references/`, `../scripts/`. **Comandos desde la raíz del repositorio**.
 
 ## Condiciones de entrada (las tres)
 

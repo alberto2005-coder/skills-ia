@@ -3,6 +3,7 @@
 Objetivo: que el resultado sea tuyo, no un clon con otro logo pegado.
 
 ## Entradas
+
 App construida, `replica/fix-plan.md` (ángulo), `replica/design/`.
 
 ## Pasos
@@ -15,9 +16,11 @@ App construida, `replica/fix-plan.md` (ángulo), `replica/design/`.
 6. **Metadatos.** Revisa `package.json`, `Info.plist`/manifest, copyright, autor, bundle id, nombres de proyecto.
 
 ## Salida
+
 `replica/brand/brand.md` (nombre, checks hechos y pendientes, paleta, voz, logo brief) y código limpio con `sweep.py` a 0.
 
 ## Checklist
+
 - [ ] Búsqueda de marca hecha y anotada con fecha y fuentes.
 - [ ] `sweep.py` a 0 en el código de producción.
 - [ ] Paleta con AA tras el cambio.

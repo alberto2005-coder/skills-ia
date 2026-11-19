@@ -3,6 +3,7 @@
 Objetivo: un número defendible de cuánto se parece tu clon al original en funciones, y dónde no.
 
 ## Entradas
+
 `replica/features.csv`, capturas del original (`replica/screens/`) y de tu clon, `replica/flows`.
 
 ## Pasos
@@ -16,9 +17,11 @@ Objetivo: un número defendible de cuánto se parece tu clon al original en func
 5. **Veredicto.** Una frase: qué tan cerca está, para quién sirve ya y qué falta para el usuario que viene del original.
 
 ## Salida
+
 `replica/parity.md` con score, tabla por área, gaps, veredicto, **tabla de hallazgos con el formato de `templates/evidence.md`** y el cierre `Mapa · Límites · Desconocidos` (qué cubre la medición, hasta dónde llega, qué no se pudo comparar); `replica/diff/*.png`.
 
 ## Checklist
+
 - [ ] Score generado por el script, no a ojo.
 - [ ] Cada must pendiente tiene plan o se declara fuera de alcance con motivo.
 - [ ] Cada pantalla clave tiene diff visual revisado, no solo el número.
@@ -27,4 +30,5 @@ Objetivo: un número defendible de cuánto se parece tu clon al original en func
 - [ ] Los gaps deliberados están escritos antes del lanzamiento.
 
 ## No hagas
+
 Inflar el score marcando `done` lo que está a medias, ni llamar "mejora" a una pantalla que falta, ni presentar una inferencia ("seguro que es a propósito") como si fuera observación del diff.

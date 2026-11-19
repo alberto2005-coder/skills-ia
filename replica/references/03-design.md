@@ -3,6 +3,7 @@
 Objetivo: un sistema propio que se sienta del mismo oficio que el original, sin copiar su expresión.
 
 ## Entradas
+
 `replica/screens/`, `replica/recon.md`, `templates/tokens.json`.
 
 ## Pasos
@@ -16,9 +17,11 @@ Objetivo: un sistema propio que se sienta del mismo oficio que el original, sin 
 7. **Modo claro/oscuro** solo si la app lo tiene; si no, no lo inventes.
 
 ## Salida
+
 `replica/design/tokens.json`, `replica/design/components.md` con la tabla de componentes, estados y licencias.
 
 ## Checklist
+
 - [ ] AA en todos los pares texto/fondo, foco visible.
 - [ ] Objetivos táctiles ≥44px.
 - [ ] Nada de logos, ilustraciones, iconos ni fuentes del original.
@@ -26,4 +29,5 @@ Objetivo: un sistema propio que se sienta del mismo oficio que el original, sin 
 - [ ] Estados vacío/error/carga diseñados, no improvisados.
 
 ## No hagas
+
 "Recrear pixel a pixel" la pantalla del original: eso es copiar expresión y además produce un clon peor. Reconstruye la estructura y dale tu propia piel.

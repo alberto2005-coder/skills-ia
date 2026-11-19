@@ -10,6 +10,7 @@
 ## 🇪🇸 Español
 
 ### Índice
+
 1. [Filosofía Clean-Room](#filosofía-clean-room)
 2. [Pipeline de 14 Fases (0–13)](#pipeline-de-14-fases-013)
 3. [Sub-skills](#sub-skills)
@@ -20,11 +21,13 @@
 8. [Uso y Tests](#uso-y-tests)
 
 ### Filosofía Clean-Room
+
 `replica` reconstruye **lo que una aplicación hace**, no lo que posee. Solo fuentes públicas, documentación, help center, store listing, reseñas públicas y **tu propia cuenta**. Nunca código, assets, textos ni bases de datos del original. Si sus términos prohíben un competidor, se dice y se limita a fuentes públicas; la decisión legal es del usuario.
 
 **Paquete de 14 skills:** maestro + 13 sub-skills, una por bloque de fases.
 
 ### Pipeline de 14 Fases (0–13)
+
 | # | Fase | Sub-skill | Salida en `replica/` |
 |---|---|---|---|
 | 0 | Límites y alcance | `replica-recon` | `scope.md` |
@@ -46,6 +49,7 @@
 La fase 12 exige petición explícita, artefacto propio o autorizado y herramientas ya instaladas (nunca DRM, logins ajenos ni paywalls). La 13 va siempre después de la marca (9) y el lanzamiento (10). Cualquier fase puede ejecutarse suelta.
 
 ### Sub-skills
+
 | Sub-skill | Fases | Qué hace |
 |---|---|---|
 | `replica-recon` | 0, 1, 1b | Límites legales, alcance, inventario de funciones con evidencia y especificación de apps complejas. |
@@ -63,12 +67,15 @@ La fase 12 exige petición explícita, artefacto propio o autorizado y herramien
 | `replica-redes` | 13 | 3 guiones de Reels, captions y banco de ganchos. |
 
 ### Comando Maestro y Estado
+
 El maestro (`replica/SKILL.md`) arranca o retoma el pipeline: lee `replica/progreso.md`, recorre las fases en orden, **para al final de cada una** y pide aprobación explícita. Guarda fase, estado (`pendiente` · `en curso` · `aprobada` · `bloqueada` · `n/a`), decisiones, bloqueos y bitácora. Un gate rojo deja la fase `bloqueada`; no se rodea.
 
 ### Evidencia Obligatoria
+
 En recon (1), paridad (7) y análisis estático (12) todo hallazgo que sostenga una decisión usa `templates/evidence.md`: **Fuente · Observación · Inferencia · Confianza (high/medium/low/THIN) · Límites y desconocidos**. Sin fuente, el hallazgo se descarta; `THIN` (<3 muestras o una sola fuente) no se usa como argumento.
 
 ### Herramientas Deterministas
+
 - `parity.py`: paridad funcional ponderada (must 3 / should 2 / could 1), falla si queda un `must`.
 - `sweep.py`: nombre, dominio, colores e identificadores del original; exit 1 si hay restos.
 - `contrast.py`: WCAG AA/AAA sobre los tokens.
@@ -77,9 +84,11 @@ En recon (1), paridad (7) y análisis estático (12) todo hallazgo que sostenga 
 - `listing.py`: límites de App Store/Play, claims y nombre del original.
 
 ### Plantillas
+
 `scope.md`, `architecture.md`, `complex-app-spec.md`, `test-plan.md`, `preflight.md`, `evidence.md`, `progreso.md`, `reels.md`, `features.csv`, `tokens.json`, `reviews.csv`, `themes.json`, `listing.json`.
 
 ### Uso y Tests
+
 ```bash
 # Paridad funcional
 py replica/scripts/parity.py replica/features.csv --markdown --out replica/parity.md
@@ -96,6 +105,7 @@ py -m unittest discover -s replica/tests -v
 ## 🇬🇧 English
 
 ### Table of Contents
+
 1. [Clean-Room Philosophy](#clean-room-philosophy)
 2. [14-Phase Pipeline (0–13)](#14-phase-pipeline-013)
 3. [Sub-skills](#sub-skills-1)
@@ -106,11 +116,13 @@ py -m unittest discover -s replica/tests -v
 8. [Usage and Tests](#usage-and-tests)
 
 ### Clean-Room Philosophy
+
 `replica` reconstructs **what an application does**, not what it owns. Only public sources, docs, help center, store listing, public reviews and **your own account**. Never the original's code, assets, copy or databases. If its terms forbid a competitor, say so and stay on public sources; the legal call belongs to the user.
 
 **14-skill package:** master + 13 sub-skills, one per phase block.
 
 ### 14-Phase Pipeline (0–13)
+
 | # | Phase | Sub-skill | Output in `replica/` |
 |---|---|---|---|
 | 0 | Boundaries and scope | `replica-recon` | `scope.md` |
@@ -132,6 +144,7 @@ py -m unittest discover -s replica/tests -v
 Phase 12 requires an explicit request, an owned or authorized artifact and already-installed tools (never DRM, third-party logins or paywalls). Phase 13 always runs after brand (9) and launch (10). Any phase can be run standalone.
 
 ### Sub-skills
+
 | Sub-skill | Phases | Purpose |
 |---|---|---|
 | `replica-recon` | 0, 1, 1b | Legal boundaries, scope, evidence-backed feature inventory and complex-app spec. |
@@ -149,12 +162,15 @@ Phase 12 requires an explicit request, an owned or authorized artifact and alrea
 | `replica-redes` | 13 | 3 Reels scripts, captions and hook bank. |
 
 ### Master Command and State
+
 The master (`replica/SKILL.md`) starts or resumes the pipeline: reads `replica/progreso.md`, walks phases in order, **stops after each one** and asks for explicit approval. It records phase, state (`pending` · `in progress` · `approved` · `blocked` · `n/a`), decisions, blockers and log. A red gate leaves the phase `blocked`; it is never bypassed.
 
 ### Mandatory Evidence
+
 In recon (1), parity (7) and static analysis (12), every finding backing a decision uses `templates/evidence.md`: **Source · Observation · Inference · Confidence (high/medium/low/THIN) · Limits and unknowns**. No source, no finding; `THIN` (<3 samples or a single source) is not used as an argument.
 
 ### Deterministic Tools
+
 - `parity.py`: weighted functional parity (must 3 / should 2 / could 1); fails on any pending `must`.
 - `sweep.py`: original name, domain, colors and identifiers; exit 1 on leftovers.
 - `contrast.py`: WCAG AA/AAA over design tokens.
@@ -163,9 +179,11 @@ In recon (1), parity (7) and static analysis (12), every finding backing a decis
 - `listing.py`: App Store/Play limits, claims and original name in the listing.
 
 ### Templates
+
 `scope.md`, `architecture.md`, `complex-app-spec.md`, `test-plan.md`, `preflight.md`, `evidence.md`, `progreso.md`, `reels.md`, `features.csv`, `tokens.json`, `reviews.csv`, `themes.json`, `listing.json`.
 
 ### Usage and Tests
+
 ```bash
 # Functional parity
 py replica/scripts/parity.py replica/features.csv --markdown --out replica/parity.md

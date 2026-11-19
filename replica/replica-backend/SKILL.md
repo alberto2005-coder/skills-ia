@@ -11,7 +11,7 @@ metadata:
 
 La app deja de ser una maqueta: cuentas, datos que persisten, permisos y cobros que no se pueden inventar. No diseña pantallas ni maqueta: la UI llega construida de `replica-build`.
 
-Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Comandos desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Comandos desde la raíz del repositorio**.
 
 ## Precondiciones
 

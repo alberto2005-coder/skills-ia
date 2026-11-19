@@ -36,4 +36,5 @@ Responsable: {{responsable}}
 ---
 
 ## 3. Autorización de Publicación
+
 - [ ] Confirmación explícita del usuario recibida para publicar en producción o enviar a revisión de tiendas.

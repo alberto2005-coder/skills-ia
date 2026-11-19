@@ -3,6 +3,7 @@
 Objetivo: publicar sin sorpresas y poder volver atrás.
 
 ## Entradas
+
 Todo lo anterior. `replica/preflight.md` se escribe en esta fase.
 
 ## Preflight (todo o no se despliega)
@@ -36,7 +37,9 @@ python scripts/listing.py replica/launch/listing.json
 6. **Pide confirmación explícita antes de publicar** (tienda o dominio público). Publicar no es un paso que se asuma.
 
 ## Salida
+
 App live + `replica/preflight.md` completo y `replica/launch/plan.md` actualizado.
 
 ## No hagas
+
 Desplegar con un must pendiente "porque ya casi", ni con el sweep sucio, ni publicar en tienda sin que el usuario lo haya dicho.

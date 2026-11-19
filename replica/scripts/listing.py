@@ -125,9 +125,21 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[x] No se pudo leer {args.listing}: {exc}", file=sys.stderr)
         return 2
 
+    if not isinstance(data, dict):
+        print(f"[x] {args.listing}: se esperaba un objeto JSON", file=sys.stderr)
+        return 2
+
     platform = str(data.get("platform", "both")).lower()
     platforms = ["ios", "android"] if platform in {"both", "ambos"} else [platform]
     avoid = data.get("avoid", [])
+    # Una cadena iteraba carácter a carácter, así que `avoid: "Original App"`
+    # buscaba "O", "r", "i"... y marcaba media descripción.
+    if isinstance(avoid, str):
+        avoid = [avoid]
+    elif not isinstance(avoid, list):
+        print("[x] 'avoid' debe ser una cadena o una lista de cadenas", file=sys.stderr)
+        return 2
+    avoid = [str(item) for item in avoid if str(item).strip()]
 
     reports = []
     for name in platforms:

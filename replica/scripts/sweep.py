@@ -20,6 +20,7 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -172,9 +173,31 @@ def main(argv: list[str] | None = None) -> int:
 
     hits: list[dict] = []
     scanned = 0
+    skipped_large = 0
     for file_path in iter_files(args.path, excluded):
+        try:
+            size = os.path.getsize(file_path)
+        except OSError:
+            size = 0
+        # Un fichero grande omitido no puede contar como "escaneado": el
+        # informe decía haber revisado lo que nunca se abrió.
+        if size > MAX_BYTES:
+            skipped_large += 1
+            continue
         scanned += 1
         hits.extend(scan_file(file_path, patterns))
+
+    if scanned == 0:
+        # Un directorio vacío no es "limpio": no se comprobó nada. Si había
+        # ficheros y se omitieron (binarios, extensiones), sí es el resultado
+        # documentado y sigue siendo 0.
+        entries = [] if os.path.isfile(args.path) else list(Path(args.path).rglob("*"))
+        if not entries:
+            print(f"[x] Nada que escanear en {os.path.abspath(args.path)}", file=sys.stderr)
+            return 2
+    if skipped_large:
+        print(f"[!] {skipped_large} fichero(s) omitido(s) por superar "
+              f"{MAX_BYTES // 1_000_000} MB", file=sys.stderr)
 
     by_term: dict[str, int] = {}
     for hit in hits:
@@ -186,6 +209,7 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "root": os.path.abspath(args.path),
                     "scanned_files": scanned,
+                    "skipped_large_files": skipped_large,
                     "hits": hits,
                     "by_term": by_term,
                     "clean": not hits,

@@ -46,10 +46,13 @@ Reglas de la escala:
 Cierra cada documento de evidencia (`recon.md`, `parity.md`, `static-report.md`) con estas tres secciones:
 
 ### Mapa (qué quedó cubierto)
+
 - {{flujo o superficie}} → hallazgos H-00X, H-00Y · confianza media: {{…}}
 
 ### Límites (hasta dónde llega esta evidencia)
+
 - {{p. ej. "solo web pública, no he visto la app iOS", "análisis estático solo del JS del bundle, sin el backend"}}
 
 ### Desconocidos abiertos (preguntas sin respuesta)
+
 1. {{pregunta concreta + qué haría falta para responderla + quién puede responderla}}

@@ -11,7 +11,7 @@ metadata:
 
 Escribe la app. Cada incremento cierra un flujo `must`, se prueba solo y actualiza `features.csv`. Esta fase no incluye auth, datos persistentes, pagos ni jobs: eso es `replica-backend` (fase 5).
 
-Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Comandos desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Comandos desde la raíz del repositorio**.
 
 ## Precondiciones
 

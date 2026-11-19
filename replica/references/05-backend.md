@@ -3,6 +3,7 @@
 Objetivo: cuentas, datos, pagos e integraciones que aguantan gente real.
 
 ## Entradas
+
 `replica/architecture.md`, `replica/features.csv`, código de la fase 4.
 
 ## Pasos
@@ -16,9 +17,11 @@ Objetivo: cuentas, datos, pagos e integraciones que aguantan gente real.
 7. **Operación.** Rate limiting por endpoint sensible, backups, logs sin PII, alertas de errores, variables de entorno documentadas.
 
 ## Salida
+
 Código backend + `replica/backend.md` con: endpoints implementados, reglas de autorización, flujos de pago, integraciones y variables de entorno necesarias.
 
 ## Checklist
+
 - [ ] Usuario B no puede tocar recursos de A (probado).
 - [ ] Webhook repetido no duplica ni pierde estado.
 - [ ] Migraciones aplican desde cero en limpio.

@@ -3,6 +3,7 @@
 Objetivo: decidir stack, datos y API antes de escribir pantallas, y ordenar el trabajo por rebanadas verticales.
 
 ## Entradas
+
 `replica/recon.md`, `replica/features.csv`.
 
 ## Pasos
@@ -34,6 +35,7 @@ Objetivo: decidir stack, datos y API antes de escribir pantallas, y ordenar el t
 ```
 
 ## Checklist
+
 - [ ] Cada invariante del recon tiene constraint o transacción que la protege.
 - [ ] Ningún endpoint sin regla de autorización escrita.
 - [ ] La primera rebanada es un flujo completo, no "el login y ya".

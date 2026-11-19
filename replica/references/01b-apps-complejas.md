@@ -1,4 +1,5 @@
 # 01b · Replicación de Software de Alta Complejidad y Motores Interactivos
+
 ## Caso de referencia: Suites de Productividad y Editores (Ej. Microsoft Word, Google Docs, Figma, Notion)
 
 Cuando la aplicación a replicar no es un simple CRUD o SaaS con formularios web, sino un **software de alta complejidad interactiva** (procesador de textos como Microsoft Word, editor visual como Figma, hoja de cálculo como Excel o canvas como Miro), el enfoque ingenuo de "hacer unas pantallas y una API REST" fracasa en minutos.
@@ -10,6 +11,7 @@ Este documento establece el protocolo estricto para descomponer y replicar con *
 ## 1. El Principio Fundamental: Motor de Estado vs. Shell Visual
 
 Un software como Microsoft Word consta de dos mundos separados:
+
 1. **El Motor Central (In-Memory Engine & AST):** Totalmente desacoplado de la interfaz. Maneja el árbol del documento, las coordenadas de selección, los comandos reversibles y las reglas matemáticas de formateo y paginación.
 2. **El Shell de UI (Ribbon & Canvas):** Dibuja el estado del motor y captura eventos del teclado y ratón para transformarlos en comandos del motor.
 
@@ -21,7 +23,7 @@ Un software como Microsoft Word consta de dos mundos separados:
 
 Para duplicar con exactitud lo que hace Microsoft Word, el sistema se descompone en estos 8 subsistemas obligatorios:
 
-```
+```text
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        UI Shell (Ribbon & Viewport)                   │
 ├───────────────┬──────────────────────────┬─────────────────────────────┤
@@ -37,6 +39,7 @@ Para duplicar con exactitud lo que hace Microsoft Word, el sistema se descompone
 ```
 
 ### Subsistema 1: Modelo de Documento (Document AST)
+
 - Estructura jerárquica estricta:
   - `Document` -> `Section` (márgenes, orientación vertical/horizontal, columnas, encabezado/pie).
   - `Section` -> `BlockNode` (`Paragraph`, `Table`, `PageBreak`).
@@ -45,6 +48,7 @@ Para duplicar con exactitud lo que hace Microsoft Word, el sistema se descompone
 - **Invariante:** Cada cambio al árbol genera una versión inmutable o pasa a través de una transacción atómica.
 
 ### Subsistema 2: Motor de Selección y Cursor (Caret & Range)
+
 - Coordenadas universales: `anchor = { nodeId, offset }`, `focus = { nodeId, offset }`.
 - Comportamientos exactos:
   - Cursor colapsado (`anchor == focus`): parpadeo rítmico (500 ms), medición vertical coincidente con la altura del glifo actual.
@@ -52,11 +56,13 @@ Para duplicar con exactitud lo que hace Microsoft Word, el sistema se descompone
   - Triple clic: selecciona el párrafo completo. Doble clic: selecciona la palabra.
 
 ### Subsistema 3: Patrón Command e Historial Transaccional (Undo / Redo)
+
 - Cada mutación es un objeto con dos métodos: `execute()` y `undo()`.
 - **Agrupación inteligente de eventos (Batching):** Escribir caracteres continuos se agrupa en una sola transacción en el historial de `Ctrl + Z`. Un cambio de estilo, una inserción de tabla o una pausa de más de 1 segundo inicia un nuevo lote de deshacer.
 - Invariante: Ejecutar `undo()` y luego `redo()` devuelve el AST exactamente al mismo checksum inicial.
 
 ### Subsistema 4: Cascada de Estilos y Formateo
+
 - Jerarquía de 4 niveles idéntica a Word:
   1. *Estilo por defecto del documento* (Normal: Calibri / Aptos 11pt, interlineado 1.08).
   2. *Estilo de párrafo* (Título 1, Título 2, Cita, Lista).
@@ -65,6 +71,7 @@ Para duplicar con exactitud lo que hace Microsoft Word, el sistema se descompone
 - **Herencia e inversión:** Si una selección abarca texto mixto (parte en negrita y parte normal), pulsar `Ctrl + B` convierte TODO a negrita; pulsarla de nuevo quita la negrita de todo.
 
 ### Subsistema 5: Motor de Layout y Paginación (Canvas Geometry)
+
 - **Cálculo geométrico de saltos de línea (Line-Breaking):** Ajuste por ancho disponible `(PageWidth - LeftMargin - RightMargin)`.
 - **Control de líneas huérfanas y viudas:** Una página nunca puede terminar con la primera línea solitaria de un párrafo, ni empezar con la última línea aislada.
 - **Saltos de página dinámicos vs. duros:**
@@ -73,12 +80,14 @@ Para duplicar con exactitud lo que hace Microsoft Word, el sistema se descompone
 - **Encabezados y Pies de página:** Páginas pares/impares diferenciadas y campo dinámico de paginación (`Página {PAGE} de {NUMPAGES}`).
 
 ### Subsistema 6: Estructuras Complejas (Tablas e Imágenes)
+
 - **Tablas:** Matriz bidimensional de celdas. Soporte de combinación de celdas (`colspan`, `rowspan`), anchos relativos o fijos de columna, y saltos de fila entre páginas.
 - **Imágenes:**
   - Modo *En línea con el texto (Inline):* se comporta como un carácter gigante dentro de un párrafo.
   - Modo *Ajuste de texto (Floating / Wrap):* Cuadrado, Estrecho, Detrás del texto o Delante del texto con coordenadas `(x, y)` relativas a la página o párrafo.
 
 ### Subsistema 7: Ergonomía de UI y Ribbon (Barra de Comandos)
+
 - Pestañas funcionales organizadas:
   - **Inicio:** Portapapeles (Copiar/Pegar con retención de formato), Fuente, Párrafo (alineación, listas, interlineado), Estilos.
   - **Insertar:** Salto de página, Tablas, Imágenes, Encabezado/Pie, Número de página, Vínculos.
@@ -87,6 +96,7 @@ Para duplicar con exactitud lo que hace Microsoft Word, el sistema se descompone
 - Regla horizontal superior con marcadores interactivos de sangría izquierda, sangría de primera línea y sangría derecha.
 
 ### Subsistema 8: Persistencia e Interoperabilidad
+
 - Formato primario en disco: JSON nativo que serializa el AST al 100% sin pérdida.
 - Importación y exportación DOCX: Mapeo del AST hacia el estándar OOXML (`word/document.xml`, `word/styles.xml`).
 - Exportación fiel a PDF usando el mismo motor de geometría y paginación.

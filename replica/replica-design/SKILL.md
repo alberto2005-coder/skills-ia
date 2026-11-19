@@ -11,7 +11,7 @@ metadata:
 
 Produce una UI **propia** que resuelve los mismos problemas de uso que la original. Ni paleta, ni iconos, ni ilustraciones, ni copy ajenos.
 
-Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio**.
 
 ## Precondiciones
 

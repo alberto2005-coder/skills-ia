@@ -11,7 +11,7 @@ metadata:
 
 Primera sub-skill del pipeline `replica`. Su trabajo es **decidir qué se va a reconstruir y demostrar que se puede hacer legalmente**, antes de escribir una línea de producto.
 
-Assets compartidos: `../references/`, `../scripts/`, `../templates/`, `../tests/`. **Comandos desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos: `../references/`, `../scripts/`, `../templates/`, `../tests/`. **Comandos desde la raíz del repositorio**.
 
 ## Cuándo se usa
 

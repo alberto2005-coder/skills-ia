@@ -11,7 +11,7 @@ metadata:
 
 Un clon sin pruebas no está listo: está sin terminar. Esta fase convierte `features.csv` e invariantes en pruebas ejecutables. Mide corrección propia, no parecido con el original: la paridad es `replica-diff` (fase 7).
 
-Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Comandos desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Comandos desde la raíz del repositorio**.
 
 ## Precondiciones
 

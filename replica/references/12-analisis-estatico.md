@@ -67,7 +67,7 @@ Salida esperada (ejemplo):
 
 ## Paso 2 · Extracción determinista con stdlib
 
-Guarda este script como `replica/static/extract.py` (solo stdlib, 3.8+, sin red, salida determinista: listas únicas ordenadas) y ejecútalo sobre cada fichero:
+Guarda este script como `replica/static/extract.py` (solo stdlib, 3.9+, sin red, salida determinista: listas únicas ordenadas) y ejecútalo sobre cada fichero:
 
 ```python
 #!/usr/bin/env python3
@@ -206,6 +206,7 @@ replica/static/
 Si **no** se cumplen las condiciones, no se crea `replica/static/`: se anota en `recon.md` una línea *"análisis estático no disponible (falta X)"* y se continúa en observación de UI.
 
 ## Checklist
+
 - [ ] Las dos condiciones de Entradas se cumplen y se documentan (binario con autorización + herramientas detectadas).
 - [ ] Ninguna herramienta se instaló ni se descargó; las `None` de `shutil.which` se declaran como no disponibles.
 - [ ] El código descompilado/smali no ha ido a parar al proyecto: solo hechos en forma de evidencia.
@@ -214,4 +215,5 @@ Si **no** se cumplen las condiciones, no se crea `replica/static/`: se anota en 
 - [ ] `extract.py` se ejecutó sin red y su JSON es reproducible (mismo fichero → mismo resultado).
 
 ## No hagas
+
 Instalar herramientas, tocar DRM o cifrados, saltarte un login o un paywall, usar credenciales ajenas, copiar código descompilado al proyecto, o presentar una cadena encontrada en un binario como una "función confirmada". Si hay código fuente completo, esta fase sobra: usa las herramientas normales del agente.

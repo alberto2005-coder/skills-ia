@@ -11,7 +11,7 @@ metadata:
 
 Aquí el clon deja de parecer un clon. **Sin este gate no se publica.** No rediseña componentes ni flujos: cambia identidad, copy y restos del original; el sistema de diseño viene de `replica-design`.
 
-Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio**.
 
 ## Precondiciones
 
@@ -33,6 +33,7 @@ py replica/scripts/contrast.py replica/design/tokens.json
 ```
 
    `sweep.py` marca nombre, dominio, colores e identificadores del original (incluido `OriginalAppEmbed`), ignora binarios y admite exenciones justificadas (`sweep:ignore`, `sweep:ignore-file`).
+
 7. Un resto intencionado (p. ej. mención comparativa legítima) se exonera con comentario y motivo; no se borra la exención sin explicar.
 
 ## Gate de salida

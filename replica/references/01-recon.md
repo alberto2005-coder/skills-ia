@@ -3,6 +3,7 @@
 Objetivo: un mapa funcional de la app que sirva para construir sin volver a mirarla, y un tamaño honesto del trabajo.
 
 ## Entradas
+
 Nada de `replica/` (es la primera fase). Sí: URL, store listing, tu cuenta.
 
 ## Paso 0 · Foco (obligatorio antes de mirar nada)
@@ -62,6 +63,7 @@ Reglas del foco:
 `replica/features.csv` y `replica/screens/` con tus capturas.
 
 ## Checklist
+
 - [ ] Arriba del todo está la función observable de esta iteración (Paso 0).
 - [ ] Si `recon.md` ya existía, se ha refinado: no se ha rehecho ni se han duplicado hallazgos.
 - [ ] Cada hallazgo clave tiene fila en la tabla de evidencia con las 5 columnas (fuente, observación, inferencia, confianza, límites).
@@ -74,4 +76,5 @@ Reglas del foco:
 - [ ] Textos de UI descritos con tus palabras, no copiados.
 
 ## No hagas
+
 Rellenar features que no has visto funcionar, ni asumir que "seguro que tiene X". Si no lo has visto, no está. Tampoco rehacer desde cero un recon ya guardado, ni mezclar observación e inferencia en la misma casilla, ni borrar desconocidos porque molesten.

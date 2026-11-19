@@ -11,7 +11,7 @@ metadata:
 
 El producto está listo; falta que se pueda comprar. Landing, tiendas, precios locales y claims que se sostienen.
 
-Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio**.
 
 ## Precondiciones
 
@@ -30,6 +30,7 @@ py replica/scripts/listing.py replica/launch/listing.json
 ```
 
    Comprueba límites de App Store/Play, claims de ranking, keywords desperdiciadas y nombre del original en el listing.
+
 5. **Precios locales**: moneda, impuestos y método de pago mayoritario por país; nada de conversión automática sin redondeo comercial decidido.
 6. **Claims**: cada afirmación de la landing y del listing con evidencia (`features.csv`, `themes.md`, prueba propia). Sin evidencia, se reformula o se elimina.
 7. **Re-sweep del copy nuevo**:

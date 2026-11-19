@@ -11,7 +11,7 @@ metadata:
 
 Contenido social que se puede grabar hoy y defender mañana. Tres guiones, captions por red y ganchos reutilizables.
 
-Assets compartidos: `../references/`, `../templates/`, `../scripts/`. **Todos los comandos se ejecutan desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos: `../references/`, `../templates/`, `../scripts/`. **Todos los comandos se ejecutan desde la raíz del repositorio**.
 
 ## Precondiciones
 

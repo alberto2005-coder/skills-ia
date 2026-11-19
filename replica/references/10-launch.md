@@ -3,6 +3,7 @@
 Objetivo: landing, precios y listing que conviertan, sin promesas que no puedas sostener.
 
 ## Entradas
+
 `replica/fix-plan.md` (ángulo y fixes), `replica/parity.md`, `replica/brand/`, `templates/listing.json`.
 
 ## Pasos
@@ -39,9 +40,11 @@ Notas de uso:
 - **Landing:** muestra el precio en la moneda local si puedes; si no, declara la moneda y el tipo de cambio y no finjas que es "lo mismo" en todas partes.
 
 ## Salida
+
 Landing publicada o en repo, `replica/launch/listing.json` con 0 errores, `replica/launch/plan.md` (canales, mensaje, fechas) y, si aplica, `replica/launch/paises.md`.
 
 ## Checklist
+
 - [ ] `listing.py` en 0 errores.
 - [ ] Cada beneficio tiene detrás una feature que existe y pasa parity.
 - [ ] Precios coherentes con lo que aplica el backend.

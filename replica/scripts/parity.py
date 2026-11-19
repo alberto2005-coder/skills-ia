@@ -50,6 +50,8 @@ def normalize(value: str | None, default: str = "") -> str:
 
 
 def normalize_row(raw: dict) -> dict:
+    if not isinstance(raw, dict):
+        raise ValueError("cada fila del manifiesto debe ser un objeto, no %s" % type(raw).__name__)
     row = {normalize(k): v for k, v in raw.items() if k is not None}
     priority = normalize(row.get("priority") or row.get("prio") or row.get("prioridad"))
     if priority in {"m", "must-have", "must_have", "imprescindible"}:
@@ -58,6 +60,10 @@ def normalize_row(raw: dict) -> dict:
         priority = "should"
     elif priority in {"c", "could-have", "could_have", "opcional", "nice"}:
         priority = "could"
+    if priority and priority not in WEIGHTS:
+        # Colar "mustt" como `should` bajaba el peso de un must real sin avisar.
+        raise ValueError("prioridad desconocida %r en la fila %r" % (
+            priority, row.get("id") or row.get("feature") or "?"))
     if priority not in WEIGHTS:
         priority = "should"
 

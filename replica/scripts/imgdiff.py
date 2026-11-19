@@ -42,7 +42,13 @@ def read_png(path: str) -> tuple[int, int, int, bytes]:
         chunk = data[pos + 8:pos + 8 + length]
         pos += 12 + length
         if ctype == b"IHDR":
-            width, height, depth, color_type, _, _, interlace = struct.unpack(">IIBBBBB", chunk)
+            # Un IHDR truncado daba `struct.error` fuera del `except` del CLI.
+            if len(chunk) < 13:
+                raise ValueError(f"{path}: IHDR truncado ({len(chunk)} bytes)")
+            try:
+                width, height, depth, color_type, _, _, interlace = struct.unpack(">IIBBBBB", chunk[:13])
+            except struct.error as error:
+                raise ValueError(f"{path}: IHDR inválido ({error})")
             if interlace:
                 raise ValueError(f"{path}: PNG entrelazado no soportado")
         elif ctype == b"IDAT":
@@ -59,7 +65,15 @@ def read_png(path: str) -> tuple[int, int, int, bytes]:
 
     bpp = CHANNELS[color_type]
     stride = width * bpp
-    raw = zlib.decompress(b"".join(idat))
+    try:
+        raw = zlib.decompress(b"".join(idat))
+    except zlib.error as error:
+        raise ValueError(f"{path}: IDAT corrupto ({error})")
+    # Sin esta comprobación un IDAT corto provocaba `IndexError` al leer el
+    # filtro de la primera fila que faltaba.
+    expected = height * (stride + 1)
+    if len(raw) < expected:
+        raise ValueError(f"{path}: IDAT truncado ({len(raw)} de {expected} bytes)")
     out = bytearray(height * stride)
     prev = bytearray(stride)
     offset = 0
@@ -180,12 +194,15 @@ def compare(a_path: str, b_path: str, cols: int, heatmap_path: str | None) -> di
 
     a_grid, rows, cols_used = to_grid(edge_magnitude(luma_map(aw, ah, abpp, apx), aw, ah), aw, ah, cols)
     b_grid, brows, _ = to_grid(edge_magnitude(luma_map(bw, bh, bbpp, bpx), bw, bh), bw, bh, cols)
-    rows = min(rows, brows)
+    # Recortar a la rejilla más corta hacía invisible el contenido extra de la
+    # captura más alta: esas filas de más son una diferencia real.
+    rows = max(rows, brows)
 
     diffs = []
     for gy in range(rows):
         for gx in range(cols_used):
-            a, b = a_grid[gy][gx], b_grid[gy][gx]
+            a = a_grid[gy][gx] if gy < len(a_grid) else 0.0
+            b = b_grid[gy][gx] if gy < len(b_grid) else 0.0
             denom = max(a + b, 1e-6)
             diffs.append((abs(a - b) / denom, gy, gx))
 
@@ -254,7 +271,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         result = compare(args.original, args.clone, args.grid, args.out)
-    except (OSError, ValueError, zlib.error) as exc:
+    except (OSError, ValueError, zlib.error, struct.error, IndexError) as exc:
         print(f"[x] {exc}", file=sys.stderr)
         return 2
 

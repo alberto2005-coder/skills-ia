@@ -83,7 +83,7 @@ Regla de oro del comando maestro: **nunca avanza dos fases de golpe ni da una fa
 
 ## Herramientas
 
-Scripts en `replica/scripts/`, solo stdlib de Python 3.8+, sin red. **Todos los comandos se ejecutan desde la raíz del repositorio** (`skills-ia-main/`); las referencias de lectura son relativas al paquete (`../references/`).
+Scripts en `replica/scripts/`, solo stdlib de Python 3.9+, sin red. **Todos los comandos se ejecutan desde la raíz del repositorio** ; las referencias de lectura son relativas al paquete (`../references/`).
 
 ```bash
 python replica/scripts/sweep.py . --avoid "App Original" --avoid apporiginal.com --color "#1DB954"

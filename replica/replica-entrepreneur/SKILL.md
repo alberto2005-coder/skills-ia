@@ -11,7 +11,7 @@ metadata:
 
 El clon ya funciona; ahora se decide **qué duele de verdad** en esta categoría. Solo con reseñas reales y citables.
 
-Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio**.
 
 ## Precondiciones
 
@@ -29,6 +29,7 @@ py replica/scripts/reviews.py replica/reviews.csv --themes replica/themes.json -
 ```
 
    El script extrae temas y citas **literales con URL**, descarta filas sin enlace y marca `THIN` si hay menos de 3 reseñas o una sola fuente.
+
 4. Un tema `THIN` no se usa como argumento ni en copy: se anota como pendiente de más muestra.
 5. Convierte los temas sólidos en `replica/fix-plan.md`: qué cambiar, por qué (cita), coste estimado y criterio de éxito. Prioriza por frecuencia × gravedad, no por lo que suene bonito.
 6. Lo que no se va a hacer también se escribe, con el motivo.

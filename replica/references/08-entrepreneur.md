@@ -3,6 +3,7 @@
 Objetivo: convertir quejas reales en un plan de producto y un ángulo, sin inventar ni una cita.
 
 ## Entradas
+
 Reseñas públicas: App Store/Play, G2, Capterra, Trustpilot, Reddit, foros del sector, hilos públicos. `templates/reviews.csv`, `templates/themes.json`.
 
 ## Pasos
@@ -15,13 +16,16 @@ Reseñas públicas: App Store/Play, G2, Capterra, Trustpilot, Reddit, foros del 
 6. **Ángulo.** Una frase de posicionamiento construida sobre los temas sólidos: "X para quien odia Y". Si no hay temas sólidos, el ángulo no está listo.
 
 ## Salida
+
 `replica/reviews.csv`, `replica/themes.md`, `replica/fix-plan.md` (tabla: tema | evidencia (n, fuentes) | fix | métrica) y el ángulo en una línea.
 
 ## Checklist
+
 - [ ] 100% de las citas con URL y literales.
 - [ ] Sample size declarado en cada afirmación.
 - [ ] Temas `THIN` marcados como tales, no promocionados.
 - [ ] Cada fix tiene una pantalla y una métrica.
 
 ## No hagas
+
 Escribir reseñas de ejemplo como si fueran reales, redondear "unas cuantas quejas" a "la mayoría", ni atribuir a usuarios lo que dice un blog.

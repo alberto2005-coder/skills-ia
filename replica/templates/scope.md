@@ -1,6 +1,7 @@
 # Alcance y Límites del Clon: {{app_nombre_propio}}
 
 ## 1. Aplicación de Referencia y Clean-Room
+
 - **App de referencia:** {{nombre_app_original}} ({{dominio_original}})
 - **Fuentes autorizadas utilizadas:**
   - [ ] Web pública, help center y documentación oficial.
@@ -29,5 +30,6 @@
 | Slice 3: Ajustes y administración | S | 1 día | Slice 1 |
 
 ## 4. Riesgos Legales y Términos de Servicio
+
 - **Términos del original:** {{resumen_terminos_competidor}}
 - **Marca y Trade Dress:** Sin confusión visual ni similitud fonética en el nombre propio.

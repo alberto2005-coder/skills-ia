@@ -34,11 +34,13 @@ Estado de la columna: `pendiente` (no empezada) · `en curso` (trabajando) · `a
 ## Decisiones
 
 <!-- Formato: - (fecha) Decisión — por qué — quién la aprobó -->
+
 - ({{fecha}}) {{decisión}} — {{motivo}} — {{usuario}}
 
 ## Bloqueos
 
 <!-- Formato: - (fecha) Motivo — qué haría falta para desbloquear — quién decide -->
+
 - ({{fecha}}) {{motivo}} — {{qué falta}} — {{quién}}
 
 ## Pendientes de aprobación
@@ -48,4 +50,5 @@ Estado de la columna: `pendiente` (no empezada) · `en curso` (trabajando) · `a
 ## Bitácora de cambios
 
 <!-- Solo hechos nuevos: qué fase añadió qué, con fecha. No se borra historial. -->
+
 - ({{fecha}}) Fase {{NN}}: {{qué se añadió/corrigió}}.

@@ -11,7 +11,7 @@ metadata:
 
 Responde una sola pregunta con evidencia: **¿el clon hace lo mismo?** Sin adornos y sin aprobar por impresión.
 
-Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio**.
 
 ## Precondiciones
 
@@ -29,6 +29,7 @@ py replica/scripts/parity.py replica/features.csv --markdown --out replica/parit
 ```
 
    Pondera must 3 / should 2 / could 1, `partial` = 0.5 y excluye `out_of_scope`. Falla si algún `must` no está `done`.
+
 3. **Paridad visual**:
 
 ```bash
@@ -36,13 +37,14 @@ py replica/scripts/imgdiff.py original.png clon.png --out replica/diff/home.png 
 ```
 
    Compara layout por mapa de bordes y rejilla, ignorando el color: el rebrand no debe penalizar.
+
 4. Cada diferencia que importe lleva fila de `../templates/evidence.md` con **Fuente · Observación · Inferencia · Confianza · Límites**. Una diferencia no explicada no es «parecido razonable»: es un hallazgo abierto.
 5. Clasifica cada diferencia en: **corregir** (rompe función), **aceptar** (decisión con motivo) o **fuera de alcance** (con enlace a `scope.md`).
 6. Escribe `replica/parity.md` con la tabla, el resultado del gate y las diferencias aceptadas.
 
 ## Gate de salida
 
-- `parity.py` sin `must` pendientes (código de salida 0).
+- `parity.py` sin `must` pendientes y con al menos un `must` declarado (código de salida 0). Un manifiesto sin `must` no es un gate: sale 1 y hay que asignar prioridades antes de dar la fase por buena.
 - `imgdiff.py` sobre el flujo principal con similitud ≥ umbral acordado o diferencia explicada región por región.
 - Toda diferencia aceptada tiene motivo y responsable.
 - Cero filas de evidencia con confianza `THIN` usadas como argumento.

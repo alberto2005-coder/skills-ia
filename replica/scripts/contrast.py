@@ -124,6 +124,13 @@ def main(argv: list[str] | None = None) -> int:
             }
         )
 
+    if not results and "pairs" not in data:
+        # Sin pares por defecto evaluables el gate salía en verde sin haber
+        # comprobado nada. Con `pairs` explícitos, lo que no existe se avisa
+        # par a par y no convierte el fichero en un error de uso.
+        print("[x] Ningún par evaluable: revisa 'colors' y 'pairs'.", file=sys.stderr)
+        return 2
+
     if args.json:
         print(json.dumps({"pairs": results, "failures": failures}, indent=2))
     else:
