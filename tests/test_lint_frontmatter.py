@@ -22,7 +22,8 @@ description: Describe el paquete y su uso. English: describe the package and its
 FOLDED_DESCRIPTION_SKILL = """---
 name: demo
 description: >
-  Describe el paquete y su uso con una frase suficientemente larga.
+  Describe el paquete y su uso con una frase suficientemente larga. Úsala cuando
+  haya que demostrar que la activación funciona. English: describe the package.
 ---
 
 # Demo
@@ -31,7 +32,9 @@ description: >
 
 ALIGNED_SKILL = """---
 name: demo
-description: Describe el paquete y su uso con una frase suficientemente larga.
+description: >
+  Describe el paquete y su uso con una frase suficientemente larga. Úsala cuando
+  haya que demostrar que la versión cuadra. English: describe the package.
 metadata:
   package: demo
   version: "1.0.0"
@@ -39,6 +42,37 @@ metadata:
 
 # Demo
 """
+
+
+NO_TRIGGER_SKILL = """---
+name: demo
+description: >
+  Describe el paquete y su uso con una frase suficientemente larga, pero sin
+  decir cuándo usarla ni repetirlo en otro idioma.
+metadata:
+  package: demo
+  version: "1.0.0"
+---
+
+# Demo
+"""
+
+
+NO_BILINGUAL_SKILL = """---
+name: demo
+description: >
+  Describe el paquete y su uso con una frase suficientemente larga. Úsala cuando
+  haya que comprobar que falta la versión en inglés.
+metadata:
+  package: demo
+  version: "1.0.0"
+---
+
+# Demo
+"""
+
+
+MARKETPLACE = '{"name": "demo-market", "owner": {"name": "demo"}, "plugins": [{"name": "demo", "source": "./demo", "version": "9.9.9", "skills": ["."]}]}'
 
 
 class TestLintFrontmatter(unittest.TestCase):
@@ -98,6 +132,60 @@ class TestLintFrontmatter(unittest.TestCase):
             problems = lint_frontmatter.lint_repository(root)
 
         self.assertEqual(problems, {})
+
+    def test_description_without_trigger_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            skill = root / "demo"
+            skill.mkdir()
+            (skill / "SKILL.md").write_text(NO_TRIGGER_SKILL, encoding="utf-8")
+
+            problems = lint_frontmatter.lint_repository(root)
+
+        self.assertTrue(
+            any("caso de uso" in item for item in problems.get("demo/SKILL.md", [])),
+            problems,
+        )
+
+    def test_description_without_the_other_language_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            skill = root / "demo"
+            skill.mkdir()
+            (skill / "SKILL.md").write_text(NO_BILINGUAL_SKILL, encoding="utf-8")
+
+            problems = lint_frontmatter.lint_repository(root)
+
+        self.assertTrue(
+            any("otra lengua" in item for item in problems.get("demo/SKILL.md", [])),
+            problems,
+        )
+
+    def test_marketplace_version_must_match_the_index(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            package = root / "demo"
+            package.mkdir()
+            (package / "skills.json").write_text(
+                '{"version": "1.0.0", "skills": [{"name": "demo", "path": "SKILL.md"}]}',
+                encoding="utf-8",
+            )
+            (package / "SKILL.md").write_text(ALIGNED_SKILL, encoding="utf-8")
+            (root / "skills.json").write_text(
+                '{"packages": [{"name": "demo", "path": "demo", "version": "1.0.0"}]}',
+                encoding="utf-8",
+            )
+            marketplace = root / ".claude-plugin"
+            marketplace.mkdir()
+            (marketplace / "marketplace.json").write_text(MARKETPLACE, encoding="utf-8")
+
+            problems = lint_frontmatter.lint_repository(root)
+
+        self.assertIn(".claude-plugin/marketplace.json", problems)
+        self.assertTrue(
+            any("versión" in item for item in problems[".claude-plugin/marketplace.json"]),
+            problems,
+        )
 
     def test_index_version_must_match_the_manifest(self):
         with tempfile.TemporaryDirectory() as tmp:

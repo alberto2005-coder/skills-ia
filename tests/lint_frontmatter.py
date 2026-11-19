@@ -17,6 +17,10 @@ Comprueba, con el parser YAML del entorno (PyYAML, dependencia de desarrollo):
    de skills por paquete y la cobertura de todos los `SKILL.md`.
 6. Cada paquete del índice tiene su guía `docs/<paquete>.md` y un enlace a ella
    en `README.md` y en `docs/index.md`.
+7. La descripción de cada skill declara el disparador («Úsala cuando…») y cubre los
+   dos idiomas, que es lo que gobierna la activación automática.
+8. `.claude-plugin/marketplace.json` cuadra con el índice: versiones, rutas y la
+   lista de skills de cada plugin.
 
 Es la puerta de CI independiente de `unittest`.
 
@@ -29,7 +33,7 @@ import argparse
 import json
 import re
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import yaml
 
@@ -43,6 +47,12 @@ MAX_NAME = 64
 MIN_DESCRIPTION = 20
 MAX_DESCRIPTION = 1024
 MAX_BODY_LINES = 500
+# La descripción es la única señal de activación: sin caso de uso explícito, el
+# agente no sabe cuándo elegir la skill, y sin el otro idioma pierde la mitad de
+# las peticiones. Los cues se buscan en minúsculas y sin acentos propios.
+TRIGGER_CUES = ("úsala", "úsalo", "actívala", "actívalo", "use when", "use this")
+BILINGUAL_CUES = ("english:", "español", "spanish")
+MARKETPLACE_PATH = Path(".claude-plugin") / "marketplace.json"
 
 
 def _force_utf8_output() -> None:
@@ -103,6 +113,15 @@ def lint_file(path: Path) -> list[str]:
             problems.append(
                 f"description de {length} caracteres; debe estar entre "
                 f"{MIN_DESCRIPTION} y {MAX_DESCRIPTION}"
+            )
+        lowered = description.lower()
+        if not any(cue in lowered for cue in TRIGGER_CUES):
+            problems.append(
+                "description sin caso de uso explícito: añade «Úsala cuando…» o «Use when…»"
+            )
+        if not any(cue in lowered for cue in BILINGUAL_CUES):
+            problems.append(
+                "description sin la otra lengua: añade «English: …» o menciona el otro idioma"
             )
 
     body_lines = len(text[match.end():].splitlines())
@@ -348,6 +367,108 @@ def lint_package_docs(root: Path) -> dict[str, list[str]]:
     return problems
 
 
+
+def _skill_dir(entry_file: str) -> str:
+    """Carpeta que declara un SKILL.md dentro del paquete."""
+    return PurePosixPath(entry_file).parent.as_posix()
+
+
+def lint_marketplace(root: Path) -> dict[str, list[str]]:
+    """El marketplace de Claude Code no puede desviarse del índice.
+
+    Un plugin con la versión, la ruta o la lista de skills equivocada instala
+    código distinto del que publican los tags, y el usuario no tiene forma de
+    notarlo.
+    """
+    path = root / MARKETPLACE_PATH
+    if not path.is_file():
+        return {}
+
+    relative = MARKETPLACE_PATH.as_posix()
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        return {relative: ["JSON inválido: %s" % error]}
+
+    problems: dict[str, list[str]] = {}
+    for field in ("name", "owner", "plugins"):
+        if field not in data:
+            problems.setdefault(relative, []).append("falta «%s»" % field)
+    if problems:
+        return problems
+
+    index_path = root / "skills.json"
+    if not index_path.is_file():
+        return {}
+    try:
+        packages = json.loads(index_path.read_text(encoding="utf-8")).get("packages") or []
+    except json.JSONDecodeError:
+        return {}
+
+    entries = data.get("plugins") or []
+    by_name: dict[str, dict] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            problems.setdefault(relative, []).append("entrada que no es un objeto")
+            continue
+        name = entry.get("name")
+        source = entry.get("source")
+        if not name or not source:
+            problems.setdefault(relative, []).append("entrada sin «name» o «source»")
+            continue
+        by_name[name] = entry
+        if not str(source).startswith("./"):
+            problems.setdefault(relative, []).append(
+                "«%s»: source debe empezar por ./ (%r)" % (name, source)
+            )
+        elif not (root / str(source)[2:]).is_dir():
+            problems.setdefault(relative, []).append(
+                "«%s»: source no existe en el disco (%s)" % (name, source)
+            )
+
+    for package in packages:
+        name = package.get("name")
+        expected = package.get("version")
+        entry = by_name.get(name)
+        if entry is None:
+            problems.setdefault(relative, []).append("falta el plugin «%s»" % name)
+            continue
+        if entry.get("version") != expected:
+            problems.setdefault(relative, []).append(
+                "«%s»: versión %r y el índice dice %r" % (name, entry.get("version"), expected)
+            )
+        manifest_file = root / (package.get("path") or name) / "skills.json"
+        try:
+            manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        declared = {
+            ("." if _skill_dir(entry_file) == "." else "./" + _skill_dir(entry_file))
+            for entry_file in (item.get("path", "") for item in manifest.get("skills") or [])
+        }
+        listed = set(entry.get("skills") or [])
+        if declared - listed:
+            problems.setdefault(relative, []).append(
+                "«%s»: el plugin no lista %s" % (name, sorted(declared - listed)[:4])
+            )
+        if listed - declared:
+            problems.setdefault(relative, []).append(
+                "«%s»: el plugin lista rutas que el manifiesto no declara (%s)"
+                % (name, sorted(listed - declared)[:4])
+            )
+        for item in entry.get("skills") or []:
+            target = root / (package.get("path") or name) / item / "SKILL.md"
+            if not target.is_file():
+                problems.setdefault(relative, []).append(
+                    "«%s»: %s no tiene SKILL.md" % (name, item)
+                )
+
+    extra = sorted(set(by_name) - {package.get("name") for package in packages})
+    if extra:
+        problems.setdefault(relative, []).append("plugins que no están en el índice: " + ", ".join(extra))
+    return problems
+
+
 def lint_repository(root: Path = ROOT) -> dict[str, list[str]]:
     problems: dict[str, list[str]] = {}
     for path in iter_skill_files(root):
@@ -361,6 +482,8 @@ def lint_repository(root: Path = ROOT) -> dict[str, list[str]]:
     for path, found in lint_package_docs(root).items():
         problems.setdefault(path, []).extend(found)
     for path, found in lint_versions(root).items():
+        problems.setdefault(path, []).extend(found)
+    for path, found in lint_marketplace(root).items():
         problems.setdefault(path, []).extend(found)
     index_problems = lint_index(root)
     if index_problems:

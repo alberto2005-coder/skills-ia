@@ -16,7 +16,9 @@ import build_package  # noqa: E402
 
 SKILL_OK = """---
 name: demo
-description: Paquete de prueba con una descripción suficientemente larga.
+description: >
+  Paquete de prueba con una descripción suficientemente larga. Úsala cuando haya
+  que empaquetar un paquete de ejemplo. English: build a sample package archive.
 metadata:
   package: demo
   version: "%s"
