@@ -33,7 +33,7 @@ try:
     from . import (analyze, compare as compare_mod, execute, indexcheck,
                    perf, report, schema_audit, serp, source_audit,
                    web_audit)
-    from .httpbody import decode_body
+    from .httpbody import decode_body, decode_html
     from .page import parse_file, parse_html
 except (ImportError, ValueError):
     import analyze
@@ -46,7 +46,7 @@ except (ImportError, ValueError):
     import serp
     import source_audit
     import web_audit
-    from httpbody import decode_body
+    from httpbody import decode_body, decode_html
     from page import parse_file, parse_html
 
 VERSION = report.TOOL_VERSION
@@ -84,7 +84,7 @@ def _print_checks(checks, only=None, label=None):
     for rec in checks:
         if only and rec.get("dimension") not in only:
             continue
-        icon = {"pass": "🟢", "fail": "🔴" if rec.get("severity") == "must" else "🟡",
+        icon = {"pass": "🟢", "fail": "🔴" if rec.get("severity_level") == "must" else "🟡",
                 "skip": "⚪"}.get(rec.get("status"), "⚪")
         print("%s %-18s %s" % (icon, rec.get("id"), rec.get("evidence", "")))
 
@@ -133,7 +133,7 @@ def run_pipeline(target, allow_local=False, robots_path=None, presence=False,
     headers = {}
     if _is_url(target):
         measured = perf.measure(target, timeout=timeout, allow_local=allow_local)
-        page = parse_html(measured["body"].decode("utf-8", errors="replace"))
+        page = parse_html(decode_html(measured["body"], measured["headers"]))
         page_url = measured["final_url"]
         headers = measured["headers"]
         label = page_url
@@ -221,8 +221,8 @@ def _summary(out, payload):
     print(payload.get("verdict_line"))
     print("Puntuación: %.1f/100 · 🔴 %d · 🟡 %d · ✅ %d · ⚪ %d" % (
         payload.get("score", 0),
-        payload.get("counts_by_severity", {}).get("must", {}).get("fail", 0),
-        payload.get("counts_by_severity", {}).get("should", {}).get("fail", 0),
+        payload.get("counts_by_level", {}).get("must", {}).get("fail", 0),
+        payload.get("counts_by_level", {}).get("should", {}).get("fail", 0),
         counts.get("pass", 0), counts.get("skip", 0)))
     print("Informe: %s/audit.md" % out)
     print("Máquina: %s/audit.json" % out)
@@ -240,10 +240,17 @@ def _load_json(path):
 
 def cmd_audit(args):
     target = args.target
+    if args.rate <= 0:
+        raise SystemExit("--rate debe ser mayor que 0 peticiones por segundo")
+    if args.timeout <= 0:
+        raise SystemExit("--timeout debe ser mayor que 0 segundos")
     if args.mode in ("web", "local"):
         result = web_audit.audit_web(
             target, max_pages=args.max_pages, max_depth=args.max_depth,
-            timeout=args.timeout, allow_local=(args.mode == "local"),
+            timeout=args.timeout,
+            # `--allow-local` también en `--mode web`: antes solo contaba con
+            # `--mode local` y el flag quedaba ignorado.
+            allow_local=(args.mode == "local" or args.allow_local),
             rate=args.rate, respect_robots=not args.no_respect_robots)
     elif args.mode == "source":
         result = source_audit.audit_source(target, max_files=args.max_files)
@@ -312,7 +319,8 @@ def cmd_compare(args):
 
 
 def cmd_serp(args):
-    result, page, page_url = run_pipeline(args.target, timeout=args.timeout)
+    result, page, page_url = run_pipeline(args.target, timeout=args.timeout,
+                                          allow_local=args.allow_local)
     out_dir = Path(args.output)
     out, payload = _write(result, out_dir)
     path, metrics = serp.write(page, page_url, out_dir / "serp",
@@ -333,7 +341,8 @@ def cmd_serp(args):
 def cmd_perf(args):
     if not _is_url(args.target):
         raise SystemExit("perf requiere una URL http(s) para medir TTFB y compresión.")
-    result, _page, _url = run_pipeline(args.target, timeout=args.timeout)
+    result, _page, _url = run_pipeline(args.target, timeout=args.timeout,
+                                       allow_local=args.allow_local)
     out, payload = _write(result, Path(args.output))
     perf_data = result["data"].get("perf", {})
     print("\n== Rendimiento ==")
@@ -350,7 +359,8 @@ def cmd_perf(args):
 def cmd_headers(args):
     if not _is_url(args.target):
         raise SystemExit("headers requiere una URL http(s).")
-    result, _page, _url = run_pipeline(args.target, timeout=args.timeout)
+    result, _page, _url = run_pipeline(args.target, timeout=args.timeout,
+                                       allow_local=args.allow_local)
     out, payload = _write(result, Path(args.output))
     security = result["data"].get("security", {})
     print("\n== Seguridad HTTP ==")
@@ -363,7 +373,8 @@ def cmd_headers(args):
 
 
 def cmd_schema(args):
-    result, page, page_url = run_pipeline(args.target, timeout=args.timeout)
+    result, page, page_url = run_pipeline(args.target, timeout=args.timeout,
+                                          allow_local=args.allow_local)
     out, payload = _write(result, Path(args.output))
     schema_data = result["data"].get("schema", {})
     print("\n== Schema.org ==")
@@ -371,7 +382,7 @@ def cmd_schema(args):
     print("Bloques: %s · inválidos: %s" % (
         len(schema_data.get("blocks") or []),
         schema_data.get("invalid_blocks") or "ninguno"))
-    if args.rich_preview:
+    if args.rich_preview and not getattr(args, "no_rich_preview", False):
         blocks = schema_audit.blocks_from_page(page)
         path = schema_audit.write_rich_preview(
             blocks, Path(out) / "schema", url=page_url)
@@ -381,7 +392,8 @@ def cmd_schema(args):
 
 
 def cmd_hreflang(args):
-    result, page, page_url = run_pipeline(args.target, timeout=args.timeout)
+    result, page, page_url = run_pipeline(args.target, timeout=args.timeout,
+                                          allow_local=args.allow_local)
     out, payload = _write(result, Path(args.output))
     data = result["data"].get("hreflang", {})
     print("\n== hreflang ==")
@@ -394,7 +406,8 @@ def cmd_hreflang(args):
 
 
 def cmd_onpage(args):
-    result, page, page_url = run_pipeline(args.target, timeout=args.timeout)
+    result, page, page_url = run_pipeline(args.target, timeout=args.timeout,
+                                          allow_local=args.allow_local)
     out, payload = _write(result, Path(args.output))
     data = result["data"].get("onpage", {})
     print("\n== On-page ==")
@@ -418,7 +431,7 @@ def cmd_onpage(args):
 def cmd_index(args):
     result, page, page_url = run_pipeline(
         args.target, robots_path=args.robots, presence=args.presence,
-        timeout=args.timeout)
+        timeout=args.timeout, allow_local=args.allow_local)
     out, payload = _write(result, Path(args.output))
     data = result["data"].get("index", {})
     print("\n== Indexación ==")
@@ -509,24 +522,31 @@ def build_parser():
     serp_cmd.add_argument("--title", default=None)
     serp_cmd.add_argument("--description", default=None)
     serp_cmd.add_argument("--timeout", type=int, default=10)
+    serp_cmd.add_argument("--allow-local", action="store_true")
     serp_cmd.add_argument("--output", default="output")
     serp_cmd.set_defaults(func=cmd_serp)
 
     perf_cmd = sub.add_parser("perf", help="TTFB, peso, compresión y recursos")
     perf_cmd.add_argument("target")
     perf_cmd.add_argument("--timeout", type=int, default=10)
+    perf_cmd.add_argument("--allow-local", action="store_true")
     perf_cmd.add_argument("--output", default="output")
     perf_cmd.set_defaults(func=cmd_perf)
 
     headers = sub.add_parser("headers", help="seguridad HTTP")
     headers.add_argument("target")
     headers.add_argument("--timeout", type=int, default=10)
+    headers.add_argument("--allow-local", action="store_true")
     headers.add_argument("--output", default="output")
     headers.set_defaults(func=cmd_headers)
 
     schema = sub.add_parser("schema", help="JSON-LD y rich preview")
     schema.add_argument("target")
-    schema.add_argument("--rich-preview", action="store_true", default=True)
+    schema.add_argument("--rich-preview", action="store_true", default=True,
+                        help="escribe output/schema/rich-preview.html (por defecto)")
+    schema.add_argument("--no-rich-preview", action="store_true",
+                        help="no escribe el rich preview")
+    schema.add_argument("--allow-local", action="store_true")
     schema.add_argument("--timeout", type=int, default=10)
     schema.add_argument("--output", default="output")
     schema.set_defaults(func=cmd_schema)
@@ -534,12 +554,14 @@ def build_parser():
     href = sub.add_parser("hreflang", help="SEO internacional")
     href.add_argument("target")
     href.add_argument("--timeout", type=int, default=10)
+    href.add_argument("--allow-local", action="store_true")
     href.add_argument("--output", default="output")
     href.set_defaults(func=cmd_hreflang)
 
     onpage_cmd = sub.add_parser("onpage", help="auditoría on-page")
     onpage_cmd.add_argument("target")
     onpage_cmd.add_argument("--timeout", type=int, default=10)
+    onpage_cmd.add_argument("--allow-local", action="store_true")
     onpage_cmd.add_argument("--output", default="output")
     onpage_cmd.set_defaults(func=cmd_onpage)
 
@@ -548,6 +570,7 @@ def build_parser():
     index_cmd.add_argument("--robots", default=None, help="robots.txt local")
     index_cmd.add_argument("--presence", action="store_true")
     index_cmd.add_argument("--timeout", type=int, default=10)
+    index_cmd.add_argument("--allow-local", action="store_true")
     index_cmd.add_argument("--output", default="output")
     index_cmd.set_defaults(func=cmd_index)
 

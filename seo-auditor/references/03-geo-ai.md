@@ -3,6 +3,7 @@
 Analiza la preparación del contenido para motores generativos (Google AI Overviews, Perplexity, ChatGPT Search, Gemini, Copilot) sin prometer visibilidad.
 
 ## Principios
+
 1. **Nada de citas inventadas:** no se afirma que un sitio "aparece" o "aparecerá" en respuestas de IA sin una prueba fechada y reproducible. El motor evalúa señales, no posiciones.
 2. **GEO es preparación estructural:** facilidad para extraer, comprender, verificar y citar el contenido.
 3. **Separar propósitos:** permitir la búsqueda de un motor no obliga a permitir su entrenamiento. Esa distinción es explícita en toda la skill.
@@ -23,12 +24,13 @@ Analiza la preparación del contenido para motores generativos (Google AI Overvi
 | `Bingbot` | Bing / Copilot | `search` | https://www.bing.com/webmasters/help/which-crawlers-does-bing-use-8c184ec0 |
 
 Reglas:
+
 - Bloquear `search` o `user-fetch` reduce la probabilidad de ser citado; es una decisión de negocio, no un error técnico por sí misma.
 - Bloquear solo `training` (`GPTBot`, `ClaudeBot`, `Google-Extended`) es una postura legítima y no penaliza en el motor.
 
 Bloque recomendado (el motor lo genera en `output/robots.txt.draft`):
 
-```
+```text
 User-agent: OAI-SearchBot
 Allow: /
 
@@ -66,6 +68,7 @@ Estructura (plantilla generable con `fix`):
 ```
 
 Reglas:
+
 - Solo enlaces reales (sitemap o páginas rastreadas). Nunca se inventan secciones.
 - `llms-full.txt` añade el contenido textual completo; útil para extracción, no obligatorio.
 - Si el sitio no publica `llms.txt` no es un fallo `must`: es una mejora.
@@ -91,6 +94,7 @@ Un párrafo inicial que responde la pregunta principal de forma autónoma, con d
 Ejemplo de estructura: definición → por qué importa → cómo se comprueba → límite o matiz.
 
 ## 5. Extracción y citabilidad
+
 - Contenido crítico en el HTML inicial (no tras acordeones JS).
 - Tablas comparativas y listas ordenadas extraíbles.
 - Afirmaciones con fuente primaria enlazada.
@@ -107,6 +111,7 @@ Ejemplo de estructura: definición → por qué importa → cómo se comprueba �
 | `GEO-ANSWER-001` | nice | Bloque-respuesta 134–167 palabras (`estimate`) | https://developers.google.com/search/docs/fundamentals/creating-helpful-content |
 
 ## Lo que esta skill NO hace
+
 - No consulta APIs de IA ni simula respuestas de ChatGPT/Perplexity.
 - No estima "cuota de voz" ni posiciones en AI Overviews.
 - No afirma indexación en motores de IA.

@@ -4,7 +4,7 @@ description: Audita y optimiza el SEO de cualquier sitio web público, código f
 license: MIT
 metadata:
   package: seo-auditor
-  version: "2.0.0"
+  version: "3.0.0"
 ---
 
 # SEO Auditor 2.0
@@ -42,7 +42,7 @@ Auditoría y optimización SEO para **web pública, código fuente, servidor loc
 | Seguridad | 10 |
 | Rendimiento | 15 |
 
-```
+```text
 score_dimensión = 100 * aprobados / (aprobados + fallidos)
 total = media ponderada de las dimensiones evaluadas
 ```

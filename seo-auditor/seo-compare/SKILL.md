@@ -4,7 +4,7 @@ description: Compara dos auditorías SEO y clasifica cada comprobación en mejor
 license: MIT
 metadata:
   package: seo-auditor
-  version: "2.0.0"
+  version: "3.0.0"
 ---
 
 # SEO Auditor · Compare y monitorización
@@ -13,7 +13,7 @@ metadata:
 
 Assets compartidos: `../references/`, `../scripts/`.
 
-**Todos los comandos se ejecutan desde la raíz del repositorio** (`skills-ia-main/`) con el prefijo `py seo-auditor/scripts/cli.py`.
+**Todos los comandos se ejecutan desde la raíz del repositorio**  con el prefijo `py` (Windows) o `python3` (Linux/macOS) sobre `seo-auditor/scripts/cli.py`.
 
 ## Cuándo se usa
 

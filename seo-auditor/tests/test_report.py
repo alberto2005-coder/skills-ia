@@ -91,9 +91,9 @@ class ReportTests(unittest.TestCase):
 
     def test_must_fail_caps_verdict(self):
         checks = [{"id": "P%d" % i, "status": "pass", "dimension": "tecnico",
-                   "severity": "must", "title": "ok", "url": ""} for i in range(9)]
+                   "severity_level": "must", "title": "ok", "url": ""} for i in range(9)]
         checks.append({"id": "M1", "status": "fail", "dimension": "tecnico",
-                       "severity": "must", "title": "bloqueo", "url": ""})
+                       "severity_level": "must", "title": "bloqueo", "url": ""})
         rubric = report.checks_mod.compute_rubric(checks)
         self.assertEqual(rubric["total"], 90.0)
         self.assertEqual(rubric["verdict"], "Competitive")

@@ -19,7 +19,7 @@ except (ImportError, ValueError):
     import checks as checks_mod
 
 TOOL_NAME = "seo-auditor"
-TOOL_VERSION = "2.0.0"
+TOOL_VERSION = "3.0.0"
 SCHEMA_ID = "seo-auditor/audit"
 SCHEMA_VERSION = "2.0"
 
@@ -54,15 +54,15 @@ def build_payload(result, generated_at=None):
         rec["icon"] = checks_mod.icon_for(rec)
     rubric = checks_mod.compute_rubric(merged)
     counts = {"pass": 0, "fail": 0, "skip": 0}
-    by_severity = {"must": {"pass": 0, "fail": 0, "skip": 0},
+    by_level = {"must": {"pass": 0, "fail": 0, "skip": 0},
                    "should": {"pass": 0, "fail": 0, "skip": 0},
                    "nice": {"pass": 0, "fail": 0, "skip": 0}}
     for rec in merged:
         status = rec.get("status", "skip")
         counts[status] = counts.get(status, 0) + 1
-        sev = rec.get("severity", "nice")
-        if sev in by_severity:
-            by_severity[sev][status] += 1
+        level = rec.get("severity_level", "nice")
+        if level in by_level:
+            by_level[level][status] += 1
 
     payload = {
         "schema": SCHEMA_ID,
@@ -78,7 +78,7 @@ def build_payload(result, generated_at=None):
         "verdict_line": rubric["verdict_line"],
         "dimensions": rubric["dimensions"],
         "counts": counts,
-        "counts_by_severity": by_severity,
+        "counts_by_level": by_level,
         "must_fails": rubric["must_fail_count"],
         "checks": merged,
         "findings": findings,
@@ -106,10 +106,10 @@ def _table_rubric(payload):
 
 
 def _sort_checks(items):
-    severity = {"must": 0, "should": 1, "nice": 2}
+    levels = {"must": 0, "should": 1, "nice": 2}
     status = {"fail": 0, "pass": 1, "skip": 2}
     return sorted(items, key=lambda c: (status.get(c.get("status"), 3),
-                                        severity.get(c.get("severity"), 3),
+                                        levels.get(c.get("severity_level"), 3),
                                         c.get("id", "")))
 
 
@@ -122,8 +122,8 @@ def render_markdown(payload):
         "> **Veredicto:** %s" % payload.get("verdict_line", ""),
         "> **Puntuación:** %.1f/100 · 🔴 %d · 🟡 %d · 🟢 %d · ⚪ %d" % (
             payload.get("score", 0),
-            _fail_by_severity(payload, "must"),
-            _fail_by_severity(payload, "should"),
+            _fail_by_level(payload, "must"),
+            _fail_by_level(payload, "should"),
             _pass_count(payload),
             counts.get("skip", 0)),
         "> Modo: `%s` · Generado (UTC): %s · Motor: %s %s" % (
@@ -157,10 +157,10 @@ def render_markdown(payload):
 
     # Grupos por icono.
     groups = (
-        ("🔴 Críticos (`must`)", lambda c: c.get("status") == "fail" and c.get("severity") == "must"),
-        ("🟡 Avisos (`should`)", lambda c: c.get("status") == "fail" and c.get("severity") == "should"),
+        ("🔴 Críticos (`must`)", lambda c: c.get("status") == "fail" and c.get("severity_level") == "must"),
+        ("🟡 Avisos (`should`)", lambda c: c.get("status") == "fail" and c.get("severity_level") == "should"),
         ("🟢 Aprobados y mejoras opcionales", lambda c: c.get("status") == "pass"
-         or (c.get("status") == "fail" and c.get("severity") == "nice")),
+         or (c.get("status") == "fail" and c.get("severity_level") == "nice")),
         ("⚪ No comprobados (`skip`)", lambda c: c.get("status") == "skip"),
     )
     for title, predicate in groups:
@@ -176,7 +176,7 @@ def render_markdown(payload):
             lines.append("### %s `%s` — %s" % (icon, rec.get("id"), rec.get("title")))
             lines.append("- Dimensión: %s · Severidad: `%s` (%s) · Estado: %s" % (
                 DIM_LABEL.get(rec.get("dimension"), rec.get("dimension", "")),
-                rec.get("severity"), checks_mod.severity_label(rec.get("severity")), state))
+                rec.get("severity_level"), checks_mod.severity_label(rec.get("severity_level")), state))
             if rec.get("url"):
                 lines.append("- Evidencia en: `%s`" % rec["url"])
             lines.append("- Evidencia: %s" % (rec.get("evidence") or "—"))
@@ -224,8 +224,8 @@ def render_markdown(payload):
     return "\n".join(lines)
 
 
-def _fail_by_severity(payload, severity):
-    return payload.get("counts_by_severity", {}).get(severity, {}).get("fail", 0)
+def _fail_by_level(payload, level):
+    return payload.get("counts_by_level", {}).get(level, {}).get("fail", 0)
 
 
 def _pass_count(payload):
@@ -237,9 +237,9 @@ def _pass_count(payload):
 def render_html(payload):
     checks = _sort_checks(payload.get("checks", []))
     counts = payload.get("counts", {})
-    must_fail = _fail_by_severity(payload, "must")
-    should_fail = _fail_by_severity(payload, "should")
-    nice = payload.get("counts_by_severity", {}).get("nice", {}).get("fail", 0)
+    must_fail = _fail_by_level(payload, "must")
+    should_fail = _fail_by_level(payload, "should")
+    nice = payload.get("counts_by_level", {}).get("nice", {}).get("fail", 0)
 
     def esc(value):
         return html_mod.escape(str(value if value is not None else ""))
@@ -342,16 +342,16 @@ tr{page-break-inside:avoid}header{padding:0 0 12px 0}}
                  "<th>Doc oficial</th></tr></thead><tbody>")
     for rec in checks:
         status = rec.get("status", "skip")
-        severity = rec.get("severity", "nice")
-        row_class = status if status != "fail" else "fail " + severity
-        badge = {"must": "b-must", "should": "b-should", "nice": "b-nice"}.get(severity, "b-nice")
+        level = rec.get("severity_level", "nice")
+        row_class = status if status != "fail" else "fail " + level
+        badge = {"must": "b-must", "should": "b-should", "nice": "b-nice"}.get(level, "b-nice")
         parts.append("<tr class=\"%s\" data-status=\"%s\" data-severity=\"%s\">" % (
-            row_class, status, severity))
+            row_class, status, level))
         parts.append("<td>%s</td><td><code>%s</code></td><td>%s</td><td>%s</td>" % (
             esc(checks_mod.icon_for(rec)), esc(rec.get("id")), esc(rec.get("title")),
             esc(DIM_LABEL.get(rec.get("dimension"), rec.get("dimension")))))
         parts.append("<td><span class=\"badge %s\">%s</span></td>" % (
-            badge, esc(severity)))
+            badge, esc(level)))
         evidence = esc(rec.get("evidence"))
         if status == "fail":
             evidence += "<br><em>%s</em>" % esc(analyze.recommendation_for(rec.get("id")))

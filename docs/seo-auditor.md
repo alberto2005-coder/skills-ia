@@ -10,6 +10,7 @@
 ## 🇪🇸 Español
 
 ### Índice
+
 1. [Visión General](#visión-general)
 2. [Modos](#modos)
 3. [Rúbrica y Veredicto](#rúbrica-y-veredicto)
@@ -20,11 +21,13 @@
 8. [Uso y Tests](#uso-y-tests)
 
 ### Visión General
-`seo-auditor` audita sitios públicos, código local, servidores en desarrollo y páginas sueltas. El motor calcula y el modelo explica: cada hallazgo tiene id estable, severidad y cita oficial; la puntuación se recalcula desde la evidencia guardada, sin volver a la red.
+
+`seo-auditor` audita sitios públicos, código local, servidores en desarrollo y páginas sueltas. El motor calcula y el modelo explica: cada hallazgo tiene id estable, `severity` (riesgo: `high`/`medium`/`low`), `severity_level` (puerta: `must`/`should`/`nice`) y cita oficial; la puntuación se recalcula desde la evidencia guardada, sin volver a la red. Los registros de `checks` del JSON llevan solo `severity_level` (la puerta): `severity` existe únicamente en `findings`, donde ya es la escala de riesgo.
 
 **Paquete de 6 skills:** maestro + `seo-audit`, `seo-plan`, `seo-execute`, `seo-serp`, `seo-compare`.
 
 ### Modos
+
 | Modo | Objetivo |
 |---|---|
 | `web` | Sitio público con crawl respetuoso (`--max-pages`, `--rate`) |
@@ -33,10 +36,13 @@
 | `hybrid` | Código + servidor local |
 | `page` | Una página o URL suelta |
 
+`--allow-local` autoriza destinos en loopback y redes privadas (`localhost`, `127.0.0.1`, `::1`, rangos privados) en `audit`, `index`, `serp`, `perf`, `headers`, `schema`, `hreflang` y `onpage`; sin él, la validación de destino los rechaza. En `--mode local` y `--mode hybrid` el destino local ya está permitido. `schema --no-rich-preview` omite `schema/rich-preview.html` y conserva el inventario JSON-LD.
+
 ### Rúbrica y Veredicto
+
 Pesos: Técnico 25 · Contenido 20 · Schema 15 · GEO 15 · Seguridad 10 · Rendimiento 15.
 
-```
+```text
 score_dimensión = 100 * aprobados / (aprobados + fallidos)
 total = media ponderada de las dimensiones evaluadas
 ```
@@ -50,6 +56,7 @@ total = media ponderada de las dimensiones evaluadas
 Un fallo `must` impide `Leading` y lo degrada a `Competitive`: un `noindex` no convive con un «Leading». Los `skip` no penalizan; las dimensiones sin comprobaciones se excluyen y su peso se redistribuye.
 
 ### Módulos y Comandos
+
 | # | Bloque | Comando |
 |---|---|---|
 | 1 | Indexación + directivas cruzadas | `index` |
@@ -64,6 +71,7 @@ Un fallo `must` impide `Leading` y lo degrada a `Competitive`: un `noindex` no c
 CLI de 11 comandos: `audit`, `rescore`, `compare`, `serp`, `perf`, `headers`, `schema`, `hreflang`, `onpage`, `index`, `fix`.
 
 ### Sub-skills
+
 | Sub-skill | Qué hace |
 |---|---|
 | `seo-audit` | Auditoría completa y módulos de diagnóstico, rúbrica y re-score sin red. |
@@ -73,6 +81,7 @@ CLI de 11 comandos: `audit`, `rescore`, `compare`, `serp`, `perf`, `headers`, `s
 | `seo-compare` | Diff entre auditorías (mejorado/empeorado/nuevo/resuelto) y monitorización. |
 
 ### Artefactos y Flujo
+
 Cada auditoría produce `audit.json` (máquina), `audit.md` (persona) y `report.html` (imprimible con filtros 🔴🟡🟢⚪).
 
 1. **Audit** → `seo-audit`.
@@ -81,6 +90,7 @@ Cada auditoría produce `audit.json` (máquina), `audit.md` (persona) y `report.
 4. **Verificar** → nueva auditoría + `seo-compare`.
 
 ### Límites Declarados
+
 - No se consultan rankings, Search Console ni Analytics salvo que el usuario los aporte.
 - Sin API externa no hay Core Web Vitals: se mide TTFB, peso, compresión y recursos, y se marca lo demás `estimate`.
 - La presencia con `site:` es indirecta y no prueba indexación.
@@ -89,6 +99,7 @@ Cada auditoría produce `audit.json` (máquina), `audit.md` (persona) y `report.
 - No hay PDF nativo (rompería cero dependencias): `report.html` incluye **Imprimir → Guardar como PDF**.
 
 ### Uso y Tests
+
 ```bash
 py seo-auditor/scripts/cli.py audit https://example.com --mode web --max-pages 30 --rate 1
 py seo-auditor/scripts/cli.py audit . --mode source
@@ -104,6 +115,7 @@ py -m unittest discover -s seo-auditor/tests -v
 ## 🇬🇧 English
 
 ### Table of Contents
+
 1. [Overview](#overview)
 2. [Modes](#modes)
 3. [Rubric and Verdict](#rubric-and-verdict)
@@ -114,11 +126,13 @@ py -m unittest discover -s seo-auditor/tests -v
 8. [Usage and Tests](#usage-and-tests)
 
 ### Overview
-`seo-auditor` audits public sites, local code, dev servers and single pages. The engine computes and the model explains: every finding has a stable id, severity and official citation; scores are recomputed from stored evidence without hitting the network.
+
+`seo-auditor` audits public sites, local code, dev servers and single pages. The engine computes and the model explains: every finding has a stable id, `severity` (risk: `high`/`medium`/`low`), `severity_level` (gate: `must`/`should`/`nice`) and an official citation; scores are recomputed from stored evidence without hitting the network. The JSON `checks` records carry only `severity_level` (the gate): `severity` exists only in `findings`, where it is already the risk scale.
 
 **6-skill package:** master + `seo-audit`, `seo-plan`, `seo-execute`, `seo-serp`, `seo-compare`.
 
 ### Modes
+
 | Mode | Target |
 |---|---|
 | `web` | Public site with respectful crawl (`--max-pages`, `--rate`) |
@@ -127,10 +141,13 @@ py -m unittest discover -s seo-auditor/tests -v
 | `hybrid` | Code + local server |
 | `page` | Single page or URL |
 
+`--allow-local` authorises loopback and private-network targets (`localhost`, `127.0.0.1`, `::1`, private ranges) on `audit`, `index`, `serp`, `perf`, `headers`, `schema`, `hreflang` and `onpage`; without it, target validation rejects them. In `--mode local` and `--mode hybrid` the local target is already allowed. `schema --no-rich-preview` skips `schema/rich-preview.html` and keeps the JSON-LD inventory.
+
 ### Rubric and Verdict
+
 Weights: Technical 25 · Content 20 · Schema 15 · GEO 15 · Security 10 · Performance 15.
 
-```
+```text
 dimension_score = 100 * passed / (passed + failed)
 total = weighted mean of evaluated dimensions
 ```
@@ -144,6 +161,7 @@ total = weighted mean of evaluated dimensions
 A `must` failure blocks `Leading` and degrades it to `Competitive`: a `noindex` never sits next to "Leading". `skip` items do not penalize; dimensions without checks are excluded and their weight redistributed.
 
 ### Modules and Commands
+
 | # | Block | Command |
 |---|---|---|
 | 1 | Indexing + crossed directives | `index` |
@@ -158,6 +176,7 @@ A `must` failure blocks `Leading` and degrades it to `Competitive`: a `noindex` 
 11-command CLI: `audit`, `rescore`, `compare`, `serp`, `perf`, `headers`, `schema`, `hreflang`, `onpage`, `index`, `fix`.
 
 ### Sub-skills
+
 | Sub-skill | Purpose |
 |---|---|
 | `seo-audit` | Full audit and diagnostic modules, rubric and offline re-score. |
@@ -167,6 +186,7 @@ A `must` failure blocks `Leading` and degrades it to `Competitive`: a `noindex` 
 | `seo-compare` | Audit diff (improved/worse/new/resolved) and monitoring. |
 
 ### Artifacts and Flow
+
 Every audit produces `audit.json` (machine), `audit.md` (human) and `report.html` (printable with 🔴🟡🟢⚪ filters).
 
 1. **Audit** → `seo-audit`.
@@ -175,6 +195,7 @@ Every audit produces `audit.json` (machine), `audit.md` (human) and `report.html
 4. **Verify** → fresh audit + `seo-compare`.
 
 ### Declared Limits
+
 - No rankings, Search Console or Analytics unless the user provides them.
 - Without an external API there are no Core Web Vitals: TTFB, weight, compression and resources are measured, the rest is marked `estimate`.
 - `site:` presence is indirect and does not prove indexing.
@@ -183,6 +204,7 @@ Every audit produces `audit.json` (machine), `audit.md` (human) and `report.html
 - No native PDF (zero-dependency rule): `report.html` ships **Print → Save as PDF**.
 
 ### Usage and Tests
+
 ```bash
 py seo-auditor/scripts/cli.py audit https://example.com --mode web --max-pages 30 --rate 1
 py seo-auditor/scripts/cli.py audit . --mode source

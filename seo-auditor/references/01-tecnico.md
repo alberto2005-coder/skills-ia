@@ -5,6 +5,7 @@ Audita la infraestructura, rastreabilidad, indexabilidad y arquitectura técnica
 ## Áreas Clave de Inspección
 
 ### 1. Rastreabilidad e Indexabilidad
+
 - **Códigos HTTP:** 4xx, 5xx, cadenas y bucles 3xx.
 - **Directivas cruzadas (módulo 1 de IndexPulse):** se comparan las cinco fuentes y se marca el conflicto, no solo la ausencia:
   - reglas de `robots.txt` (`Allow`/`Disallow`, coincidencia por prefijo más larga; `Allow` gana en empate),
@@ -15,12 +16,15 @@ Audita la infraestructura, rastreabilidad, indexabilidad y arquitectura técnica
   Un `noindex` en meta con `X-Robots-Tag: index` es un **conflicto** (`IDX-CONFLICT-001`), no dos avisos sueltos.
 
 ### 2. Canónicas y Duplicidad Técnica
+
 - URL absoluta y autorreferencial en páginas originales.
 - No debe apuntar a URLs 4xx ni a redirecciones 3xx.
 - Coherencia de protocolo y barra final.
 
 ### 3. Internacionalización (hreflang) — módulo 6
+
 Checklist de pares:
+
 1. `<html lang>` con código BCP 47 válido.
 2. Cada `hreflang` usa ISO 639-1/639-2 y, si aplica, región ISO 3166-1 alfa-2.
 3. **Autorreferencia**: la página se declara a sí misma.
@@ -29,13 +33,16 @@ Checklist de pares:
 6. Idioma y región mal escritos (`español!`, `en-UK` en lugar de `en-GB`).
 
 ### 4. Cabeceras HTTP de seguridad — módulo 4
+
 Score 0–100 reproducible (pesos entre paréntesis): `Strict-Transport-Security` (20), `Content-Security-Policy` (25), `X-Frame-Options` o CSP `frame-ancestors` (15), `X-Content-Type-Options: nosniff` (15), `Referrer-Policy` (10), `Permissions-Policy` (15). Mixed content confirmado resta 20.
 
 ### 5. Renderizado y Rendimiento Observable
+
 - Contenido esencial en el HTML inicial frente a CSR.
 - Recursos que bloquean el render; fuentes y estilos.
 
 ### 6. Estructura de Enlaces Internos
+
 - Enlaces rotos, páginas huérfanas en la muestra, profundidad de clics.
 
 ## Comprobaciones y cita oficial
@@ -64,4 +71,5 @@ Score 0–100 reproducible (pesos entre paréntesis): `Strict-Transport-Security
 | `SEC-MIXED-001` | must | Sin recursos `http://` en página HTTPS | https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content |
 
 ## Salida Esperada
+
 Ubicación, evidencia literal, severidad (`must|should|nice`), cita y recomendación reproducible.

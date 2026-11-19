@@ -13,6 +13,7 @@ Dos partes independientes:
 from __future__ import annotations
 
 import re
+import socket
 import time
 from urllib.error import URLError, HTTPError
 from urllib.parse import quote_plus, urlparse
@@ -20,11 +21,11 @@ from urllib.request import Request, urlopen
 
 try:
     from .checks import check
-    from .httpbody import decode_body
+    from .httpbody import decode_body, decode_html
     from .page import normalize_url
 except (ImportError, ValueError):
     from checks import check
-    from httpbody import decode_body
+    from httpbody import decode_body, decode_html
     from page import normalize_url
 
 ENGINES = {
@@ -39,6 +40,8 @@ BLOCK_MARKERS = ("captcha", "unusual traffic", "tráfico inusual", "access denie
                  "before you continue", "robot check")
 
 CRAWLER_UA = "SEOAuditor/1.0 (+diagnostico de indexacion; solo lectura)"
+# El token con el que robots.txt debe evaluar a ESTE cliente.
+AUDITOR_AGENT = "SEOAuditor"
 
 
 # --- robots.txt -------------------------------------------------------------
@@ -146,8 +149,11 @@ def fetch_robots(url, timeout=10, allow_local=False):
         with build_safe_opener(allow_local).open(request, timeout=timeout) as response:
             raw = response.read(1_000_000)
             body = decode_body(raw, dict(response.headers))
-            return body.decode("utf-8", errors="replace"), robots_url
-    except (HTTPError, URLError):
+            return decode_html(body, dict(response.headers)), robots_url
+    except (HTTPError, URLError, TimeoutError, socket.timeout, OSError) as error:
+        # `TimeoutError` no es `URLError`: un robots.txt lento rompía
+        # `audit --mode page` con stack trace en vez de seguir sin robots.
+        del error
         return "", robots_url
 
 
@@ -173,12 +179,15 @@ def analyze(page, url="", headers=None, robots=None, sitemap_urls=None,
         checks.append(check("IDX-ROBOTS-002", "skip",
                             "robots.txt no disponible en este modo.", url))
     else:
-        allowed = is_allowed(robots, path, "Googlebot")
+        # El UA propio es el que hace las peticiones: decidir con el grupo de
+        # Googlebot daba por permitido lo que a este auditor se le prohíbe.
+        allowed = is_allowed(robots, path, AUDITOR_AGENT)
         data["robots_allows_url"] = allowed
+        data["robots_allows_googlebot"] = is_allowed(robots, path, "Googlebot")
         checks.append(check(
             "IDX-ROBOTS-001", "pass" if allowed else "fail",
-            "Googlebot %s rastrear %s según robots.txt." % (
-                "puede" if allowed else "NO puede", path),
+            "%s %s rastrear %s según robots.txt." % (
+                AUDITOR_AGENT, "puede" if allowed else "NO puede", path),
             url))
         blocked = global_disallow(robots)
         checks.append(check(

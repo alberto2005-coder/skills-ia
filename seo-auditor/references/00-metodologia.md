@@ -1,6 +1,7 @@
 # Metodología y Seguridad en Auditoría SEO
 
 ## Principios Fundamentales
+
 1. **Evidencia antes que opinión:** Todo hallazgo se sustenta en evidencia directa (código fuente, cabecera HTTP, URL rastreada o fragmento de contenido). `audit.json` guarda esa evidencia para poder recalcular la puntuación con `--rescore` sin volver a la red.
 2. **Separación rigurosa de estados:**
    - **Observado:** comprobado en la respuesta HTTP o en el archivo analizado (confianza alta).
@@ -32,7 +33,7 @@
 
 Fórmula reproducible:
 
-```
+```text
 score_dimensión = 100 * aprobados / (aprobados + fallidos)
 total = media ponderada de las dimensiones evaluadas
 ```
@@ -56,6 +57,7 @@ El veredicto se escribe en la cabecera del informe.
 Los hallazgos siguen exportando `severity` legacy (`critical`/`high`/`medium`/`low`) para no romper integraciones anteriores. El mapeo es `must→high`, `should→medium`, `nice→low`; el campo autoritativo es `severity_level`.
 
 ## Límites de Seguridad y Rastreo
+
 - **Protección SSRF:** el rastreador bloquea IPs privadas, redes locales y esquemas no seguros. En modo `local` solo se admite loopback (`localhost`, `127.0.0.1`, `::1`). La validación se repite en **cada salto** de una redirección: una URL pública que redirija a `127.0.0.1` o a una IP privada se rechaza sin llegar a pedirla.
 - **Exclusiones:** nunca se inspeccionan `.env`, claves privadas, credenciales, `.git`, `node_modules`, `vendor`, `build`, `dist`, `output` ni `reports`.
 - **Crawl respetuoso:** robots.txt se consulta y se respeta; 1 petición/segundo por defecto; tope de páginas y profundidad se declaran en el informe (`crawl` en `audit.json`).

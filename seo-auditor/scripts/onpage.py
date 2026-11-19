@@ -45,11 +45,14 @@ def heading_hierarchy(page):
         issues.append("H1 ausente")
     if counts["h1"] > 1:
         issues.append("H1 duplicado (%d)" % counts["h1"])
-    # Saltos: un H3 sin ningún H2 previo, o un H4 sin H3 previo.
-    sequence = []
-    for level in ("h1", "h2", "h3", "h4"):
-        for _ in page.headings.get(level, []):
-            sequence.append(int(level[1]))
+    # Saltos: un H3 sin ningún H2 previo, o un H4 sin H3 previo, en el ORDEN
+    # DEL DOCUMENTO. Recorrer por niveles daba `h1,h3,h2` como `h1,h2,h3` y
+    # ocultaba el salto real.
+    sequence = list(getattr(page, "heading_sequence", []) or [])
+    if not sequence:
+        for level in ("h1", "h2", "h3", "h4"):
+            for _ in page.headings.get(level, []):
+                sequence.append(int(level[1]))
     previous = 0
     for level in sequence:
         if previous and level > previous + 1:

@@ -1,6 +1,6 @@
 # Guía rápida de uso
 
-Todos los comandos funcionan con `py` en Windows (Python 3.8+, solo stdlib).
+Todos los comandos funcionan con `py` en Windows (Python 3.9+, solo stdlib). En Linux/macOS sustituye `py` por `python3`.
 Desde la raíz del repositorio:
 
 ```bash
@@ -12,6 +12,13 @@ Desde la carpeta `seo-auditor/`:
 ```bash
 py scripts/cli.py --help
 ```
+
+## Flags comunes
+
+| Flag | Comandos | Qué hace |
+|---|---|---|
+| `--allow-local` | `audit`, `index`, `serp`, `perf`, `headers`, `schema`, `hreflang`, `onpage` | Permite destinos en loopback y redes privadas (`localhost`, `127.0.0.1`, `::1`, rangos privados). Sin él se rechazan. En `--mode local` y `--mode hybrid` el destino local ya está permitido. |
+| `--no-rich-preview` | `schema` | No escribe `schema/rich-preview.html`; el inventario JSON-LD y sus hallazgos se mantienen. `--rich-preview` es el comportamiento por defecto. |
 
 ## 1. Auditar código fuente local
 

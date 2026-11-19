@@ -15,11 +15,11 @@ from urllib.parse import quote
 
 try:
     from .checks import check
-    from .httpbody import decode_body
+    from .httpbody import charset_of, decode_body, decode_html
     from .page import parse_html
 except (ImportError, ValueError):
     from checks import check
-    from httpbody import decode_body
+    from httpbody import charset_of, decode_body, decode_html
     from page import parse_html
 
 PSI_URL = "https://pagespeed.web.dev/analysis?url=%s"
@@ -152,6 +152,7 @@ def measure(url, timeout=15, allow_local=False):
         "status": getattr(response, "status", None),
         "headers": headers,
         "body": decode_body(raw, headers),
+        "charset": charset_of(headers, decode_body(raw, headers)),
         "encoded_bytes": len(raw),
         "ttfb_ms": ttfb_ms,
         "total_ms": total_ms,
@@ -161,7 +162,7 @@ def measure(url, timeout=15, allow_local=False):
 def analyze_url(url, timeout=15, allow_local=False, external_cwv=None):
     """Mide y analiza una URL. Devuelve (checks, data, page)."""
     measured = measure(url, timeout=timeout, allow_local=allow_local)
-    page = parse_html(measured["body"].decode("utf-8", errors="replace"))
+    page = parse_html(decode_html(measured["body"], measured["headers"]))
     checks, data = analyze(
         measured["headers"], len(measured["body"]), measured["ttfb_ms"],
         measured["total_ms"], page, external_cwv=external_cwv,

@@ -4,7 +4,7 @@ description: Simula cómo se verá una página en Google escritorio y móvil, Bi
 license: MIT
 metadata:
   package: seo-auditor
-  version: "2.0.0"
+  version: "3.0.0"
 ---
 
 # SEO Auditor · SERP y tarjetas
@@ -13,7 +13,7 @@ Ver antes de publicar. Genera un `preview.html` autocontenido con las vistas que
 
 Assets compartidos: `../references/`, `../scripts/`, `../templates/`.
 
-**Todos los comandos se ejecutan desde la raíz del repositorio** (`skills-ia-main/`) con el prefijo `py seo-auditor/scripts/cli.py`.
+**Todos los comandos se ejecutan desde la raíz del repositorio**  con el prefijo `py` (Windows) o `python3` (Linux/macOS) sobre `seo-auditor/scripts/cli.py`.
 
 ## Cuándo se usa
 

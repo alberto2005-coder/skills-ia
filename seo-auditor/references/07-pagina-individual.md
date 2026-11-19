@@ -25,6 +25,7 @@ Guía paso a paso para auditar a fondo una URL pública específica o un archivo
    - Bloques JSON-LD presentes y coherencia con la información visible en la página.
 
 ## Estructura del Informe de Página
+
 1. **Ficha técnica:** URL/archivo, tipo de página, código HTTP.
 2. **Diagnóstico y hallazgos:** Puntos críticos, advertencias y oportunidades ordenadas por impacto.
 3. **Evidencias literales:** Fragmentos de código o texto evaluados.

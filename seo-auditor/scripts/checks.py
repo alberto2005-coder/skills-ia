@@ -133,13 +133,13 @@ def catalog(check_id):
             return {
                 "id": check_id,
                 "dimension": "tecnico",
-                "severity": "nice",
+                "severity_level": "nice",
                 "citation": "",
                 "title": check_id,
                 "known": False,
             }
     dim, sev, cite, title = CHECKS[key]
-    return {"id": check_id, "dimension": dim, "severity": sev,
+    return {"id": check_id, "dimension": dim, "severity_level": sev,
             "citation": cite, "title": title, "known": True}
 
 
@@ -152,7 +152,7 @@ def check(check_id, status, evidence="", url="", note=""):
     if status not in ("pass", "fail", "skip"):
         raise ValueError("status inválido: %r" % status)
     rec = {"id": meta["id"], "status": status, "evidence": evidence, "url": url,
-           "dimension": meta["dimension"], "severity": meta["severity"],
+           "dimension": meta["dimension"], "severity_level": meta["severity_level"],
            "citation": meta["citation"], "title": meta["title"],
            "known": meta["known"]}
     if note:
@@ -166,7 +166,7 @@ def icon_for(rec):
         return ICON_SKIP
     if rec.get("status") == "pass":
         return ICON_PASS
-    return ICON_FAIL.get(rec.get("severity", "nice"), "🟢")
+    return ICON_FAIL.get(rec.get("severity_level", "nice"), "🟢")
 
 
 def severity_label(sev):
@@ -214,7 +214,7 @@ def merge_checks(result_checks, findings):
         meta = catalog(fid)
         merged[key] = {
             "id": fid, "status": "fail", "evidence": f.get("evidence", ""),
-            "url": url, "dimension": meta["dimension"], "severity": meta["severity"],
+            "url": url, "dimension": meta["dimension"], "severity_level": meta["severity_level"],
             "citation": meta["citation"], "title": f.get("title") or meta["title"],
             "known": meta["known"],
         }
@@ -261,7 +261,7 @@ def compute_rubric(checks):
         total = 0.0
 
     must_fails = [c for c in checks
-                  if c.get("status") == "fail" and c.get("severity") == "must"]
+                  if c.get("status") == "fail" and c.get("severity_level") == "must"]
     # Regla documentada: un fallo `must` no permite `Leading`.
     final_verdict = verdict(total)
     if must_fails and final_verdict == "Leading":

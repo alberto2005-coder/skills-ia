@@ -208,12 +208,12 @@ def render_plan(payload, files):
               "| Orden | Check | Severidad | Acción | Doc oficial |",
               "|---:|---|---|---|---|"]
     order = 0
-    severity_rank = {"must": 0, "should": 1, "nice": 2}
+    level_rank = {"must": 0, "should": 1, "nice": 2}
     for rec in sorted(_failed(payload), key=lambda r: (
-            severity_rank.get(r.get("severity"), 3), r.get("id", ""))):
+            level_rank.get(r.get("severity_level"), 3), r.get("id", ""))):
         order += 1
         lines.append("| %d | `%s` | %s | %s | %s |" % (
-            order, rec.get("id"), rec.get("severity"),
+            order, rec.get("id"), rec.get("severity_level"),
             analyze.recommendation_for(rec.get("id")).replace("|", "/"),
             rec.get("citation", "")))
     lines += ["", "## Cómo aplicar", "",

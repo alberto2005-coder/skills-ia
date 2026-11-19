@@ -19,14 +19,14 @@ from urllib.request import Request
 
 try:
     from . import analyze, indexcheck, perf
-    from .httpbody import decode_body
+    from .httpbody import decode_body, decode_html
     from .page import parse_html
     from .security import build_safe_opener, validate_target
 except (ImportError, ValueError):
     import analyze
     import indexcheck
     import perf
-    from httpbody import decode_body
+    from httpbody import decode_body, decode_html
     from page import parse_html
     from security import build_safe_opener, validate_target
 
@@ -42,8 +42,12 @@ def fetch(url, timeout=10, allow_local=False):
                                     "Accept-Encoding": "gzip, deflate"})
     start = time.time()
     response = build_safe_opener(allow_local).open(request, timeout=timeout)
-    raw = response.read(MAX_BYTES)
-    elapsed = int((time.time() - start) * 1000)
+    # El primer byte mide TTFB; leer todo antes de parar el reloj convertía
+    # "TTFB" en el tiempo de descarga completa.
+    first = response.read(1)
+    ttfb_ms = int((time.time() - start) * 1000)
+    raw = first + response.read(MAX_BYTES)
+    total_ms = int((time.time() - start) * 1000)
     headers = {str(k).lower(): str(v) for k, v in response.headers.items()}
     return {
         "status": getattr(response, "status", None),
@@ -51,8 +55,8 @@ def fetch(url, timeout=10, allow_local=False):
         "headers": headers,
         "body": decode_body(raw, headers),
         "encoded_bytes": len(raw),
-        "ttfb_ms": elapsed,
-        "total_ms": elapsed,
+        "ttfb_ms": ttfb_ms,
+        "total_ms": total_ms,
     }
 
 
@@ -65,7 +69,11 @@ def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=Fals
               rate=1.0, respect_robots=True):
     validate_target(start_url, allow_local=allow_local)
     limit = max(1, min(int(max_pages), 500))
-    rate = max(0.1, float(rate or 1.0))
+    if rate is None or float(rate) <= 0:
+        raise ValueError("rate debe ser mayor que 0 peticiones por segundo")
+    if timeout is None or int(timeout) <= 0:
+        raise ValueError("timeout debe ser mayor que 0 segundos")
+    rate = float(rate)
     interval = 1.0 / rate
 
     origin = urlparse(start_url)
@@ -116,7 +124,7 @@ def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=Fals
         seen.add(url)
 
         if respect_robots and robots is not None and not indexcheck.is_allowed(
-                robots, urlparse(url).path or "/", "Googlebot"):
+                robots, urlparse(url).path or "/", indexcheck.AUDITOR_AGENT):
             skipped.append(url)
             continue
 
@@ -143,10 +151,13 @@ def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=Fals
         }
         records.append(record)
 
-        if "html" not in content_type.lower():
+        # Sin `Content-Type` la página desaparecía del crawl. Si el cuerpo
+        # empieza por `<`, es HTML y se analiza igual.
+        if "html" not in content_type.lower() and not (
+                not content_type and response["body"].lstrip()[:1] == b"<"):
             continue
 
-        page = parse_html(response["body"].decode("utf-8", errors="replace"))
+        page = parse_html(decode_html(response["body"], response["headers"]))
         parsed_pages.append((url, page, response["headers"], record))
 
         if depth < max_depth:
@@ -165,7 +176,7 @@ def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=Fals
             candidate = _origin(start_url) + "/sitemap.xml"
             response = fetch(candidate, timeout=timeout, allow_local=allow_local)
             if 200 <= (response["status"] or 0) < 300:
-                text = response["body"].decode("utf-8", errors="replace")
+                text = decode_html(response["body"], response["headers"])
                 sitemap_count = len(re.findall(r"<loc>", text))
                 sitemap_urls.append(candidate)
         except Exception:
@@ -220,7 +231,7 @@ def audit_web(start_url, max_pages=30, max_depth=3, timeout=10, allow_local=Fals
         "evidence": "robots.txt respetado=%s; %.1f req/s; tope %d páginas; "
                     "%d URLs omitidas por robots." % (
                         respect_robots, rate, limit, len(skipped)),
-        "url": start_url, "dimension": "tecnico", "severity": "should",
+        "url": start_url, "dimension": "tecnico", "severity_level": "should",
         "citation": "https://developers.google.com/search/docs/crawling-indexing/robots/robots_txt",
         "title": "Crawl respetuoso: robots.txt respetado y 1 petición/segundo",
         "known": True,

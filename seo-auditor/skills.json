@@ -2,7 +2,7 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "seo-auditor",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Auditoría y optimización SEO/GEO con maestro + 5 sub-skills (audit, plan, execute, serp, compare), rúbrica 0-100 y evidencia reproducible.",
   "author": "Alberto Ortiz",
   "skills": [

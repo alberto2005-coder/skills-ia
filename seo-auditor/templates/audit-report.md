@@ -16,6 +16,7 @@
 | Rendimiento | 15 | | | | |
 
 ## Rastreo declarado
+
 - Tope de páginas: {{max_pages}} · Profundidad: {{max_depth}} · Ritmo: {{rate}} req/s
 - robots.txt respetado: {{sí|no}} · Páginas rastreadas: {{n}}
 

@@ -11,7 +11,7 @@ from scripts import compare, report
 
 def rec(check_id, status, severity="must"):
     return {"id": check_id, "status": status, "dimension": "tecnico",
-            "severity": severity, "title": "Comprobación " + check_id,
+            "severity_level": severity, "title": "Comprobación " + check_id,
             "citation": "https://developers.google.com/search/docs",
             "evidence": status, "url": "https://example.com"}
 

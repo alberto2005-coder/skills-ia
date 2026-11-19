@@ -50,7 +50,7 @@ def compare(old, new):
             entries.append({
                 "tipo": kind, "id": check_id, "url": url,
                 "antes": old_status, "ahora": new_status,
-                "severidad": new_rec.get("severity") or old_rec.get("severity"),
+                "severidad": new_rec.get("severity_level") or old_rec.get("severity_level"),
                 "titulo": new_rec.get("title") or old_rec.get("title"),
                 "evidencia_antes": old_rec.get("evidence", ""),
                 "evidencia_ahora": new_rec.get("evidence", ""),
@@ -63,7 +63,7 @@ def compare(old, new):
                 entries.append({
                     "tipo": "nuevo", "id": check_id, "url": url,
                     "antes": None, "ahora": new_rec.get("status"),
-                    "severidad": new_rec.get("severity"),
+                    "severidad": new_rec.get("severity_level"),
                     "titulo": new_rec.get("title"),
                     "evidencia_antes": "",
                     "evidencia_ahora": new_rec.get("evidence", ""),
@@ -77,7 +77,7 @@ def compare(old, new):
                 entries.append({
                     "tipo": "resuelto", "id": check_id, "url": url,
                     "antes": old_rec.get("status"), "ahora": None,
-                    "severidad": old_rec.get("severity"),
+                    "severidad": old_rec.get("severity_level"),
                     "titulo": old_rec.get("title"),
                     "evidencia_antes": old_rec.get("evidence", ""),
                     "evidencia_ahora": "",

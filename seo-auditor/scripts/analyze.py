@@ -196,7 +196,7 @@ def to_findings(checks):
         if rec.get("status") != "fail":
             continue
         meta = catalog(rec["id"])
-        severity_level = rec.get("severity") or meta["severity"]
+        severity_level = rec.get("severity_level") or meta["severity_level"]
         findings.append({
             "id": rec["id"],
             "category": rec.get("dimension") or meta["dimension"],

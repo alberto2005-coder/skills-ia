@@ -41,6 +41,9 @@ class _PageParser(HTMLParser):
         self.meta = []
         self.link_tags = []
         self.headings = {h: [] for h in HEADINGS}
+        # Orden real del documento: sin esto la jerarquía se reconstruía
+        # agrupando por nivel y `h1,h3,h2` no detectaba el salto.
+        self.heading_sequence = []
         self._heading_stack = []
         self._heading_buf = []
         self.images = []
@@ -80,6 +83,7 @@ class _PageParser(HTMLParser):
             self.link_tags.append(a)
         elif tag in HEADINGS:
             self._heading_stack.append(tag)
+            self.heading_sequence.append(int(tag[1]))
             self._heading_buf.append([])
         elif tag == "img":
             self.images.append({
@@ -206,6 +210,7 @@ class Page(object):
         self.alternates = [tag for tag in p.link_tags if "alternate" in (tag.get("rel") or "").lower()]
         self.html_lang = p.html_lang
         self.headings = {h: list(v) for h, v in p.headings.items()}
+        self.heading_sequence = list(p.heading_sequence)
         self.images = p.images
         self.iframes = p.iframes
         self.media = p.media
@@ -256,6 +261,18 @@ def parse_html(html):
     return Page(html)
 
 
-def parse_file(path, encoding="utf-8"):
-    with open(path, "r", encoding=encoding, errors="replace") as fh:
-        return parse_html(fh.read())
+def parse_file(path, encoding=None):
+    """Lee un HTML local respetando el charset que declara.
+
+    `encoding` fuerza uno concreto; por defecto se usa el `<meta charset>` y
+    UTF-8 como último recurso (antes todo se leía como UTF-8).
+    """
+    try:
+        from .httpbody import decode_html
+    except (ImportError, ValueError):
+        from httpbody import decode_html
+    with open(path, "rb") as fh:
+        raw = fh.read()
+    if encoding:
+        return parse_html(raw.decode(encoding, errors="replace"))
+    return parse_html(decode_html(raw))

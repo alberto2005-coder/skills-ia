@@ -5,15 +5,18 @@ Evalúa calidad, intención, metadatos, estructura semántica y valor para el us
 ## Criterios de Evaluación
 
 ### 1. Metadatos Principales
+
 - **`<title>`:** claro, relevante y único. Referencia orientativa 45–65 caracteres; el límite real es de píxeles (~580 px en escritorio), por eso el motor calcula ambos y etiqueta el ancho como `estimate`.
 - **`<meta name="description">`:** resumen con valor diferencial, única por página. Orientativo 120–160 caracteres; el motor avisa del truncamiento.
 
 ### 2. Jerarquía de Encabezados (H1–H4) — módulo 7
+
 - Exactamente **un** `<h1>` (ausente o duplicado = `ONP-H1-001`).
 - Sin saltos arbitrarios (`h1 → h3` sin `h2`).
 - Encabezados por semántica, no por tamaño visual.
 
 ### 3. On-Page medible
+
 | Métrica | Cómo se obtiene | Etiqueta |
 |---|---|---|
 | Ratio texto/HTML | caracteres de texto visible / caracteres de HTML | `estimate` (umbral orientativo 15 %) |
@@ -25,15 +28,19 @@ Evalúa calidad, intención, metadatos, estructura semántica y valor para el us
 > **Aviso:** la densidad de palabras clave **no** es una métrica de calidad ni un objetivo SEO. Se muestra como tabla informativa (`ONP-KW-001`) para detectar desequilibrios evidentes, nunca como meta a alcanzar.
 
 ### 4. Intención de Búsqueda y Utilidad
+
 Adecuación informativa / transaccional / comercial / navegacional; profundidad suficiente; formato escaneable (párrafos, tablas, listas).
 
 ### 5. Duplicidad y Thin Content
+
 Solo se clasifica como duplicado o escaso con evidencia textual comparada entre dos o más páginas. No se penalizan páginas utilitarias legítimas.
 
 ### 6. Autoría y E-E-A-T
+
 Autor u organización identificable, fuentes primarias y fechas visibles de publicación y actualización.
 
 ### 7. Accesibilidad y Multimedia
+
 `alt` descriptivo en imágenes informativas y `alt=""` en decorativas; texto ancla descriptivo (evitar "clic aquí").
 
 ## Comprobaciones y cita oficial

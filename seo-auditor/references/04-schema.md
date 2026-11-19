@@ -3,6 +3,7 @@
 Audita la implementación de datos estructurados para comprensión semántica y elegibilidad a resultados enriquecidos.
 
 ## Reglas de Auditoría
+
 - **Formato prioritario:** JSON-LD (`<script type="application/ld+json">`).
 - **Validación sintáctica:** JSON válido, sin comas colgantes ni comillas mal escapadas.
 - **Correspondencia visual obligatoria:** todo dato del Schema debe ser visible para el usuario. Inventar valoraciones, precios u opiniones infringe las directrices.
@@ -11,6 +12,7 @@ Audita la implementación de datos estructurados para comprensión semántica y 
 ## Inventario y rich preview (módulo 5)
 
 El motor:
+
 1. lista **todos** los `@type` presentes (incluidos los anidados: `Offer`, `AggregateRating`, `Question`, `Answer`…),
 2. marca bloques con JSON inválido,
 3. valida propiedades mínimas por tipo,
@@ -36,6 +38,7 @@ La vista previa es ilustrativa: se etiqueta como estimación y no reproduce el r
 > `Product` sin `availability` es válido en schema.org pero **no** cumple el mínimo de Google para rich result: el motor lo marca en la evidencia.
 
 ## Errores Frecuentes
+
 - Propiedades requeridas ausentes según el validador oficial.
 - Esquemas duplicados o conflictivos en la misma página (dos `Product` con datos distintos).
 - URLs relativas dentro de JSON-LD en vez de absolutas canónicas.

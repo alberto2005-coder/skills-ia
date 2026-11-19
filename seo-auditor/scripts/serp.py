@@ -30,6 +30,8 @@ MAX_TITLE_PX = 580
 MAX_DESC_PX = 990
 TITLE_CHARS_SOFT = 60
 DESC_CHARS_SOFT = 160
+# Por debajo de esto la descripción no describe: truncar no es el único fallo.
+MIN_DESCRIPTION_CHARS = 70
 
 
 def estimate_title_px(text):
@@ -83,12 +85,17 @@ def analyze(page, url="", title=None, description=None):
             m["title_chars"], m["title_px"], MAX_TITLE_PX)) if m["title"]
         else "Sin título que simular.",
         url, note="estimate"))
+    # Una descripción de 10 caracteres no se trunca, pero tampoco sirve: sin
+    # mínimo, `SERP-DESC-001` aprobaba cualquier cosa que cupiera.
+    description_ok = (bool(m["description"]) and not m["description_truncated"]
+                      and m["description_chars"] >= MIN_DESCRIPTION_CHARS)
+    description_note = "Sin meta description."
+    if m["description"]:
+        description_note = "%d caracteres (mínimo %d, recomendado 120–160)." % (
+            m["description_chars"], MIN_DESCRIPTION_CHARS)
     checks.append(check(
-        "SERP-DESC-001",
-        "pass" if (m["description"] and not m["description_truncated"]) else "fail",
-        ("%d caracteres (recomendado 120–160)." % m["description_chars"])
-        if m["description"] else "Sin meta description.",
-        url, note="estimate"))
+        "SERP-DESC-001", "pass" if description_ok else "fail",
+        description_note, url, note="estimate"))
 
     missing_og = [k for k in ("og:title", "og:description", "og:image")
                   if not page.og.get(k)]
