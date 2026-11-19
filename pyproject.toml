@@ -8,6 +8,26 @@ dependencies = []
 [tool.uv]
 package = false
 
+[tool.pytest.ini_options]
+# `importlib` evita que dos ficheros con el mismo basename (`test_structure.py`
+# en tres suites, `test_report.py` en dos…) se resuelvan al mismo módulo.
+addopts = "--import-mode=importlib"
+testpaths = [
+    "tests",
+    "agent-red-team/tests",
+    "api-contract-guard/tests",
+    "appsec-audit/tests",
+    "db-architect/tests",
+    "docs-sync-engine/tests",
+    "finops-auditor/tests",
+    "humanizador-anti-ia/tests",
+    "premium-web-designer/tests",
+    "refactor-surgeon/tests",
+    "replica/tests",
+    "seo-auditor/tests",
+    "skill-evals/tests",
+]
+
 [tool.ruff]
 target-version = "py39"
 line-length = 120

@@ -1,5 +1,6 @@
 """Ejecuta todas las suites de pruebas del repositorio."""
 
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -25,6 +26,7 @@ SUITES = (
 
 def main():
     failures = []
+    total_tests = 0
 
     for folder, runner in SUITES:
         test_dir = ROOT / folder / "tests" if folder != "." else ROOT / "tests"
@@ -47,17 +49,43 @@ def main():
                 "-v",
             ]
 
-        result = subprocess.run(command, cwd=str(ROOT), check=False)
+        result = subprocess.run(
+            command,
+            cwd=str(ROOT),
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        print(result.stdout, end="")
+        print(result.stderr, end="", file=sys.stderr)
+
+        output = result.stdout + "\n" + result.stderr
+        match = re.search(r"Ran (\d+) tests?", output)
+        if match:
+            total_tests += int(match.group(1))
+        else:
+            total_tests += len(re.findall(r"\.\.\.\s*(?:ok|FAIL|ERROR)", output))
+
         if result.returncode:
             failures.append((folder, result.returncode))
 
+    total_suites = len(SUITES)
+    passed_suites = total_suites - len(failures)
+
+    print("\n" + "=" * 72)
+    print(f"Resumen: {passed_suites}/{total_suites} suites ejecutadas con éxito.")
+    print(f"Total ejecutado: {total_suites} suites y {total_tests} tests.")
+
     if failures:
-        print("\nSuites fallidas: {}".format(
-            ", ".join("{} (código {})".format(name, code) for name, code in failures)
-        ))
+        print(
+            "Suites fallidas ({}): {}".format(
+                len(failures),
+                ", ".join(f"{name} (código {code})" for name, code in failures),
+            )
+        )
         return 1
 
-    print("\nTodas las suites finalizaron correctamente.")
+    print("Todas las suites finalizaron correctamente.")
     return 0
 
 

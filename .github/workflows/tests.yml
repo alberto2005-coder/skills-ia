@@ -23,7 +23,7 @@ jobs:
       - name: Set up uv and Python
         uses: astral-sh/setup-uv@v7
         with:
-          python-version: "3.13"
+          python-version: "3.14"
           enable-cache: true
 
       - name: Sync environment
@@ -39,6 +39,16 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: "1"
 
+      # code_metrics: los 26 hallazgos `high` son deuda real (funciones de 120-184 lineas,
+      # V(G) 21-40) y estan aceptados en tests/metrics_baseline.json; el gate falla si crecen.
+      # clone_detect: con los defaults (20 tokens) marca 803 clones de helpers de 5 lineas que
+      # el empaquetado autocontenido por carpeta obliga a duplicar; aqui se exige ademas tamano
+      # y similitud altos para que solo cuente la duplicacion sustancial.
+      - name: Code metrics ratchet (no new high findings or clones)
+        run: uv run --locked python tests/metrics_gate.py
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+
       - name: Design skill-evals cases
         run: uv run --locked python skill-evals/scripts/design.py --from-phrases tests/phrases.json --out skill-evals/reports/cases.json
         env:
@@ -50,11 +60,15 @@ jobs:
           PYTHONDONTWRITEBYTECODE: "1"
 
   test:
-    name: Tests (${{ matrix.os }})
+    name: Tests (${{ matrix.os }}, ${{ matrix.python }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        # 3.9 = suelo declarado en requires-python (se verifica de verdad);
+        # 3.14 = versión en fase bugfix. Antes solo se probaba 3.13, así que
+        # el mínimo anunciado jamás se ejecutaba en CI.
+        python: ["3.9", "3.14"]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
@@ -64,7 +78,7 @@ jobs:
       - name: Set up uv and Python
         uses: astral-sh/setup-uv@v7
         with:
-          python-version: "3.13"
+          python-version: ${{ matrix.python }}
           enable-cache: true
 
       - name: Sync environment
@@ -72,5 +86,10 @@ jobs:
 
       - name: Run every test suite
         run: uv run --locked python run_tests.py
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+
+      - name: Run pytest from the repository root
+        run: uv run --locked pytest -q
         env:
           PYTHONDONTWRITEBYTECODE: "1"
