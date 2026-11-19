@@ -1,0 +1,111 @@
+name: Release package
+
+# Publica un zip validado por cada tag `<paquete>-v<version>`.
+# También se puede invocar desde `tag-release.yml` (workflow_call) o a mano
+# con workflow_dispatch.
+
+on:
+  push:
+    tags: ["*-v*"]
+  workflow_call:
+    inputs:
+      package:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      package:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-package-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish package archive
+    # `bundle-v*` también encaja en el patrón `*-v*`: lo atiende release-bundle.
+    if: ${{ !startsWith(github.ref_name, 'bundle-v') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.14"
+          enable-cache: true
+
+      - name: Sync environment
+        run: uv sync --locked
+
+      - name: Resolve tag, package and version
+        id: meta
+        env:
+          IN_PACKAGE: ${{ inputs.package }}
+          IN_VERSION: ${{ inputs.version }}
+          IN_TAG: ${{ inputs.tag }}
+        run: |
+          tag="${IN_TAG:-$GITHUB_REF_NAME}"
+          package="${IN_PACKAGE:-${tag%-v*}}"
+          version="${IN_VERSION:-${tag##*-v}}"
+          if [ ! -f "$package/skills.json" ]; then
+            echo "::error::el tag «$tag» no corresponde a un paquete del repo"
+            exit 1
+          fi
+          declared=$(jq -r '.version' "$package/skills.json")
+          if [ "$declared" != "$version" ]; then
+            echo "::error::el tag declara $version y el manifiesto de $package declara $declared"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "package=$package" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Build and validate the archive
+        run: uv run --locked python scripts/build_package.py "${{ steps.meta.outputs.package }}" --out dist
+
+      - name: Build release notes from the package commits
+        env:
+          PACKAGE: ${{ steps.meta.outputs.package }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          previous=$(git tag --list "${PACKAGE}-v*" --sort=-v:refname | grep -vx "$TAG" | head -n1 || true)
+          if [ -n "$previous" ]; then range="${previous}..HEAD"; else range="HEAD"; fi
+          git log --no-merges --pretty=%s "$range" -- "$PACKAGE" > commits.txt
+          uv run --locked python docs-sync-engine/scripts/changelog_gen.py \
+            --input commits.txt --version "$VERSION" --out notes.md
+          cat notes.md
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          cat dist/*.sha256 > SHA256SUMS
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/*.zip SHA256SUMS --clobber
+          else
+            gh release create "$TAG" dist/*.zip SHA256SUMS --title "$TAG" --notes-file notes.md
+          fi

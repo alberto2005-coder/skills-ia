@@ -44,6 +44,7 @@ class VersionGuardTests(unittest.TestCase):
         self.root = Path(self._tmp.name)
         run_git(self.root, "init", "-q")
         write_package(self.root, "1.0.0")
+        (self.root / "skills.json").write_text('{"version": "1.0.0", "packages": []}', encoding="utf-8")
         run_git(self.root, "add", "-A")
         run_git(self.root, "commit", "-qm", "base")
 
@@ -96,6 +97,34 @@ class VersionGuardTests(unittest.TestCase):
         run_git(self.root, "commit", "-qm", "nuevo")
 
         self.assertEqual(version_guard.lint_changes(self.root, "HEAD~1"), [])
+
+    def test_release_plan_lists_packages_and_tags(self):
+        self.commit_change("demo/scripts/tool.py", "print('hola')\n", version="1.2.0")
+
+        plan = version_guard.release_plan(self.root, "HEAD~1")
+
+        self.assertEqual(
+            plan["packages"],
+            [{"package": "demo", "version": "1.2.0", "tag": "demo-v1.2.0"}],
+        )
+        self.assertIsNone(plan["bundle"])
+
+    def test_release_plan_detects_a_bundle_change(self):
+        (self.root / "skills.json").write_text('{"version": "5.1.0", "packages": []}', encoding="utf-8")
+        run_git(self.root, "add", "-A")
+        run_git(self.root, "commit", "-qm", "bundle")
+
+        plan = version_guard.release_plan(self.root, "HEAD~1")
+
+        self.assertEqual(plan["packages"], [])
+        self.assertEqual(plan["bundle"], {"version": "5.1.0", "tag": "bundle-v5.1.0"})
+
+    def test_release_plan_is_empty_without_changes(self):
+        self.commit_change("docs/guia.md", "# Guia\n")
+
+        self.assertEqual(
+            version_guard.release_plan(self.root, "HEAD~1"), {"packages": [], "bundle": None}
+        )
 
     def test_non_semver_version_is_reported(self):
         self.commit_change("demo/scripts/tool.py", "print('hola')\n", version="v1.3")

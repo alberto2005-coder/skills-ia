@@ -8,8 +8,9 @@ Compara el manifiesto `skills.json` de cada paquete entre `REV` (por defecto
 la versión del manifiesto no ha subido, sale con error: el manifiesto del
 paquete es la única fuente de verdad de la versión.
 
-`--bumped` imprime las subidas detectadas (`<paquete> <versión>`) en lugar de
-validar, para que los workflows de publicación sepan qué etiquetar.
+`--bumped` imprime las subidas detectadas (`<paquete> <versión>`) y `--plan`
+devuelve el plan de publicación en JSON (paquetes con tag y bundle si cambia la
+versión del índice raíz), que es lo que consumen los workflows de tags.
 
 Código de salida: 0 sin problemas · 1 paquetes sin subir · 2 entorno inválido.
 """
@@ -112,6 +113,48 @@ def bumped_packages(root: Path, base: str) -> dict[str, tuple[str, str]]:
     return bumps
 
 
+def index_version(root: Path, rev: str | None = None) -> str | None:
+    """`version` del índice raíz en el árbol actual o en `rev`."""
+    if rev is None:
+        try:
+            text = (root / "skills.json").read_text(encoding="utf-8")
+        except OSError:
+            return None
+    else:
+        try:
+            text = _git(root, "show", "%s:skills.json" % rev)
+        except RuntimeError:
+            return None
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        return None
+    version = data.get("version")
+    return version if isinstance(version, str) else None
+
+
+def bundle_bump(root: Path, base: str) -> tuple[str, str] | None:
+    """(antigua, nueva) si la versión del índice raíz cambió entre `base` y HEAD."""
+    old = index_version(root, base)
+    new = index_version(root)
+    if old and new and old != new:
+        return old, new
+    return None
+
+
+def release_plan(root: Path, base: str) -> dict:
+    """Plan de publicación: paquetes con tag y bundle cuando cambia el índice."""
+    packages = [
+        {"package": name, "version": new, "tag": "%s-v%s" % (name, new)}
+        for name, (_, new) in sorted(bumped_packages(root, base).items())
+    ]
+    bundle = None
+    bump = bundle_bump(root, base)
+    if bump is not None:
+        bundle = {"version": bump[1], "tag": "bundle-v%s" % bump[1]}
+    return {"packages": packages, "bundle": bundle}
+
+
 def lint_changes(root: Path, base: str) -> list[str]:
     """Problemas de la guardia: paquetes modificados sin subir la versión."""
     problems: list[str] = []
@@ -137,6 +180,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--base", default=None, help="revisión base (por defecto HEAD~1)")
     parser.add_argument("--root", default=str(ROOT), help="raíz del repositorio")
     parser.add_argument("--bumped", action="store_true", help="imprime las subidas detectadas")
+    parser.add_argument("--plan", action="store_true", help="imprime el plan de publicación en JSON")
     args = parser.parse_args(argv)
 
     root = Path(args.root).resolve()
@@ -147,6 +191,10 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     if base is None:
         print("version_guard: sin historial suficiente para comparar; no se valida", file=sys.stderr)
+        return 0
+
+    if args.plan:
+        print(json.dumps(release_plan(root, base), indent=2, sort_keys=True))
         return 0
 
     if args.bumped:

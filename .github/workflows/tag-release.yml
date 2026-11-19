@@ -1,0 +1,114 @@
+name: Tag releases
+
+# Al llegar a main, compara el índice y los manifiestos con el commit anterior
+# (`github.event.before`) y crea un tag por paquete con versión nueva, más
+# `bundle-v<version>` si cambió la versión del índice raíz.
+#
+# Los tags creados con GITHUB_TOKEN no disparan otros workflows, así que sin un
+# PAT en el secreto RELEASE_TOKEN este workflow publica las releases él mismo
+# llamando a los workflows reutilizables. Con RELEASE_TOKEN se limita a etiquetar
+# y deja que `push: tags` dispare la publicación.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tag-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: Plan and tag versions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      packages: ${{ steps.plan.outputs.packages }}
+      bundle: ${{ steps.plan.outputs.bundle }}
+      direct: ${{ steps.plan.outputs.direct }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN || github.token }}
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.14"
+          enable-cache: true
+
+      - name: Sync environment
+        run: uv sync --locked
+
+      - name: Plan releases from the version diff
+        id: plan
+        env:
+          BASE_SHA: ${{ github.event.before }}
+          HAS_TOKEN: ${{ secrets.RELEASE_TOKEN != '' }}
+        run: |
+          plan=$(uv run --locked python tests/version_guard.py --plan --base "$BASE_SHA")
+          printf '%s\n' "$plan" > release-plan.json
+          printf '%s\n' "$plan"
+          # Una matriz vacía falla al expandirse, así que el plan se publica con un
+          # centinela y el job de release se salta esa entrada con un `if`.
+          packages=$(jq -c '.packages' release-plan.json)
+          if [ "$packages" = "[]" ]; then
+            packages='[{"package":"-","version":"0.0.0","tag":"-"}]'
+          fi
+          echo "packages=$packages" >> "$GITHUB_OUTPUT"
+          echo "bundle=$(jq -r '.bundle.tag // ""' release-plan.json)" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_TOKEN" = "true" ]; then
+            echo "direct=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "direct=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::Sin RELEASE_TOKEN los tags no disparan los workflows de release; se publican desde este run."
+          fi
+
+      - name: Create and push tags idempotently
+        run: |
+          jq -r '.packages[] | "\(.tag) \(.package) \(.version)"' release-plan.json |
+            while read -r tag package version; do
+              if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+                echo "ya existe $tag"
+                continue
+              fi
+              git tag -a "$tag" -m "$package $version"
+              git push origin "refs/tags/$tag"
+            done
+          bundle=$(jq -r '.bundle.tag // ""' release-plan.json)
+          if [ -n "$bundle" ] && ! git rev-parse -q --verify "refs/tags/$bundle" >/dev/null; then
+            git tag -a "$bundle" -m "bundle $(jq -r '.bundle.version' release-plan.json)"
+            git push origin "refs/tags/$bundle"
+          fi
+
+  release-packages:
+    name: Release ${{ matrix.package }} ${{ matrix.version }}
+    needs: plan
+    if: ${{ needs.plan.outputs.direct == 'true' && matrix.package != '-' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.plan.outputs.packages) }}
+    uses: ./.github/workflows/release-package.yml
+    with:
+      package: ${{ matrix.package }}
+      version: ${{ matrix.version }}
+      tag: ${{ matrix.tag }}
+    permissions:
+      contents: write
+
+  release-bundle:
+    name: Release bundle
+    needs: plan
+    if: ${{ needs.plan.outputs.direct == 'true' && needs.plan.outputs.bundle != '' }}
+    uses: ./.github/workflows/release-bundle.yml
+    with:
+      version: ${{ needs.plan.outputs.bundle }}
+      tag: bundle-v${{ needs.plan.outputs.bundle }}
+    permissions:
+      contents: write
