@@ -8,6 +8,7 @@ Ejecutar desde la raíz del repo:
 import importlib.util
 import json
 import pathlib
+import re
 import subprocess
 import sys
 import unittest
@@ -117,6 +118,27 @@ class TestProteccionEstructura(unittest.TestCase):
         self.assertEqual(audit.restore_masked(masked, segments), text)
 
 
+class TestLegibilidad(unittest.TestCase):
+    def test_flesch_hardinak_valor_concreto(self):
+        """206.835 - 84.6*(sílabas/palabra) - 1.015*(palabras/frase).
+
+        Texto controlado: 10 frases de 10 palabras («casa» = 2 sílabas) =
+        100 palabras, 10 frases, 200 sílabas:
+        206.835 - 84.6*2.0 - 1.015*10.0 = 27.485 → 27.5.
+        La fórmula antigua (con frases/palabra) daba 106.6 → saturaba en 100.
+        """
+        texto = " ".join(["casa casa casa casa casa casa casa casa casa casa."] * 10)
+        report = audit.analyze_text(texto)
+        self.assertEqual(report["total_words"], 100)
+        self.assertEqual(report["total_sentences"], 10)
+        self.assertEqual(report["readability_score"], 27.5)
+
+    def test_flesch_hardinak_no_satura_en_texto_normal(self):
+        report = audit.analyze_text(read(HUMAN_FILES[0].name))
+        self.assertLess(report["readability_score"], 100.0)
+        self.assertGreaterEqual(report["readability_score"], 0.0)
+
+
 class TestHonestidadFactual(unittest.TestCase):
     def test_detecta_datos_sin_fuente(self):
         findings = audit.detect_data_to_verify(read("datos_sin_fuente.txt"))
@@ -170,6 +192,30 @@ class TestCLI(unittest.TestCase):
     def test_texto_vacio_falla_con_codigo_1(self):
         proc = run_cli("--text", "   ")
         self.assertEqual(proc.returncode, 1)
+
+
+class TestDocumentacion(unittest.TestCase):
+    def test_ejemplo_score_del_skill_cuadra_con_los_pesos(self):
+        """El JSON de ejemplo de SKILL.md debe coincidir con el script real.
+
+        Antes documentaba "total": 75.4 para unos componentes que dan 73.8.
+        """
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        bloques = re.findall(r"```json\s*\n(.*?)```", skill, re.S)
+        ejemplo = next(json.loads(b) for b in bloques if "vocabulario_ia" in b)
+        total_esperado = round(
+            ejemplo["vocabulario_ia"] * audit.PESOS["vocabulario_ia"]
+            + ejemplo["uniformidad_frases"] * audit.PESOS["uniformidad_frases"]
+            + ejemplo["patrones_estructurales"] * audit.PESOS["patrones_estructurales"]
+            + ejemplo["artefactos_chatbot"] * audit.PESOS["artefactos_chatbot"],
+            1,
+        )
+        self.assertEqual(ejemplo["total"], total_esperado)
+        real = audit.score_text(read("ia_01_articulo.txt"))
+        for key in SCORE_KEYS:
+            self.assertEqual(ejemplo[key], real[key], "el ejemplo de SKILL.md está desactualizado")
+        self.assertEqual(ejemplo["detalle"]["palabras"], real["detalle"]["palabras"])
+        self.assertEqual(ejemplo["detalle"]["frases"], real["detalle"]["frases"])
 
 
 if __name__ == "__main__":

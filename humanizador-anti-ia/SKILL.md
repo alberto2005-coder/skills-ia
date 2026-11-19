@@ -109,7 +109,7 @@ Se conservan hechos, argumentos y datos. Se cambia la arquitectura textual y el 
 
 ## Puntuación 0-100 (`scripts/audit_style.py`)
 
-Python 3.8+, solo stdlib, sin red. **Más alto = más IA.** Todos los comandos se ejecutan desde la raíz del repositorio (`skills-ia-main/`). Es una medición reproducible del texto, no un veredicto sobre quién lo escribió.
+Python 3.9+, solo stdlib, sin red. **Más alto = más IA.** Todos los comandos se ejecutan desde la raíz del repositorio . Es una medición reproducible del texto, no un veredicto sobre quién lo escribió.
 
 ```bash
 py humanizador-anti-ia/scripts/audit_style.py --text "Tu texto aquí..."
@@ -123,6 +123,7 @@ py humanizador-anti-ia/scripts/audit_style.py --file borrador.md --score
 Vocabulario IA (30%), uniformidad de frases (25%), patrones estructurales (30%) y artefactos de chatbot (15%); `total` es su media ponderada. La definición de cada señal, los niveles y el detalle del cálculo están en `detector-ia`.
 
 Notas de calibración, para que nadie lea el número como una verdad absoluta:
+
 - Las densidades usan una base mínima de 250 palabras: un texto corto no se extrapola a «20 por cada 1000».
 - El vocabulario pesa menos que el conjunto contenido+estructura a propósito. Cambiar palabras sin tocar la estructura es maquillaje.
 - Un texto humano informal suele quedar por debajo de 25. Un texto formal bien escrito puede llegar a 30-40 sin ser IA: por eso el informe se lee junto a los hallazgos, no solo con el número.
@@ -132,15 +133,17 @@ Notas de calibración, para que nadie lea el número como una verdad absoluta:
 
 JSON plano con `total`, `nivel`, las cuatro claves, `detalle` (recuentos que justifican cada señal) y `datos_a_verificar`. Sale con código 0: mide, no aprueba ni suspende.
 
+Salida real (misma entrada que el ejemplo): `py humanizador-anti-ia/scripts/audit_style.py --file humanizador-anti-ia/tests/corpus/ia_01_articulo.txt --score`
+
 ```json
 {
-  "total": 75.4,
+  "total": 74.4,
   "nivel": "alto",
   "vocabulario_ia": 100.0,
   "uniformidad_frases": 62.5,
-  "patrones_estructurales": 94.0,
+  "patrones_estructurales": 95.9,
   "artefactos_chatbot": 0.0,
-  "detalle": {"palabras": 165, "frases": 8, "...": "recuentos por señal"},
+  "detalle": {"palabras": 154, "frases": 8, "...": "recuentos por señal"},
   "datos_a_verificar": []
 }
 ```

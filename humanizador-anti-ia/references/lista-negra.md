@@ -27,14 +27,17 @@ Los modelos de lenguaje abusan sistemáticamente de transiciones formales al ini
 Términos estadísticamente sobre-representados en el corpus sintético:
 
 ### Adjetivos grandilocuentes
+
 - **Patrones:** *crucial, fascinante, meticuloso, intrincado, multifacético, holístico, inquebrantable, vibrante, palpable, rotundo, primordial, fundamental, imperativo, paradigmático, resonante, testimonio (vivo).*
 - **Sustitutos naturales:** importante, clave, complejo, detallado, completo, visible, real, directo, básico, necesario.
 
 ### Verbos comodín e hiperbólicos
+
 - **Patrones:** *desentrañar, sumergirse en, potenciar, brindar, abarcar, catalizar, revolucionar, empoderar, fomentar, salvaguardar, navegar (en sentido abstracto), apalancar, orquestar, vislumbrar, atisbar, entrelazar, recalcar.*
 - **Sustitutos naturales:** explicar, analizar, mejorar, dar, cubrir, cambiar, acelerar, permitir, cuidar, usar, manejar, ver, unir.
 
 ### Metáforas desgastadas
+
 - **Patrones:** *tapiz (ej. "el rico tapiz de..."), faro de esperanza/conocimiento, piedra angular, panorama en constante evolución, crisol de culturas, arma de doble filo, punta de lanza, viaje (metafórico hacia el éxito), sinfonía de elementos, amalgama.*
 - **Sustitutos naturales:** Describir la situación de forma literal y concreta sin adornos poéticos forzados.
 
@@ -65,6 +68,7 @@ Términos estadísticamente sobre-representados en el corpus sintético:
 ## 4. Transformaciones prácticas (Antes vs Después)
 
 ### Caso 1: Negocios y tecnología
+
 > **Texto IA:**
 > En el vertiginoso panorama empresarial actual, la inteligencia artificial se erige como una herramienta crucial capaz de potenciar la eficiencia operativa. Cabe destacar que su implementación no solo optimiza procesos intrincados, sino que también brinda un marco holístico para la innovación. En última instancia, las organizaciones deben adaptarse a este nuevo paradigma para salvaguardar su competitividad.
 >
@@ -72,6 +76,7 @@ Términos estadísticamente sobre-representados en el corpus sintético:
 > Quien no automatice tareas repetitivas este año va a perder margen frente a sus competidores. No hace falta cambiar toda la empresa de golpe: basta con empezar limpiando procesos manuales de atención o facturación donde el equipo pierde dos horas al día. Lo demás puede esperar.
 
 ### Caso 2: Divulgación y ciencia
+
 > **Texto IA:**
 > El microbioma humano representa un fascinante tapiz biológico que desempeña un papel primordial en el bienestar general. Sumergirse en su estudio permite desentrañar cómo millones de microorganismos entrelazan sus funciones para catalizar la salud digestiva e inmunológica. Sin lugar a dudas, comprender esta sinergia es vital.
 >

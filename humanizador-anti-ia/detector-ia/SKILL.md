@@ -11,7 +11,7 @@ metadata:
 
 **Solo mide. No reescribe.** Si el usuario quiere que el texto cambie, usa `humanizar`.
 
-Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio**.
 
 ## Cuándo se usa
 

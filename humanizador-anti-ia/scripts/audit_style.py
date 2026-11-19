@@ -456,6 +456,167 @@ def _structural_signals(clean_text):
 # ---------------------------------------------------------------------------
 # Análisis
 # ---------------------------------------------------------------------------
+def _sentence_stats(lengths):
+    """Media, desviación, CV y rachas monótonas de la longitud de frase."""
+    total = len(lengths)
+    mean_len = sum(lengths) / total
+    variance = sum((length - mean_len) ** 2 for length in lengths) / total
+    std_dev = math.sqrt(variance)
+    cv = (std_dev / mean_len) if mean_len > 0 else 0.0
+
+    monotonic_runs = 0
+    for index in range(total - 2):
+        window = lengths[index:index + 3]
+        if max(window) - min(window) <= 3:
+            monotonic_runs += 1
+
+    return {
+        "total": total,
+        "mean": mean_len,
+        "std": std_dev,
+        "cv": cv,
+        "short": sum(1 for length in lengths if length <= 8),
+        "long": sum(1 for length in lengths if length >= 22),
+        "runs": monotonic_runs,
+    }
+
+
+def _text_signals(clean_text, lower_text):
+    """Clichés, guiones largos, voz pasiva y diversidad léxica."""
+    found_banned = []
+    for pattern in BANNED_PHRASES:
+        matches = re.findall(pattern, lower_text)
+        if matches:
+            found_banned.extend(matches)
+
+    passive_matches = re.findall(
+        r"\b(?:ha sido|fue|fueron|han sido|era|eran|ser[aá]n?)\s+[a-záéíóúüñ]+(?:d[oa]s?)\b",
+        lower_text,
+    )
+
+    all_words = re.findall(r"\b[a-záéíóúüñ]+\b", lower_text)
+    ttr = (len(set(all_words)) / len(all_words)) if all_words else 0.0
+
+    return {
+        "banned": found_banned,
+        "em_dashes": clean_text.count("—") + clean_text.count("–"),
+        "passive": passive_matches,
+        "words": all_words,
+        "ttr": ttr,
+    }
+
+
+def _readability_score(all_words, total_words, total_sentences):
+    """Flesch-Hardinak (reading ease en español)."""
+    # 206.835 - 84.6*(sílabas/palabra) - 1.015*(palabras/frase). El segundo
+    # término va con PALABRAS/FRASE (≈10-20), no con frases/palabra (≈0.05),
+    # que dejaba la métrica saturada.
+    total_syllables = sum(count_syllables_es(w) for w in all_words) if all_words else 1
+    syll_per_word = total_syllables / max(1, len(all_words))
+    words_per_sentence = total_words / max(1, total_sentences)
+    readability_fh = 206.835 - (84.6 * syll_per_word) - (1.015 * words_per_sentence)
+    return max(0.0, min(100.0, round(readability_fh, 1)))
+
+
+def _repeated_starts(clean_text):
+    paragraphs = _paragraphs(clean_text)
+    first_words = [re.findall(r"^\w+", p.lower())[0] for p in paragraphs if re.findall(r"^\w+", p.lower())]
+    return len(first_words) - len(set(first_words))
+
+
+def _score_block(signals, stats, lengths, structural, artifact_hits, total_words):
+    structural_density, structural_detail = structural
+    """Cuatro señales ponderadas → bloque `score` del informe."""
+    base_words = max(SCORE_BASE_WORDS, total_words, 1)
+    banned_hits = len(signals["banned"])
+    vocab_density = banned_hits * 1000.0 / base_words
+    vocab_score = _saturate(vocab_density, 6.0)
+
+    inside = 0
+    if stats["total"] >= 4:
+        inside = sum(1 for length in lengths if abs(length - stats["mean"]) <= 0.20 * stats["mean"])
+        uniform_pct = 100.0 * inside / stats["total"]
+    else:
+        uniform_pct = 0.0
+    uniform_score = round(uniform_pct, 1)
+
+    structural_score = _saturate(structural_density, 5.0)
+
+    artifact_density = len(artifact_hits) * 1000.0 / base_words
+    artifact_score = _saturate(artifact_density, 3.0)
+
+    total = round(
+        vocab_score * PESOS["vocabulario_ia"]
+        + uniform_score * PESOS["uniformidad_frases"]
+        + structural_score * PESOS["patrones_estructurales"]
+        + artifact_score * PESOS["artefactos_chatbot"],
+        1,
+    )
+
+    return {
+        "total": total,
+        "nivel": _nivel(total),
+        "vocabulario_ia": vocab_score,
+        "uniformidad_frases": uniform_score,
+        "patrones_estructurales": structural_score,
+        "artefactos_chatbot": artifact_score,
+        "detalle": {
+            "palabras": total_words,
+            "frases": stats["total"],
+            "vocabulario": {
+                "apariciones": banned_hits,
+                "por_1000_palabras": round(vocab_density, 2),
+                "terminos": sorted(set(signals["banned"])),
+            },
+            "uniformidad": {
+                "frases_dentro_de_20pct": inside,
+                "porcentaje": round(uniform_pct, 1),
+                "media_palabras": round(stats["mean"], 1),
+                "burstiness_cv": round(stats["cv"], 2),
+            },
+            "estructura": structural_detail,
+            "artefactos": {
+                "apariciones": len(artifact_hits),
+                "por_1000_palabras": round(artifact_density, 2),
+                "terminos": sorted(set(artifact_hits)),
+            },
+        },
+    }
+
+
+def _issue_list(signals, stats, repeated_starts):
+    issues = []
+    if stats["cv"] < 0.45 and stats["total"] >= 4:
+        issues.append(
+            "Burstiness baja (CV=%.2f, objetivo >= 0.45). El texto tiene un ritmo monótono propio de IA. "
+            "Alterna oraciones de 4-8 palabras con subordinadas de 22+ palabras." % stats["cv"]
+        )
+    if stats["short"] == 0 and stats["total"] >= 3:
+        issues.append("Faltan frases cortas y contundentes (<= 8 palabras) para dar impacto y dinamismo.")
+    if stats["runs"] > 0:
+        issues.append(
+            "Se detectaron %d secuencias de 3 o más frases seguidas con longitud casi idéntica." % stats["runs"]
+        )
+    if signals["banned"]:
+        unique_banned = sorted(set(signals["banned"]))
+        issues.append(
+            "Clichés o conectores IA detectados (%d): %s"
+            % (len(signals["banned"]), ", ".join(unique_banned))
+        )
+    if signals["em_dashes"] > 0:
+        issues.append(
+            "Se detectaron %d guiones largos (—/–). Sustitúyelos por comas, paréntesis o punto y seguido."
+            % signals["em_dashes"]
+        )
+    if len(signals["passive"]) >= 3:
+        issues.append(
+            "Abuso de voz pasiva (%d apariciones). Prefiere la voz activa en español." % len(signals["passive"])
+        )
+    if repeated_starts > 0:
+        issues.append("Hay %d párrafos que inician con la misma palabra o conector." % repeated_starts)
+    return issues
+
+
 def analyze_text(text):
     masked, segments = mask_protected(text)
     clean_text = analysis_text(masked)
@@ -471,161 +632,44 @@ def analyze_text(text):
 
     total_words_count = sum(lengths)
     total_sentences_count = len(lengths)
-
-    mean_len = total_words_count / total_sentences_count
-    variance = sum((length - mean_len) ** 2 for length in lengths) / total_sentences_count
-    std_dev = math.sqrt(variance)
-
-    cv = (std_dev / mean_len) if mean_len > 0 else 0.0
-
-    short_sentences = sum(1 for length in lengths if length <= 8)
-    long_sentences = sum(1 for length in lengths if length >= 22)
-
-    monotonic_runs = 0
-    for i in range(len(lengths) - 2):
-        window = lengths[i:i + 3]
-        if max(window) - min(window) <= 3:
-            monotonic_runs += 1
-
     lower_text = clean_text.lower()
 
-    found_banned = []
-    for pattern in BANNED_PHRASES:
-        matches = re.findall(pattern, lower_text)
-        if matches:
-            found_banned.extend(matches)
+    stats = _sentence_stats(lengths)
+    signals = _text_signals(clean_text, lower_text)
 
-    em_dashes = clean_text.count("—") + clean_text.count("–")
-
-    passive_matches = re.findall(
-        r"\b(?:ha sido|fue|fueron|han sido|era|eran|ser[aá]n?)\s+[a-záéíóúüñ]+(?:d[oa]s?)\b",
-        lower_text,
-    )
-
-    all_words = re.findall(r"\b[a-záéíóúüñ]+\b", lower_text)
-    ttr = (len(set(all_words)) / len(all_words)) if all_words else 0.0
-
-    total_syllables = sum(count_syllables_es(w) for w in all_words) if all_words else 1
-    syll_per_word = total_syllables / max(1, len(all_words))
-    sent_per_word = total_sentences_count / max(1, len(all_words))
-    readability_fh = 206.84 - (60 * syll_per_word) - (102 * sent_per_word)
-    readability_score = max(0.0, min(100.0, round(readability_fh, 1)))
-
-    paragraphs = _paragraphs(clean_text)
-    first_words = [re.findall(r"^\w+", p.lower())[0] for p in paragraphs if re.findall(r"^\w+", p.lower())]
-    repeated_starts = len(first_words) - len(set(first_words))
-
-    # --- Señal 1: densidad de vocabulario IA por 1000 palabras ---
-    base_words = max(SCORE_BASE_WORDS, total_words_count, 1)
-    banned_hits = len(found_banned)
-    vocab_density = banned_hits * 1000.0 / base_words
-    vocab_score = _saturate(vocab_density, 6.0)
-
-    # --- Señal 2: uniformidad de longitud de frases (inverso de burstiness) ---
-    inside = 0
-    if total_sentences_count >= 4:
-        inside = sum(1 for length in lengths if abs(length - mean_len) <= 0.20 * mean_len)
-        uniform_pct = 100.0 * inside / total_sentences_count
-    else:
-        uniform_pct = 0.0
-    uniform_score = round(uniform_pct, 1)
-
-    # --- Señal 3: patrones estructurales ---
     structural_density, structural_detail = _structural_signals(clean_text)
-    structural_score = _saturate(structural_density, 5.0)
 
-    # --- Señal 4: artefactos de chatbot ---
     artifact_hits = []
     for pattern in CHATBOT_ARTIFACTS:
         artifact_hits.extend(re.findall(pattern, lower_text, re.I))
-    artifact_density = len(artifact_hits) * 1000.0 / base_words
-    artifact_score = _saturate(artifact_density, 3.0)
 
-    total = round(
-        vocab_score * PESOS["vocabulario_ia"]
-        + uniform_score * PESOS["uniformidad_frases"]
-        + structural_score * PESOS["patrones_estructurales"]
-        + artifact_score * PESOS["artefactos_chatbot"],
-        1,
-    )
+    score = _score_block(signals, stats, lengths, (structural_density, structural_detail),
+                         artifact_hits, total_words_count)
 
-    score = {
-        "total": total,
-        "nivel": _nivel(total),
-        "vocabulario_ia": vocab_score,
-        "uniformidad_frases": uniform_score,
-        "patrones_estructurales": structural_score,
-        "artefactos_chatbot": artifact_score,
-        "detalle": {
-            "palabras": total_words_count,
-            "frases": total_sentences_count,
-            "vocabulario": {
-                "apariciones": banned_hits,
-                "por_1000_palabras": round(vocab_density, 2),
-                "terminos": sorted(set(found_banned)),
-            },
-            "uniformidad": {
-                "frases_dentro_de_20pct": inside,
-                "porcentaje": round(uniform_pct, 1),
-                "media_palabras": round(mean_len, 1),
-                "burstiness_cv": round(cv, 2),
-            },
-            "estructura": structural_detail,
-            "artefactos": {
-                "apariciones": len(artifact_hits),
-                "por_1000_palabras": round(artifact_density, 2),
-                "terminos": sorted(set(artifact_hits)),
-            },
-        },
-    }
+    repeated_starts = _repeated_starts(clean_text)
+    issues = _issue_list(signals, stats, repeated_starts)
 
     protected_counts = {"code_block": 0, "inline_code": 0, "enlace": 0, "frontmatter": 0}
     for seg in segments:
         protected_counts[seg["tipo"]] = protected_counts.get(seg["tipo"], 0) + 1
 
-    issues = []
-    if cv < 0.45 and total_sentences_count >= 4:
-        issues.append(
-            "Burstiness baja (CV=%.2f, objetivo >= 0.45). El texto tiene un ritmo monótono propio de IA. "
-            "Alterna oraciones de 4-8 palabras con subordinadas de 22+ palabras." % cv
-        )
-    if short_sentences == 0 and total_sentences_count >= 3:
-        issues.append("Faltan frases cortas y contundentes (<= 8 palabras) para dar impacto y dinamismo.")
-    if monotonic_runs > 0:
-        issues.append(
-            "Se detectaron %d secuencias de 3 o más frases seguidas con longitud casi idéntica." % monotonic_runs
-        )
-    if found_banned:
-        unique_banned = sorted(set(found_banned))
-        issues.append(
-            "Clichés o conectores IA detectados (%d): %s" % (len(found_banned), ", ".join(unique_banned))
-        )
-    if em_dashes > 0:
-        issues.append(
-            "Se detectaron %d guiones largos (—/–). Sustitúyelos por comas, paréntesis o punto y seguido." % em_dashes
-        )
-    if len(passive_matches) >= 3:
-        issues.append(
-            "Abuso de voz pasiva (%d apariciones). Prefiere la voz activa en español." % len(passive_matches)
-        )
-    if repeated_starts > 0:
-        issues.append("Hay %d párrafos que inician con la misma palabra o conector." % repeated_starts)
-
     return {
         "total_sentences": total_sentences_count,
         "total_words": total_words_count,
         "sentence_lengths": lengths,
-        "mean_length": round(mean_len, 1),
-        "std_dev": round(std_dev, 2),
-        "burstiness_cv": round(cv, 2),
-        "lexical_diversity_ttr": round(ttr, 2),
-        "readability_score": readability_score,
-        "short_sentences": short_sentences,
-        "long_sentences": long_sentences,
-        "banned_phrases_count": len(found_banned),
-        "banned_phrases": sorted(set(found_banned)),
-        "em_dashes_count": em_dashes,
-        "passive_voice_count": len(passive_matches),
+        "mean_length": round(stats["mean"], 1),
+        "std_dev": round(stats["std"], 2),
+        "burstiness_cv": round(stats["cv"], 2),
+        "lexical_diversity_ttr": round(signals["ttr"], 2),
+        "readability_score": _readability_score(
+            signals["words"], total_words_count, total_sentences_count
+        ),
+        "short_sentences": stats["short"],
+        "long_sentences": stats["long"],
+        "banned_phrases_count": len(signals["banned"]),
+        "banned_phrases": sorted(set(signals["banned"])),
+        "em_dashes_count": signals["em_dashes"],
+        "passive_voice_count": len(signals["passive"]),
         "protected_segments": protected_counts,
         "datos_a_verificar": detect_data_to_verify(text),
         "score": score,

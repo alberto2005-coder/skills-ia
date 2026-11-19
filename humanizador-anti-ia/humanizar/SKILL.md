@@ -11,7 +11,7 @@ metadata:
 
 Devuelve ritmo, concreción y voz. No es un sinonimizador: el trabajo está en el contenido y la estructura.
 
-Assets compartidos del paquete: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio** (`skills-ia-main/`).
+Assets compartidos del paquete: `../references/`, `../scripts/`, `../templates/`. **Todos los comandos se ejecutan desde la raíz del repositorio**.
 
 ## Cuándo se usa
 

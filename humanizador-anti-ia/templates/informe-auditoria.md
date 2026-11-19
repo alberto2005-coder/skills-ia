@@ -85,9 +85,11 @@ Datos, cifras y atribuciones detectadas sin fuente en el propio texto. **No se h
 ## 6. Comparativa Antes / Después
 
 ### Fragmento Original (Borrador con sesgo IA)
+
 > {{texto_original}}
 
 ### Fragmento Reescrito (Humanizado)
+
 > {{texto_humanizado}}
 
 ---
@@ -103,6 +105,7 @@ Patrones del catálogo marcados «a veces es legítimo» que encajan con el regi
 ---
 
 ## 8. Conclusión Editorial
+
 {{conclusión_editorial_y_observaciones}}
 
 - **Qué ha bajado y cuánto:** {{resumen_del_delta_por_señal}}

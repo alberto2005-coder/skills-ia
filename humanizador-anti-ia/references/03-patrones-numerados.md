@@ -13,13 +13,14 @@ Marco conceptual: **«Wikipedia: Signs of AI writing»** (la lista de indicios q
 - **La puntuación** de `scripts/audit_style.py` solo mide lo que se puede contar: vocabulario, uniformidad de frases, estructura y artefactos. El catálogo te dice *qué* cambiar; el score te dice *cuánto* queda.
 
 **Niveles de vocabulario (grupo C):**
+
 - **Tier 1** — se cambia siempre que aparezca: delata de inmediato.
 - **Tier 2** — se cambia por densidad: una aparición pasa, cuatro en un párrafo no.
 - **Tier 3** — solo si se acumulan o si el texto entero es de relleno: son palabras normales que la IA sobreusa.
 
 ---
 
-# A. Contenido
+## A. Contenido
 
 Lo que se dice, no cómo se dice. Es lo más difícil de disimular y lo primero que hay que arreglar.
 
@@ -127,7 +128,7 @@ Lo que se dice, no cómo se dice. Es lo más difícil de disimular y lo primero 
 
 ---
 
-# B. Ritmo y sintaxis
+## B. Ritmo y sintaxis
 
 ### 11. Longitud de frase uniforme (burstiness plano)
 
@@ -231,7 +232,7 @@ Lo que se dice, no cómo se dice. Es lo más difícil de disimular y lo primero 
 
 ---
 
-# C. Vocabulario por niveles
+## C. Vocabulario por niveles
 
 ### 21. Tier 1 — cambio inmediato
 
@@ -315,7 +316,7 @@ Lo que se dice, no cómo se dice. Es lo más difícil de disimular y lo primero 
 
 ---
 
-# D. Estructura
+## D. Estructura
 
 ### 29. Lista de tres elementos simétrica
 
@@ -323,6 +324,7 @@ Lo que se dice, no cómo se dice. Es lo más difícil de disimular y lo primero 
 
 **Antes:**
 «- Mejora la comunicación interna.
+
 - Aumenta la motivación del equipo.
 - Reduce la rotación de personal.»
 
@@ -358,12 +360,16 @@ La rotación bajó cuatro puntos en el primer semestre, aunque parte del efecto 
 
 **Antes:**
 «## Optimización de procesos
+
 ## Mejora de la experiencia
+
 ## Impulso de la innovación»
 
 **Después:**
 «## Cómo cerramos la caja en dos minutos
+
 ## Lo que dicen los clientes que se fueron
+
 ## Lo que probamos y no funcionó»
 
 **¿A veces es legítimo?** En documentación normativa o académica, los títulos neutros ayudan a buscar. En un artículo, un título concreto se lee.
@@ -384,6 +390,7 @@ La rotación bajó cuatro puntos en el primer semestre, aunque parte del efecto 
 
 **Antes:**
 «- Implementar procesos automatizados de control.
+
 - Establecer métricas claras de seguimiento.
 - Fomentar la comunicación entre departamentos.»
 
@@ -406,7 +413,7 @@ De la comunicación entre departamentos nos ocupamos en septiembre; antes no hab
 
 ---
 
-# E. Artefactos de chatbot
+## E. Artefactos de chatbot
 
 ### 36. Negación de capacidades o identidad de modelo
 
@@ -460,7 +467,7 @@ De la comunicación entre departamentos nos ocupamos en septiembre; antes no hab
 
 ---
 
-# Pack español
+## Pack español
 
 Los tells que aparecen **en español** y que un detector entrenado en inglés no ve. El script `audit_style.py` cuenta varios de ellos en las señales de vocabulario, estructura y artefactos.
 
@@ -507,37 +514,46 @@ Prueba rápida: si quitas el adjetivo, ¿se pierde información? Si no, sobra.
 ## Antes / después (pack español)
 
 **1. Apertura de folleto**
+
 - Antes: «En el panorama actual, la formación continua se ha convertido en un pilar fundamental para el éxito profesional.»
 - Después: «Quien no actualiza sus herramientas cada dos años acaba aprendiendo a usar las viejas.»
 
 **2. «Sumérgete»**
+
 - Antes: «Sumérgete en esta guía y descubre cómo transformar tu forma de vender.»
 - Después: «Esta guía explica cómo cambiar el guion de ventas en cuatro pasos.»
 
 **3. LinkedIn con moraleja**
+
 - Antes: «El liderazgo no es solo un cargo, es una responsabilidad. El futuro es ahora: lidera con propósito.»
 - Después: «Dirigí un equipo de nueve personas durante tres años. Lo que funcionó: decir el presupuesto en voz alta desde el primer día.»
 
 **4. Lista de tres simétrica**
+
 - Antes:
   «- Escucha activa.
+
   - Comunicación efectiva.
   - Liderazgo inspirador.»
 - Después: «Escuchaba más de lo que hablaba. Lo demás vino solo, y no siempre.»
 
 **5. Cierre con moraleja**
+
 - Antes: «En definitiva, el camino no es fácil, pero quienes perseveran acaban brillando.»
 - Después: «El piloto acaba en junio. Decidimos en julio.»
 
 **6. Puntos suspensivos y raya**
+
 - Antes: «La clave —y esto lo cambia todo— está en los datos… y en cómo los usamos.»
 - Después: «La clave está en los datos. Y sobre todo en quién los limpia.»
 
 **7. Adjetivos hinchados**
+
 - Antes: «Una propuesta robusta, holística y transformadora para un mercado vibrante.»
 - Después: «Una propuesta con dos módulos: stock y facturación. Cuesta 4.000 euros y tarda seis semanas.»
 
 **8. «No solo X sino Y» en un email**
+
 - Antes: «Este cambio no solo reduce el tiempo de respuesta, sino que también mejora la satisfacción del cliente.»
 - Después: «Con este cambio respondemos en dos horas en vez de un día. Las quejas por demora bajaron a la mitad.»
 
