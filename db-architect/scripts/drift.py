@@ -18,6 +18,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from db_util import split_top_level
 
 SKIP_PARTS = {"__pycache__", ".venv", ".git"}
 CREATE_TABLE = re.compile(
@@ -42,23 +43,6 @@ RENAME_TABLE = re.compile(
 DROP_TABLE = re.compile(r"DROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?[\"'`]?(\w+)", re.I)
 CONSTRAINT_WORDS = ("primary key", "foreign key", "unique", "check", "constraint")
 TYPE_STOP = {"not", "null", "default", "primary", "references", "unique", "check", "constraint"}
-
-
-def split_top_level(text: str) -> list[str]:
-    """Separa por comas ignorando las que están dentro de paréntesis."""
-    parts, depth, current = [], 0, []
-    for char in text:
-        if char == "(":
-            depth += 1
-        elif char == ")":
-            depth -= 1
-        if char == "," and depth == 0:
-            parts.append("".join(current))
-            current = []
-        else:
-            current.append(char)
-    parts.append("".join(current))
-    return [part.strip() for part in parts if part.strip()]
 
 
 def column_type(raw_type: str) -> str:
@@ -87,34 +71,140 @@ def apply_create(tables: dict, name: str, block: str) -> None:
 
 
 def build_model(text: str, tables: dict | None = None) -> dict:
+    """Aplica las sentencias en el ORDEN DEL TEXTO, no por categorías.
+
+    Aplicar primero todos los CREATE y después todos los DROP daba un modelo
+    distinto al real cuando una migración crea, altera y vuelve a borrar: el
+    resultado dependía del tipo de sentencia y no de su posición.
+    """
     tables = {} if tables is None else tables
-    for name, block in CREATE_TABLE.findall(text):
-        apply_create(tables, name, block)
-    for old, new in RENAME_TABLE.findall(text):
-        if old.lower() in tables:
-            tables[new.lower()] = tables.pop(old.lower())
-    for table, old, new in RENAME_COLUMN.findall(text):
-        columns = tables.get(table.lower())
-        if columns and old.lower() in columns:
-            columns[new.lower()] = columns.pop(old.lower())
-    for table, column in DROP_COLUMN.findall(text):
-        tables.get(table.lower(), {}).pop(column.lower(), None)
-    for table, column, new_type in ALTER_TYPE.findall(text):
-        columns = tables.get(table.lower())
-        if columns and column.lower() in columns:
-            columns[column.lower()] = re.sub(r"\s+", "", new_type.lower())
-    for table, column, new_type in ADD_COLUMN.findall(text):
-        tables.setdefault(table.lower(), {})[column.lower()] = re.sub(r"\s+", "", new_type.lower())
-    for table in DROP_TABLE.findall(text):
-        tables.pop(table.lower(), None)
+    operations: list[tuple[int, str, tuple]] = []
+    for match in CREATE_TABLE.finditer(text):
+        operations.append((match.start(), "create", match.groups()))
+    for match in RENAME_TABLE.finditer(text):
+        operations.append((match.start(), "rename_table", match.groups()))
+    for match in RENAME_COLUMN.finditer(text):
+        operations.append((match.start(), "rename_column", match.groups()))
+    for match in DROP_COLUMN.finditer(text):
+        operations.append((match.start(), "drop_column", match.groups()))
+    for match in ALTER_TYPE.finditer(text):
+        operations.append((match.start(), "alter_type", match.groups()))
+    for match in ADD_COLUMN.finditer(text):
+        operations.append((match.start(), "add_column", match.groups()))
+    for match in DROP_TABLE.finditer(text):
+        operations.append((match.start(), "drop_table", match.groups()))
+
+    for _, kind, groups in sorted(operations, key=lambda item: item[0]):
+        if kind == "create":
+            apply_create(tables, groups[0], groups[1])
+        elif kind == "rename_table":
+            old, new = groups
+            if old.lower() in tables:
+                tables[new.lower()] = tables.pop(old.lower())
+        elif kind == "rename_column":
+            table, old, new = groups
+            columns = tables.get(table.lower())
+            if columns and old.lower() in columns:
+                columns[new.lower()] = columns.pop(old.lower())
+        elif kind == "drop_column":
+            table, column = groups
+            tables.get(table.lower(), {}).pop(column.lower(), None)
+        elif kind == "alter_type":
+            table, column, new_type = groups
+            columns = tables.get(table.lower())
+            if columns and column.lower() in columns:
+                columns[column.lower()] = re.sub(r"\s+", "", new_type.lower())
+        elif kind == "add_column":
+            table, column, new_type = groups
+            tables.setdefault(table.lower(), {})[column.lower()] = re.sub(r"\s+", "", new_type.lower())
+        elif kind == "drop_table":
+            tables.pop(groups[0].lower(), None)
     return tables
+
+
+# --- Migraciones Alembic -----------------------------------------------------
+# Un `.py` de Alembic no contiene SQL: aceptarlo en `migration_files` sin
+# traducir sus `op.*` declaraba como deriva cada tabla del esquema.
+
+ALEMBIC_CREATE = re.compile(r"op\.create_table\(\s*[\"'](\w+)[\"']\s*,(.*?)\)\s*$", re.S | re.M)
+ALEMBIC_ADD = re.compile(r"op\.add_column\(\s*[\"'](\w+)[\"']\s*,(.*?)\)\s*$", re.S | re.M)
+ALEMBIC_DROP_COLUMN = re.compile(r"op\.drop_column\(\s*[\"'](\w+)[\"']\s*,\s*[\"'](\w+)[\"']")
+ALEMBIC_RENAME_TABLE = re.compile(r"op\.rename_table\(\s*[\"'](\w+)[\"']\s*,\s*[\"'](\w+)[\"']")
+ALEMBIC_DROP_TABLE = re.compile(r"op\.drop_table\(\s*[\"'](\w+)[\"']")
+ALEMBIC_ALTER = re.compile(
+    r"op\.alter_column\(\s*[\"'](\w+)[\"']\s*,\s*[\"'](\w+)[\"'][^)]*?type_\s*=\s*([A-Za-z_.]+(?:\([^)]*\))?)",
+    re.S,
+)
+SQLALCHEMY_COLUMN = re.compile(r"sa\.Column\(\s*[\"'](\w+)[\"']\s*(?:,\s*([A-Za-z_.]+(?:\([^)]*\))?))?")
+SA_TYPE_NAMES = {
+    "integer": "integer", "biginteger": "bigint", "smallinteger": "smallint",
+    "string": "varchar", "text": "text", "boolean": "boolean",
+    "datetime": "timestamp", "date": "date", "time": "time",
+    "numeric": "numeric", "decimal": "numeric", "float": "float", "uuid": "uuid",
+}
+
+
+def sa_type(raw: str | None) -> str:
+    """`sa.String(80)` → `varchar(80)`: el nombre que usa el DDL declarado."""
+    if not raw:
+        return "unknown"
+    match = re.match(r"(?:sa\.)?(\w+)(?:\(([^)]*)\))?", raw.strip())
+    if not match:
+        return "unknown"
+    name = SA_TYPE_NAMES.get(match.group(1).lower(), match.group(1).lower())
+    args = re.sub(r"\s+", "", match.group(2) or "")
+    return f"{name}({args})" if args else name
+
+
+def replay_alembic(text: str, tables: dict) -> None:
+    """Traduce las operaciones Alembic equivalentes a las de `build_model`."""
+    operations: list[tuple[int, str, tuple]] = []
+    for match in ALEMBIC_CREATE.finditer(text):
+        operations.append((match.start(), "create", match.groups()))
+    for match in ALEMBIC_ADD.finditer(text):
+        operations.append((match.start(), "add", match.groups()))
+    for match in ALEMBIC_DROP_COLUMN.finditer(text):
+        operations.append((match.start(), "drop_column", match.groups()))
+    for match in ALEMBIC_RENAME_TABLE.finditer(text):
+        operations.append((match.start(), "rename_table", match.groups()))
+    for match in ALEMBIC_DROP_TABLE.finditer(text):
+        operations.append((match.start(), "drop_table", match.groups()))
+    for match in ALEMBIC_ALTER.finditer(text):
+        operations.append((match.start(), "alter", match.groups()))
+
+    for _, kind, groups in sorted(operations, key=lambda item: item[0]):
+        if kind == "create":
+            table, body = groups
+            columns = {}
+            for column, raw_type in SQLALCHEMY_COLUMN.findall(body):
+                columns[column.lower()] = sa_type(raw_type)
+            tables[table.lower()] = columns
+        elif kind == "add":
+            table, body = groups
+            for column, raw_type in SQLALCHEMY_COLUMN.findall(body):
+                tables.setdefault(table.lower(), {})[column.lower()] = sa_type(raw_type)
+        elif kind == "drop_column":
+            table, column = groups
+            tables.get(table.lower(), {}).pop(column.lower(), None)
+        elif kind == "rename_table":
+            old, new = groups
+            if old.lower() in tables:
+                tables[new.lower()] = tables.pop(old.lower())
+        elif kind == "drop_table":
+            tables.pop(groups[0].lower(), None)
+        elif kind == "alter":
+            table, column, raw_type = groups
+            columns = tables.get(table.lower())
+            if columns and column.lower() in columns:
+                columns[column.lower()] = sa_type(raw_type)
 
 
 def migration_files(folder: Path) -> list[Path]:
     if folder.is_file():
         return [folder]
-    return sorted(item for item in folder.rglob("*") if item.is_file()
-                  and item.suffix in {".sql", ".py"} and not SKIP_PARTS & set(item.parts))
+    return sorted(item for item in folder.rglob("*")
+                  if item.is_file() and item.suffix in {".sql", ".py"}
+                  and not SKIP_PARTS & set(item.relative_to(folder).parts))
 
 
 def diff(declared: dict, replayed: dict) -> list[dict]:
@@ -162,7 +252,11 @@ def main(argv: list[str] | None = None) -> int:
     replayed: dict = {}
     files = migration_files(migrations_path)
     for path in files:
-        build_model(path.read_text(encoding="utf-8", errors="replace"), replayed)
+        source = path.read_text(encoding="utf-8", errors="replace")
+        if path.suffix.lower() == ".py":
+            replay_alembic(source, replayed)
+        else:
+            build_model(source, replayed)
 
     findings = diff(declared, replayed)
     by_severity = {

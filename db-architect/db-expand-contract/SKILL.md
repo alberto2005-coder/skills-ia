@@ -4,7 +4,7 @@ description: Divide una migración en el plan de dos fases expand y contract, se
 license: MIT
 metadata:
   package: db-architect
-  version: "1.2.0"
+  version: "2.0.0"
 ---
 
 # DB Expand Contract

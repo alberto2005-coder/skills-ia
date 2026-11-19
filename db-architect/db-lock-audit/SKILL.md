@@ -4,7 +4,7 @@ description: Detecta las operaciones de migración que bloquean la tabla o la re
 license: MIT
 metadata:
   package: db-architect
-  version: "1.2.0"
+  version: "2.0.0"
 ---
 
 # DB Lock Audit

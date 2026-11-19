@@ -20,6 +20,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from db_util import iter_files
 
 SEVERITIES = {"low": 1, "medium": 2, "high": 3}
 SKIP_PARTS = {"__pycache__", ".venv", ".git"}
@@ -63,7 +64,9 @@ def statements(path: Path) -> list[tuple[int, str]]:
         if line.lstrip().startswith(("--", "#")):
             cleaned_lines.append("")
         else:
-            cleaned_lines.append(line)
+            # Un comentario al final de la línea dejaba `DELETE FROM t -- x`
+            # sin casar con `\s*$` y anulaba delete-sin-where.
+            cleaned_lines.append(re.sub(r"\s+--.*$", "", line))
     cleaned = "\n".join(cleaned_lines)
     chunks: list[tuple[int, str]] = []
     start = 0
@@ -102,16 +105,6 @@ def scan_file(path: Path) -> list[dict]:
     return findings
 
 
-def iter_files(path: Path) -> list[Path]:
-    if path.is_file():
-        return [path]
-    return sorted(
-        item for item in path.rglob("*")
-        if item.is_file() and item.suffix in {".sql", ".py"}
-        and not SKIP_PARTS & set(item.parts)
-    )
-
-
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Bloqueos y reescrituras en migraciones.")
     parser.add_argument("--path", required=True, help="fichero o carpeta de migraciones")
@@ -124,7 +117,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ruta inexistente: {target}")
         return 2
 
-    files = iter_files(target)
+    files = iter_files(target, {".sql", ".py"}, frozenset(SKIP_PARTS))
     findings = [item for path in files for item in scan_file(path)]
     by_severity = {name: sum(1 for item in findings if item["severity"] == name) for name in SEVERITIES}
 

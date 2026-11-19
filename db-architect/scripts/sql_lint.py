@@ -24,7 +24,13 @@ SEVERITIES = {"low": 1, "medium": 2}
 SKIP_PARTS = {"__pycache__", ".venv", ".git"}
 LOWERCASE_KEYWORD = re.compile(r"^\s*(select|insert|update|delete|create|alter|drop|with)\b", re.M)
 STAR = re.compile(r"\bSELECT\s+\*\s+FROM\b", re.I)
-CREATE_TABLE = re.compile(r"CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)\s*\((.*?)\)\s*(?:;|$)", re.I | re.S)
+# `re.M` es obligatorio: sin él `$` solo casa al final del texto y un DDL sin
+# punto y coma entre sentencias dejaba sin analizar todas las tablas salvo la
+# última.
+CREATE_TABLE = re.compile(
+    r"CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[\"'`]?(\w+)[\"'`]?\s*\((.*?)\)\s*(?:;|$)",
+    re.I | re.S | re.M,
+)
 COMMENT = re.compile(r"--[^\n]*")
 CAMEL = re.compile(r"\b[a-z]+[A-Z]\w*\b")
 MAX_LINE = 120
@@ -34,7 +40,7 @@ def sql_files(root: Path) -> list[Path]:
     if root.is_file():
         return [root] if root.suffix == ".sql" else []
     return sorted(item for item in root.rglob("*.sql")
-                  if item.is_file() and not SKIP_PARTS & set(item.parts))
+                  if item.is_file() and not SKIP_PARTS & set(item.relative_to(root).parts))
 
 
 def lint_file(path: Path) -> list[dict]:

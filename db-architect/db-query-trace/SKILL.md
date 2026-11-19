@@ -4,7 +4,7 @@ description: Detecta consultas ORM dentro de bucles (N+1) en código Python con 
 license: MIT
 metadata:
   package: db-architect
-  version: "1.2.0"
+  version: "2.0.0"
 ---
 
 # DB Query Trace

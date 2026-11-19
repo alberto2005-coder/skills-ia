@@ -19,6 +19,7 @@ import re
 import sqlite3
 import sys
 from pathlib import Path
+from db_util import iter_files
 
 SEVERITIES = {"low": 1, "medium": 2, "high": 3}
 TABLE = re.compile(
@@ -44,10 +45,15 @@ def _columns(raw: str) -> list[str]:
     return [item.strip().strip("\"'`") for item in raw.split(",") if item.strip()]
 
 
+def index_sql(table: str, column: str) -> str:
+    """El `CREATE INDEX` que el gate de salida promete para cada FK."""
+    return f"CREATE INDEX idx_{table}_{column} ON {table} ({column});"
+
+
 def scan_sql(path: Path, text: str) -> list[dict]:
     findings: list[dict] = []
 
-    def add(rule: str, severity: str, message: str, table: str) -> None:
+    def add(rule: str, severity: str, message: str, table: str, fix: str = "") -> None:
         findings.append({
             "file": path.as_posix(),
             "line": _line_of(text, f"create table {table}"),
@@ -55,6 +61,7 @@ def scan_sql(path: Path, text: str) -> list[dict]:
             "rule": rule,
             "severity": severity,
             "message": message,
+            "fix": fix,
         })
 
     try:
@@ -84,25 +91,24 @@ def scan_sql(path: Path, text: str) -> list[dict]:
             for column in _columns(raw):
                 if column not in indexed.get(table, set()):
                     add("fk-sin-indice", "medium",
-                        f"la clave foránea {table}.{column} no tiene índice", table)
+                        f"la clave foránea {table}.{column} no tiene índice; "
+                        f"propuesto: {index_sql(table, column)}", table,
+                        fix=index_sql(table, column))
         for column in REFERENCES.findall(block):
             if column not in indexed.get(table, set()):
                 add("fk-sin-indice", "medium",
-                    f"la clave foránea {table}.{column} no tiene índice", table)
+                    f"la clave foránea {table}.{column} no tiene índice; "
+                    f"propuesto: {index_sql(table, column)}", table,
+                    fix=index_sql(table, column))
     return findings
-
-
-def iter_files(path: Path) -> list[Path]:
-    if path.is_file():
-        return [path]
-    return sorted(item for item in path.rglob("*.sql") if item.is_file())
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Auditoría de esquemas SQL en memoria.")
     parser.add_argument("--path", required=True, help="fichero .sql o directorio")
     parser.add_argument("--json", action="store_true")
-    parser.add_argument("--fail-on", default="high", choices=["low", "medium", "high", "none"])
+    # Las reglas emiten `medium` y `high`: `low` era una opción inalcanzable.
+    parser.add_argument("--fail-on", default="high", choices=["medium", "high", "none"])
     args = parser.parse_args(argv)
 
     target = Path(args.path)
@@ -110,8 +116,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ruta inexistente: {target}")
         return 2
 
-    files = iter_files(target)
-    findings = [item for path in files for item in scan_sql(path, path.read_text(encoding="utf-8"))]
+    files = iter_files(target, {".sql"})
+    findings = [item for path in files
+                for item in scan_sql(path, path.read_text(encoding="utf-8", errors="replace"))]
     findings.sort(key=lambda item: (item["file"], item["line"], item["rule"], item["table"]))
     by_severity = {name: sum(1 for item in findings if item["severity"] == name) for name in SEVERITIES}
 

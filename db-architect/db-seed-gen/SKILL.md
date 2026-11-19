@@ -4,7 +4,7 @@ description: Genera datos de siembra deterministas desde un esquema SQL, ordenan
 license: MIT
 metadata:
   package: db-architect
-  version: "1.2.0"
+  version: "2.0.0"
 ---
 
 # DB Seed Gen

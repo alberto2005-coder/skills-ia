@@ -3,7 +3,7 @@
 Uso:
     py db-architect/scripts/migration_guard.py --path <ruta> [--json] [--fail-on critical]
 
-Niveles: `critical` para lo que bloquea tablas o destruye datos, `warning` para
+Niveles: `critical` para lo que bloquea tablas o destruye datos, `medium` para
 lo que puede tardar o dejar la migración sin vuelta atrás.
 
 Código de salida: 0 sin hallazgos en el umbral · 1 umbral superado · 2 ruta
@@ -17,8 +17,9 @@ import json
 import re
 import sys
 from pathlib import Path
+from db_util import iter_files
 
-SEVERITIES = {"info": 1, "warning": 2, "critical": 3}
+SEVERITIES = {"info": 1, "medium": 2, "warning": 2, "critical": 3}
 RULES = (
     (re.compile(r"\bDROP\s+TABLE\b", re.I), "critical", "drop-table",
      "DROP TABLE destruye datos y no tiene vuelta atrás"),
@@ -28,9 +29,9 @@ RULES = (
      "TRUNCATE vacía la tabla sin posibilidad de recuperación"),
     (re.compile(r"ALTER\s+COLUMN\s+\w+\s+(?:SET\s+DATA\s+)?TYPE\b", re.I), "critical", "cambio-de-tipo",
      "cambiar el tipo reescribe la tabla y bloquea escrituras"),
-    (re.compile(r"CREATE\s+(?:UNIQUE\s+)?INDEX\s+(?!CONCURRENTLY)", re.I), "warning", "indice-sin-concurrently",
+    (re.compile(r"CREATE\s+(?:UNIQUE\s+)?INDEX\s+(?!CONCURRENTLY)", re.I), "medium", "indice-sin-concurrently",
      "crear el índice sin CONCURRENTLY bloquea la tabla"),
-    (re.compile(r"ADD\s+COLUMN\s+\w+[^;]*DEFAULT\s+\S+[^;]*NOT\s+NULL", re.I), "warning",
+    (re.compile(r"ADD\s+COLUMN\s+\w+[^;]*DEFAULT\s+\S+[^;]*NOT\s+NULL", re.I), "medium",
      "columna-not-null-con-default",
      "ADD COLUMN NOT NULL con DEFAULT reescribe la tabla en motores antiguos"),
 )
@@ -49,7 +50,8 @@ def rollback_index(text: str) -> int:
 
 
 def scan_file(path: Path) -> list[dict]:
-    text = path.read_text(encoding="utf-8")
+    # Un .sql en latin-1 reventaba con UnicodeDecodeError en vez de analizarse.
+    text = path.read_text(encoding="utf-8", errors="replace")
     split = rollback_index(text)
     forward = text if split < 0 else text[:split]
     findings = []
@@ -71,21 +73,11 @@ def scan_file(path: Path) -> list[dict]:
             "file": path.as_posix(),
             "line": 1,
             "rule": "sin-reversion",
-            "severity": "warning",
+            "severity": "medium",
             "message": "la migración no declara DOWN/downgrade(): no se puede revertir",
         })
     findings.sort(key=lambda item: (item["line"], item["rule"]))
     return findings
-
-
-def iter_files(path: Path) -> list[Path]:
-    if path.is_file():
-        return [path]
-    return sorted(
-        item for item in path.rglob("*.py") if item.is_file()
-    ) + sorted(
-        item for item in path.rglob("*.sql") if item.is_file()
-    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -93,7 +85,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--path", required=True, help="fichero o directorio de migraciones")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-on", default="critical",
-                        choices=["info", "warning", "critical", "none"])
+                        choices=["info", "medium", "warning", "critical", "none"])
     args = parser.parse_args(argv)
 
     target = Path(args.path)
@@ -101,7 +93,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ruta inexistente: {target}")
         return 2
 
-    files = iter_files(target)
+    files = [target] if target.is_file() else (
+        iter_files(target, {".py"}) + iter_files(target, {".sql"})
+    )
     findings = [item for path in files for item in scan_file(path)]
     findings.sort(key=lambda item: (item["file"], item["line"], item["rule"]))
     by_severity = {name: sum(1 for item in findings if item["severity"] == name) for name in SEVERITIES}

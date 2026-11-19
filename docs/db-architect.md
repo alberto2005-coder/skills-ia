@@ -10,6 +10,7 @@
 ## Español
 
 ### Índice
+
 1. Propósito
 2. Modos
 3. Arquitectura
@@ -20,9 +21,11 @@
 8. Límites
 
 ### Propósito
+
 `db-architect` lee los `.sql` y el código Python de acceso a datos y responde tres preguntas antes de que lo haga producción: qué le falta al esquema, qué migración puede romper el despliegue y dónde hay un N+1. No se conecta a ninguna base: trabaja sobre ficheros y por eso es reproducible y apto para CI.
 
 ### Modos
+
 El maestro no usa flags: el alcance de la petición fija las fases.
 
 | Modo | Fases | Entrega |
@@ -35,6 +38,7 @@ El maestro no usa flags: el alcance de la petición fija las fases.
 Los cuatro modos comparten la misma lectura estática, así que se pueden encadenar en una sola sesión.
 
 ### Arquitectura
+
 Un maestro y ocho sub-skills con scripts compartidos. Se instala la carpeta completa.
 
 | Sub-skill | Qué hace |
@@ -50,20 +54,21 @@ Un maestro y ocho sub-skills con scripts compartidos. Se instala la carpeta comp
 | `db-seed-gen` | Datos de siembra deterministas desde el esquema, con semilla |
 
 ### Reglas
+
 | Regla | Script | Severidad |
 |---|---|---|
-| `tabla-sin-primary-key` | `schema_audit.py` | media |
-| `fk-sin-indice` | `schema_audit.py` | media |
-| `drop-table`, `drop-column` | `migration_guard.py` | crítica |
-| `sin-reversion` | `migration_guard.py` | aviso |
-| `indice-sin-concurrently`, `rename-inseguro` | `lock_audit.py` | media |
-| `reescritura-de-tipo`, `set-not-null` | `lock_audit.py` | alta |
-| `deriva` (`tabla-*`, `columna-*`, `tipo-distinto`) | `drift.py` | media/alta |
-| `columna-obligatoria-en-un-paso`, `rename-no-divisible`, `reescritura-no-divisible` | `expand_contract.py` | alta |
-| `sentencia-desconocida` | `expand_contract.py` | alta |
-| `tabla-sin-clave`, `select-asterisco` | `sql_lint.py` | media |
+| `tabla-sin-primary-key` | `schema_audit.py` | medium |
+| `fk-sin-indice` | `schema_audit.py` | medium |
+| `drop-table`, `drop-column` | `migration_guard.py` | critical |
+| `sin-reversion` | `migration_guard.py` | medium |
+| `indice-sin-concurrently`, `rename-inseguro` | `lock_audit.py` | medium |
+| `reescritura-de-tipo`, `set-not-null` | `lock_audit.py` | high |
+| `deriva` (`tabla-*`, `columna-*`, `tipo-distinto`) | `drift.py` | medium/high |
+| `columna-obligatoria-en-un-paso`, `rename-no-divisible`, `reescritura-no-divisible` | `expand_contract.py` | high |
+| `sentencia-desconocida` | `expand_contract.py` | high |
+| `tabla-sin-clave`, `select-asterisco` | `sql_lint.py` | medium |
 | `palabra-clave-minuscula`, `identificador-no-snake`, `comparacion-distinta`, `linea-larga`, `tabulador` | `sql_lint.py` | baja |
-| `consulta-en-bucle` | `query_trace.py` | media |
+| `consulta-en-bucle` | `query_trace.py` | medium |
 
 Cada hallazgo lleva fichero, línea, tabla o función afectada y un mensaje que explica por qué importa.
 
@@ -95,7 +100,9 @@ Salida del auditor de esquema:
 Códigos de salida: `0` limpio o por debajo del umbral · `1` umbral superado · `2` ruta ilegible. Solo stdlib, sin red y sin motor de base de datos.
 
 ### Instalación y uso
+
 Copia la carpeta `db-architect/` completa. Ejemplos de petición:
+
 - «Revisa este esquema y dime qué le falta antes de escribir la primera migración».
 - «¿Esta migración puede romper el despliegue?».
 - «Busca consultas N+1 en el módulo de pedidos».
@@ -107,9 +114,10 @@ Copia la carpeta `db-architect/` completa. Ejemplos de petición:
 uv run python -m unittest discover -s db-architect/tests -t db-architect/tests
 ```
 
-48 pruebas: esquema limpio frente a esquema con hallazgos, migración destructiva frente a reversible, N+1 detectado y no detectado, siembra determinista con la misma semilla, códigos de salida de los seis scripts, y doce sobre bloqueos (cada regla, migración segura, comentarios ignorados, umbral y `--fail-on none`) y deriva (esquema que cuadra, columnas y tablas que sobran o faltan, tipos distintos y renombrado intermedio), y dieciocho sobre el plan de dos fases (aditivo, destructivo, mezcla, columna obligatoria, cambio de tipo, `rename`, sentencia desconocida, cuerpo de función con `;` sin partir, `--fail-on none` y ruta ausente) y el lint SQL (fichero limpio, palabra clave en minúscula, `SELECT *`, tabla sin clave, camelCase, `!=` con línea larga, `--fail-on none` y ruta ausente).
+48 pruebas: esquema limpio frente a esquema con hallazgos, migración destructiva frente a reversible, N+1 detectado y no detectado, siembra determinista con la misma semilla, códigos de salida de los ocho scripts, y doce sobre bloqueos (cada regla, migración segura, comentarios ignorados, umbral y `--fail-on none`) y deriva (esquema que cuadra, columnas y tablas que sobran o faltan, tipos distintos y renombrado intermedio), y dieciocho sobre el plan de dos fases (aditivo, destructivo, mezcla, columna obligatoria, cambio de tipo, `rename`, sentencia desconocida, cuerpo de función con `;` sin partir, `--fail-on none` y ruta ausente) y el lint SQL (fichero limpio, palabra clave en minúscula, `SELECT *`, tabla sin clave, camelCase, `!=` con línea larga, `--fail-on none` y ruta ausente).
 
 ### Límites
+
 El análisis es textual y heurístico: no valida el SQL contra un motor real, no conoce dialectos y no modela planes de ejecución. Un esquema generado por ORM sin `.sql` no se audita hasta exportarlo, y la detección de N+1 solo ve consultas escritas dentro del bucle, no las que dispara el ORM por carga diferida. `seed_gen` genera datos sintéticos, nunca extrae datos reales. Las sentencias que `expand_contract` no reconoce no se asignan a ninguna fase: salen como desconocidas con aviso.
 
 ---
@@ -117,6 +125,7 @@ El análisis es textual y heurístico: no valida el SQL contra un motor real, no
 ## English
 
 ### Index
+
 1. Purpose
 2. Modes
 3. Architecture
@@ -127,9 +136,11 @@ El análisis es textual y heurístico: no valida el SQL contra un motor real, no
 8. Limits
 
 ### Purpose
+
 `db-architect` reads `.sql` files and Python data-access code and answers three questions before production does: what the schema is missing, which migration can break the deployment and where an N+1 lives. It never connects to a database: it works on files, which makes it reproducible and CI-friendly.
 
 ### Modes
+
 The master takes no flags: the request's scope sets the phases.
 
 | Mode | Phases | Deliverable |
@@ -142,6 +153,7 @@ The master takes no flags: the request's scope sets the phases.
 All four modes share the same static reading, so they can be chained in one session.
 
 ### Architecture
+
 One master and eight sub-skills with shared scripts. The whole folder is installed.
 
 | Sub-skill | What it does |
@@ -157,6 +169,7 @@ One master and eight sub-skills with shared scripts. The whole folder is install
 | `db-seed-gen` | Deterministic seed data from the schema, with a seed |
 
 ### Rules
+
 | Rule | Script | Severity |
 |---|---|---|
 | `tabla-sin-primary-key` | `schema_audit.py` | medium |
@@ -202,7 +215,9 @@ Schema audit output:
 Exit codes: `0` clean or below threshold · `1` threshold exceeded · `2` unreadable path. Stdlib only, offline, no database engine.
 
 ### Install and use
+
 Copy the whole `db-architect/` folder. Example requests:
+
 - "Review this schema and tell me what it lacks before the first migration".
 - "Can this migration break the deployment?".
 - "Find N+1 queries in the orders module".
@@ -214,7 +229,8 @@ Copy the whole `db-architect/` folder. Example requests:
 uv run python -m unittest discover -s db-architect/tests -t db-architect/tests
 ```
 
-48 tests: clean schema versus schema with findings, destructive versus reversible migration, N+1 detected and not detected, deterministic seeding with the same seed, exit codes for all six scripts, and twelve covering locks (every rule, a safe migration, ignored comments, thresholds and `--fail-on none`) and drift (matching schema, extra or missing columns and tables, type mismatches and an intermediate rename), and eighteen for the two-phase plan (additive, destructive, mixed, mandatory column, type change, `rename`, unknown statement, function body with `;` kept whole, `--fail-on none` and missing path) and the SQL lint (clean file, lowercase keyword, `SELECT *`, table without a key, camelCase, `!=` with a long line, `--fail-on none` and missing path).
+48 tests: clean schema versus schema with findings, destructive versus reversible migration, N+1 detected and not detected, deterministic seeding with the same seed, exit codes for all eight scripts, and twelve covering locks (every rule, a safe migration, ignored comments, thresholds and `--fail-on none`) and drift (matching schema, extra or missing columns and tables, type mismatches and an intermediate rename), and eighteen for the two-phase plan (additive, destructive, mixed, mandatory column, type change, `rename`, unknown statement, function body with `;` kept whole, `--fail-on none` and missing path) and the SQL lint (clean file, lowercase keyword, `SELECT *`, table without a key, camelCase, `!=` with a long line, `--fail-on none` and missing path).
 
 ### Limits
+
 The analysis is textual and heuristic: it does not validate SQL against a real engine, knows no dialects and models no execution plans. An ORM-generated schema without `.sql` is not audited until exported, and N+1 detection only sees queries written inside the loop, not those triggered by lazy loading. `seed_gen` produces synthetic data and never extracts real records. Statements `expand_contract` does not recognise are assigned to no phase: they come out as unknown with a warning.

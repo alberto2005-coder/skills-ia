@@ -19,6 +19,7 @@ import random
 import re
 import sys
 from pathlib import Path
+from db_util import split_top_level
 
 TABLE = re.compile(
     r"CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[\"'`]?(\w+)[\"'`]?\s*\((.*?)\)\s*;",
@@ -35,11 +36,13 @@ def parse_schema(text: str) -> dict[str, list[dict]]:
     tables: dict[str, list[dict]] = {}
     for name, block in TABLE.findall(text):
         columns = []
-        for raw in block.split(","):
+        for raw in split_top_level(block):
             line = raw.strip()
             if not line or line.lower().startswith(CONSTRAINTS):
                 continue
             parts = line.split()
+            if len(parts) < 2:
+                continue
             column = parts[0].strip("\"'`")
             kind = " ".join(parts[1:])
             references = REFERENCES.search(kind)
@@ -54,7 +57,10 @@ def parse_schema(text: str) -> dict[str, list[dict]]:
 
 
 def order_tables(tables: dict[str, list[dict]]) -> list[str]:
-    pending = {name: {col["references"] for col in columns if col["references"] in tables}
+    # Una FK auto-referenciada (`parent_id REFERENCES t`) no crea un ciclo de
+    # orden: la tabla se inserta primero y la fila se apunta a sí misma.
+    pending = {name: {col["references"] for col in columns
+                      if col["references"] in tables and col["references"] != name}
                for name, columns in tables.items()}
     ordered: list[str] = []
     while pending:
@@ -115,7 +121,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ruta inexistente: {path}")
         return 2
     try:
-        tables = parse_schema(path.read_text(encoding="utf-8"))
+        tables = parse_schema(path.read_text(encoding="utf-8", errors="replace"))
         if not tables:
             print("el esquema no declara tablas CREATE TABLE")
             return 1
