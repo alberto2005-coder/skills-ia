@@ -8,6 +8,24 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-19 · Ola 1: instalable, activable y con verificación de lectura
+
+#### Añadido
+
+- **`.claude-plugin/marketplace.json`:** un plugin por paquete con su versión y su lista de skills, para instalarlo con `/plugin marketplace add alberto2005-coder/skills-ia` y `/plugin install <paquete>@skills-ia`.
+- **Tres vías de instalación en el `README.md`:** marketplace de Claude Code, `npx skills add` y descarga del release verificada con `SHA256SUMS` (paquete por paquete).
+- **Gate de descripciones en `tests/lint_frontmatter.py`:** cada `SKILL.md` debe declarar un caso de uso explícito («Úsala cuando…» / «Use when…») y cubrir los dos idiomas. La descripción es la única señal de activación que leen los agentes.
+- **`allowed-tools` en las skills de solo lectura:** `db-architect` (9), `docs-sync-engine` (6), `detector-ia` y `red-scan` declaran lectura más sus propios scripts, sin pedir permiso para nada más.
+
+#### Cambiado
+
+- **36 descripciones reescritas** en `api-contract-guard`, `db-architect`, `docs-sync-engine`, `finops-auditor` y `refactor-surgeon`: se conserva la frase original y se añade el caso de uso y sus disparadores en inglés.
+- **Versiones:** `api-contract-guard` 1.2.0, `db-architect` 2.1.0, `docs-sync-engine` 1.2.0, `finops-auditor` 1.4.0, `refactor-surgeon` 1.5.0, `humanizador-anti-ia` 2.1.0, `agent-red-team` 3.1.0; índice raíz 5.1.0.
+
+#### Notas
+
+- `allowed-tools` pre-aprueba herramientas durante el turno: no restringe. Para prohibir escrituras existe `disallowed-tools`, que queda fuera de la spec portable de seis campos, así que no se usa aquí.
+
 ### - 2026-11-19 · actionlint en el job de lint
 
 #### Añadido
@@ -517,6 +535,24 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-19 · Wave 1: installable, activatable and read-verified
+
+#### Added
+
+- **`.claude-plugin/marketplace.json`:** one plugin per package with its version and skill list, installable with `/plugin marketplace add alberto2005-coder/skills-ia` and `/plugin install <package>@skills-ia`.
+- **Three installation routes in `README.md`:** Claude Code marketplace, `npx skills add` and a release download verified against `SHA256SUMS`, package by package.
+- **Description gate in `tests/lint_frontmatter.py`:** every `SKILL.md` must state an explicit use case ("Úsala cuando…" / "Use when…") and cover both languages. The description is the only activation signal agents read.
+- **`allowed-tools` on the read-only skills:** `db-architect` (9), `docs-sync-engine` (6), `detector-ia` and `red-scan` declare reads plus their own scripts, and nothing more.
+
+#### Changed
+
+- **36 rewritten descriptions** in `api-contract-guard`, `db-architect`, `docs-sync-engine`, `finops-auditor` and `refactor-surgeon`: the original sentence stays and the use case plus English triggers are appended.
+- **Versions:** `api-contract-guard` 1.2.0, `db-architect` 2.1.0, `docs-sync-engine` 1.2.0, `finops-auditor` 1.4.0, `refactor-surgeon` 1.5.0, `humanizador-anti-ia` 2.1.0, `agent-red-team` 3.1.0; root index 5.1.0.
+
+#### Notes
+
+- `allowed-tools` pre-approves tools for the turn; it does not restrict them. Blocking writes needs `disallowed-tools`, which is outside the portable six-field spec, so it is not used here.
 
 ### - 2026-11-19 · actionlint in the lint job
 

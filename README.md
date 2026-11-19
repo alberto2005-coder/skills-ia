@@ -13,10 +13,11 @@
 
 1. [Visión General](#visión-general)
 2. [Módulos y Sub-skills](#módulos-y-sub-skills)
-3. [Estructura Estándar de cada Paquete](#estructura-estándar-de-cada-paquete)
-4. [Documentación Técnica](#documentación-técnica)
-5. [Requisitos y Filosofía de Cero Dependencias](#requisitos-y-filosofía-de-cero-dependencias)
-6. [Licencia](#licencia)
+3. [Instalación](#instalación)
+4. [Estructura Estándar de cada Paquete](#estructura-estándar-de-cada-paquete)
+5. [Documentación Técnica](#documentación-técnica)
+6. [Requisitos y Filosofía de Cero Dependencias](#requisitos-y-filosofía-de-cero-dependencias)
+7. [Licencia](#licencia)
 
 ### Visión General
 
@@ -180,6 +181,42 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | `premium-web-designer` | Maestro: dirección de arte, UX/UI, desarrollo y gates medibles. |
 | `premium-qa` | QA independiente: medición en cinco anchos, gates numéricos e informe de entrega. |
 
+### Instalación
+
+Cada paquete se instala completo: el maestro, sus sub-skills y los `scripts/` compartidos. Hay tres vías y las tres dan el mismo contenido.
+
+**1. Marketplace de Claude Code** (recomendada: actualiza y versiona sola)
+
+```text
+/plugin marketplace add alberto2005-coder/skills-ia
+/plugin install db-architect@skills-ia
+```
+
+El catálogo vive en [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json): un plugin por paquete, con su versión y la lista de skills, así que `/plugin` instala exactamente lo que publica el tag.
+
+**2. `npx skills` (skills.sh)** para cualquier agente que lea `SKILL.md`
+
+```bash
+npx skills add alberto2005-coder/skills-ia --skill db-architect
+npx skills add alberto2005-coder/skills-ia --skill seo-auditor --global
+```
+
+Instala la carpeta del paquete en la ruta del agente que elijas. No instales una sub-skill suelta: referencia `../scripts/` y `../references/` del paquete.
+
+**3. Descarga del release**, verificada con su checksum
+
+```bash
+curl -LO https://github.com/alberto2005-coder/skills-ia/releases/latest/download/db-architect-2.1.0.zip
+curl -LO https://github.com/alberto2005-coder/skills-ia/releases/latest/download/SHA256SUMS
+sha256sum -c SHA256SUMS --ignore-missing
+unzip db-architect-2.1.0.zip -d ~/.claude/skills
+rm ~/.claude/skills/manifest.json
+```
+
+El zip trae `manifest.json` (paquete, versión, commit y skills) y un prefijo con el nombre del paquete; el `manifest.json` es solo para verificar, no se instala. El bundle `bundle-v<versión>` publica los 12 paquetes, el `SHA256SUMS` global y el índice `skills.json`.
+
+**Requisito:** Python 3.9+ en el agente que ejecute los `scripts/`. Los `SKILL.md` no necesitan nada.
+
 ### Estructura Estándar de cada Paquete
 
 ```text
@@ -233,10 +270,11 @@ Distribuido bajo la [Licencia MIT](LICENSE).
 
 1. [Overview](#overview)
 2. [Modules and Sub-skills](#modules-and-sub-skills)
-3. [Standard Package Structure](#standard-package-structure)
-4. [Technical Documentation](#technical-documentation)
-5. [Requirements and Zero-Dependency Philosophy](#requirements-and-zero-dependency-philosophy)
-6. [License](#license)
+3. [Installation](#installation)
+4. [Standard Package Structure](#standard-package-structure)
+5. [Technical Documentation](#technical-documentation)
+6. [Requirements and Zero-Dependency Philosophy](#requirements-and-zero-dependency-philosophy)
+7. [License](#license)
 
 ### Overview
 
@@ -399,6 +437,42 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 |---|---|
 | `premium-web-designer` | Master: art direction, UX/UI, development and measurable gates. |
 | `premium-qa` | Independent QA: five-width measurement, numeric gates and delivery report. |
+
+### Installation
+
+Every package installs as a whole: the master skill, its sub-skills and the shared `scripts/`. All three routes deliver the same content.
+
+**1. Claude Code marketplace** (recommended: updates and versioning come for free)
+
+```text
+/plugin marketplace add alberto2005-coder/skills-ia
+/plugin install db-architect@skills-ia
+```
+
+The catalogue lives in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json): one plugin per package, with its version and skill list, so `/plugin` installs exactly what the tag publishes.
+
+**2. `npx skills` (skills.sh)** for any agent that reads `SKILL.md`
+
+```bash
+npx skills add alberto2005-coder/skills-ia --skill db-architect
+npx skills add alberto2005-coder/skills-ia --skill seo-auditor --global
+```
+
+It installs the package folder into the route of the agent you pick. Do not install a sub-skill on its own: it references the package's `../scripts/` and `../references/`.
+
+**3. Release download**, verified against its checksum
+
+```bash
+curl -LO https://github.com/alberto2005-coder/skills-ia/releases/latest/download/db-architect-2.1.0.zip
+curl -LO https://github.com/alberto2005-coder/skills-ia/releases/latest/download/SHA256SUMS
+sha256sum -c SHA256SUMS --ignore-missing
+unzip db-architect-2.1.0.zip -d ~/.claude/skills
+rm ~/.claude/skills/manifest.json
+```
+
+The zip carries a `manifest.json` (package, version, commit and skills) and a prefix with the package name; `manifest.json` is only for verification, do not install it. The `bundle-v<version>` release publishes all 12 packages, the global `SHA256SUMS` and the `skills.json` index.
+
+**Requirement:** Python 3.9+ in the agent that runs the `scripts/`. The `SKILL.md` files need nothing.
 
 ### Standard Package Structure
 

@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "skills-ia",
+  "description": "Skills modulares, deterministas y versionadas para agentes de código.",
+  "version": "5.1.0",
+  "owner": {
+    "name": "alberto2005-coder",
+    "url": "https://github.com/alberto2005-coder"
+  },
+  "plugins": [
+    {
+      "name": "replica",
+      "source": "./replica",
+      "description": "Reconstrucción funcional clean-room por fases, con evidencia y paridad verificable.",
+      "version": "2.0.0",
+      "skills": [
+        ".",
+        "./replica-recon",
+        "./replica-architect",
+        "./replica-design",
+        "./replica-build",
+        "./replica-backend",
+        "./replica-test",
+        "./replica-diff",
+        "./replica-entrepreneur",
+        "./replica-brand",
+        "./replica-launch",
+        "./replica-deploy",
+        "./replica-static",
+        "./replica-redes"
+      ]
+    },
+    {
+      "name": "appsec-audit",
+      "source": "./appsec-audit",
+      "description": "Auditoría de seguridad integral: código, API, infra, cloud y LLM con nota A–F.",
+      "version": "2.0.0",
+      "skills": [
+        ".",
+        "./appsec-recon",
+        "./appsec-code",
+        "./appsec-infra",
+        "./appsec-llm",
+        "./appsec-report",
+        "./appsec-threat",
+        "./appsec-deps",
+        "./appsec-ci",
+        "./appsec-fix",
+        "./appsec-scale"
+      ]
+    },
+    {
+      "name": "agent-red-team",
+      "source": "./agent-red-team",
+      "description": "Auditoría de skills, servidores MCP y carpetas de instrucciones antes de instalarlas.",
+      "version": "3.1.0",
+      "skills": [
+        ".",
+        "./red-scan",
+        "./red-audit"
+      ]
+    },
+    {
+      "name": "humanizador-anti-ia",
+      "source": "./humanizador-anti-ia",
+      "description": "Detección y reescritura de escritura de IA con score 0–100 determinista.",
+      "version": "2.1.0",
+      "skills": [
+        ".",
+        "./humanizar",
+        "./detector-ia"
+      ]
+    },
+    {
+      "name": "seo-auditor",
+      "source": "./seo-auditor",
+      "description": "Auditoría SEO/GEO con rúbrica 0–100, simulador de SERP y evidencia reproducible.",
+      "version": "3.0.0",
+      "skills": [
+        ".",
+        "./seo-audit",
+        "./seo-plan",
+        "./seo-execute",
+        "./seo-serp",
+        "./seo-compare"
+      ]
+    },
+    {
+      "name": "premium-web-designer",
+      "source": "./premium-web-designer",
+      "description": "Diseño y desarrollo web premium con dirección de arte, UX/UI y QA medible.",
+      "version": "3.0.0",
+      "skills": [
+        ".",
+        "./premium-qa"
+      ]
+    },
+    {
+      "name": "skill-evals",
+      "source": "./skill-evals",
+      "description": "Evaluación offline de skills: activación, colisiones, presupuesto y veredicto reproducible.",
+      "version": "1.0.0",
+      "skills": [
+        ".",
+        "./eval-design",
+        "./eval-run",
+        "./eval-report"
+      ]
+    },
+    {
+      "name": "finops-auditor",
+      "source": "./finops-auditor",
+      "description": "Auditoría de costes cloud: huérfanos, rightsizing, coste de LLM e IaC.",
+      "version": "1.4.0",
+      "skills": [
+        ".",
+        "./finops-scan",
+        "./finops-rightsize",
+        "./finops-llm-scan",
+        "./finops-infra-scan",
+        "./finops-ci-opt",
+        "./finops-diff"
+      ]
+    },
+    {
+      "name": "db-architect",
+      "source": "./db-architect",
+      "description": "Auditoría de bases de datos sin motor: esquema, migraciones, N+1 y siembra.",
+      "version": "2.1.0",
+      "skills": [
+        ".",
+        "./db-schema-audit",
+        "./db-migration-guard",
+        "./db-expand-contract",
+        "./db-lock-audit",
+        "./db-drift",
+        "./db-sql-lint",
+        "./db-query-trace",
+        "./db-seed-gen"
+      ]
+    },
+    {
+      "name": "api-contract-guard",
+      "source": "./api-contract-guard",
+      "description": "Defensa del contrato de API: impacto SemVer, cruce de rutas y mock local.",
+      "version": "1.2.0",
+      "skills": [
+        ".",
+        "./api-diff",
+        "./api-code-sync",
+        "./api-mock-server",
+        "./api-auth-coverage"
+      ]
+    },
+    {
+      "name": "refactor-surgeon",
+      "source": "./refactor-surgeon",
+      "description": "Refactor con red: métricas, casos dorados, cortes por grafo y verificación.",
+      "version": "1.5.0",
+      "skills": [
+        ".",
+        "./refactor-metrics",
+        "./refactor-hotspots",
+        "./refactor-harness",
+        "./refactor-clones",
+        "./refactor-deadcode",
+        "./refactor-cycles",
+        "./refactor-slice",
+        "./refactor-verify"
+      ]
+    },
+    {
+      "name": "docs-sync-engine",
+      "source": "./docs-sync-engine",
+      "description": "Documentación pegada al código: referencias, glosario, arquitectura y CHANGELOG.",
+      "version": "1.2.0",
+      "skills": [
+        ".",
+        "./docs-drift-check",
+        "./docs-terms",
+        "./docs-env",
+        "./docs-arch-gen",
+        "./docs-changelog"
+      ]
+    }
+  ]
+}
