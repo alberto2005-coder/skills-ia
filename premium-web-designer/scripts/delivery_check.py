@@ -58,35 +58,66 @@ class Page(HTMLParser):
         self._capture: str | None = None
         self._jsonld = False
 
+    # Despacho por etiqueta: el parser es el mismo, pero ninguna rama vive
+    # dentro de las demás.
+    _START_TAGS = {
+        "html": "_start_html",
+        "title": "_capture_title",
+        "meta": "_start_meta",
+        "link": "_start_link",
+        "script": "_start_script",
+        "style": "_capture_style",
+        "h1": "_capture_heading",
+        "h2": "_capture_heading",
+        "h3": "_capture_heading",
+        "h4": "_capture_heading",
+        "h5": "_capture_heading",
+        "h6": "_capture_heading",
+        "img": "_start_img",
+        "a": "_start_anchor",
+    }
+
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         values = {key: (value or "") for key, value in attrs}
+        handler = self._START_TAGS.get(tag)
+        if handler is not None:
+            getattr(self, handler)(values)
 
-        if tag == "html":
-            self.lang = values.get("lang", "")
-        elif tag == "title":
-            self._capture = "title"
+    def _start_html(self, values: dict[str, str]) -> None:
+        self.lang = values.get("lang", "")
+
+    def _capture_title(self, values: dict[str, str]) -> None:
+        self._capture = "title"
+        self._buffer = []
+
+    def _start_meta(self, values: dict[str, str]) -> None:
+        self.metas.append(values)
+
+    def _start_link(self, values: dict[str, str]) -> None:
+        self.links.append(values)
+
+    def _start_script(self, values: dict[str, str]) -> None:
+        self.scripts.append(values)
+        if values.get("type", "").lower() == "application/ld+json":
+            self._jsonld = True
+            self._capture = "jsonld"
             self._buffer = []
-        elif tag == "meta":
-            self.metas.append(values)
-        elif tag == "link":
-            self.links.append(values)
-        elif tag == "script":
-            self.scripts.append(values)
-            if values.get("type", "").lower() == "application/ld+json":
-                self._jsonld = True
-                self._capture = "jsonld"
-                self._buffer = []
-        elif tag == "style":
-            self._capture = "style"
-            self._buffer = []
-        elif tag in {"h1", "h2", "h3", "h4", "h5", "h6"}:
-            self._capture = "heading"
-            self._buffer = []
-        elif tag == "img":
-            self.images += 1
-            if "alt" not in values:
-                self.images_without_alt += 1
-        elif tag == "a" and self.first_anchor is None:
+
+    def _capture_style(self, values: dict[str, str]) -> None:
+        self._capture = "style"
+        self._buffer = []
+
+    def _capture_heading(self, values: dict[str, str]) -> None:
+        self._capture = "heading"
+        self._buffer = []
+
+    def _start_img(self, values: dict[str, str]) -> None:
+        self.images += 1
+        if "alt" not in values:
+            self.images_without_alt += 1
+
+    def _start_anchor(self, values: dict[str, str]) -> None:
+        if self.first_anchor is None:
             self.first_anchor = values
 
     def handle_endtag(self, tag: str) -> None:
@@ -169,6 +200,13 @@ def check_page(root: Path, result: Result, public: bool = False) -> None:
     page.feed(read_text(index))
     page.close()
 
+    assets, versioned = _link_assets(page)
+    _check_meta(result, page, public)
+    _check_structure(result, page)
+    _check_assets(result, page, assets, versioned)
+
+
+def _link_assets(page: Page) -> tuple[list[str], list[str]]:
     assets = sorted(
         {LOCAL_ASSET.match(link.get("href", "")).group(1) for link in page.links if LOCAL_ASSET.match(link.get("href", ""))}
         | {LOCAL_ASSET.match(script.get("src", "")).group(1) for script in page.scripts if LOCAL_ASSET.match(script.get("src", ""))}
@@ -181,7 +219,10 @@ def check_page(root: Path, result: Result, public: bool = False) -> None:
         for reference in references
         if "?" in reference and reference.split("?")[0].endswith((".css", ".js"))
     ]
+    return assets, versioned
 
+
+def _check_meta(result: Result, page: Page, public: bool) -> None:
     result.add(
         "HTML-001",
         MUST,
@@ -259,6 +300,8 @@ def check_page(root: Path, result: Result, public: bool = False) -> None:
     twitter = any(meta.get("name", "").lower().startswith("twitter:") for meta in page.metas)
     result.add("HTML-009", NICE, twitter, "Twitter card", "ausente" if not twitter else "")
 
+
+def _check_structure(result: Result, page: Page) -> None:
     h1_count = sum(1 for level, _ in page.headings if level == 1)
     result.add(
         "HTML-010",
@@ -268,13 +311,7 @@ def check_page(root: Path, result: Result, public: bool = False) -> None:
         f"{h1_count} encontrados",
     )
 
-    skipped_levels = ""
-    previous = 0
-    for level, text in page.headings:
-        if previous and level > previous + 1:
-            skipped_levels = f"salto h{previous} → h{level} en «{text[:40]}»"
-            break
-        previous = level
+    skipped_levels = _heading_gap(page.headings)
     result.add(
         "HTML-011",
         SHOULD,
@@ -291,21 +328,35 @@ def check_page(root: Path, result: Result, public: bool = False) -> None:
         f"{page.images_without_alt} de {page.images} sin alt" if page.images else "sin imágenes",
     )
 
-    invalid_jsonld = ""
+    ok_jsonld, detail = _jsonld_status(page)
+    result.add("HTML-013", SHOULD, ok_jsonld, "JSON-LD presente y válido", detail)
+
+
+def _heading_gap(headings: list[tuple[int, str]]) -> str:
+    previous = 0
+    for level, text in headings:
+        if previous and level > previous + 1:
+            return f"salto h{previous} → h{level} en «{text[:40]}»"
+        previous = level
+    return ""
+
+
+def _jsonld_status(page: Page) -> tuple[bool, str]:
+    invalid = ""
     for block in page.jsonld:
         try:
             json.loads(block)
         except json.JSONDecodeError as error:
-            invalid_jsonld = str(error)
+            invalid = str(error)
             break
-    result.add(
-        "HTML-013",
-        SHOULD,
-        bool(page.jsonld) and not invalid_jsonld,
-        "JSON-LD presente y válido",
-        invalid_jsonld or ("ausente" if not page.jsonld else f"{len(page.jsonld)} bloques"),
-    )
+    if invalid:
+        return False, invalid
+    if not page.jsonld:
+        return False, "ausente"
+    return True, f"{len(page.jsonld)} bloques"
 
+
+def _check_assets(result: Result, page: Page, assets: list[str], versioned: list[str]) -> None:
     skip_link = bool(page.first_anchor) and page.first_anchor.get("href", "").startswith("#")
     result.add("HTML-014", SHOULD, skip_link, "Enlace de salto al contenido", "" if skip_link else "el primer enlace no apunta a un ancla")
 
