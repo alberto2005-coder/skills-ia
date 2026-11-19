@@ -1,10 +1,20 @@
 ---
 name: db-expand-contract
-description: Divide una migración en el plan de dos fases expand y contract, separa lo aditivo de lo destructivo y avisa de lo que no se puede partir sin reescribir la tabla.
+description: >
+  Divide una migración en el plan de dos fases expand y contract, separa lo aditivo de lo
+  destructivo y avisa de lo que no se puede partir sin reescribir la tabla. Úsala cuando haya
+  que desplegar un cambio de esquema sin ventana de mantenimiento. English: split a migration
+  into expand and contract phases and flag what cannot be split.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py db-architect/scripts/*)
+  - Bash(python3 db-architect/scripts/*)
 license: MIT
 metadata:
   package: db-architect
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # DB Expand Contract

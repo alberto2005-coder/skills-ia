@@ -1,10 +1,14 @@
 ---
 name: refactor-hotspots
-description: Ordena los ficheros por churn de git log desde una fecha obligatoria multiplicado por su complejidad, y declara «no medido» sin fecha, sin repositorio o en un clon shallow.
+description: >
+  Ordena los ficheros por churn de git log desde una fecha obligatoria multiplicado por su
+  complejidad, y declara «no medido» sin fecha, sin repositorio o en un clon shallow. Úsala para
+  decidir por dónde empezar el refactor con datos de churn y complejidad. English: rank files by
+  git churn times complexity, and say "not measured" when it cannot be measured.
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Refactor Hotspots

@@ -1,11 +1,15 @@
 ---
 name: api-diff
 description: >
-  Compara dos contratos OpenAPI y calcula el impacto SemVer: endpoint o tipo de respuesta eliminado es major, lo aditivo es minor y la documentación es patch, con detalle por ruta.
+  Compara dos contratos OpenAPI y calcula el impacto SemVer: endpoint o tipo de respuesta
+  eliminado es major, lo aditivo es minor y la documentación es patch, con detalle por ruta.
+  Úsala cuando pregunten qué versión le toca a un cambio de contrato o qué campos y rutas
+  desaparecen entre dos OpenAPI. English: compute the SemVer impact of a contract change with
+  per-route detail.
 license: MIT
 metadata:
   package: api-contract-guard
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # API Diff

@@ -1,11 +1,16 @@
 ---
 name: api-contract-guard
 description: >
-  Orquesta la defensa de un contrato de API: diff SemVer entre versiones, cruce de rutas backend/frontend y servidor mock local, con veredicto major/minor/patch y evidencia reproducible.
+  Orquesta la defensa de un contrato de API: diff SemVer entre versiones, cruce de rutas
+  backend/frontend y servidor mock local, con veredicto major/minor/patch y evidencia
+  reproducible. Úsala cuando pregunten si un cambio de API rompe clientes, cuando haya que
+  comparar dos versiones del contrato o cruzar las rutas del backend con las llamadas del
+  frontend. English: defend an API contract — SemVer impact between versions, backend/frontend
+  route sync and a local OpenAPI mock.
 license: MIT
 metadata:
   package: api-contract-guard
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # API Contract Guard

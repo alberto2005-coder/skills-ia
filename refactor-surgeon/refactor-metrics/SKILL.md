@@ -1,10 +1,14 @@
 ---
 name: refactor-metrics
-description: Mide complejidad ciclomática, anidamiento, líneas y parámetros por función, con nota de mantenibilidad 0-100, para decidir qué se refactoriza y comparar el después.
+description: >
+  Mide complejidad ciclomática, anidamiento, líneas y parámetros por función, con nota de
+  mantenibilidad 0-100, para decidir qué se refactoriza y comparar el después. Úsala para medir
+  complejidad, anidamiento y parámetros antes y después de refactorizar. English: measure
+  cyclomatic complexity, nesting, size and maintainability per function.
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Refactor Metrics

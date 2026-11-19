@@ -1,11 +1,21 @@
 ---
 name: docs-sync-engine
 description: >
-  Mantiene la documentación pegada al código: detecta referencias rotas, genera el borrador de arquitectura y arma el CHANGELOG desde los commits, de forma reproducible.
+  Mantiene la documentación pegada al código: detecta referencias rotas, genera el borrador de
+  arquitectura y arma el CHANGELOG desde los commits, de forma reproducible. Úsala cuando la
+  documentación haya quedado atrás del código o antes de publicar una release. English: keep
+  docs glued to the code — broken references, architecture draft and CHANGELOG.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py docs-sync-engine/scripts/*)
+  - Bash(python3 docs-sync-engine/scripts/*)
+  - Bash(git log *)
 license: MIT
 metadata:
   package: docs-sync-engine
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Docs Sync Engine

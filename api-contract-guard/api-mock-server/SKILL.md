@@ -1,10 +1,14 @@
 ---
 name: api-mock-server
-description: Levanta un servidor HTTP mock en 127.0.0.1 desde un contrato OpenAPI, responde los ejemplos declarados y no sale nunca a la red ni toca el backend real.
+description: >
+  Levanta un servidor HTTP mock en 127.0.0.1 desde un contrato OpenAPI, responde los ejemplos
+  declarados y no sale nunca a la red ni toca el backend real. Úsala cuando haya que probar el
+  frontend sin backend, tener respuestas de ejemplo del contrato o un servidor local aislado.
+  English: serve a local mock from the OpenAPI examples without touching the real backend.
 license: MIT
 metadata:
   package: api-contract-guard
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # API Mock Server

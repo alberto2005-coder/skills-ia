@@ -5,7 +5,7 @@ description: >
 license: MIT
 metadata:
   package: agent-red-team
-  version: "3.0.0"
+  version: "3.1.0"
 ---
 
 # Red Team · Auditoría completa (full audit)

@@ -1,11 +1,21 @@
 ---
 name: docs-arch-gen
 description: >
-  Genera un borrador del documento de arquitectura leyendo el árbol de Python: módulo, docstring de responsabilidad y funciones de entrada, más el comando para regenerarlo.
+  Genera un borrador del documento de arquitectura leyendo el árbol de Python: módulo, docstring
+  de responsabilidad y funciones de entrada, más el comando para regenerarlo. Úsala cuando falte
+  el documento de arquitectura o haya que regenerarlo tras mover módulos. English: draft an
+  architecture document from the Python tree and its docstrings.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py docs-sync-engine/scripts/*)
+  - Bash(python3 docs-sync-engine/scripts/*)
+  - Bash(git log *)
 license: MIT
 metadata:
   package: docs-sync-engine
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Docs Arch Gen

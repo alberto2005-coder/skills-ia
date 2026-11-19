@@ -1,11 +1,20 @@
 ---
 name: db-schema-audit
 description: >
-  Audita esquemas SQL con SQLite en memoria: claves primarias ausentes, claves foráneas sin índice y sintaxis inválida, con severidad y salida JSON para la puerta de CI.
+  Audita esquemas SQL con SQLite en memoria: claves primarias ausentes, claves foráneas sin
+  índice y sintaxis inválida, con severidad y salida JSON para la puerta de CI. Úsala cuando
+  pidan revisar tablas, claves o índices de un esquema. English: audit SQL schemas in memory and
+  report severity with JSON output for CI.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py db-architect/scripts/*)
+  - Bash(python3 db-architect/scripts/*)
 license: MIT
 metadata:
   package: db-architect
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # DB Schema Audit

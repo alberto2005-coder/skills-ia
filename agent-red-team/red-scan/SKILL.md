@@ -2,10 +2,16 @@
 name: red-scan
 description: >
   Escaneo rápido de seguridad de una skill, MCP o carpeta de instrucciones, con veredicto y hallazgos en el chat, sin crear ficheros. Úsala para la pregunta puntual «¿esta skill es segura?», «mírame este SKILL.md» o «¿qué hace este script?» antes de instalar algo de terceros. English: quick scan, give the verdict in chat and create no files.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py agent-red-team/scripts/*)
+  - Bash(python3 agent-red-team/scripts/*)
 license: MIT
 metadata:
   package: agent-red-team
-  version: "3.0.0"
+  version: "3.1.0"
 ---
 
 # Red Team · Scan rápido (guidance)

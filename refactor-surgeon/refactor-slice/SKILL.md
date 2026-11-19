@@ -1,10 +1,14 @@
 ---
 name: refactor-slice
-description: Calcula el grafo de llamadas de un fichero y propone cortes por componentes conexas, señalando qué funciones son entradas y qué grupos no se hablan entre sí.
+description: >
+  Calcula el grafo de llamadas de un fichero y propone cortes por componentes conexas, señalando
+  qué funciones son entradas y qué grupos no se hablan entre sí. Úsala cuando un fichero hace
+  demasiado y haya que decidir en qué trozos partirlo. English: build the call graph and propose
+  cuts along connected components.
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Refactor Slice

@@ -1,11 +1,21 @@
 ---
 name: db-lock-audit
 description: >
-  Detecta las operaciones de migración que bloquean la tabla o la reescriben: cambio de tipo, columna NOT NULL con DEFAULT, CREATE INDEX sin CONCURRENTLY, RENAME en un paso y VACUUM FULL.
+  Detecta las operaciones de migración que bloquean la tabla o la reescriben: cambio de tipo,
+  columna NOT NULL con DEFAULT, CREATE INDEX sin CONCURRENTLY, RENAME en un paso y VACUUM FULL.
+  Úsala cuando una migración pueda dejar la tabla bloqueada o reescribirla durante minutos.
+  English: flag the migration operations that lock or rewrite a table and give the safe
+  alternative.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py db-architect/scripts/*)
+  - Bash(python3 db-architect/scripts/*)
 license: MIT
 metadata:
   package: db-architect
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # DB Lock Audit

@@ -1,11 +1,20 @@
 ---
 name: db-sql-lint
 description: >
-  Lint de estilo sobre ficheros SQL con reglas acotadas: palabras clave, SELECT *, tablas sin clave primaria, snake_case, líneas largas, tabuladores y != en lugar de <>.
+  Lint de estilo sobre ficheros SQL con reglas acotadas: palabras clave, SELECT *, tablas sin
+  clave primaria, snake_case, líneas largas, tabuladores y != en lugar de <>. Úsala para revisar
+  migraciones y consultas antes de fusionar. English: lint SQL style with bounded rules and
+  report file, line and rule.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py db-architect/scripts/*)
+  - Bash(python3 db-architect/scripts/*)
 license: MIT
 metadata:
   package: db-architect
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # DB SQL Lint

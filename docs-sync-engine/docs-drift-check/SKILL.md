@@ -1,10 +1,21 @@
 ---
 name: docs-drift-check
-description: Detecta referencias rotas en la documentación comparando las rutas entre backticks y los enlaces relativos contra el árbol real del repositorio.
+description: >
+  Detecta referencias rotas en la documentación comparando las rutas entre backticks y los
+  enlaces relativos contra el árbol real del repositorio. Úsala cuando haya que comprobar que
+  los enlaces y las rutas citadas en la documentación siguen existiendo. English: find broken
+  references by comparing backtick paths and relative links with the tree.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py docs-sync-engine/scripts/*)
+  - Bash(python3 docs-sync-engine/scripts/*)
+  - Bash(git log *)
 license: MIT
 metadata:
   package: docs-sync-engine
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Docs Drift Check

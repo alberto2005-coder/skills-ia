@@ -5,7 +5,7 @@ description: >
 license: MIT
 metadata:
   package: agent-red-team
-  version: "3.0.0"
+  version: "3.1.0"
 ---
 
 # Agent Red Team — Auditor de Seguridad de Skills

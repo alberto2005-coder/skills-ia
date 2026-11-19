@@ -1,10 +1,20 @@
 ---
 name: db-query-trace
-description: Detecta consultas ORM dentro de bucles (N+1) en código Python con AST, sin ejecutarlo, y avisa cuando falta carga anticipada como selectinload o joinedload.
+description: >
+  Detecta consultas ORM dentro de bucles (N+1) en código Python con AST, sin ejecutarlo, y avisa
+  cuando falta carga anticipada como selectinload o joinedload. Úsala cuando una pantalla tarde
+  por consultas dentro de bucles o falte carga anticipada. English: find N+1 ORM queries with an
+  AST pass, without running the code.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py db-architect/scripts/*)
+  - Bash(python3 db-architect/scripts/*)
 license: MIT
 metadata:
   package: db-architect
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # DB Query Trace

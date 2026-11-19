@@ -1,10 +1,21 @@
 ---
 name: docs-changelog
-description: Arma el borrador del CHANGELOG agrupando commits convencionales por tipo y versión, con sección Otros para lo que no sigue la convención.
+description: >
+  Arma el borrador del CHANGELOG agrupando commits convencionales por tipo y versión, con
+  sección Otros para lo que no sigue la convención. Úsala al preparar una release o cuando el
+  CHANGELOG no refleje los commits. English: build a CHANGELOG draft from conventional commits,
+  with an Other section.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py docs-sync-engine/scripts/*)
+  - Bash(python3 docs-sync-engine/scripts/*)
+  - Bash(git log *)
 license: MIT
 metadata:
   package: docs-sync-engine
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Docs Changelog

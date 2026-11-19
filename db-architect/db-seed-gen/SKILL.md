@@ -1,10 +1,20 @@
 ---
 name: db-seed-gen
-description: Genera datos de siembra deterministas desde un esquema SQL, ordenando las tablas por claves foráneas y repitiendo byte a byte con la misma semilla y el mismo esquema.
+description: >
+  Genera datos de siembra deterministas desde un esquema SQL, ordenando las tablas por claves
+  foráneas y repitiendo byte a byte con la misma semilla y el mismo esquema. Úsala cuando hagan
+  falta datos de prueba estables que se repitan igual en cada máquina. English: generate
+  deterministic seed data ordered by foreign keys.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py db-architect/scripts/*)
+  - Bash(python3 db-architect/scripts/*)
 license: MIT
 metadata:
   package: db-architect
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # DB Seed Gen

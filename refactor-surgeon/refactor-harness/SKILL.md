@@ -1,10 +1,14 @@
 ---
 name: refactor-harness
-description: Graba casos dorados de un módulo antes de refactorizarlo y los reproduce después, ejecutando solo con permiso explícito y tratando la excepción como conducta observable.
+description: >
+  Graba casos dorados de un módulo antes de refactorizarlo y los reproduce después, ejecutando
+  solo con permiso explícito y tratando la excepción como conducta observable. Úsala antes de
+  refactorizar un módulo sin tests, para congelar su conducta. English: record golden cases
+  before the refactor and replay them after, only with explicit permission.
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Refactor Harness

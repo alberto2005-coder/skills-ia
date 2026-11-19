@@ -1,10 +1,21 @@
 ---
 name: docs-env
-description: Cruza las variables de entorno que lee el código con .env.example y la documentación, y reporta las que faltan en cada lado y las declaradas que nadie usa.
+description: >
+  Cruza las variables de entorno que lee el código con .env.example y la documentación, y
+  reporta las que faltan en cada lado y las declaradas que nadie usa. Úsala cuando alguien clone
+  el repositorio y no sepa qué variables necesita, o cuando sobren variables en .env.example.
+  English: cross-check env vars read in code against .env.example and the docs.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py docs-sync-engine/scripts/*)
+  - Bash(python3 docs-sync-engine/scripts/*)
+  - Bash(git log *)
 license: MIT
 metadata:
   package: docs-sync-engine
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Docs Env

@@ -1,11 +1,14 @@
 ---
 name: api-code-sync
 description: >
-  Cruza rutas del backend con llamadas del frontend con expresiones regulares: detecta dead calls, métodos que no coinciden y endpoints sin consumidor, con salida JSON.
+  Cruza rutas del backend con llamadas del frontend con expresiones regulares: detecta dead
+  calls, métodos que no coinciden y endpoints sin consumidor, con salida JSON. Úsala cuando el
+  frontend llame a endpoints que ya no existen o cuando haya rutas que nadie consume. English:
+  match backend routes against frontend calls and list dead calls and mismatched methods.
 license: MIT
 metadata:
   package: api-contract-guard
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # API Code Sync

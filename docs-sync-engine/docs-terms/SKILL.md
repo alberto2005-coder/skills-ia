@@ -1,10 +1,21 @@
 ---
 name: docs-terms
-description: Revisa la terminología de la documentación con glosarios accept/reject, sugiere el reemplazo de cada término prohibido y avisa de grafías que no son la canónica.
+description: >
+  Revisa la terminología de la documentación con glosarios accept/reject, sugiere el reemplazo
+  de cada término prohibido y avisa de grafías que no son la canónica. Úsala cuando haya que
+  unificar terminología y grafías entre documentos. English: enforce canonical glossary terms
+  and flag banned spellings.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py docs-sync-engine/scripts/*)
+  - Bash(python3 docs-sync-engine/scripts/*)
+  - Bash(git log *)
 license: MIT
 metadata:
   package: docs-sync-engine
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Docs Terms

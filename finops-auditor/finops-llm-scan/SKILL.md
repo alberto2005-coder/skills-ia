@@ -1,11 +1,15 @@
 ---
 name: finops-llm-scan
 description: >
-  Revisa llamadas a APIs de LLM en el código Python: falta de max_tokens, modelos caros usados como clasificador, bucles de agente sin tope y prompts de sistema largos sin caché, con severidad y salida JSON.
+  Revisa llamadas a APIs de LLM en el código Python: falta de max_tokens, modelos caros usados
+  como clasificador, bucles de agente sin tope y prompts de sistema largos sin caché, con
+  severidad y salida JSON. Úsala cuando el gasto en APIs de LLM crezca o falte max_tokens.
+  English: scan LLM API calls for spend risks — missing max_tokens, expensive models as
+  classifiers, unbounded agent loops.
 license: MIT
 metadata:
   package: finops-auditor
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # FinOps LLM Scan

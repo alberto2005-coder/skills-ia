@@ -2,7 +2,7 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "db-architect",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Auditoría de bases de datos: esquema, riesgo, plan expand/contract, bloqueos, deriva, estilo SQL, consultas N+1 y datos de siembra deterministas.",
   "skills": [
     {

@@ -1,10 +1,14 @@
 ---
 name: refactor-verify
-description: Verifica que el refactor no cambió la conducta comparando los casos dorados contra el snapshot y repitiendo los tests existentes, con veredicto limpio o discrepancia.
+description: >
+  Verifica que el refactor no cambió la conducta comparando los casos dorados contra el snapshot
+  y repitiendo los tests existentes, con veredicto limpio o discrepancia. Úsala después de
+  refactorizar, para demostrar que la conducta es la misma. English: verify unchanged behaviour
+  by replaying golden cases against the snapshot.
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Refactor Verify

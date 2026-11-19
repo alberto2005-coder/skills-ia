@@ -1,10 +1,14 @@
 ---
 name: finops-scan
-description: Escanea y recopila el inventario completo de recursos cloud (instancias, bases de datos, almacenamiento, IPs) y detecta desperdicios y anomalías de coste.
+description: >
+  Escanea y recopila el inventario completo de recursos cloud (instancias, bases de datos,
+  almacenamiento, IPs) y detecta desperdicios y anomalías de coste. Úsala para levantar el
+  inventario de recursos cloud y localizar desperdicio. English: inventory cloud resources and
+  flag waste and cost anomalies.
 license: MIT
 metadata:
   package: finops-auditor
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # FinOps Scan

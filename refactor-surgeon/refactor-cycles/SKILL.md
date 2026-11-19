@@ -1,10 +1,14 @@
 ---
 name: refactor-cycles
-description: Encuentra los ciclos de imports entre los módulos de un árbol Python resolviendo imports absolutos y relativos, y devuelve cada componente fuertemente conexa con sus ficheros.
+description: >
+  Encuentra los ciclos de imports entre los módulos de un árbol Python resolviendo imports
+  absolutos y relativos, y devuelve cada componente fuertemente conexa con sus ficheros. Úsala
+  cuando los imports se enreden entre módulos y el arranque dependa del orden. English: find
+  import cycles and return each strongly connected component with its files.
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Refactor Cycles

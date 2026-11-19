@@ -1,11 +1,21 @@
 ---
 name: db-architect
 description: >
-  Orquesta la auditoría de bases de datos: esquema, riesgo de migraciones, consultas N+1 y datos de siembra deterministas, con flujo Audit → Guard → Optimize y evidencia reproducible.
+  Orquesta la auditoría de bases de datos: esquema, riesgo de migraciones, consultas N+1 y datos
+  de siembra deterministas, con flujo Audit → Guard → Optimize y evidencia reproducible. Úsala
+  cuando pidan auditar un esquema, evaluar si una migración es peligrosa o revisar las consultas
+  de un ORM. English: audit a database without an engine — schema, migration risk, N+1 queries
+  and deterministic seeds.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py db-architect/scripts/*)
+  - Bash(python3 db-architect/scripts/*)
 license: MIT
 metadata:
   package: db-architect
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # DB Architect

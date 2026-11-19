@@ -1,11 +1,14 @@
 ---
 name: refactor-surgeon
 description: >
-  Refactoriza con red: mide complejidad y anidamiento, graba casos dorados, propone cortes por grafo de llamadas y verifican que la conducta no cambió.
+  Refactoriza con red: mide complejidad y anidamiento, graba casos dorados, propone cortes por
+  grafo de llamadas y verifica que la conducta no cambió. Úsala cuando haya que refactorizar sin
+  tests o demostrar que la conducta sigue igual. English: refactor with a safety net — metrics,
+  golden cases, call-graph cuts and behaviour verification.
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Refactor Surgeon

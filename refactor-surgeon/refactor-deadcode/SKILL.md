@@ -1,10 +1,14 @@
 ---
 name: refactor-deadcode
-description: Encuentra imports que nadie usa y funciones o clases privadas sin referencias en un árbol Python, contando usos por identificador entre ficheros, antes de refactorizar.
+description: >
+  Encuentra imports que nadie usa y funciones o clases privadas sin referencias en un árbol
+  Python, contando usos por identificador entre ficheros, antes de refactorizar. Úsala antes de
+  borrar nada, para saber qué imports y funciones privadas nadie usa. English: find unused
+  imports and unreferenced private definitions before refactoring.
 license: MIT
 metadata:
   package: refactor-surgeon
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Refactor Deadcode

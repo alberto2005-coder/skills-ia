@@ -1,10 +1,20 @@
 ---
 name: db-drift
-description: Compara el esquema declarado con el que resulta de reproducir las migraciones en orden y reporta tablas, columnas y tipos que solo están en un lado, con la deriva por nombre.
+description: >
+  Compara el esquema declarado con el que resulta de reproducir las migraciones en orden y
+  reporta tablas, columnas y tipos que solo están en un lado, con la deriva por nombre. Úsala
+  cuando sospeche que el esquema desplegado y las migraciones no cuentan la misma historia.
+  English: compare the declared schema with the one replayed migrations produce.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py db-architect/scripts/*)
+  - Bash(python3 db-architect/scripts/*)
 license: MIT
 metadata:
   package: db-architect
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # DB Drift

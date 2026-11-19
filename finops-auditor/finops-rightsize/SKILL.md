@@ -1,10 +1,14 @@
 ---
 name: finops-rightsize
-description: Propone recomendaciones de cambio de tamaño (right-sizing) para instancias de cómputo y bases de datos basadas en métricas de rendimiento real.
+description: >
+  Propone recomendaciones de cambio de tamaño (right-sizing) para instancias de cómputo y bases
+  de datos basadas en métricas de rendimiento real. Úsala cuando instancias y bases de datos
+  estén sobredimensionadas respecto a lo que consumen. English: propose rightsizing with
+  savings, risk and a verification metric.
 license: MIT
 metadata:
   package: finops-auditor
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # FinOps Right-Sizing

@@ -1,10 +1,15 @@
 ---
 name: api-auth-coverage
-description: Cruza la seguridad declarada en OpenAPI con las guardas reales de las rutas del código y reporta rutas protegidas sin guarda, guardas sin `security` y operaciones sin implementar.
+description: >
+  Cruza la seguridad declarada en OpenAPI con las guardas reales de las rutas del código y
+  reporta rutas protegidas sin guarda, guardas sin `security` y operaciones sin implementar.
+  Úsala cuando haya que comprobar si la autenticación del contrato coincide con la que el código
+  aplica, o buscar endpoints abiertos sin querer. English: compare declared OpenAPI security
+  with the guards actually enforced in code.
 license: MIT
 metadata:
   package: api-contract-guard
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # API Auth Coverage

@@ -1,10 +1,14 @@
 ---
 name: finops-diff
-description: Compara el coste de dos inventarios por recurso y aplica guardrails de CI (--max-increase, --max-percent, --budget), con salida JSON y código de salida 1 cuando se supera un límite.
+description: >
+  Compara el coste de dos inventarios por recurso y aplica guardrails de CI (--max-increase,
+  --max-percent, --budget), con salida JSON y código de salida 1 cuando se supera un límite.
+  Úsala para comparar el coste entre dos inventarios y bloquear subidas por encima del
+  presupuesto. English: diff two inventories and fail CI past a budget threshold.
 license: MIT
 metadata:
   package: finops-auditor
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # FinOps Diff

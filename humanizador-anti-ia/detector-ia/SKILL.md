@@ -2,10 +2,16 @@
 name: detector-ia
 description: >
   Mide y detecta señales de escritura de IA en un texto sin modificarlo — score 0-100 determinista de 4 señales, patrones detectados, datos sin fuente y segmentos protegidos, en JSON, Markdown o consola. Úsala cuando pidan puntuar un texto, saber si parece de IA, comparar dos textos por estilo o auditar un borrador sin reescribirlo. English: score the text for AI signals, say whether it reads as AI-generated, without editing it, and list the unsourced data.
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash(py humanizador-anti-ia/scripts/*)
+  - Bash(python3 humanizador-anti-ia/scripts/*)
 license: MIT
 metadata:
   package: humanizador-anti-ia
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # Humanizador · Detector (`detector-ia`)

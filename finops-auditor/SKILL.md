@@ -1,10 +1,15 @@
 ---
 name: finops-auditor
-description: Auditoría integral de costes Cloud, detección de recursos huérfanos, instancias sobreaprovisionadas y recomendaciones de optimización FinOps con scripts deterministas.
+description: >
+  Auditoría integral de costes Cloud, detección de recursos huérfanos, instancias
+  sobreaprovisionadas y recomendaciones de optimización FinOps con scripts deterministas. Úsala
+  cuando la factura cloud haya subido o cuando haya que justificar el gasto antes de aprobarlo.
+  English: audit cloud spend, orphaned resources and overprovisioned instances with
+  deterministic scripts.
 license: MIT
 metadata:
   package: finops-auditor
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # FinOps Auditor Master
