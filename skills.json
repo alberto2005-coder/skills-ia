@@ -1,8 +1,8 @@
 {
   "format": "skills-ia-index",
   "format_version": "1.0",
-  "updated": "2026-11-18",
-  "version": "4.1.0",
+  "updated": "2026-11-19",
+  "version": "5.0.0",
   "description": "Índice vendor-neutral de los paquetes de Skills IA. Cualquier agente (Claude, Codex, Cursor, Gemini, OpenCode...) puede descubrir las skills escaneando **/SKILL.md; este índice da además el mapa de paquetes y permite varias skills por carpeta.",
   "skills_total": 79,
   "packages": [
@@ -32,7 +32,7 @@
     {
       "name": "appsec-audit",
       "path": "appsec-audit",
-      "version": "1.4.0",
+      "version": "2.0.0",
       "manifest": "appsec-audit/skills.json",
       "skill_count": 11,
       "skills": [
@@ -52,7 +52,7 @@
     {
       "name": "agent-red-team",
       "path": "agent-red-team",
-      "version": "2.1.0",
+      "version": "3.0.0",
       "manifest": "agent-red-team/skills.json",
       "skill_count": 3,
       "skills": [
@@ -76,7 +76,7 @@
     {
       "name": "seo-auditor",
       "path": "seo-auditor",
-      "version": "2.0.0",
+      "version": "3.0.0",
       "manifest": "seo-auditor/skills.json",
       "skill_count": 6,
       "skills": [
@@ -91,7 +91,7 @@
     {
       "name": "premium-web-designer",
       "path": "premium-web-designer",
-      "version": "2.1.0",
+      "version": "3.0.0",
       "manifest": "premium-web-designer/skills.json",
       "skill_count": 2,
       "skills": [
@@ -131,7 +131,7 @@
     {
       "name": "db-architect",
       "path": "db-architect",
-      "version": "1.2.0",
+      "version": "2.0.0",
       "manifest": "db-architect/skills.json",
       "skill_count": 9,
       "skills": [

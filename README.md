@@ -10,6 +10,7 @@
 ## 🇪🇸 Español
 
 ### Índice
+
 1. [Visión General](#visión-general)
 2. [Módulos y Sub-skills](#módulos-y-sub-skills)
 3. [Estructura Estándar de cada Paquete](#estructura-estándar-de-cada-paquete)
@@ -18,6 +19,7 @@
 6. [Licencia](#licencia)
 
 ### Visión General
+
 **Skills IA** es una colección de habilidades modulares, deterministas e independientes diseñadas para ser integradas en cualquier asistente de Inteligencia Artificial (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Cada habilidad es autosuficiente y opera sin alterar paquetes globales ni requerir dependencias complejas.
 
 Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica, varias sub-skills con un corte de uso real. Se instalan juntas y comparten assets sin duplicarlos. El índice máquina-legible está en [`skills.json`](skills.json): 12 paquetes, 79 skills.
@@ -92,8 +94,9 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | `skill-evals` | Maestro: diseño de casos, ejecución, puertas, comparación e informe. |
 | `eval-design` | Casos desde `phrases.json`, límites, cobertura y split train/test. |
 | `eval-run` | Precisión, recall, MRR, colisiones, presupuesto, regresiones y puertas. |
+| `eval-report` | Informe Markdown o HTML autónomo: fallos con esperado y ganador, colisiones, presupuesto y regresiones frente a la línea base. |
 
-#### `finops-auditor` — maestro + 5 sub-skills
+#### `finops-auditor` — maestro + 6 sub-skills
 
 | Sub-skill | Qué hace |
 |---|---|
@@ -178,21 +181,24 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | `premium-qa` | QA independiente: medición en cinco anchos, gates numéricos e informe de entrega. |
 
 ### Estructura Estándar de cada Paquete
+
 ```text
 paquete/
 ├── SKILL.md              # maestro: orquesta y fija límites
 ├── sub-skill/SKILL.md    # una por bloque de uso real
-├── references/           # compartidas, sin duplicar
+├── references/           # compartidas — solo si el paquete las necesita
 ├── scripts/              # stdlib de Python, deterministas
-├── templates/            # salidas estructuradas
+├── templates/            # salidas estructuradas — solo si hacen falta
 ├── tests/                # unittest, sin red
 └── skills.json           # array con todas las skills del paquete
 ```
 
-Cada `SKILL.md` (maestro y sub-skills) lleva frontmatter YAML con `name` y `description` para activación automática. Las sub-skills referencian los assets compartidos con rutas relativas al paquete (`../references/`, `../scripts/`), así que **se instala la carpeta completa**.
+Cada `SKILL.md` (maestro y sub-skills) lleva frontmatter YAML con `name` y `description` para activación automática. Las sub-skills referencian los assets compartidos con rutas relativas al paquete (`../references/`, `../scripts/`), así que **se instala la carpeta completa**. `scripts/`, `tests/` y `skills.json` están en todos los paquetes; `references/` y `templates/` aparecen solo cuando hay material compartido que merezca separarse.
 
 ### Documentación Técnica
+
 Las guías completas de cada módulo se encuentran en la carpeta [`docs/`](docs/):
+
 - [Índice de Documentación](docs/index.md)
 - [Guía de Agent Red Team](docs/agent-red-team.md)
 - [Guía de Humanizador Anti-IA](docs/humanizador-anti-ia.md)
@@ -208,13 +214,15 @@ Las guías completas de cada módulo se encuentran en la carpeta [`docs/`](docs/
 - [Guía de Skill Evals](docs/skill-evals.md)
 
 ### Requisitos y Filosofía de Cero Dependencias
+
 - **Python 3.9+** (utiliza únicamente la librería estándar de Python: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).
 - Los tests usan `unittest`; las herramientas de pruebas y calidad (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) están en el grupo `dev` de `pyproject.toml` y se gestionan con [`uv`](https://docs.astral.sh/uv/).
 - Para preparar el entorno `.venv` y ejecutar todos los tests desde la raíz: `uv sync` y `uv run python run_tests.py`.
-- GitHub Actions ejecuta todas las suites en cada `push` mediante `.github/workflows/tests.yml`.
+- GitHub Actions ejecuta todas las suites en cada `push` mediante `.github/workflows/tests.yml`, y además un gate de métricas (`tests/metrics_gate.py`) que falla si crecen los hallazgos `high` de `code_metrics` o los clones de `clone_detect`; el techo aceptado vive en `tests/metrics_baseline.json`.
 - Tests transversales en `tests/`: activación de las 79 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
 
 ### Licencia
+
 Distribuido bajo la [Licencia MIT](LICENSE).
 
 ---
@@ -222,6 +230,7 @@ Distribuido bajo la [Licencia MIT](LICENSE).
 ## 🇬🇧 English
 
 ### Table of Contents
+
 1. [Overview](#overview)
 2. [Modules and Sub-skills](#modules-and-sub-skills)
 3. [Standard Package Structure](#standard-package-structure)
@@ -230,6 +239,7 @@ Distribuido bajo la [Licencia MIT](LICENSE).
 6. [License](#license)
 
 ### Overview
+
 **Skills IA** is a collection of modular, deterministic, and self-contained agent skills designed for integration with any AI assistant (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Each skill is independent and operates without modifying global packages or requiring third-party libraries.
 
 Each folder is a **package**: one master skill that orchestrates and, where applicable, sub-skills split by real usage boundaries. Packages share assets without duplication. The machine-readable index is [`skills.json`](skills.json): 12 packages, 79 skills.
@@ -304,8 +314,9 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | `skill-evals` | Master: case design, run, gates, baseline comparison and report. |
 | `eval-design` | Cases from `phrases.json`, boundary cases, coverage and train/test split. |
 | `eval-run` | Precision, recall, MRR, collisions, budget, regressions and gates. |
+| `eval-report` | Markdown or standalone HTML report: failures with expected and winner, collisions, context budget and regressions against the baseline. |
 
-#### `finops-auditor` — master + 5 sub-skills
+#### `finops-auditor` — master + 6 sub-skills
 
 | Sub-skill | Purpose |
 |---|---|
@@ -390,21 +401,24 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | `premium-qa` | Independent QA: five-width measurement, numeric gates and delivery report. |
 
 ### Standard Package Structure
+
 ```text
 package/
 ├── SKILL.md              # master: orchestrates and sets limits
 ├── sub-skill/SKILL.md    # one per real usage boundary
-├── references/           # shared, no duplication
+├── references/           # shared — only when the package needs them
 ├── scripts/              # deterministic Python stdlib
-├── templates/            # structured outputs
+├── templates/            # structured outputs — only when needed
 ├── tests/                # unittest, offline
 └── skills.json           # array with every skill in the package
 ```
 
-Every `SKILL.md` (master and sub-skills) carries YAML frontmatter with `name` and `description` for automatic activation. Sub-skills reference shared assets relative to the package (`../references/`, `../scripts/`), so **install the whole folder**.
+Every `SKILL.md` (master and sub-skills) carries YAML frontmatter with `name` and `description` for automatic activation. Sub-skills reference shared assets relative to the package (`../references/`, `../scripts/`), so **install the whole folder**. `scripts/`, `tests/` and `skills.json` are present in every package; `references/` and `templates/` appear only when there is shared material worth splitting out.
 
 ### Technical Documentation
+
 Comprehensive module documentation is available in the [`docs/`](docs/) directory:
+
 - [Documentation Index](docs/index.md)
 - [Agent Red Team Guide](docs/agent-red-team.md)
 - [Humanizador Anti-IA Guide](docs/humanizador-anti-ia.md)
@@ -420,11 +434,13 @@ Comprehensive module documentation is available in the [`docs/`](docs/) director
 - [Skill Evals Guide](docs/skill-evals.md)
 
 ### Requirements and Zero-Dependency Philosophy
+
 - **Python 3.9+** (uses only standard library modules: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).
 - Tests use `unittest`; test and quality tools (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) are in the `dev` group in `pyproject.toml` and managed by [`uv`](https://docs.astral.sh/uv/).
 - Prepare `.venv` and run every test from the repository root with `uv sync` and `uv run python run_tests.py`.
-- GitHub Actions runs all suites on every `push` via `.github/workflows/tests.yml`.
+- GitHub Actions runs all suites on every `push` via `.github/workflows/tests.yml`, plus a metrics gate (`tests/metrics_gate.py`) that fails when `code_metrics` `high` findings or `clone_detect` clones grow; the accepted ceiling lives in `tests/metrics_baseline.json`.
 - Cross-cutting tests in `tests/`: activation for all 79 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
 
 ### License
+
 Distributed under the [MIT License](LICENSE).

@@ -7,6 +7,7 @@
 ## 🇪🇸 Español
 
 ### Índice
+
 1. [Guías de Paquetes](#guías-de-paquetes)
 2. [Paquetes y Sub-skills](#paquetes-y-sub-skills)
 3. [Estructura de un Paquete](#estructura-de-un-paquete)
@@ -14,6 +15,7 @@
 5. [Reglas de Seguridad y Ejecución](#reglas-de-seguridad-y-ejecución)
 
 ### Guías de Paquetes
+
 - [**Agent Red Team**](agent-red-team.md): auditoría de seguridad de skills, MCP y carpetas de instrucciones, con escaneo rápido y auditoría completa verificada.
 - [**Humanizador Anti-IA**](humanizador-anti-ia.md): detección y reescritura de patrones de escritura de IA, con catálogo de 40 patrones y score 0–100 determinista.
 - [**Replica**](replica.md): reconstrucción funcional *clean-room* por fases, con evidencia obligatoria, paridad y rebrand.
@@ -28,6 +30,7 @@
 - [**Skill Evals**](skill-evals.md): evaluación offline del catálogo con casos desde frases reales, puertas de precisión/recall/MRR, informe reproducible y optimización de descripciones.
 
 ### Paquetes y Sub-skills
+
 **12 paquetes, 79 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
 
 | Paquete | Skills | Maestro | Sub-skills |
@@ -48,26 +51,57 @@
 Cada maestro elige el modo, fija los límites y reparte el trabajo; `premium-web-designer` suma `premium-qa` para auditar webs ya construidas y `appsec-audit` reparte la auditoría entre reconocimiento, código, infraestructura, LLM, amenazas, dependencias, CI, remediación, informe y escala, y `skill-evals` reparte el ciclo entre diseño de casos, ejecución e informe.
 
 ### Estructura de un Paquete
+
 ```text
 paquete/
 ├── SKILL.md              # maestro: orquesta, decide modo y fija límites
 ├── <sub-skill>/SKILL.md  # una por bloque de uso real
-├── references/           # compartidas por todas las skills del paquete
+├── references/           # compartidas — solo si el paquete las necesita
 ├── scripts/              # Python stdlib, deterministas, sin red
-├── templates/            # salidas estructuradas
+├── templates/            # salidas estructuradas — solo si hacen falta
 ├── tests/                # unittest, sin red
 └── skills.json           # array con todas las skills del paquete
 ```
 
-Las sub-skills **no duplican assets**: referencian `../references/`, `../scripts/` y `../templates/`, así que se instala la carpeta completa. Cada `SKILL.md` lleva frontmatter `name` + `description` para activación automática.
+Las sub-skills **no duplican assets**: referencian `../references/`, `../scripts/` y `../templates/`, así que se instala la carpeta completa. `scripts/`, `tests/` y `skills.json` están en todos los paquetes; `references/` y `templates/` aparecen solo cuando hay material compartido que merezca separarse. Cada `SKILL.md` lleva frontmatter `name` + `description` para activación automática. Los helpers compartidos dentro de un paquete viven en `scripts/<paquete>_util.py`; no hay módulo común entre paquetes, porque cada uno se instala solo.
 
 ### Tests
+
 ```bash
 uv sync
 uv run python run_tests.py
 ```
 
+### Severidad y `--fail-on`
+
+La escala canónica de `severity` es **`critical` → `high` → `medium` → `low`**, más `info` donde la herramienta distingue informativo y `reject` en `agent-red-team` (un nivel que bloquea siempre). La salida no mezcla idiomas; las herramientas que leen hallazgos siguen aceptando las variantes antiguas (`critica`, `alta`, `media`, `baja`) como alias de entrada.
+
+`must`/`should`/`nice` es otro eje: el de la **puerta**. Se llama `severity_level` en `seo-auditor` y `gate` en `premium-web-designer`.
+
+`--fail-on` no es uniforme porque cada herramienta solo puede romper el pipeline con lo que emite de verdad:
+
+| Valores | Herramientas |
+|---|---|
+| `low \| medium \| high \| none` | `auth_coverage.py`, `env_check.py`, `terms_check.py`, `code_metrics.py`, `dead_code.py`, `llm_cost_scan.py`, `infra_cost_scan.py`, `ci_cost_scan.py`, `lock_audit.py` |
+| `low \| medium \| none` | `sql_lint.py` |
+| `medium \| none` | `query_trace.py` |
+| `medium \| high \| none` | `schema_audit.py` |
+| `info \| medium \| critical \| none` | `migration_guard.py` (`warning` sigue aceptándose como alias de `medium`) |
+| `high \| none` | `docs_drift.py` |
+| `low \| medium \| high \| critical \| none` | `normalize_sarif.py` |
+| `dead \| none` | `code_sync.py` |
+| `patch \| minor \| major \| none` | `contract_diff.py` |
+| `new \| none` | `diff_reports.py` |
+| `reachable \| none` | `sbom.py audit` |
+| `drift \| none` | `drift.py` |
+| `unsafe \| none` | `expand_contract.py` |
+| `guardrail \| none` | `cost_diff.py` |
+| `clone \| none` | `clone_detect.py` |
+| `cycle \| none` | `import_cycles.py` |
+| `hotspot \| none` | `hotspots.py` |
+
 ### Reglas de Seguridad y Ejecución
+
 1. Todas las herramientas funcionan en modo solo lectura por defecto.
 2. No se ejecutan comandos destructivos ni llamadas de red salientes no autorizadas.
 3. Compatibilidad con la librería estándar de Python 3.9+ sin `pip install`.
@@ -77,6 +111,7 @@ uv run python run_tests.py
 ## 🇬🇧 English
 
 ### Table of Contents
+
 1. [Package Guides](#package-guides)
 2. [Packages and Sub-skills](#packages-and-sub-skills)
 3. [Package Structure](#package-structure)
@@ -84,6 +119,7 @@ uv run python run_tests.py
 5. [Safety and Execution Guidelines](#safety-and-execution-guidelines)
 
 ### Package Guides
+
 - [**Agent Red Team**](agent-red-team.md): security audit of skills, MCP servers and instruction folders, with quick scan and verified full audit.
 - [**Humanizador Anti-IA**](humanizador-anti-ia.md): detection and rewriting of AI writing patterns, with a 40-pattern catalog and a deterministic 0–100 score.
 - [**Replica**](replica.md): clean-room functional reconstruction by phases, with mandatory evidence, parity and rebrand.
@@ -98,6 +134,7 @@ uv run python run_tests.py
 - [**Skill Evals**](skill-evals.md): offline catalog evaluation with cases from real phrases, precision/recall/MRR gates, a reproducible report and description optimisation.
 
 ### Packages and Sub-skills
+
 **12 packages, 79 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
 
 | Package | Skills | Master | Sub-skills |
@@ -118,26 +155,57 @@ uv run python run_tests.py
 Each master picks the mode, sets boundaries and splits the work; `premium-web-designer` adds `premium-qa` to audit sites that already exist and `appsec-audit` splits the audit across recon, code, infrastructure, LLM, threats, dependencies, CI, remediation, report and scale, while `skill-evals` splits the loop across case design, run and report.
 
 ### Package Structure
+
 ```text
 package/
 ├── SKILL.md              # master: orchestrates, picks mode, sets limits
 ├── <sub-skill>/SKILL.md  # one per real usage block
-├── references/           # shared by every skill in the package
+├── references/           # shared — only when the package needs them
 ├── scripts/              # deterministic Python stdlib, offline
-├── templates/            # structured outputs
+├── templates/            # structured outputs — only when needed
 ├── tests/                # unittest, offline
 └── skills.json           # array with every skill in the package
 ```
 
-Sub-skills **do not duplicate assets**: they reference `../references/`, `../scripts/` and `../templates/`, so the whole folder is installed. Every `SKILL.md` carries `name` + `description` frontmatter for automatic activation.
+Sub-skills **do not duplicate assets**: they reference `../references/`, `../scripts/` and `../templates/`, so the whole folder is installed. `scripts/`, `tests/` and `skills.json` are present in every package; `references/` and `templates/` appear only when there is shared material worth splitting out. Every `SKILL.md` carries `name` + `description` frontmatter for automatic activation. Helpers shared inside a package live in `scripts/<package>_util.py`; there is no common module across packages, because each one is installed on its own.
 
 ### Tests
+
 ```bash
 uv sync
 uv run python run_tests.py
 ```
 
+### Severity and `--fail-on`
+
+The canonical `severity` scale is **`critical` → `high` → `medium` → `low`**, plus `info` where a tool distinguishes informational findings and `reject` in `agent-red-team` (a level that always blocks). Output never mixes languages; tools that read findings still accept the old variants (`critica`, `alta`, `media`, `baja`) as input aliases.
+
+`must`/`should`/`nice` is a different axis: the **gate**. It is called `severity_level` in `seo-auditor` and `gate` in `premium-web-designer`.
+
+`--fail-on` is not uniform because each tool can only break the pipeline with what it actually emits:
+
+| Values | Tools |
+|---|---|
+| `low \| medium \| high \| none` | `auth_coverage.py`, `env_check.py`, `terms_check.py`, `code_metrics.py`, `dead_code.py`, `llm_cost_scan.py`, `infra_cost_scan.py`, `ci_cost_scan.py`, `lock_audit.py` |
+| `low \| medium \| none` | `sql_lint.py` |
+| `medium \| none` | `query_trace.py` |
+| `medium \| high \| none` | `schema_audit.py` |
+| `info \| medium \| critical \| none` | `migration_guard.py` (`warning` is still accepted as an alias of `medium`) |
+| `high \| none` | `docs_drift.py` |
+| `low \| medium \| high \| critical \| none` | `normalize_sarif.py` |
+| `dead \| none` | `code_sync.py` |
+| `patch \| minor \| major \| none` | `contract_diff.py` |
+| `new \| none` | `diff_reports.py` |
+| `reachable \| none` | `sbom.py audit` |
+| `drift \| none` | `drift.py` |
+| `unsafe \| none` | `expand_contract.py` |
+| `guardrail \| none` | `cost_diff.py` |
+| `clone \| none` | `clone_detect.py` |
+| `cycle \| none` | `import_cycles.py` |
+| `hotspot \| none` | `hotspots.py` |
+
 ### Safety and Execution Guidelines
+
 1. All tools operate in read-only mode by default.
 2. No destructive commands or unauthorized outbound network requests are performed.
 3. Python 3.9+ standard library compatibility without `pip install`.
