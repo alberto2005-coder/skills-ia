@@ -8,6 +8,26 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-19 · Fase 1: el manifiesto como fuente única de la versión
+
+#### Añadido
+
+- **`tests/version_guard.py`:** guardia para PRs y pushes. Compara el manifiesto de cada paquete entre la base (`--base REV`, por defecto `HEAD~1`) y el árbol actual: si hay ficheros cambiados dentro del paquete y la `version` del manifiesto no sube, falla indicando el paquete, el número de ficheros y la versión que sigue vigente. `--bumped` imprime `<paquete> <versión>` de las subidas, que es lo que necesitarán los workflows de publicación.
+- **Seis tests** de la guardia en `tests/test_version_guard.py`, sobre repositorios git temporales: cambio sin subir, cambio con subida, cambios fuera de paquetes, subidas detectadas, paquete nuevo y versión no semver.
+- **Dos tests** en `tests/test_lint_frontmatter.py` para la coherencia de versiones: índice contra manifiesto y `metadata.version` contra manifiesto.
+- **CI:** el job de lint hace `fetch-depth: 0` y ejecuta `tests/version_guard.py --base`, con `github.event.pull_request.base.sha` o `github.event.before` según el evento.
+
+#### Cambiado
+
+- **`tests/lint_frontmatter.py`:** nueva comprobación `lint_versions`. El manifiesto de cada paquete es la fuente única: el índice raíz y el `metadata.version` de cada `SKILL.md` deben coincidir con él, y la versión debe ser `X.Y.Z`. Los avisos del índice ya no se sobrescriben al mezclarse con los de versión.
+- **`tests/sync_skill_metadata.py`:** toma la versión del manifiesto del paquete en lugar del índice raíz.
+- **`README.md` y `docs/index.md`:** documentan la guardia y su comando en la lista de puertas.
+
+#### Verificado
+
+- Los 12 paquetes ya coincidían en las tres copias, así que ninguna versión necesitó sincronizarse.
+- `run_tests.py` → **697 tests, 13/13 suites**; `pytest`; `ruff check .` limpio; `tests/lint_frontmatter.py` OK con 79 `SKILL.md`; `tests/metrics_gate.py` → 0 hallazgos `high` y 0 clones.
+
 ### - 2026-11-19 · Puertas de CI documentadas en el índice
 
 #### Cambiado
@@ -424,6 +444,26 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-19 · Phase 1: the manifest as the single source of the version
+
+#### Added
+
+- **`tests/version_guard.py`:** a guard for pull requests and pushes. It compares each package manifest between the base (`--base REV`, `HEAD~1` by default) and the current tree: if files inside the package changed and the manifest `version` did not go up, it fails with the package, the file count and the version that is still in place. `--bumped` prints `<package> <version>` for the bumps, which is what the publishing workflows will need.
+- **Six tests** for the guard in `tests/test_version_guard.py`, over temporary git repositories: change without a bump, change with a bump, changes outside packages, detected bumps, new package and non-semver version.
+- **Two tests** in `tests/test_lint_frontmatter.py` for version coherence: index against manifest and `metadata.version` against manifest.
+- **CI:** the lint job checks out with `fetch-depth: 0` and runs `tests/version_guard.py --base`, using `github.event.pull_request.base.sha` or `github.event.before` depending on the event.
+
+#### Changed
+
+- **`tests/lint_frontmatter.py`:** new `lint_versions` check. Each package manifest is the single source: the root index and every `SKILL.md` `metadata.version` must match it, and the version must be `X.Y.Z`. Index findings are no longer overwritten when merged with the version ones.
+- **`tests/sync_skill_metadata.py`:** reads the version from the package manifest instead of the root index.
+- **`README.md` and `docs/index.md`:** document the guard and its command in the gate list.
+
+#### Verified
+
+- All 12 packages were already aligned across the three copies, so no version had to be synced.
+- `run_tests.py` → **697 tests, 13/13 suites**; `pytest`; `ruff check .` clean; `tests/lint_frontmatter.py` OK with 79 `SKILL.md`; `tests/metrics_gate.py` → 0 `high` findings and 0 clones.
 
 ### - 2026-11-19 · CI gates documented in the index
 

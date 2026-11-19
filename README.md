@@ -218,7 +218,7 @@ Las guías completas de cada módulo se encuentran en la carpeta [`docs/`](docs/
 - **Python 3.9+** (utiliza únicamente la librería estándar de Python: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).
 - Los tests usan `unittest`; las herramientas de pruebas y calidad (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) están en el grupo `dev` de `pyproject.toml` y se gestionan con [`uv`](https://docs.astral.sh/uv/).
 - Para preparar el entorno `.venv` y ejecutar todos los tests desde la raíz: `uv sync` y `uv run python run_tests.py`.
-- GitHub Actions ejecuta todas las suites en cada `push` mediante `.github/workflows/tests.yml`, y además un gate de métricas (`tests/metrics_gate.py`) que falla si crecen los hallazgos `high` de `code_metrics` o los clones de `clone_detect`; el techo aceptado vive en `tests/metrics_baseline.json`.
+- GitHub Actions ejecuta todas las suites en cada `push` mediante `.github/workflows/tests.yml`, y además un gate de métricas (`tests/metrics_gate.py`) que falla si crecen los hallazgos `high` de `code_metrics` o los clones de `clone_detect`; el techo aceptado vive en `tests/metrics_baseline.json`. Una guardia de versiones (`tests/version_guard.py`) falla si cambia un paquete sin subir su `version` en el manifiesto.
 - Tests transversales en `tests/`: activación de las 79 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
 
 ### Licencia
@@ -438,7 +438,7 @@ Comprehensive module documentation is available in the [`docs/`](docs/) director
 - **Python 3.9+** (uses only standard library modules: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).
 - Tests use `unittest`; test and quality tools (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) are in the `dev` group in `pyproject.toml` and managed by [`uv`](https://docs.astral.sh/uv/).
 - Prepare `.venv` and run every test from the repository root with `uv sync` and `uv run python run_tests.py`.
-- GitHub Actions runs all suites on every `push` via `.github/workflows/tests.yml`, plus a metrics gate (`tests/metrics_gate.py`) that fails when `code_metrics` `high` findings or `clone_detect` clones grow; the accepted ceiling lives in `tests/metrics_baseline.json`.
+- GitHub Actions runs all suites on every `push` via `.github/workflows/tests.yml`, plus a metrics gate (`tests/metrics_gate.py`) that fails when `code_metrics` `high` findings or `clone_detect` clones grow; the accepted ceiling lives in `tests/metrics_baseline.json`. A version guard (`tests/version_guard.py`) fails when a package changes without bumping its `version` in the manifest.
 - Cross-cutting tests in `tests/`: activation for all 79 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
 
 ### License
