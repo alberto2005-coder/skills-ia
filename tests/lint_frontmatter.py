@@ -3,9 +3,9 @@
 Uso:
     py tests/lint_frontmatter.py [--json]
 
-Comprueba, sin dependencias:
+Comprueba, con el parser YAML del entorno (PyYAML, dependencia de desarrollo):
 
-1. Frontmatter de cada `SKILL.md` fuera de `tests/`: delimitadores, `name` en
+1. Frontmatter de cada `SKILL.md` fuera de `tests/`: YAML válido, `name` en
    minúsculas (máx. 64) e igual al nombre de su carpeta, `description` de 20 a
    1024 caracteres y cuerpo por debajo de 500 líneas.
 2. Cada entrada de los `skills.json` de paquete resuelve a un fichero con el
@@ -29,6 +29,8 @@ import re
 import sys
 from pathlib import Path
 
+import yaml
+
 ROOT = Path(__file__).resolve().parent.parent
 SKIP_PARTS = {"tests", "fixtures", "node_modules", "__pycache__", ".venv", ".git"}
 FRONTMATTER = re.compile(r"^---\r?\n(.*?)\r?\n---\r?\n", re.S)
@@ -49,30 +51,23 @@ def _force_utf8_output() -> None:
             reconfigure(encoding="utf-8", errors="replace")
 
 
-def frontmatter_fields(block: str) -> dict[str, str]:
-    fields: dict[str, str] = {}
-    lines = block.splitlines()
-    index = 0
-    while index < len(lines):
-        match = re.match(r"^(name|description):\s*(.*?)\s*$", lines[index])
-        if not match:
-            index += 1
-            continue
-        key, value = match.groups()
-        if key == "description" and value.startswith((">", "|")):
-            parts = []
-            index += 1
-            while index < len(lines):
-                line = lines[index]
-                if line.strip() and not line[0].isspace():
-                    break
-                parts.append(line.strip())
-                index += 1
-            fields[key] = " ".join(parts).strip()
-            continue
-        fields[key] = value.strip().strip('"').strip("'")
-        index += 1
-    return fields
+def parse_frontmatter(block: str) -> tuple[dict, list[str]]:
+    """Campos del bloque y, si el YAML no parsea, el problema en vez de un dict vacío.
+
+    Se valida con PyYAML a propósito: el parseo a mano aceptaba valores como
+    `description: texto. English: more text`, donde `: ` dentro de un escalar plano
+    hace que un parser real rechace el bloque entero.
+    """
+    try:
+        data = yaml.safe_load(block)
+    except yaml.YAMLError as error:
+        mark = getattr(error, "problem_mark", None)
+        where = f" en la línea {mark.line + 1} del bloque" if mark is not None else ""
+        problem = getattr(error, "problem", None) or "no se pudo parsear"
+        return {}, [f"frontmatter con YAML inválido{where}: {problem}"]
+    if not isinstance(data, dict):
+        return {}, ["el frontmatter debe ser un mapa YAML de pares clave: valor"]
+    return data, []
 
 
 def lint_file(path: Path) -> list[str]:
@@ -83,10 +78,10 @@ def lint_file(path: Path) -> list[str]:
     if not match:
         return ["sin bloque de frontmatter delimitado por ---"]
 
-    fields = frontmatter_fields(match.group(1))
-    name = fields.get("name", "")
-    if not name:
-        problems.append("falta «name»")
+    fields, problems = parse_frontmatter(match.group(1))
+    name = fields.get("name")
+    if not isinstance(name, str) or not name.strip():
+        problems.append("falta «name» o no es texto")
     else:
         if not NAME_PATTERN.match(name):
             problems.append(
@@ -97,12 +92,16 @@ def lint_file(path: Path) -> list[str]:
         if name != path.parent.name:
             problems.append(f"name «{name}» no coincide con la carpeta «{path.parent.name}»")
 
-    description = fields.get("description", "")
-    if not MIN_DESCRIPTION <= len(description) <= MAX_DESCRIPTION:
-        problems.append(
-            f"description de {len(description)} caracteres; debe estar entre "
-            f"{MIN_DESCRIPTION} y {MAX_DESCRIPTION}"
-        )
+    description = fields.get("description")
+    if not isinstance(description, str) or not description.strip():
+        problems.append("falta «description» o no es texto")
+    else:
+        length = len(description.strip())
+        if not MIN_DESCRIPTION <= length <= MAX_DESCRIPTION:
+            problems.append(
+                f"description de {length} caracteres; debe estar entre "
+                f"{MIN_DESCRIPTION} y {MAX_DESCRIPTION}"
+            )
 
     body_lines = len(text[match.end():].splitlines())
     if body_lines >= MAX_BODY_LINES:
