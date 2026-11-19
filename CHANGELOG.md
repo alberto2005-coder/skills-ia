@@ -8,6 +8,26 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-19 · Fase 2: empaquetado determinista y validado
+
+#### Añadido
+
+- **`scripts/build_package.py`:** construye `dist/<paquete>-<versión>.zip` con el paquete completo, un `manifest.json` en la raíz (versión, commit, skills y número de ficheros) y un `.sha256` en formato `sha256sum`. Entradas ordenadas, fecha fija de 1980 y permisos fijos: dos builds del mismo árbol dan el mismo hash. `--all` empaqueta los paquetes del índice y `--out` cambia el destino.
+- **Validación obligatoria:** el zip se descomprime en un temporal y se le pasa `tests/lint_frontmatter.py`; si el lint falla, el script borra el zip y el checksum y sale con error.
+- **Exclusiones y rechazo de binarios:** fuera `tests/`, `__pycache__`, `.ruff_cache`, `.pytest_cache`, `.venv`, `output/` y `reports/`; cualquier fichero con NUL o UTF-8 inválido aborta el empaquetado.
+- **`Makefile`:** `make dist` (todos) y `make dist PACKAGE=<paquete>` (uno), más `make clean-dist`.
+- **Ocho tests** en `tests/test_build_package.py`: determinismo byte a byte, `manifest.json` interno, checksum, exclusiones, binario por extensión conocida, binario con extensión inocente, paquete que no pasa el lint sin dejar artefacto y `--all`.
+
+#### Cambiado
+
+- **`.gitignore`:** `/dist/` fuera del control de versiones.
+- **`docs/index.md`:** sección «Empaquetado» con el flujo y lo que valida.
+
+#### Verificado
+
+- Los 12 paquetes se empaquetan y pasan el lint extraído; dos builds completos dan hashes idénticos.
+- `run_tests.py` → **705 tests, 13/13 suites**; `pytest`; `ruff check .` limpio; `tests/metrics_gate.py` → 0 hallazgos `high` y 0 clones.
+
 ### - 2026-11-19 · Fase 1: el manifiesto como fuente única de la versión
 
 #### Añadido
@@ -444,6 +464,26 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-19 · Phase 2: deterministic, validated packaging
+
+#### Added
+
+- **`scripts/build_package.py`:** builds `dist/<package>-<version>.zip` with the whole package, a root `manifest.json` (version, commit, skills and file count) and a `.sha256` file in `sha256sum` format. Sorted entries, a fixed 1980 timestamp and fixed permissions make two builds of the same tree hash identically. `--all` packages every package in the index and `--out` changes the destination.
+- **Mandatory validation:** the archive is unpacked into a temporary directory and `tests/lint_frontmatter.py` runs on it; on failure the script deletes the zip and the checksum and exits with an error.
+- **Exclusions and binary rejection:** `tests/`, `__pycache__`, `.ruff_cache`, `.pytest_cache`, `.venv`, `output/` and `reports/` stay out; any file with NUL bytes or invalid UTF-8 aborts the build.
+- **`Makefile`:** `make dist` (all) and `make dist PACKAGE=<package>` (one), plus `make clean-dist`.
+- **Eight tests** in `tests/test_build_package.py`: byte-for-byte determinism, inner `manifest.json`, checksum, exclusions, binary with a known suffix, binary with an innocent suffix, package failing the lint with no artifact left, and `--all`.
+
+#### Changed
+
+- **`.gitignore`:** `/dist/` is no longer versioned.
+- **`docs/index.md`:** new "Packaging" section with the flow and what it validates.
+
+#### Verified
+
+- All 12 packages build and pass the extracted lint; two full builds produce identical hashes.
+- `run_tests.py` → **705 tests, 13/13 suites**; `pytest`; `ruff check .` clean; `tests/metrics_gate.py` → 0 `high` findings and 0 clones.
 
 ### - 2026-11-19 · Phase 1: the manifest as the single source of the version
 

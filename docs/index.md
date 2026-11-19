@@ -79,6 +79,15 @@ uv run python tests/metrics_gate.py
 
 `tests/lint_frontmatter.py` valida el bloque de cada `SKILL.md` con un parser YAML real (PyYAML, del grupo `dev`), además de `name`, `description`, manifiestos, enlaces relativos e índice. La versión de cada paquete sale de su manifiesto y `tests/version_guard.py` falla si un paquete cambia sin subirla, comparando contra el commit anterior. `tests/metrics_gate.py` falla si crecen los hallazgos `high` o los clones respecto al techo de `tests/metrics_baseline.json`. GitHub Actions ejecuta las puertas de lint en Python 3.14 y las suites en la matriz 3.9/3.14 sobre Linux, macOS y Windows; `markdownlint-cli2` es una comprobación local opcional.
 
+### Empaquetado
+
+```bash
+make dist                 # todos los paquetes
+make dist PACKAGE=replica # uno solo
+```
+
+`scripts/build_package.py` genera `dist/<paquete>-<version>.zip` con el paquete completo y un `manifest.json` en la raíz (versión, commit y skills incluidas), más un `.sha256` con formato `sha256sum`. Las entradas van ordenadas y con fecha fija, así que dos builds del mismo árbol dan el mismo hash. Excluye `tests/`, `__pycache__`, `.ruff_cache`, `.venv` y las salidas de auditoría, y rechaza cualquier fichero que no sea texto UTF-8. Antes de dar el zip por bueno lo descomprime en un temporal y le pasa `tests/lint_frontmatter.py`; si falla, borra el artefacto y sale con error.
+
 ### Severidad y `--fail-on`
 
 La escala canónica de `severity` es **`critical` → `high` → `medium` → `low`**, más `info` donde la herramienta distingue informativo y `reject` en `agent-red-team` (un nivel que bloquea siempre). La salida no mezcla idiomas; las herramientas que leen hallazgos siguen aceptando las variantes antiguas (`critica`, `alta`, `media`, `baja`) como alias de entrada.
@@ -189,6 +198,15 @@ uv run python tests/metrics_gate.py
 ```
 
 `tests/lint_frontmatter.py` validates every `SKILL.md` block with a real YAML parser (PyYAML, from the `dev` group), plus `name`, `description`, manifests, relative links and the index. Each package version comes from its manifest, and `tests/version_guard.py` fails when a package changes without bumping it, comparing against the previous commit. `tests/metrics_gate.py` fails when `high` findings or clones grow past the ceiling in `tests/metrics_baseline.json`. GitHub Actions runs the lint gates on Python 3.14 and the suites on the 3.9/3.14 matrix across Linux, macOS and Windows; `markdownlint-cli2` is an optional local check.
+
+### Packaging
+
+```bash
+make dist                 # every package
+make dist PACKAGE=replica # a single one
+```
+
+`scripts/build_package.py` writes `dist/<package>-<version>.zip` with the whole package and a root `manifest.json` (version, commit and included skills), plus a `.sha256` file in `sha256sum` format. Entries are sorted and carry a fixed timestamp, so two builds of the same tree produce the same hash. It leaves out `tests/`, `__pycache__`, `.ruff_cache`, `.venv` and audit outputs, and rejects any file that is not UTF-8 text. Before accepting the archive it unpacks it into a temporary directory and runs `tests/lint_frontmatter.py`; on failure it deletes the artifact and exits with an error.
 
 ### Severity and `--fail-on`
 
