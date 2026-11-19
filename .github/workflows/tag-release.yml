@@ -61,7 +61,7 @@ jobs:
             packages='[{"package":"-","version":"0.0.0","tag":"-"}]'
           fi
           echo "packages=$packages" >> "$GITHUB_OUTPUT"
-          echo "bundle=$(jq -r '.bundle.tag // ""' release-plan.json)" >> "$GITHUB_OUTPUT"
+          echo "bundle=$(jq -r '.bundle.version // ""' release-plan.json)" >> "$GITHUB_OUTPUT"
           if [ "$HAS_TOKEN" = "true" ]; then
             echo "direct=false" >> "$GITHUB_OUTPUT"
           else

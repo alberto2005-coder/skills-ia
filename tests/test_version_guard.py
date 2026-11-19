@@ -118,6 +118,7 @@ class VersionGuardTests(unittest.TestCase):
 
         self.assertEqual(plan["packages"], [])
         self.assertEqual(plan["bundle"], {"version": "5.1.0", "tag": "bundle-v5.1.0"})
+        self.assertNotIn("bundle-v", plan["bundle"]["version"])  # el tag se construye una vez
 
     def test_release_plan_is_empty_without_changes(self):
         self.commit_change("docs/guia.md", "# Guia\n")
