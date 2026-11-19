@@ -10,6 +10,7 @@
 ## Español
 
 ### Índice
+
 1. Propósito
 2. Modos
 3. Arquitectura
@@ -20,9 +21,11 @@
 8. Límites
 
 ### Propósito
+
 `skill-evals` responde a una pregunta que ningún `SKILL.md` puede contestar solo: cuando alguien escribe «revisa el seo de esta web», ¿se activa la skill correcta y ninguna de sus hermanas? Lo mide sin modelo ni red: un router léxico puntúa la frase contra las descripciones del catálogo, se compara con la verdad declarada en `tests/phrases.json` y el resultado se contrasta con puertas numéricas que rompen CI.
 
 ### Modos
+
 El maestro no usa flags: el alcance de la petición fija las fases.
 
 | Modo | Fases | Entrega |
@@ -33,6 +36,7 @@ El maestro no usa flags: el alcance de la petición fija las fases.
 | **Optimización** | `eval-run` + `eval-design` | Descripción propuesta, sin aplicarla salvo `--apply` |
 
 ### Arquitectura
+
 Un maestro y tres sub-skills con scripts compartidos. Se instala la carpeta completa.
 
 | Sub-skill | Qué hace |
@@ -45,6 +49,7 @@ Un maestro y tres sub-skills con scripts compartidos. Se instala la carpeta comp
 La librería común es [`evalkit.py`](../skill-evals/scripts/evalkit.py): rutas de casos, carga del router, métricas y formato de la corrida. Las referencias viven en [`metrics.md`](../skill-evals/references/metrics.md) y [`competitors.md`](../skill-evals/references/competitors.md), y las plantillas en [`eval-cases.json`](../skill-evals/templates/eval-cases.json) y [`report.md`](../skill-evals/templates/report.md).
 
 ### Métricas y puertas
+
 Cada caso declara su tipo (`positive`, `negative`, `boundary`, `out_of_domain`) y su split (`train`, `test`). Sobre esa verdad se calculan tres métricas y tres topes:
 
 | Concepto | Valor por defecto |
@@ -81,7 +86,9 @@ escrito: skill-evals/reports/cases.json
 Códigos de salida: `0` correcto o por encima de las puertas · `1` puerta superada o regresión · `2` fichero ilegible.
 
 ### Instalación y uso
+
 Copia la carpeta `skill-evals/` completa. Ejemplos de petición:
+
 - «Diseña los casos de evaluación del catálogo de skills».
 - «Mide precisión, recall y MRR y dime qué skills fallan».
 - «Genera el informe de evaluación en HTML».
@@ -96,6 +103,7 @@ uv run python -m unittest discover -s skill-evals/tests -t skill-evals/tests
 42 pruebas: diseño de casos desde `phrases.json` y validación con `--check`, métricas y puertas de `run.py`, comparación con línea base y regresiones, colisiones y presupuesto de contexto, informe Markdown y HTML byte a byte, optimizador sin escritura y con `--apply`, y estructura del paquete (frontmatter, manifiesto, gates y handoff).
 
 ### Límites
+
 El router es léxico: mide solapamiento de vocabulario con la descripción, no comprensión semántica, así que una paráfrasis muy alejada del texto puede fallar sin que la skill esté mal escrita. La calidad depende de `tests/phrases.json`: frases sesgadas producen métricas optimistas, y las frases se escribieron después de ver las descripciones, no a ciegas. No evalúa la calidad de la respuesta de la skill, solo su activación. Todo es offline y determinista: sin modelo, sin red y sin reloj, de modo que dos corridas con los mismos datos coinciden byte a byte.
 
 ---
@@ -103,6 +111,7 @@ El router es léxico: mide solapamiento de vocabulario con la descripción, no c
 ## English
 
 ### Index
+
 1. Purpose
 2. Modes
 3. Architecture
@@ -113,9 +122,11 @@ El router es léxico: mide solapamiento de vocabulario con la descripción, no c
 8. Limits
 
 ### Purpose
+
 `skill-evals` answers a question no `SKILL.md` can answer on its own: when someone types "audit the SEO of this site", does the right skill activate and none of its siblings? It measures that with no model and no network: a lexical router scores the phrase against the catalog descriptions, the result is compared with the truth declared in `tests/phrases.json`, and the outcome is checked against numeric gates that fail CI.
 
 ### Modes
+
 The master takes no flags: the request's scope sets the phases.
 
 | Mode | Phases | Deliverable |
@@ -126,6 +137,7 @@ The master takes no flags: the request's scope sets the phases.
 | **Optimisation** | `eval-run` + `eval-design` | Proposed description, not written unless `--apply` |
 
 ### Architecture
+
 One master and three sub-skills with shared scripts. The whole folder is installed.
 
 | Sub-skill | What it does |
@@ -138,6 +150,7 @@ One master and three sub-skills with shared scripts. The whole folder is install
 The shared library is [`evalkit.py`](../skill-evals/scripts/evalkit.py): case paths, router loading, metrics and run format. References live in [`metrics.md`](../skill-evals/references/metrics.md) and [`competitors.md`](../skill-evals/references/competitors.md), templates in [`eval-cases.json`](../skill-evals/templates/eval-cases.json) and [`report.md`](../skill-evals/templates/report.md).
 
 ### Metrics and gates
+
 Every case declares its kind (`positive`, `negative`, `boundary`, `out_of_domain`) and its split (`train`, `test`). Three metrics and three caps are computed over that truth:
 
 | Concept | Default value |
@@ -174,7 +187,9 @@ escrito: skill-evals/reports/cases.json
 Exit codes: `0` correct or above the gates · `1` gate failed or regression · `2` unreadable file.
 
 ### Install and use
+
 Copy the whole `skill-evals/` folder. Example requests:
+
 - "Design the evaluation cases for the skill catalog".
 - "Measure precision, recall and MRR and tell me which skills fail".
 - "Generate the evaluation report as HTML".
@@ -189,4 +204,5 @@ uv run python -m unittest discover -s skill-evals/tests -t skill-evals/tests
 42 tests: case design from `phrases.json` and `--check` validation, `run.py` metrics and gates, baseline comparison and regressions, collisions and context budget, byte-identical Markdown and HTML reports, the optimiser with and without `--apply`, and package structure (frontmatter, manifest, gates and handoff).
 
 ### Limits
+
 The router is lexical: it measures vocabulary overlap with the description, not semantic understanding, so a paraphrase far from the text can fail without the skill being wrong. Quality depends on `tests/phrases.json`: biased phrases produce optimistic metrics, and the phrases were written after seeing the descriptions, not blind. It does not evaluate the quality of a skill's answer, only its activation. Everything is offline and deterministic: no model, no network and no clock, so two runs over the same data match byte for byte.

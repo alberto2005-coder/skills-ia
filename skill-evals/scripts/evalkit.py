@@ -160,9 +160,18 @@ def validate_cases(document: dict, known_skills: set[str]) -> list[str]:
 def _evaluate_case(router, case: dict, threshold: float) -> dict:
     prompt = case["prompt"]
     ranking = router.ranking(prompt)[:TOP_K]
-    best, best_score = ranking[0]
     expect = case.get("expect")
     forbid = case.get("forbid")
+    if not ranking:
+        # Sin candidatos (router vacío o prompt degenerado) `ranking[0]`
+        # lanzaba IndexError en vez de marcar el caso como fallido.
+        return {
+            "id": case["id"], "prompt": prompt, "kind": case["kind"],
+            "split": case.get("split", "train"), "expect": expect,
+            "forbid": forbid, "best": "", "score": 0.0, "rank": 0,
+            "sibling": None, "passed": False, "ranking": [],
+        }
+    best, best_score = ranking[0]
 
     if expect is None:
         passed = best_score < threshold

@@ -54,10 +54,13 @@ nunca por train. Elegir por train es sobreajustar el conjunto que ya se vio.
 - **Léxico, no semántico**: «borra el historial» y «elimina el registro» no
   comparten raíz y el router no las relaciona. Un falso negativo puede ser del
   router, no de la descripción.
+
 - **Vocabulario del repositorio**: los casos salen de `phrases.json`, escritas
   por quien conoce las skills. Un usuario real puede formular distinto; el
   conjunto mide lo que mide, no la distribución real de consultas.
+
 - **Umbral único**: 0,3 funciona para este corpus; con descripciones muy cortas
   o muy largas el mismo número cambia de significado.
+
 - **Sin varianza**: al ser determinista no hay pass@k; una repetición da el
   mismo resultado y no aporta información.

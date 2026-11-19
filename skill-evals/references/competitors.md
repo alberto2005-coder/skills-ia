@@ -39,12 +39,15 @@ de agentes más citadas. La columna «Aquí» dice qué script o sub-skill lo cu
 
 1. **Un solo router.** Reimplementar el scoring habría permitido números más
    bonitos y desconectados de CI. Se importa `tests/trigger_router.py` tal cual.
+
 2. **Sin modelo.** Un juez LLM añade coste, no determinismo y una dependencia de
    red que el repositorio no acepta. La evaluación léxica detecta los dos fallos
    que dominan el routing real: vocabulario ausente (falso negativo) y
    descripción demasiado ancha (falso positivo).
+
 3. **Casos, no prompts sueltos.** Un caso sin `expect` no distingue «no debe
    activarse» de «no se activa nada»; de ahí `expect: null` y `forbid`.
+
 4. **El informe no decide.** El veredicto lo pone `run.py`; `report.py` solo lo
    presenta. Así el HTML no puede contradecir al código de salida.
 
@@ -52,8 +55,10 @@ de agentes más citadas. La columna «Aquí» dice qué script o sub-skill lo cu
 
 - Sandbox con Docker y agente real (SkillEvaluator, plugin evals): requiere
   modelo, red y ejecución de código; este repositorio es de solo lectura.
+
 - Embeddings para deduplicación semántica: exige modelo; aquí Jaccard léxico.
 - pass@k y repeticiones: sin modelo no hay varianza que medir; el router es
   determinista por diseño.
+
 - Optimización automática con hill climbing multi-ronda: se sustituye por
   diagnóstico + propuesta + verificación, que deja el cambio auditable en diff.

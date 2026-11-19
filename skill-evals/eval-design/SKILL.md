@@ -63,9 +63,11 @@ descripción, no en el caso. `optimize.py` cierra el ciclo sin modelo:
 
 1. extrae los términos que usan las frases **de train** que fallan y la
    descripción no contiene;
+
 2. propone candidatos que los añaden (varias tallas, orden determinista);
 3. evalúa cada candidato en train y descarta el que no mejora ni el que añade
    colisiones;
+
 4. elige el ganador por **test**, nunca por train;
 5. emite el diff unificado y la mejora de precisión/recall antes y después.
 

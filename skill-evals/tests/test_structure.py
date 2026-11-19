@@ -2,7 +2,7 @@ import json
 import re
 import unittest
 
-from config import (
+from evals_config import (
     MASTER_MAX_COMMANDS,
     MASTER_MAX_LINES,
     REQUIRED_FILES,
