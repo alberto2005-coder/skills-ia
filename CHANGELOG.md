@@ -8,6 +8,22 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · Auditoría de documentación en CI y campos del frontmatter
+
+#### Añadido
+
+- **`tests/audit_docs.py`:** contrasta la documentación con el repo — rutas citadas, flags documentadas contra el `argparse` de cada paquete, tablas de paquetes del `README` y del índice, cabeceras «maestro + N», recuentos de skills y de tests por guía, y anclas internas. Sale con código 1 si algo no cuadra y se ejecuta en el job de lint.
+- **`tests/test_audit_docs.py`:** once tests sobre un repo de mentira (ruta que falta, ruta relativa al paquete, flag desconocida, tabla con recuento viejo, cabecera, recuento de skills, ancla, slug de GitHub y raíz inválida).
+- **Los campos del frontmatter, documentados** en la sección de estructura del `README` y del índice (ES/EN): `name` y `description` son obligatorios, más los portables `license`, `allowed-tools`, `compatibility` y `metadata`; aquí `metadata` lleva `package`, `version` y `author`, y las skills de solo lectura declaran `allowed-tools`.
+
+#### Corregido
+
+- **`docs/replica.md` presentaba `replica/progreso.md` como ruta del repo** cuando es el estado que el pipeline escribe en el proyecto que reconstruye; la frase ahora lo dice así.
+
+#### Notas
+
+- La primera pasada del auditor encontró un fallo suyo: la expresión de las flags ignoraba las que van entre acentos graves, que son casi todas. Corregido y cubierto con un test que declara una flag inexistente.
+
 ### - 2026-11-20 · Corregidos dos desfases en la documentación
 
 #### Corregido
@@ -636,6 +652,22 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · Documentation audit in CI and documented frontmatter fields
+
+#### Added
+
+- **`tests/audit_docs.py`:** checks the documentation against the repo — cited paths, documented flags against each package's `argparse`, package tables in the `README` and the index, “master + N” headings, per-guide skill and test counts, and internal anchors. It exits 1 on drift and runs in the lint job.
+- **`tests/test_audit_docs.py`:** eleven tests over a throwaway repo (missing path, package-relative path, unknown flag, stale table count, heading, skill count, anchor, GitHub slug and invalid root).
+- **Frontmatter fields documented** in the structure section of the `README` and the index (ES/EN): `name` and `description` are required, plus the portable `license`, `allowed-tools`, `compatibility` and `metadata`; here `metadata` holds `package`, `version` and `author`, and read-only skills declare `allowed-tools`.
+
+#### Fixed
+
+- **`docs/replica.md` presented `replica/progreso.md` as a repo path** when it is the state the pipeline writes into the project it rebuilds; the sentence now says so.
+
+#### Notes
+
+- The auditor's first pass caught a bug of its own: the flag pattern skipped the ones inside backticks, which is nearly all of them. Fixed and covered by a test that declares a flag which does not exist.
 
 ### - 2026-11-20 · Fixed two documentation drifts
 
