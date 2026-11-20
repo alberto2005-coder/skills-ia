@@ -90,11 +90,21 @@ make dist PACKAGE=replica # uno solo
 
 ### Publicación
 
+Publicar es subir la versión, commitear y hacer push; el resto lo hace el workflow.
+
+```bash
+uv run --locked python scripts/bump_version.py db-architect 2.1.1  # 1. sube la versión en los cuatro sitios
+git add -A && git commit -m "feat(db-architect): ..."             # 2. commit
+git push origin main                                              # 3. push
+```
+
+`scripts/bump_version.py` mueve a la vez el manifiesto del paquete, el `metadata.version` de sus `SKILL.md`, la entrada del índice raíz y el plugin del marketplace; además sube el índice raíz un parche (la versión del bundle) salvo que se pase `--no-bundle`. Con `--dry-run` enseña los ficheros que tocaría sin escribir nada, y rechaza una versión que no sea `X.Y.Z` o que no sea mayor que la actual. Tocar un paquete sin subir su versión rompe `tests/version_guard.py`, así que este comando es el camino normal.
+
 En cada push a `main`, `tag-release.yml` compara el índice y los manifiestos con el commit anterior (`github.event.before`) y crea un tag `<paquete>-v<version>` por cada subida y `bundle-v<version>` si cambió la versión del índice raíz. Los tags son idempotentes: si ya existen, no se reescriben.
 
-`release-package.yml` (tags `<paquete>-v*`) empaqueta y valida ese paquete, genera las notas con `docs-sync-engine/scripts/changelog_gen.py` a partir de los commits que tocaron su carpeta y publica el zip y el `SHA256SUMS`. `release-bundle.yml` (tags `bundle-v*`) hace lo mismo con todos los paquetes y añade `skills.json`. Ambos tienen `permissions: contents: write`, `concurrency` por tag y son idempotentes (`gh release upload --clobber`).
+`release-package.yml` (tags `<paquete>-v*`) empaqueta y valida ese paquete, genera las notas en español e inglés con `scripts/release_notes.py` a partir de los commits que tocaron su carpeta y publica el zip y el `SHA256SUMS`. `release-bundle.yml` (tags `bundle-v*`) hace lo mismo con todos los paquetes y añade `skills.json`. Ambos tienen `permissions: contents: write`, `concurrency` por tag y son idempotentes (`gh release upload --clobber`).
 
-Los tags creados con `GITHUB_TOKEN` no disparan otros workflows. Si existe el secreto `RELEASE_TOKEN` (PAT o token de GitHub App) se usa para empujarlos y el `push: tags` dispara la publicación; si no, `tag-release.yml` llama directamente a los workflows reutilizables y avisa con un `::warning::`. Los dos workflows de release también admiten `workflow_dispatch` con `package`, `version` y `tag`.
+Los tags creados con `GITHUB_TOKEN` no disparan otros workflows. Si existe el secreto `RELEASE_TOKEN` (PAT o token de GitHub App) se usa para empujarlos y el `push: tags` dispara la publicación; si no, `tag-release.yml` llama directamente a los workflows reutilizables y avisa con un `::warning::`. Los dos workflows de release también admiten `workflow_dispatch` con `package`, `version` y `tag`. `tag-release.yml` añade el suyo con `base`: es la vía de recuperación cuando un run falla a medias, porque el `before` del siguiente push ya no vería esos bumps. Salta lo que ya está publicado, reintenta cada tag tres veces y termina con la lista de lo que quedó pendiente, así que relanzarlo basta para completar la publicación.
 
 ### Severidad y `--fail-on`
 
@@ -218,11 +228,21 @@ make dist PACKAGE=replica # a single one
 
 ### Publishing
 
+Publishing is bumping the version, committing and pushing; the workflow does the rest.
+
+```bash
+uv run --locked python scripts/bump_version.py db-architect 2.1.1  # 1. bump the version in all four places
+git add -A && git commit -m "feat(db-architect): ..."             # 2. commit
+git push origin main                                              # 3. push
+```
+
+`scripts/bump_version.py` moves the package manifest, the `metadata.version` of its `SKILL.md` files, the root index entry and the marketplace plugin together; it also raises the root index by a patch (the bundle version) unless `--no-bundle` is passed. `--dry-run` lists the files it would touch without writing anything, and it rejects a version that is not `X.Y.Z` or not greater than the current one. Changing a package without bumping its version breaks `tests/version_guard.py`, so this is the normal path.
+
 On every push to `main`, `tag-release.yml` compares the index and the manifests against the previous commit (`github.event.before`) and creates one `<package>-v<version>` tag per bump plus `bundle-v<version>` when the root index version changed. Tags are idempotent: existing ones are never rewritten.
 
-`release-package.yml` (tags `<package>-v*`) packages and validates that package, builds the notes with `docs-sync-engine/scripts/changelog_gen.py` from the commits that touched its folder, and publishes the zip plus `SHA256SUMS`. `release-bundle.yml` (tags `bundle-v*`) does the same for every package and adds `skills.json`. Both use `permissions: contents: write`, per-tag `concurrency` and are idempotent (`gh release upload --clobber`).
+`release-package.yml` (tags `<package>-v*`) packages and validates that package, builds bilingual notes with `scripts/release_notes.py` from the commits that touched its folder, and publishes the zip plus `SHA256SUMS`. `release-bundle.yml` (tags `bundle-v*`) does the same for every package and adds `skills.json`. Both use `permissions: contents: write`, per-tag `concurrency` and are idempotent (`gh release upload --clobber`).
 
-Tags pushed with `GITHUB_TOKEN` do not trigger other workflows. When the `RELEASE_TOKEN` secret exists (PAT or GitHub App token) it is used to push them and `push: tags` triggers publishing; otherwise `tag-release.yml` calls the reusable workflows directly and prints a `::warning::`. Both release workflows also accept `workflow_dispatch` with `package`, `version` and `tag`.
+Tags pushed with `GITHUB_TOKEN` do not trigger other workflows. When the `RELEASE_TOKEN` secret exists (PAT or GitHub App token) it is used to push them and `push: tags` triggers publishing; otherwise `tag-release.yml` calls the reusable workflows directly and prints a `::warning::`. Both release workflows also accept `workflow_dispatch` with `package`, `version` and `tag`. `tag-release.yml` has its own with `base`: that is the recovery path when a run fails halfway, since the next push's `before` would no longer see those bumps. It skips what is already published, retries each tag three times and ends with the list of what stayed pending, so relaunching it is enough to finish the job.
 
 ### Severity and `--fail-on`
 
