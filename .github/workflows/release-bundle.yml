@@ -79,8 +79,8 @@ jobs:
           previous=$(git tag --list "bundle-v*" --sort=-v:refname | grep -vx "$TAG" | head -n1 || true)
           if [ -n "$previous" ]; then range="${previous}..HEAD"; else range="HEAD"; fi
           git log --no-merges --pretty=%s "$range" > commits.txt
-          uv run --locked python docs-sync-engine/scripts/changelog_gen.py \
-            --input commits.txt --version "$VERSION" --out notes.md
+          uv run --locked python scripts/release_notes.py \
+            --input commits.txt --version "$VERSION" --bundle --out notes.md
           cat notes.md
 
       - name: Publish the release

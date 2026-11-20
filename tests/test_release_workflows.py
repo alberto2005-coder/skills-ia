@@ -119,6 +119,14 @@ class TagReleaseContractTests(unittest.TestCase):
         self.assertIn("sleep $((attempt * 5))", script)
         self.assertIn("git ls-remote --exit-code --tags origin", script)
         self.assertIn("quedaron sin publicar", script)
+    def test_releases_use_the_bilingual_notes(self):
+        # La descripción de la release va en español e inglés.
+        for name in ("release-package.yml", "release-bundle.yml"):
+            with self.subTest(workflow=name):
+                text = (WORKFLOWS / name).read_text(encoding="utf-8")
+
+                self.assertIn("scripts/release_notes.py", text)
+                self.assertNotIn("changelog_gen.py", text)
 
 if __name__ == "__main__":
     unittest.main()
