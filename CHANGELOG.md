@@ -8,6 +8,21 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · Corregido: los tags no se creaban (runner sin identidad de git)
+
+#### Corregido
+
+- **`tag-release.yml` moría en el primer tag:** el runner de Actions no trae `user.name` ni `user.email` y `git tag -a` exige ambos, así que el paso `Create and push tags idempotently` fallaba con `empty ident name` y el push a `main` no publicaba nada. El paso configura ahora la identidad de `github-actions[bot]` antes de etiquetar.
+
+#### Añadido
+
+- **Disparo manual con base explícita (`workflow_dispatch` + input `base`):** cuando un run falla no quedan cambios nuevos que empujar, y el `before` del siguiente push ya no ve los bumps de versión, así que el plan saldría vacío. Lanzado a mano con el SHA anterior se recuperan los tags pendientes; el plan se niega a correr si la base llega vacía.
+- **Dos tests de contrato en `tests/test_release_workflows.py`:** fallan si el paso de tags pierde la identidad de git o si el disparo manual deja de aceptar la base.
+
+#### Verificado
+
+- `actionlint` 1.7.12 sobre los cuatro workflows: 0 errores. `pytest tests/test_release_workflows.py`: 9 tests en verde.
+
 ### - 2026-11-20 · Autor en todos los manifiestos de skill
 
 #### Añadido
@@ -545,6 +560,21 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · Fixed: no tags were created (runner without a git identity)
+
+#### Fixed
+
+- **`tag-release.yml` died on the first tag:** the Actions runner ships no `user.name`/`user.email` and `git tag -a` requires both, so `Create and push tags idempotently` failed with `empty ident name` and the push to `main` published nothing. The step now sets the `github-actions[bot]` identity before tagging.
+
+#### Added
+
+- **Manual run with an explicit base (`workflow_dispatch` + `base` input):** once a run fails there are no new commits to push, and the next push's `before` no longer sees the version bumps, so the plan would come out empty. Dispatching by hand with the previous SHA recovers the pending tags; the plan refuses to run on an empty base.
+- **Two contract tests in `tests/test_release_workflows.py`:** they fail if the tag step drops the git identity or if the manual run stops accepting the base.
+
+#### Verified
+
+- `actionlint` 1.7.12 over the four workflows: 0 errors. `pytest tests/test_release_workflows.py`: 9 tests green.
 
 ### - 2026-11-20 · Author in every skill manifest
 
