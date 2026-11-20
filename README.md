@@ -206,14 +206,14 @@ Instala la carpeta del paquete en la ruta del agente que elijas. No instales una
 **3. Descarga del release**, verificada con su checksum
 
 ```bash
-curl -LO https://github.com/alberto2005-coder/skills-ia/releases/latest/download/db-architect-2.1.0.zip
-curl -LO https://github.com/alberto2005-coder/skills-ia/releases/latest/download/SHA256SUMS
+curl -LO https://github.com/alberto2005-coder/skills-ia/releases/download/db-architect-v2.1.0/db-architect-2.1.0.zip
+curl -LO https://github.com/alberto2005-coder/skills-ia/releases/download/db-architect-v2.1.0/SHA256SUMS
 sha256sum -c SHA256SUMS --ignore-missing
 unzip db-architect-2.1.0.zip -d ~/.claude/skills
 rm ~/.claude/skills/manifest.json
 ```
 
-El zip trae `manifest.json` (paquete, versión, commit y skills) y un prefijo con el nombre del paquete; el `manifest.json` es solo para verificar, no se instala. El bundle `bundle-v<versión>` publica los 12 paquetes, el `SHA256SUMS` global y el índice `skills.json`.
+El zip trae `manifest.json` (paquete, versión, commit y skills) y un prefijo con el nombre del paquete; el `manifest.json` es solo para verificar, no se instala. La versión de los comandos es un ejemplo: sustituye `2.1.0` por la que declare [`db-architect/skills.json`](db-architect/skills.json). El bundle `bundle-v<versión>` publica los 12 paquetes, el `SHA256SUMS` global y el índice `skills.json`.
 
 **Requisito:** Python 3.9+ en el agente que ejecute los `scripts/`. Los `SKILL.md` no necesitan nada.
 
@@ -463,14 +463,14 @@ It installs the package folder into the route of the agent you pick. Do not inst
 **3. Release download**, verified against its checksum
 
 ```bash
-curl -LO https://github.com/alberto2005-coder/skills-ia/releases/latest/download/db-architect-2.1.0.zip
-curl -LO https://github.com/alberto2005-coder/skills-ia/releases/latest/download/SHA256SUMS
+curl -LO https://github.com/alberto2005-coder/skills-ia/releases/download/db-architect-v2.1.0/db-architect-2.1.0.zip
+curl -LO https://github.com/alberto2005-coder/skills-ia/releases/download/db-architect-v2.1.0/SHA256SUMS
 sha256sum -c SHA256SUMS --ignore-missing
 unzip db-architect-2.1.0.zip -d ~/.claude/skills
 rm ~/.claude/skills/manifest.json
 ```
 
-The zip carries a `manifest.json` (package, version, commit and skills) and a prefix with the package name; `manifest.json` is only for verification, do not install it. The `bundle-v<version>` release publishes all 12 packages, the global `SHA256SUMS` and the `skills.json` index.
+The zip carries a `manifest.json` (package, version, commit and skills) and a prefix with the package name; `manifest.json` is only for verification, do not install it. The version in the commands is an example: replace `2.1.0` with the one declared in [`db-architect/skills.json`](db-architect/skills.json). The `bundle-v<version>` release publishes all 12 packages, the global `SHA256SUMS` and the `skills.json` index.
 
 **Requirement:** Python 3.9+ in the agent that runs the `scripts/`. The `SKILL.md` files need nothing.
 
