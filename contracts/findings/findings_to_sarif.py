@@ -72,7 +72,11 @@ def location_block(finding: dict, base: object = None) -> dict:
     kind = location.get("type")
     target = str(location.get("target") or "")
     if kind == "url":
-        return {"locations": [{"physicalLocation": {"artifactLocation": {"uri": target}}}]}
+        # `GET /users/{id}` no es una URI válida: un endpoint sin esquema va a
+        # `logicalLocations` en vez de a `artifactLocation.uri`.
+        if target.startswith(("http://", "https://")):
+            return {"locations": [{"physicalLocation": {"artifactLocation": {"uri": target}}}]}
+        return logical_location(kind, target)
     if kind == "file":
         physical = {"artifactLocation": {"uri": relativize(uri_for(target), base)}}
         line = location.get("line")

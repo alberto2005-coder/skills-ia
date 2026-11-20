@@ -290,5 +290,154 @@ class AdapterTests(unittest.TestCase):
         self.assertEqual(emit.confidence_for("medium"), "medium")
 
 
+DB_REPORT = {
+    "files": 3,
+    "findings": [
+        {
+            "file": ".tmp/db/migrations/001.sql", "line": 1, "rule": "reescritura-de-tipo",
+            "severity": "high", "message": "reescribir la tabla bloquea escrituras",
+        },
+        {
+            "target": "users.age", "rule": "columna-solo-en-migraciones",
+            "severity": "medium", "message": "users.age nace de las migraciones y no está en el esquema",
+        },
+        {
+            "file": ".tmp/db/schema.sql", "line": 5, "rule": "fk-sin-indice", "severity": "warning",
+            "message": "la clave foránea orders.user_id no tiene índice",
+            "fix": "CREATE INDEX idx_orders_user ON orders (user_id);",
+        },
+        {
+            "file": ".tmp/db/schema.sql", "line": 9, "rule": "regla-nueva",
+            "severity": "low", "message": "algo que aún no tiene consejo propio",
+        },
+    ],
+}
+
+API_DIFF = {
+    "version": "major",
+    "changes": [
+        {"level": "major", "path": "/legacy/export", "detail": "endpoint eliminado"},
+        {"level": "patch", "path": "GET /users/{id}", "detail": "cambio de descripción"},
+    ],
+}
+
+API_AUTH = {
+    "findings": [
+        {"rule": "ruta-sin-guarda", "severity": "high", "target": "GET /users/{id}",
+         "message": "el contrato exige seguridad y read_user no lleva guarda",
+         "file": "api/api.py", "line": 7},
+        {"rule": "spec-sin-codigo", "severity": "low", "target": "POST /admin/purge",
+         "message": "el contrato declara la operación y no hay ruta que la implemente"},
+    ],
+}
+
+FINOPS_LLM = {
+    "files": 1,
+    "findings": [
+        {"file": "app/assistant.py", "line": 7, "rule": "llm-sin-limite-tokens", "severity": "high",
+         "message": "llamada create() sin max_tokens: la respuesta puede crecer sin tope"},
+        {"file": "app/assistant.py", "line": 16, "rule": "llm-sin-limite-tokens", "severity": "high",
+         "message": "llamada create() sin max_tokens: la respuesta puede crecer sin tope"},
+        {"file": "app/assistant.py", "line": 15, "rule": "bucle-sin-tope", "severity": "high",
+         "message": "bucle while True con llamadas al modelo y sin break"},
+    ],
+}
+
+
+class DbAdapterTests(unittest.TestCase):
+    def setUp(self):
+        self.payload = emit.from_db(DB_REPORT, "db-architect", "2.1.1")
+
+    def test_report_is_valid(self):
+        self.assertEqual(validate_findings.validate_payload(self.payload), [])
+        self.assertEqual(self.payload["tool"]["package"], "db-architect")
+        self.assertEqual(self.payload["summary"]["total"], 4)
+
+    def test_file_and_schema_locations(self):
+        first, second = self.payload["findings"][0], self.payload["findings"][1]
+        self.assertEqual(first["location"], {"type": "file", "target": ".tmp/db/migrations/001.sql",
+                                             "line": 1, "end_line": None})
+        self.assertEqual(second["location"], {"type": "schema", "target": "users.age",
+                                              "line": None, "end_line": None})
+
+    def test_warning_becomes_medium_and_fix_is_used(self):
+        third = self.payload["findings"][2]
+        self.assertEqual(third["severity"], "medium")
+        self.assertEqual(third["remediation"], "CREATE INDEX idx_orders_user ON orders (user_id);")
+        self.assertEqual(third["evidence"], "CREATE INDEX idx_orders_user ON orders (user_id);")
+
+    def test_known_and_unknown_rules_get_a_fix(self):
+        first, last = self.payload["findings"][0], self.payload["findings"][3]
+        self.assertIn("expand/contract", first["remediation"])
+        self.assertIn("docs/db-architect.md", last["remediation"])
+        self.assertEqual(last["evidence"], ".tmp/db/schema.sql:9")
+
+
+class ApiAdapterTests(unittest.TestCase):
+    def test_changes_become_endpoint_urls(self):
+        payload = emit.from_api(API_DIFF, "api-contract-guard", "1.2.0")
+        self.assertEqual(validate_findings.validate_payload(payload), [])
+        self.assertEqual(payload["summary"]["note"], "veredicto major")
+        major, patch = payload["findings"]
+        self.assertEqual(major["rule_id"], "contract-diff-major")
+        self.assertEqual(major["severity"], "high")
+        self.assertEqual(major["location"], {"type": "url", "target": "/legacy/export",
+                                             "line": None, "end_line": None})
+        self.assertEqual(patch["severity"], "low")
+
+    def test_coverage_findings_use_code_or_endpoint(self):
+        payload = emit.from_api(API_AUTH, "api-contract-guard", "1.2.0")
+        self.assertEqual(validate_findings.validate_payload(payload), [])
+        first, second = payload["findings"]
+        self.assertEqual(first["location"]["type"], "file")
+        self.assertEqual(first["location"]["line"], 7)
+        self.assertEqual(second["location"], {"type": "url", "target": "POST /admin/purge",
+                                              "line": None, "end_line": None})
+
+    def test_endpoints_without_scheme_go_to_logical_locations(self):
+        sarif = findings_to_sarif.build_sarif(emit.from_api(API_DIFF, "api-contract-guard", "1.2.0"))
+        result = sarif["runs"][0]["results"][0]
+        self.assertIn("logicalLocations", result["locations"][0])
+        self.assertEqual(result["locations"][0]["logicalLocations"][0]["fullyQualifiedName"],
+                         "/legacy/export")
+
+
+class FinopsAdapterTests(unittest.TestCase):
+    def test_merges_identical_sites(self):
+        payload = emit.from_finops(FINOPS_LLM, "finops-auditor", "1.1.0")
+        self.assertEqual(validate_findings.validate_payload(payload), [])
+        self.assertEqual(payload["summary"]["total"], 2)
+        merged = payload["findings"][0]
+        self.assertEqual(merged["rule_id"], "llm-sin-limite-tokens")
+        self.assertIn("app/assistant.py:7", merged["evidence"])
+        self.assertIn("también en app/assistant.py:16", merged["evidence"])
+        self.assertEqual(payload["findings"][1]["rule_id"], "bucle-sin-tope")
+
+
+class EmitCliTests(unittest.TestCase):
+    def test_cli_reads_the_package_version_and_writes_a_valid_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "finops-auditor").mkdir()
+            manifest = {"name": "finops-auditor", "version": "1.4.2"}
+            (root / "finops-auditor" / "skills.json").write_text(json.dumps(manifest), encoding="utf-8")
+            native = root / "llm.json"
+            native.write_text(json.dumps(FINOPS_LLM), encoding="utf-8")
+            output = root / "findings.json"
+            with redirect_stdout(io.StringIO()):
+                code = emit.main(["finops", str(native), "--output", str(output), "--root", str(root)])
+            self.assertEqual(code, 0)
+            emitted = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(emitted["tool"]["version"], "1.4.2")
+            self.assertEqual(validate_findings.validate_payload(emitted), [])
+
+    def test_cli_rejects_an_unknown_shape(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            native = Path(tmp) / "raro.json"
+            native.write_text(json.dumps({"resultados": []}), encoding="utf-8")
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(emit.main(["db", str(native)]), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

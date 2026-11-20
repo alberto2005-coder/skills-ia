@@ -85,15 +85,32 @@ relativa si cae dentro de `target`); `url` → `artifactLocation.uri`; `resource
 `schema` → `logicalLocations`. La huella viaja en `partialFingerprints` y cada
 `rule_id` genera una regla con `helpUri` tomado de la primera referencia.
 
-## Adaptadores del piloto
+## Adaptadores
 
 - **`appsec`**: entran solo los `confirmed`. Un `needs_validation` es una pista,
   no un hallazgo, y un `rejected` está refutado; ambos siguen en el informe nativo,
   que no se modifica. La confianza 1–10 se agrupa en `high` (8–10), `medium` (5–7) y
   `low` (1–4). El CWE se convierte en `rule_id` y en referencia.
 - **`seo`**: entran solo las comprobaciones en `fail`. `must` → `high`,
-`should` → `medium`, `nice` → `low`. La cita oficial se convierte en referencia y
-la nota del informe (`score`, veredicto) pasa al resumen.
+  `should` → `medium`, `nice` → `low`. La cita oficial se convierte en referencia y
+  la nota del informe (`score`, veredicto) pasa al resumen.
+- **`db`**: el `--json` de `lock_audit`, `drift`, `schema_audit`, `migration_guard`,
+  `sql_lint` y `query_trace`. Un hallazgo con `file` y `line` va a la ubicación
+  `file`; `drift`, que señala tabla o columna, va a `schema`. La corrección sale del
+  `fix` del propio hallazgo o de la tabla de reglas, y el `warning` de
+  `migration_guard` se lee como `medium`.
+- **`api`**: `contract_diff` (`changes`: `major` → `high`, `minor` → `medium`,
+  `patch` → `low`), `auth_coverage` y `code_sync`. Lo que trae fichero y línea va a
+  `file`; una ruta o un endpoint (`GET /users/{id}`) va a `url`.
+- **`finops`**: `llm_cost_scan`, `infra_cost_scan` y `ci_cost_scan`, los tres con la
+  misma forma `{file, line, rule, severity, message}`.
+
+**Duplicados.** La huella no lleva la línea, así que dos llamadas idénticas en el
+mismo fichero (por ejemplo `max_tokens` en las líneas 7 y 16) colapsarían en un solo
+hallazgo. El emisor los fusiona y deja los dos sitios en `evidence`
+(`assistant.py:7 · también en assistant.py:16`): no se pierde ninguno ni se repite
+una huella que el validador rechazaría. Una regla sin consejo propio remite a la
+guía del paquete en vez de improvisar uno.
 
 ## Por qué vive aquí
 
@@ -185,7 +202,7 @@ under `target`); `url` → `artifactLocation.uri`; `resource` and `schema` →
 `logicalLocations`. The fingerprint travels in `partialFingerprints` and each
 `rule_id` becomes a rule with `helpUri` from its first reference.
 
-### Pilot adapters
+### Adapters
 
 - **`appsec`**: only `confirmed` findings enter. A `needs_validation` is a lead,
   not a finding, and a `rejected` one is refuted; both stay in the native report,
@@ -194,6 +211,23 @@ under `target`); `url` → `artifactLocation.uri`; `resource` and `schema` →
 - **`seo`**: only `fail` checks enter. `must` → `high`, `should` → `medium`,
   `nice` → `low`. The official citation becomes a reference and the report score
   and verdict become the summary's `score` and `note`.
+- **`db`**: the `--json` of `lock_audit`, `drift`, `schema_audit`,
+  `migration_guard`, `sql_lint` and `query_trace`. Findings with `file` and `line`
+  go to the `file` location; `drift`, which points at a table or column, goes to
+  `schema`. The fix comes from the finding's own `fix` or the rule table, and
+  `migration_guard`'s `warning` reads as `medium`.
+- **`api`**: `contract_diff` (`changes`: `major` → `high`, `minor` → `medium`,
+  `patch` → `low`), `auth_coverage` and `code_sync`. Findings with a file and line
+  go to `file`; a route or endpoint (`GET /users/{id}`) goes to `url`.
+- **`finops`**: `llm_cost_scan`, `infra_cost_scan` and `ci_cost_scan`, all three
+  with the same `{file, line, rule, severity, message}` shape.
+
+**Duplicates.** The fingerprint leaves the line out, so two identical calls in the
+same file (say `max_tokens` on lines 7 and 16) would collapse into one finding. The
+emitter merges them and keeps both sites in `evidence`
+(`assistant.py:7 · also at assistant.py:16`): nothing is lost and no duplicate
+fingerprint is written. A rule with no advice of its own points at the package
+guide instead of inventing one.
 
 ### Why it lives here
 
