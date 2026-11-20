@@ -8,6 +8,18 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · Añadido: descripción bilingüe en las releases
+
+#### Añadido
+
+- **`scripts/release_notes.py`:** compone el cuerpo de cada release con cabecera y títulos de sección en español e inglés, reutilizando el agrupado por tipo de commit de `docs-sync-engine/scripts/changelog_gen.py`. La lista de cambios aparece una sola vez (los asuntos ya van en inglés por la convención del repo) y la cabecera cambia según sea paquete o bundle: comando de instalación, versión y cómo verificar el archivo.
+- **Los dos workflows de release lo usan:** `release-package.yml` con `--package` y `release-bundle.yml` con `--bundle`.
+- **Tests:** `tests/test_release_notes.py` cubre las dos cabeceras, los títulos bilingües, el orden sin duplicados, el release vacío y la escritura del fichero; en `tests/test_release_workflows.py` un test falla si un workflow vuelve a llamar a `changelog_gen.py` directamente.
+
+#### Notas
+
+- El título de la release sigue siendo el tag (`db-architect-v2.1.1`): lo bilingüe es la descripción, que es lo que se lee en la página del release.
+
 ### - 2026-11-20 · Añadido: `scripts/bump_version.py`
 
 #### Añadido
@@ -601,6 +613,18 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · Added: bilingual release descriptions
+
+#### Added
+
+- **`scripts/release_notes.py`:** builds each release body with a bilingual header and bilingual section titles, reusing the commit-type grouping from `docs-sync-engine/scripts/changelog_gen.py`. The change list appears once (subjects are already in English by repo convention) and the header differs for a package or the bundle: install command, version and how to verify the archive.
+- **Both release workflows use it:** `release-package.yml` with `--package` and `release-bundle.yml` with `--bundle`.
+- **Tests:** `tests/test_release_notes.py` covers both headers, the bilingual titles, ordering without duplicates, the empty release and file writing; in `tests/test_release_workflows.py` a test fails if a workflow calls `changelog_gen.py` directly again.
+
+#### Notes
+
+- The release title is still the tag (`db-architect-v2.1.1`): the bilingual part is the description, which is what the release page shows.
 
 ### - 2026-11-20 · Added: `scripts/bump_version.py`
 
