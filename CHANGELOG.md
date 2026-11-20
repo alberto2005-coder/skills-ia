@@ -8,6 +8,22 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · La auditoría de documentación corre también en local
+
+#### Añadido
+
+- **`run_tests.py` ejecuta `tests/audit_docs.py` como puerta local** al terminar las suites, con su propio recuento (`Resumen: 13/13 suites y 1/1 puertas`). El comando de siempre cubre ya el mismo contraste que el job de lint, así que el desfase aparece antes de abrir un PR.
+- **`docs/index.md`:** la sección «Tests» lista el comando del auditor y explica que `run_tests.py` lo lanza como puerta (ES/EN).
+
+#### Corregido
+
+- **`run_tests.py` se caía al imprimir la salida de una suite con emoji** (`seo-auditor`) en la consola cp1252 de Windows: ahora decodifica en UTF-8 y escribe con reemplazo, así que un carácter que la consola no sepa pintar ya no corta la matriz a mitad.
+
+#### Notas
+
+- Verificado el camino de fallo: con una ruta inventada en un doc, `run_tests.py` sale con código 1 y nombra la puerta («auditoría de documentación (código 1)»).
+- `run_tests.py` en 3.13 y 3.9 → **13/13 suites, 1/1 puertas, 747 tests**.
+
 ### - 2026-11-20 · Auditoría de documentación en CI y campos del frontmatter
 
 #### Añadido
@@ -652,6 +668,22 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · The documentation audit also runs locally
+
+#### Added
+
+- **`run_tests.py` runs `tests/audit_docs.py` as a local gate** after the suites, with its own count (`Summary: 13/13 suites and 1/1 gates`). The usual command now covers the same comparison as the lint job, so drift shows up before a PR is opened.
+- **`docs/index.md`:** the “Tests” section lists the auditor command and explains that `run_tests.py` runs it as a gate (ES/EN).
+
+#### Fixed
+
+- **`run_tests.py` crashed printing a suite's emoji output** (`seo-auditor`) on the Windows cp1252 console: it now decodes as UTF-8 and writes with replacement, so a character the console cannot render no longer cuts the matrix short.
+
+#### Notes
+
+- Failure path checked: with an invented path in a doc, `run_tests.py` exits 1 and names the gate (“auditoría de documentación (código 1)”).
+- `run_tests.py` on 3.13 and 3.9 → **13/13 suites, 1/1 gates, 747 tests**.
 
 ### - 2026-11-20 · Documentation audit in CI and documented frontmatter fields
 
