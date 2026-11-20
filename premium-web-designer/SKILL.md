@@ -16,6 +16,7 @@ license: MIT
 metadata:
   package: premium-web-designer
   version: "3.1.0"
+  author: "Alberto Ortiz"
 ---
 
 # PREMIUM WEB DESIGNER & DEVELOPER

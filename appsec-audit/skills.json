@@ -2,7 +2,7 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "appsec-audit",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Auditoría integral de seguridad con trazado de fuentes a sumideros, tribunal de validación y nota A-F.",
   "skills": [
     {

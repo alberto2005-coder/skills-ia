@@ -39,6 +39,8 @@ class TestStructure(unittest.TestCase):
                 self.assertEqual(found.group(1), name)
 
     def test_frontmatter_declares_license_and_metadata(self):
+        version = json.loads(read_file("skills.json"))["version"]
+
         for name in ("skill-evals",) + SUB_SKILLS:
             text = read_file("SKILL.md" if name == "skill-evals" else f"{name}/SKILL.md")
             block = frontmatter(text)
@@ -47,7 +49,7 @@ class TestStructure(unittest.TestCase):
                 self.assertIn("license: MIT", block)
                 self.assertIn("metadata:", block)
                 self.assertIn("  package: skill-evals", block)
-                self.assertRegex(block, r'  version: "1\.0\.0"')
+                self.assertRegex(block, r'  version: "' + re.escape(version) + r'"')
 
     def test_descriptions_within_standard_limits(self):
         for name in ("skill-evals",) + SUB_SKILLS:

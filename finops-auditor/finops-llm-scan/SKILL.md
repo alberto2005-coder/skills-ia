@@ -10,6 +10,7 @@ license: MIT
 metadata:
   package: finops-auditor
   version: "1.4.0"
+  author: "Alberto Ortiz"
 ---
 
 # FinOps LLM Scan

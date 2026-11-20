@@ -13,7 +13,8 @@ description: >
 license: MIT
 metadata:
   package: skill-evals
-  version: "1.0.0"
+  version: "1.0.1"
+  author: "Alberto Ortiz"
 ---
 
 # Skill Evals · Diseño de casos

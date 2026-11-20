@@ -12,6 +12,7 @@ license: MIT
 metadata:
   package: agent-red-team
   version: "3.1.0"
+  author: "Alberto Ortiz"
 ---
 
 # Red Team · Scan rápido (guidance)

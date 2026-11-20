@@ -2,7 +2,7 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "replica",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Reconstrucción clean-room de apps comerciales: maestro + 13 sub-skills por fase, con paridad, sweep de marca, evidencia, redes y análisis estático opt-in.",
   "author": "Alberto Ortiz",
   "skills": [

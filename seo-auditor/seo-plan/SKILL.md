@@ -5,7 +5,8 @@ description: >
 license: MIT
 metadata:
   package: seo-auditor
-  version: "3.0.0"
+  version: "3.0.1"
+  author: "Alberto Ortiz"
 ---
 
 # SEO Auditor · Plan

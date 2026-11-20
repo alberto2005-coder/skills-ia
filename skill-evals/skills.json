@@ -2,7 +2,7 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "skill-evals",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Evaluación offline de skills: casos versionables, precisión y recall de activación, colisiones, presupuesto de contexto e informes reproducibles.",
   "skills": [
     {

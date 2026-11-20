@@ -6,6 +6,7 @@ license: MIT
 metadata:
   package: agent-red-team
   version: "3.1.0"
+  author: "Alberto Ortiz"
 ---
 
 # Agent Red Team — Auditor de Seguridad de Skills

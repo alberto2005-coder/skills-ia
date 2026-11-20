@@ -16,6 +16,7 @@ license: MIT
 metadata:
   package: docs-sync-engine
   version: "1.2.0"
+  author: "Alberto Ortiz"
 ---
 
 # Docs Env

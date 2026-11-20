@@ -6,6 +6,7 @@ license: MIT
 metadata:
   package: humanizador-anti-ia
   version: "2.1.0"
+  author: "Alberto Ortiz"
 ---
 
 # Humanizador · Reescribir (`humanizar`)

@@ -16,6 +16,7 @@ license: MIT
 metadata:
   package: db-architect
   version: "2.1.0"
+  author: "Alberto Ortiz"
 ---
 
 # DB Lock Audit

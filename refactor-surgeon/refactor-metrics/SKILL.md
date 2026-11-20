@@ -9,6 +9,7 @@ license: MIT
 metadata:
   package: refactor-surgeon
   version: "1.5.0"
+  author: "Alberto Ortiz"
 ---
 
 # Refactor Metrics
