@@ -8,6 +8,17 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · Documentado el flujo de publicación
+
+#### Documentado
+
+- **`docs/index.md`, sección «Publicación» / «Publishing»:** el flujo diario en tres pasos — `scripts/bump_version.py <paquete> <version>`, commit y `git push origin main` —, qué mueve el script en cada uno de los cuatro sitios, para qué sirven `--dry-run` y `--no-bundle`, y qué rompe tocar un paquete sin subir su versión.
+- **Vía de recuperación:** `tag-release.yml` con `workflow_dispatch` y su `base`, cuándo hace falta (un run fallido a medias, porque el `before` del siguiente push ya no vería esos bumps) y por qué basta con relanzarlo.
+
+#### Corregido
+
+- **La sección describía un flujo que ya no era el real:** las notas de release se generan con `scripts/release_notes.py` y en español e inglés, no con `docs-sync-engine/scripts/changelog_gen.py`.
+
 ### - 2026-11-20 · Añadido: descripción bilingüe en las releases
 
 #### Añadido
@@ -613,6 +624,17 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · Documented the publishing flow
+
+#### Documented
+
+- **`docs/index.md`, «Publicación» / «Publishing» section:** the day-to-day flow in three steps — `scripts/bump_version.py <package> <version>`, commit and `git push origin main` —, what the script moves in each of the four places, what `--dry-run` and `--no-bundle` are for, and what breaks when a package changes without a version bump.
+- **Recovery path:** `tag-release.yml` with `workflow_dispatch` and its `base`, when it is needed (a run that failed halfway, because the next push's `before` would no longer see those bumps) and why relaunching it is enough.
+
+#### Fixed
+
+- **The section described a flow that was no longer real:** release notes are built by `scripts/release_notes.py` in Spanish and English, not by `docs-sync-engine/scripts/changelog_gen.py`.
 
 ### - 2026-11-20 · Added: bilingual release descriptions
 
