@@ -35,7 +35,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import findings_contract as contract
-import validate_findings
+import findings_validate
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 PACKAGES = {
@@ -483,7 +483,7 @@ def main(argv: list | None = None) -> int:
 
     emitted = ADAPTERS[args.source](payload, args.skill or PACKAGES[args.source], version, args.target)
 
-    errors = validate_findings.validate_payload(emitted)
+    errors = findings_validate.validate_payload(emitted)
     if errors:
         print(f"El resultado no cumple el contrato ({len(errors)} problema(s)):", file=sys.stderr)
         for error in errors:

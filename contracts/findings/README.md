@@ -9,8 +9,8 @@ adaptadores de los pilotos.
 | --- | --- |
 | `emit.py appsec <findings.json> --output ...` | Convierte un informe nativo de `appsec-audit` al contrato |
 | `emit.py seo <audit.json> --output ...` | Convierte un informe nativo de `seo-auditor` al contrato |
-| `validate_findings.py <findings.json>` | Comprueba forma, huella y coherencia del resumen |
-| `validate_findings.py <findings.json> --fail-on high` | Además, sale 3 si algo llega al umbral |
+| `findings_validate.py <findings.json>` | Comprueba forma, huella y coherencia del resumen |
+| `findings_validate.py <findings.json> --fail-on high` | Además, sale 3 si algo llega al umbral |
 | `findings_to_sarif.py <findings.json> --output x.sarif` | Exporta a SARIF 2.1.0 para Code Scanning |
 
 Códigos de salida: `0` válido · `1` no cumple el contrato · `2` entrada ilegible ·
@@ -132,8 +132,8 @@ the SARIF 2.1.0 exporter and the pilot adapters ship next to it.
 | --- | --- |
 | `emit.py appsec <findings.json> --output ...` | Converts a native `appsec-audit` report to the contract |
 | `emit.py seo <audit.json> --output ...` | Converts a native `seo-auditor` report to the contract |
-| `validate_findings.py <findings.json>` | Checks shape, fingerprint and summary coherence |
-| `validate_findings.py <findings.json> --fail-on high` | Also exits 3 when a finding reaches the threshold |
+| `findings_validate.py <findings.json>` | Checks shape, fingerprint and summary coherence |
+| `findings_validate.py <findings.json> --fail-on high` | Also exits 3 when a finding reaches the threshold |
 | `findings_to_sarif.py <findings.json> --output x.sarif` | Exports to SARIF 2.1.0 for Code Scanning |
 
 Exit codes: `0` valid · `1` contract violations · `2` unreadable input · `3`

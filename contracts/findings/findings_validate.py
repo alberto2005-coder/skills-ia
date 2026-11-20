@@ -1,7 +1,7 @@
 """Valida cualquier `findings.json` contra el contrato común v1.0.0 y corta por umbral.
 
 Uso:
-    py contracts/findings/validate_findings.py <findings.json>
+    py contracts/findings/findings_validate.py <findings.json>
         [--fail-on none|info|low|medium|high|critical] [--json]
 
 El esquema `findings.schema.json` es la definición, pero la comprobación se hace

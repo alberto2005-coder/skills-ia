@@ -15,7 +15,7 @@ sys.path.insert(0, str(CONTRACT_DIR))
 import emit  # noqa: E402
 import findings_contract as contract  # noqa: E402
 import findings_to_sarif  # noqa: E402
-import validate_findings  # noqa: E402
+import findings_validate  # noqa: E402
 
 TOOL = {"package": "demo", "skill": "demo", "version": "1.2.3"}
 
@@ -95,7 +95,7 @@ class FingerprintTests(unittest.TestCase):
 
 class ValidatorTests(unittest.TestCase):
     def errors(self, data):
-        return validate_findings.validate_payload(data)
+        return findings_validate.validate_payload(data)
 
     def test_good_payload_is_valid(self):
         self.assertEqual(self.errors(payload(target="demo")), [])
@@ -141,15 +141,15 @@ class ValidatorTests(unittest.TestCase):
             for threshold, expected in cases:
                 argv = [str(path)] + (["--fail-on", threshold] if threshold else [])
                 with redirect_stdout(io.StringIO()):
-                    self.assertEqual(validate_findings.main(argv), expected, threshold)
+                    self.assertEqual(findings_validate.main(argv), expected, threshold)
 
     def test_unreadable_input_and_invalid_payload(self):
         with tempfile.TemporaryDirectory() as tmp:
             with redirect_stdout(io.StringIO()):
-                self.assertEqual(validate_findings.main([str(Path(tmp) / "no-existe.json")]), 2)
+                self.assertEqual(findings_validate.main([str(Path(tmp) / "no-existe.json")]), 2)
             broken = Path(tmp) / "roto.json"
             broken.write_text("{", encoding="utf-8")
-            self.assertEqual(validate_findings.main([str(broken)]), 2)
+            self.assertEqual(findings_validate.main([str(broken)]), 2)
 
 
 class SarifTests(unittest.TestCase):
@@ -259,7 +259,7 @@ APPSEC_AUDIT = {
 class AdapterTests(unittest.TestCase):
     def test_seo_maps_failures_only(self):
         emitted = emit.from_seo(SEO_AUDIT, "seo-auditor", "3.0.1")
-        self.assertEqual(validate_findings.validate_payload(emitted), [])
+        self.assertEqual(findings_validate.validate_payload(emitted), [])
         self.assertEqual(emitted["summary"]["total"], 2)
         self.assertEqual(emitted["summary"]["by_severity"]["high"], 1)
         self.assertEqual(emitted["summary"]["score"], 72.5)
@@ -273,7 +273,7 @@ class AdapterTests(unittest.TestCase):
 
     def test_appsec_keeps_only_confirmed(self):
         emitted = emit.from_appsec(APPSEC_AUDIT, "appsec-audit", "2.0.1")
-        self.assertEqual(validate_findings.validate_payload(emitted), [])
+        self.assertEqual(findings_validate.validate_payload(emitted), [])
         self.assertEqual(emitted["summary"]["total"], 1)
         finding = emitted["findings"][0]
         self.assertEqual(finding["confidence"], "high")
@@ -349,7 +349,7 @@ class DbAdapterTests(unittest.TestCase):
         self.payload = emit.from_db(DB_REPORT, "db-architect", "2.1.1")
 
     def test_report_is_valid(self):
-        self.assertEqual(validate_findings.validate_payload(self.payload), [])
+        self.assertEqual(findings_validate.validate_payload(self.payload), [])
         self.assertEqual(self.payload["tool"]["package"], "db-architect")
         self.assertEqual(self.payload["summary"]["total"], 4)
 
@@ -376,7 +376,7 @@ class DbAdapterTests(unittest.TestCase):
 class ApiAdapterTests(unittest.TestCase):
     def test_changes_become_endpoint_urls(self):
         payload = emit.from_api(API_DIFF, "api-contract-guard", "1.2.0")
-        self.assertEqual(validate_findings.validate_payload(payload), [])
+        self.assertEqual(findings_validate.validate_payload(payload), [])
         self.assertEqual(payload["summary"]["note"], "veredicto major")
         major, patch = payload["findings"]
         self.assertEqual(major["rule_id"], "contract-diff-major")
@@ -387,7 +387,7 @@ class ApiAdapterTests(unittest.TestCase):
 
     def test_coverage_findings_use_code_or_endpoint(self):
         payload = emit.from_api(API_AUTH, "api-contract-guard", "1.2.0")
-        self.assertEqual(validate_findings.validate_payload(payload), [])
+        self.assertEqual(findings_validate.validate_payload(payload), [])
         first, second = payload["findings"]
         self.assertEqual(first["location"]["type"], "file")
         self.assertEqual(first["location"]["line"], 7)
@@ -405,7 +405,7 @@ class ApiAdapterTests(unittest.TestCase):
 class FinopsAdapterTests(unittest.TestCase):
     def test_merges_identical_sites(self):
         payload = emit.from_finops(FINOPS_LLM, "finops-auditor", "1.1.0")
-        self.assertEqual(validate_findings.validate_payload(payload), [])
+        self.assertEqual(findings_validate.validate_payload(payload), [])
         self.assertEqual(payload["summary"]["total"], 2)
         merged = payload["findings"][0]
         self.assertEqual(merged["rule_id"], "llm-sin-limite-tokens")
@@ -429,7 +429,7 @@ class EmitCliTests(unittest.TestCase):
             self.assertEqual(code, 0)
             emitted = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual(emitted["tool"]["version"], "1.4.2")
-            self.assertEqual(validate_findings.validate_payload(emitted), [])
+            self.assertEqual(findings_validate.validate_payload(emitted), [])
 
     def test_cli_rejects_an_unknown_shape(self):
         with tempfile.TemporaryDirectory() as tmp:
