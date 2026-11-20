@@ -73,6 +73,14 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: "1"
 
+      # Dos `x.py` fuera de tests se resuelven por nombre: con los dos en un
+      # sys.path, `import x` carga el primero y el otro queda inalcanzable
+      # (así rompió `validate_findings.py` las suites de appsec bajo pytest).
+      - name: Unique module basenames
+        run: uv run --locked python tests/lint_module_names.py
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+
       - name: Lint Python
         run: uv run --locked ruff check .
         env:

@@ -8,6 +8,19 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · Puerta contra basenames de módulos repetidos
+
+#### Añadido
+
+- **`tests/lint_module_names.py`:** falla si dos `.py` fuera de los tests comparten basename. Un `import` resuelve por nombre, no por ruta: con dos `x.py` en el mismo `sys.path` gana el primero y el otro queda inalcanzable, que es lo que rompió CI cuando `contracts/findings/validate_findings.py` coincidió con `appsec-audit/scripts/validate_findings.py` y `pytest` desde la raíz cargó el módulo equivocado en los tests de appsec.
+- **Excepciones explícitas:** solo tres repeticiones, todas de scripts de paquetes autocontenidos (`export_sarif.py` en `appsec-audit` y `agent-red-team`, `report.py` en `skill-evals` y `seo-auditor`, `schema_audit.py` en `seo-auditor` y `db-architect`). Cada una se declara con sus rutas exactas y su motivo: un basename nuevo, o el mismo nombre en un paquete nuevo, falla hasta que alguien lo añada a mano.
+- **Enganche:** segunda puerta de `run_tests.py` (además de la auditoría de documentación) y paso `Unique module basenames` en el job de lint, delante de `ruff`.
+
+#### Notas
+
+- Fuera del recuento quedan `.venv`, dependencias, artefactos y todo lo que cuelga de un `tests/`, porque las suites ya se resuelven con `--import-mode=importlib`. Hoy pasa con 95 módulos y 3 repeticiones declaradas.
+- Cuando falla, imprime la ruta de cada implicado y las dos salidas posibles (renombrar o declarar), para que el siguiente no tenga que recordar este incidente.
+
 ### - 2026-11-20 · Contrato común en cinco auditores y release v5.2.0
 
 #### Añadido
@@ -706,6 +719,19 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · Gate against repeated module basenames
+
+#### Added
+
+- **`tests/lint_module_names.py`:** fails when two `.py` files outside the tests share a basename. An `import` resolves by name, not by path: with two `x.py` on the same `sys.path` the first one wins and the other becomes unreachable, which is what broke CI when `contracts/findings/validate_findings.py` matched `appsec-audit/scripts/validate_findings.py` and `pytest` from the root loaded the wrong module into the appsec tests.
+- **Explicit exceptions:** only three repeats, all between scripts of self-contained packages (`export_sarif.py` in `appsec-audit` and `agent-red-team`, `report.py` in `skill-evals` and `seo-auditor`, `schema_audit.py` in `seo-auditor` and `db-architect`). Each one is declared with its exact paths and its reason: a new basename, or the same name in a new package, fails until someone adds it by hand.
+- **Wiring:** second `run_tests.py` gate (alongside the documentation audit) and a `Unique module basenames` step in the lint job, before `ruff`.
+
+#### Notes
+
+- `.venv`, dependencies, artifacts and everything under a `tests/` directory stay out of the count, since the suites already resolve names with `--import-mode=importlib`. It passes today with 95 modules and 3 declared repeats.
+- On failure it prints every path involved and both ways out (rename or declare), so the next person does not need to remember this incident.
 
 ### - 2026-11-20 · Shared contract across five auditors and the v5.2.0 release
 

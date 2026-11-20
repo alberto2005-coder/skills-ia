@@ -23,7 +23,10 @@ SUITES = (
     (".", "unittest"),
 )
 # Puertas sin tests: comprobaciones que no cuentan casos pero rompen la entrega.
-GATES = (("auditoría de documentación", "tests/audit_docs.py"),)
+GATES = (
+    ("auditoría de documentación", "tests/audit_docs.py"),
+    ("basenames de módulos", "tests/lint_module_names.py"),
+)
 
 # Las suites imprimen emoji y acentos: la consola de Windows (cp1252) los rechaza y
 # tumbaba el runner a mitad de la matriz. UTF-8 con reemplazo escribe siempre.
