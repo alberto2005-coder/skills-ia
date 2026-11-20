@@ -8,6 +8,16 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · Corregido: `shellcheck` tumbaba el lint (`SC2129`)
+
+#### Corregido
+
+- **`release-package.yml` escribía tres veces seguidas en `$GITHUB_OUTPUT`:** los `echo` individuales disparaban `SC2129` y el job de lint moría en `actionlint`. Ahora van en un bloque `{ ... } >> "$GITHUB_OUTPUT"`, con la misma salida.
+
+#### Notas
+
+- `actionlint` solo ejecuta `shellcheck` si lo encuentra en el `PATH`: el runner de `ubuntu-latest` lo trae de serie y en Windows no, así que la regla no aparecía en local. Verificado ahora con `actionlint` 1.7.12 y `shellcheck` 0.10.0 en el `PATH`: 0 errores en los cuatro workflows.
+
 ### - 2026-11-20 · Corregido: los tags no se creaban (runner sin identidad de git)
 
 #### Corregido
@@ -560,6 +570,16 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · Fixed: `shellcheck` broke the lint job (`SC2129`)
+
+#### Fixed
+
+- **`release-package.yml` wrote to `$GITHUB_OUTPUT` three times in a row:** the separate `echo`s tripped `SC2129` and the lint job died in `actionlint`. They now share a `{ ... } >> "$GITHUB_OUTPUT"` block, with the same output.
+
+#### Notes
+
+- `actionlint` only runs `shellcheck` when it finds it on the `PATH`: the `ubuntu-latest` runner ships it and Windows does not, so the rule never showed up locally. Verified now with `actionlint` 1.7.12 and `shellcheck` 0.10.0 on the `PATH`: 0 errors across the four workflows.
 
 ### - 2026-11-20 · Fixed: no tags were created (runner without a git identity)
 
