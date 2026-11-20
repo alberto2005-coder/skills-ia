@@ -8,6 +8,18 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · Corregidos dos desfases en la documentación
+
+#### Corregido
+
+- **La descarga de release del `README` apuntaba a `releases/latest`:** funcionaba solo mientras el bundle más reciente contuviera el zip citado, y el comando habría empezado a dar 404 en cuanto `db-architect` subiera de versión. Ahora las URLs van al release de su tag (`releases/download/db-architect-v2.1.0/…`), que es permanente, y el texto avisa de que la versión es un ejemplo y hay que sustituirla por la que declare el manifiesto.
+- **`docs/index.md` daba por hecho un helper en todos los paquetes:** solo `appsec-audit`, `db-architect` y `finops-auditor` tienen `scripts/<paquete>_util.py`, así que la regla pasa a estar en condicional.
+- **La lista de comprobaciones del linter estaba incompleta:** faltaba el marketplace, que sí se valida.
+
+#### Verificado
+
+- Auditoría de las 15 páginas (`README`, `docs/index.md` y las 13 guías): rutas citadas, flags documentados contra el `argparse` de cada paquete, versiones, recuentos de skills y de tests por paquete, tablas de paquetes del `README` y del índice, cabeceras «maestro + N», anclas internas y enlaces de descarga. Sin más desfases.
+
 ### - 2026-11-20 · Documentado el flujo de publicación
 
 #### Documentado
@@ -624,6 +636,18 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · Fixed two documentation drifts
+
+#### Fixed
+
+- **The `README` release download pointed at `releases/latest`:** it only worked while the newest bundle carried that zip, and the command would have started returning 404 the moment `db-architect` bumped. The URLs now address the tag release (`releases/download/db-architect-v2.1.0/…`), which is permanent, and the text says the version is an example to be replaced by the one the manifest declares.
+- **`docs/index.md` assumed every package has a helper:** only `appsec-audit`, `db-architect` and `finops-auditor` ship `scripts/<package>_util.py`, so the rule is now conditional.
+- **The linter checklist was incomplete:** it did not mention the marketplace, which is validated.
+
+#### Verified
+
+- Audit of all 15 pages (`README`, `docs/index.md` and the 13 guides): cited paths, documented flags against each package's `argparse`, versions, per-package skill and test counts, the package tables in `README` and the index, the “master + N” headings, internal anchors and the download links. No further drift.
 
 ### - 2026-11-20 · Documented the publishing flow
 
