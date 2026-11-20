@@ -8,6 +8,16 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · Autor en todos los manifiestos de skill
+
+#### Añadido
+
+- **`metadata.author` en los 79 `SKILL.md`:** cada skill declara `author: "Alberto Ortiz"` dentro de `metadata`, justo después de `version`. Va en `metadata` y no como `author` de primer nivel porque el frontmatter portable solo garantiza seis campos (`allowed-tools`, `compatibility`, `description`, `license`, `metadata`, `name`).
+
+#### Cambiado
+
+- **Versión de parche en los cuatro paquetes que no habían subido en la Ola 1:** `replica` 2.0.1, `appsec-audit` 2.0.1, `seo-auditor` 3.0.1 y `skill-evals` 1.0.1; índice raíz y `.claude-plugin/marketplace.json` en 5.1.1.
+
 ### - 2026-11-19 · Ola 1: instalable, activable y con verificación de lectura
 
 #### Añadido
@@ -535,6 +545,16 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · Author in every skill manifest
+
+#### Added
+
+- **`metadata.author` in all 79 `SKILL.md`:** every skill declares `author: "Alberto Ortiz"` inside `metadata`, right after `version`. It lives in `metadata` rather than as a top-level `author` because the portable frontmatter spec only guarantees six fields (`allowed-tools`, `compatibility`, `description`, `license`, `metadata`, `name`).
+
+#### Changed
+
+- **Patch release for the four packages that had not bumped in Wave 1:** `replica` 2.0.1, `appsec-audit` 2.0.1, `seo-auditor` 3.0.1 and `skill-evals` 1.0.1; root index and `.claude-plugin/marketplace.json` at 5.1.1.
 
 ### - 2026-11-19 · Wave 1: installable, activatable and read-verified
 
