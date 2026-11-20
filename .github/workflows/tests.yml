@@ -66,6 +66,13 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: "1"
 
+      # La documentación también se desfasa: rutas que ya no existen, flags que el
+      # paquete no reconoce, tablas con recuentos viejos o anclas rotas.
+      - name: Audit the documentation against the repo
+        run: uv run --locked python tests/audit_docs.py
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+
       - name: Lint Python
         run: uv run --locked ruff check .
         env:
