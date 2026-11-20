@@ -8,6 +8,24 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · Corregido: un tag rechazado dejaba el release a medias
+
+#### Corregido
+
+- **`tag-release.yml` abortaba en el primer rechazo del remoto:** el push de `api-contract-guard-v1.2.0` volvió `(failed)` justo después de crear `agent-red-team-v3.1.0`, y el paso murió sin intentar los otros diez tags. Ahora cada tag se empuja con hasta tres intentos (5, 10 y 15 s de espera) y un fallo no interrumpe a los demás.
+- **La existencia se comprueba en el remoto, no en local:** un tag creado en el run pero no publicado ya no se da por bueno; se verifica con `git ls-remote` y, si falta, se publica al relanzar el workflow.
+
+#### Añadido
+
+- **Lista de pendientes y error explícito:** si algún tag sigue sin publicarse tras los reintentos, el run termina con `::error::quedaron sin publicar: …` en vez de un fallo mudo a mitad de la lista.
+- **Guarda contra un `jq` sin salida:** si el plan trae paquetes y no se pueden leer sus tags, el paso falla en lugar de terminar en verde sin etiquetar nada.
+- **Test de contrato en `tests/test_release_workflows.py`:** falla si el paso pierde los reintentos o la verificación contra el remoto.
+
+#### Verificado
+
+- El shell del paso se ejecutó contra un remoto bare con un `pre-receive` que rechaza: transitorio → reintento y tag publicado; permanente → tres intentos, lista de pendientes y exit 1; relanzado tras desbloquear → publica solo lo que faltaba; tercera pasada → no-op.
+- `actionlint` 1.7.12 con `shellcheck` 0.10.0: 0 errores. `pytest tests/test_release_workflows.py`: 10 en verde.
+
 ### - 2026-11-20 · Corregido: `shellcheck` tumbaba el lint (`SC2129`)
 
 #### Corregido
@@ -570,6 +588,24 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · Fixed: a rejected tag left the release half done
+
+#### Fixed
+
+- **`tag-release.yml` aborted on the first remote rejection:** pushing `api-contract-guard-v1.2.0` came back `(failed)` right after creating `agent-red-team-v3.1.0`, and the step died without trying the other ten tags. Each tag is now pushed with up to three attempts (5, 10 and 15 s apart) and one failure no longer stops the rest.
+- **Existence is checked on the remote, not locally:** a tag created in the run but never published is no longer taken as done; it is verified with `git ls-remote` and pushed when the workflow is relaunched.
+
+#### Added
+
+- **Pending list and an explicit error:** if a tag is still unpublished after the retries, the run ends with `::error::quedaron sin publicar: …` instead of failing silently halfway through the list.
+- **Guard against a silent `jq`:** if the plan carries packages and their tags cannot be read, the step fails rather than finishing green without tagging anything.
+- **Contract test in `tests/test_release_workflows.py`:** it fails if the step loses the retries or the remote verification.
+
+#### Verified
+
+- The step's shell ran against a bare remote with a rejecting `pre-receive`: transient → retry and tag published; permanent → three attempts, pending list and exit 1; relaunched after unblocking → pushes only what was missing; third pass → no-op.
+- `actionlint` 1.7.12 with `shellcheck` 0.10.0: 0 errors. `pytest tests/test_release_workflows.py`: 10 green.
 
 ### - 2026-11-20 · Fixed: `shellcheck` broke the lint job (`SC2129`)
 
