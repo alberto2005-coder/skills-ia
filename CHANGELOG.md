@@ -8,6 +8,23 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · Contrato común de hallazgos (Ola 2, paso 1)
+
+#### Añadido
+
+- **`contracts/findings/findings.schema.json`, v1.0.0:** raíz con `schema_version`, `tool` (paquete, skill, versión) y `summary` (recuento por severidad, con `score` y `note` opcionales); cada hallazgo lleva `fingerprint`, `rule_id`, `severity` (cinco niveles, ahora con `info`), `confidence` (tres), `title`, `message`, `evidence`, `remediation` y `references` opcionales. Ubicación híbrida `{type, target, line, end_line}`: solo `file` admite líneas; `url`, `resource` y `schema` las exigen a `null` para no inventarlas en SEO, FinOps o esquemas.
+- **`contracts/findings/validate_findings.py`:** valida cualquier `findings.json` sin dependencias — forma, enums, `references`, huella recalculada, huellas duplicadas y resumen que tiene que cuadrar con la lista. `--fail-on none|info|low|medium|high|critical` y códigos 0 válido · 1 inválido · 2 ilegible · 3 umbral superado.
+- **`contracts/findings/findings_to_sarif.py`:** un único exportador a SARIF 2.1.0 para todo el catálogo: `critical`/`high` → `error`, `medium` → `warning`, `low`/`info` → `note`; `file` → `physicalLocation` con `region` solo si hay línea, `url` → `artifactLocation.uri`, `resource`/`schema` → `logicalLocations`; huella en `partialFingerprints` y una regla por `rule_id` con `helpUri`.
+- **`contracts/findings/emit.py`:** adaptadores de los dos pilotos. `appsec` convierte solo los `confirmed` (un `needs_validation` es pista y un `rejected` está refutado; ambos siguen en el informe nativo), agrupa la confianza 1–10 en tres niveles y convierte el CWE en `rule_id` y referencia. `seo` convierte solo los `fail`, traduce `must`/`should`/`nice` a `high`/`medium`/`low`, lleva la cita oficial a referencias y el `score` y el veredicto al resumen.
+- **`tests/test_findings_contract.py`:** 21 tests de contrato (esquema, huella estable entre líneas y entre Windows/Linux, líneas prohibidas fuera de `file`, resumen obligado a cuadrar, duplicados, umbrales de `--fail-on`, SARIF en los tres tipos de ubicación y adaptadores).
+- **`docs/index.md`:** la sección «Tests» explica dónde vive el contrato y qué hace cada pieza (ES/EN).
+
+#### Notas
+
+- **Los paquetes no se tocan.** Cada uno se instala solo y no puede importar módulos de la raíz, así que el contrato es herramienta del repositorio: una implementación, un esquema y un exportador, en vez de tres copias de la lógica SARIF. Si el paso 2 pide el validador dentro de cada zip, hará falta una copia sincronizada con test de deriva.
+- **Ejemplos reales:** `appsec-audit` sobre el fixture vulnerable (CWE-89, `critical`, línea 10, SARIF `error` con `region.startLine` 10 y URI `app.py`) y `seo-auditor` sobre `page_bad.html` (14 hallazgos: 4 `high`, 6 `medium`, 4 `low`, sin línea y con la cita de Google como `helpUri`).
+- Verificación: 21 tests nuevos, `run_tests.py` en 3.13 y 3.9, `ruff`, `metrics_gate`, `audit_docs` y `markdownlint-cli2` en verde.
+
 ### - 2026-11-20 · La auditoría de documentación corre también en local
 
 #### Añadido
@@ -668,6 +685,23 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · Shared findings contract (Wave 2, step 1)
+
+#### Added
+
+- **`contracts/findings/findings.schema.json`, v1.0.0:** root with `schema_version`, `tool` (package, skill, version) and `summary` (severity counts, optional `score` and `note`); each finding carries `fingerprint`, `rule_id`, `severity` (five levels, now including `info`), `confidence` (three), `title`, `message`, `evidence`, `remediation` and optional `references`. Hybrid location `{type, target, line, end_line}`: only `file` may carry lines; `url`, `resource` and `schema` must keep them `null` so SEO, FinOps or schema findings never invent one.
+- **`contracts/findings/validate_findings.py`:** validates any `findings.json` with no dependencies — shape, enums, `references`, recomputed fingerprint, duplicate fingerprints and a summary that must match the list. `--fail-on none|info|low|medium|high|critical`, exit codes 0 valid · 1 invalid · 2 unreadable · 3 threshold exceeded.
+- **`contracts/findings/findings_to_sarif.py`:** a single SARIF 2.1.0 exporter for the whole catalogue: `critical`/`high` → `error`, `medium` → `warning`, `low`/`info` → `note`; `file` → `physicalLocation` with `region` only when a line exists, `url` → `artifactLocation.uri`, `resource`/`schema` → `logicalLocations`; fingerprint in `partialFingerprints` and a rule per `rule_id` with `helpUri`.
+- **`contracts/findings/emit.py`:** pilot adapters. `appsec` converts only `confirmed` findings (a `needs_validation` is a lead and a `rejected` is refuted; both stay in the native report), bands 1–10 confidence into three levels and turns the CWE into `rule_id` plus reference. `seo` converts only `fail` checks, maps `must`/`should`/`nice` to `high`/`medium`/`low`, carries the official citation into references and the score and verdict into the summary.
+- **`tests/test_findings_contract.py`:** 21 contract tests (schema, fingerprint stable across lines and across Windows/Linux, lines rejected outside `file`, summary required to match, duplicates, `--fail-on` thresholds, SARIF for all three location kinds and both adapters).
+- **`docs/index.md`:** the “Tests” section explains where the contract lives and what each piece does (ES/EN).
+
+#### Notes
+
+- **Packages are untouched.** Each installs on its own and cannot import from the repository root, so the contract is repository tooling: one implementation, one schema, one exporter instead of three copies of the SARIF logic. If step 2 wants the validator inside each zip, a synced copy plus a drift test would be needed.
+- **Real examples:** `appsec-audit` on the vulnerable fixture (CWE-89, `critical`, line 10, SARIF `error` with `region.startLine` 10 and URI `app.py`) and `seo-auditor` on `page_bad.html` (14 findings: 4 `high`, 6 `medium`, 4 `low`, no line, Google citation as `helpUri`).
+- Verification: 21 new tests, `run_tests.py` on 3.13 and 3.9, `ruff`, `metrics_gate`, `audit_docs` and `markdownlint-cli2` green.
 
 ### - 2026-11-20 · The documentation audit also runs locally
 
