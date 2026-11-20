@@ -106,6 +106,19 @@ class TagReleaseContractTests(unittest.TestCase):
         self.assertTrue(inputs["base"]["required"])
         self.assertEqual(env["BASE_SHA"], "${{ inputs.base || github.event.before }}")
 
+    def test_tag_push_retries_and_checks_the_remote(self):
+        # Un push rechazado no debe abortar el resto ni dejar el repo a medias.
+        steps = load("tag-release.yml")["jobs"]["plan"]["steps"]
+        script = next(
+            step["run"]
+            for step in steps
+            if step.get("name") == "Create and push tags idempotently"
+        )
+
+        self.assertIn("for attempt in 1 2 3", script)
+        self.assertIn("sleep $((attempt * 5))", script)
+        self.assertIn("git ls-remote --exit-code --tags origin", script)
+        self.assertIn("quedaron sin publicar", script)
 
 if __name__ == "__main__":
     unittest.main()

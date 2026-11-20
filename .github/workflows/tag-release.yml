@@ -92,21 +92,40 @@ jobs:
           # el paso muere con "empty ident name" antes de crear el primer tag.
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          jq -r '.packages[] | "\(.tag) \(.package) \(.version)"' release-plan.json |
-            while read -r tag package version; do
-              if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
-                echo "ya existe $tag"
-                continue
-              fi
-              git tag -a "$tag" -m "$package $version"
-              git push origin "refs/tags/$tag"
-            done
-          bundle=$(jq -r '.bundle.tag // ""' release-plan.json)
-          if [ -n "$bundle" ] && ! git rev-parse -q --verify "refs/tags/$bundle" >/dev/null; then
-            git tag -a "$bundle" -m "bundle $(jq -r '.bundle.version' release-plan.json)"
-            git push origin "refs/tags/$bundle"
+          # Un run a medias se puede relanzar: lo que ya está publicado en el
+          # remoto se salta y solo se empuja lo que falta.
+          mapfile -t entries < <(jq -r '
+            (.packages[] | "\(.tag)\t\(.package) \(.version)"),
+            ((.bundle // empty) | "\(.tag)\tbundle \(.version)")
+          ' release-plan.json)
+          if [ "${#entries[@]}" -eq 0 ] && jq -e '.packages | length > 0' release-plan.json >/dev/null; then
+            echo "::error::el plan trae paquetes y no se pudieron leer sus tags"
+            exit 1
           fi
-
+          failed=()
+          for entry in "${entries[@]}"; do
+            tag=${entry%%$'\t'*}
+            message=${entry#*$'\t'*}
+            if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+              echo "ya existe $tag"
+              continue
+            fi
+            git rev-parse -q --verify "refs/tags/$tag" >/dev/null || git tag -a "$tag" -m "$message"
+            for attempt in 1 2 3; do
+              if git push origin "refs/tags/$tag"; then
+                break
+              fi
+              echo "::warning::el push de $tag falló (intento $attempt de 3)"
+              sleep $((attempt * 5))
+            done
+            if ! git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+              failed+=("$tag")
+            fi
+          done
+          if [ "${#failed[@]}" -gt 0 ]; then
+            echo "::error::quedaron sin publicar: ${failed[*]}"
+            exit 1
+          fi
   release-packages:
     name: Release ${{ matrix.package }} ${{ matrix.version }}
     needs: plan
