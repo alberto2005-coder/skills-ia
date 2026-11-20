@@ -78,9 +78,11 @@ jobs:
             echo "::error::el tag declara $version y el manifiesto de $package declara $declared"
             exit 1
           fi
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "package=$package" >> "$GITHUB_OUTPUT"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          {
+            echo "tag=$tag"
+            echo "package=$package"
+            echo "version=$version"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Build and validate the archive
         run: uv run --locked python scripts/build_package.py "${{ steps.meta.outputs.package }}" --out dist
