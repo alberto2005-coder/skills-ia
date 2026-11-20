@@ -8,6 +8,19 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · Añadido: `scripts/bump_version.py`
+
+#### Añadido
+
+- **`scripts/bump_version.py <paquete> <version>`:** sube la versión en los cuatro sitios donde vive y que el lint exige sincronizados — el manifiesto del paquete, el `metadata.version` de cada `SKILL.md`, la entrada del índice raíz y el plugin del marketplace. De paso sube el índice raíz un parche (la versión del bundle) y actualiza `updated`, así que un push etiqueta paquete y bundle.
+- **Opciones:** `--no-bundle` deja el índice raíz quieto (solo tag de paquete), `--dry-run` enseña qué ficheros tocaría y `--root` permite apuntar a otra copia del repo.
+- **`tests/test_bump_version.py`:** ocho tests sobre un repo de mentira — los cuatro sitios, fixtures de test intactos, versión que no sube, versión que no es X.Y.Z, paquete inexistente, `--no-bundle`, `--dry-run` y conservación de CRLF.
+
+#### Notas
+
+- Rechaza la operación antes de escribir nada si la versión nueva no es X.Y.Z o no es estrictamente mayor que la actual, y también si el paquete no está en el índice o en el marketplace: son los mismos casos que luego romperían el lint.
+- No toca git. El flujo completo queda en tres pasos: `bump_version.py`, `git commit`, `git push`; el tag y el release los crea el workflow.
+
 ### - 2026-11-20 · Corregido: un tag rechazado dejaba el release a medias
 
 #### Corregido
@@ -588,6 +601,19 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · Added: `scripts/bump_version.py`
+
+#### Added
+
+- **`scripts/bump_version.py <package> <version>`:** raises the version in the four places it lives and the lint keeps in sync — the package manifest, the `metadata.version` of every `SKILL.md`, the root index entry and the marketplace plugin. It also bumps the root index by a patch (the bundle version) and refreshes `updated`, so a push tags both the package and the bundle.
+- **Flags:** `--no-bundle` leaves the root index alone (package tag only), `--dry-run` lists the files it would touch and `--root` points it at another copy of the repo.
+- **`tests/test_bump_version.py`:** eight tests over a throwaway repo — the four places, test fixtures left alone, a version that does not go up, a version that is not X.Y.Z, a missing package, `--no-bundle`, `--dry-run` and CRLF preservation.
+
+#### Notes
+
+- It refuses before writing anything when the new version is not X.Y.Z, when it is not strictly greater than the current one, or when the package is missing from the index or the marketplace: the same cases that would break the lint afterwards.
+- It never touches git. The whole flow is three steps: `bump_version.py`, `git commit`, `git push`; the workflow creates the tag and the release.
 
 ### - 2026-11-20 · Fixed: a rejected tag left the release half done
 
