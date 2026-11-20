@@ -68,7 +68,7 @@ La fase 12 exige petición explícita, artefacto propio o autorizado y herramien
 
 ### Comando Maestro y Estado
 
-El maestro (`replica/SKILL.md`) arranca o retoma el pipeline: lee `replica/progreso.md`, recorre las fases en orden, **para al final de cada una** y pide aprobación explícita. Guarda fase, estado (`pendiente` · `en curso` · `aprobada` · `bloqueada` · `n/a`), decisiones, bloqueos y bitácora. Un gate rojo deja la fase `bloqueada`; no se rodea.
+El maestro (`replica/SKILL.md`) arranca o retoma el pipeline: lee el `progreso.md` que guarda en `replica/` dentro del proyecto que reconstruye, recorre las fases en orden, **para al final de cada una** y pide aprobación explícita. Guarda fase, estado (`pendiente` · `en curso` · `aprobada` · `bloqueada` · `n/a`), decisiones, bloqueos y bitácora. Un gate rojo deja la fase `bloqueada`; no se rodea.
 
 ### Evidencia Obligatoria
 
@@ -163,7 +163,7 @@ Phase 12 requires an explicit request, an owned or authorized artifact and alrea
 
 ### Master Command and State
 
-The master (`replica/SKILL.md`) starts or resumes the pipeline: reads `replica/progreso.md`, walks phases in order, **stops after each one** and asks for explicit approval. It records phase, state (`pending` · `in progress` · `approved` · `blocked` · `n/a`), decisions, blockers and log. A red gate leaves the phase `blocked`; it is never bypassed.
+The master (`replica/SKILL.md`) starts or resumes the pipeline: reads the `progreso.md` it keeps in `replica/` inside the project it rebuilds, walks phases in order, **stops after each one** and asks for explicit approval. It records phase, state (`pending` · `in progress` · `approved` · `blocked` · `n/a`), decisions, blockers and log. A red gate leaves the phase `blocked`; it is never bypassed.
 
 ### Mandatory Evidence
 

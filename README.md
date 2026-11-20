@@ -230,7 +230,7 @@ paquete/
 └── skills.json           # array con todas las skills del paquete
 ```
 
-Cada `SKILL.md` (maestro y sub-skills) lleva frontmatter YAML con `name` y `description` para activación automática. Las sub-skills referencian los assets compartidos con rutas relativas al paquete (`../references/`, `../scripts/`), así que **se instala la carpeta completa**. `scripts/`, `tests/` y `skills.json` están en todos los paquetes; `references/` y `templates/` aparecen solo cuando hay material compartido que merezca separarse.
+Cada `SKILL.md` lleva frontmatter YAML: `name` y `description` son obligatorios (la descripción es la señal de activación) y admite además los campos portables `license`, `allowed-tools`, `compatibility` y `metadata`. Aquí `metadata` lleva `package`, `version` y `author`, y las skills de solo lectura declaran `allowed-tools` con lectura y sus propios scripts. Las sub-skills referencian los assets compartidos con rutas relativas al paquete (`../references/`, `../scripts/`), así que **se instala la carpeta completa**. `scripts/`, `tests/` y `skills.json` están en todos los paquetes; `references/` y `templates/` aparecen solo cuando hay material compartido que merezca separarse.
 
 ### Documentación Técnica
 
@@ -255,7 +255,7 @@ Las guías completas de cada módulo se encuentran en la carpeta [`docs/`](docs/
 - **Python 3.9+** (utiliza únicamente la librería estándar de Python: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).
 - Los tests usan `unittest`; las herramientas de pruebas y calidad (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) están en el grupo `dev` de `pyproject.toml` y se gestionan con [`uv`](https://docs.astral.sh/uv/).
 - Para preparar el entorno `.venv` y ejecutar todos los tests desde la raíz: `uv sync` y `uv run python run_tests.py`.
-- GitHub Actions ejecuta todas las suites en cada `push` mediante `.github/workflows/tests.yml`, y además un gate de métricas (`tests/metrics_gate.py`) que falla si crecen los hallazgos `high` de `code_metrics` o los clones de `clone_detect`; el techo aceptado vive en `tests/metrics_baseline.json`. Una guardia de versiones (`tests/version_guard.py`) falla si cambia un paquete sin subir su `version` en el manifiesto.
+- GitHub Actions ejecuta todas las suites en cada `push` mediante `.github/workflows/tests.yml`, y además un gate de métricas (`tests/metrics_gate.py`) que falla si crecen los hallazgos `high` de `code_metrics` o los clones de `clone_detect`; el techo aceptado vive en `tests/metrics_baseline.json`. Una guardia de versiones (`tests/version_guard.py`) falla si cambia un paquete sin subir su `version` en el manifiesto, y una auditoría de documentación (`tests/audit_docs.py`) falla si los docs citan rutas, flags, recuentos o anclas que ya no cuadran.
 - Tests transversales en `tests/`: activación de las 79 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
 
 ### Licencia
@@ -487,7 +487,7 @@ package/
 └── skills.json           # array with every skill in the package
 ```
 
-Every `SKILL.md` (master and sub-skills) carries YAML frontmatter with `name` and `description` for automatic activation. Sub-skills reference shared assets relative to the package (`../references/`, `../scripts/`), so **install the whole folder**. `scripts/`, `tests/` and `skills.json` are present in every package; `references/` and `templates/` appear only when there is shared material worth splitting out.
+Every `SKILL.md` carries YAML frontmatter: `name` and `description` are required (the description is the activation signal), plus the portable `license`, `allowed-tools`, `compatibility` and `metadata` fields. Here `metadata` holds `package`, `version` and `author`, and read-only skills declare `allowed-tools` with read access plus their own scripts. Sub-skills reference shared assets relative to the package (`../references/`, `../scripts/`), so **install the whole folder**. `scripts/`, `tests/` and `skills.json` are present in every package; `references/` and `templates/` appear only when there is shared material worth splitting out.
 
 ### Technical Documentation
 
@@ -512,7 +512,7 @@ Comprehensive module documentation is available in the [`docs/`](docs/) director
 - **Python 3.9+** (uses only standard library modules: `argparse`, `re`, `ast`, `math`, `urllib`, `html.parser`, `json`).
 - Tests use `unittest`; test and quality tools (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) are in the `dev` group in `pyproject.toml` and managed by [`uv`](https://docs.astral.sh/uv/).
 - Prepare `.venv` and run every test from the repository root with `uv sync` and `uv run python run_tests.py`.
-- GitHub Actions runs all suites on every `push` via `.github/workflows/tests.yml`, plus a metrics gate (`tests/metrics_gate.py`) that fails when `code_metrics` `high` findings or `clone_detect` clones grow; the accepted ceiling lives in `tests/metrics_baseline.json`. A version guard (`tests/version_guard.py`) fails when a package changes without bumping its `version` in the manifest.
+- GitHub Actions runs all suites on every `push` via `.github/workflows/tests.yml`, plus a metrics gate (`tests/metrics_gate.py`) that fails when `code_metrics` `high` findings or `clone_detect` clones grow; the accepted ceiling lives in `tests/metrics_baseline.json`. A version guard (`tests/version_guard.py`) fails when a package changes without bumping its `version` in the manifest, and a documentation audit (`tests/audit_docs.py`) fails when the docs cite paths, flags, counts or anchors that no longer match.
 - Cross-cutting tests in `tests/`: activation for all 79 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
 
 ### License
