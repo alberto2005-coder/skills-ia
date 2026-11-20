@@ -85,6 +85,27 @@ class TagReleaseContractTests(unittest.TestCase):
         self.assertTrue(install, "falta el paso que instala actionlint con checksum")
         self.assertTrue(check, "falta el paso que ejecuta actionlint")
 
+    def test_tag_step_sets_a_git_identity_the_runner_lacks(self):
+        # El runner no trae user.name/user.email y `git tag -a` falla sin ellos.
+        steps = load("tag-release.yml")["jobs"]["plan"]["steps"]
+        script = next(
+            step["run"]
+            for step in steps
+            if step.get("name") == "Create and push tags idempotently"
+        )
+
+        self.assertIn("git config user.name", script)
+        self.assertIn("git config user.email", script)
+        self.assertLess(script.index("git config user.name"), script.index('git tag -a "$tag"'))
+
+    def test_manual_run_accepts_an_explicit_base(self):
+        inputs = load("tag-release.yml")["on"]["workflow_dispatch"]["inputs"]
+        steps = load("tag-release.yml")["jobs"]["plan"]["steps"]
+        env = next(step["env"] for step in steps if step.get("id") == "plan")
+
+        self.assertTrue(inputs["base"]["required"])
+        self.assertEqual(env["BASE_SHA"], "${{ inputs.base || github.event.before }}")
+
 
 if __name__ == "__main__":
     unittest.main()

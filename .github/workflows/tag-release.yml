@@ -8,10 +8,20 @@ name: Tag releases
 # PAT en el secreto RELEASE_TOKEN este workflow publica las releases él mismo
 # llamando a los workflows reutilizables. Con RELEASE_TOKEN se limita a etiquetar
 # y deja que `push: tags` dispare la publicación.
+#
+# `workflow_dispatch` repite el plan a mano cuando el push anterior falló:
+# al no quedar cambios nuevos, el `before` del siguiente push ya no vería los
+# bumps, así que ahí la base se pasa explícita.
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      base:
+        description: "SHA de base para calcular las versiones nuevas (obligatorio al lanzarlo a mano)"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -49,9 +59,13 @@ jobs:
       - name: Plan releases from the version diff
         id: plan
         env:
-          BASE_SHA: ${{ github.event.before }}
+          BASE_SHA: ${{ inputs.base || github.event.before }}
           HAS_TOKEN: ${{ secrets.RELEASE_TOKEN != '' }}
         run: |
+          if [ -z "$BASE_SHA" ]; then
+            echo "::error::sin base para comparar versiones: al lanzarlo a mano pasa el SHA anterior"
+            exit 1
+          fi
           plan=$(uv run --locked python tests/version_guard.py --plan --base "$BASE_SHA")
           printf '%s\n' "$plan" > release-plan.json
           printf '%s\n' "$plan"
@@ -74,6 +88,10 @@ jobs:
 
       - name: Create and push tags idempotently
         run: |
+          # El runner no trae identidad de git y `git tag -a` la exige: sin esto
+          # el paso muere con "empty ident name" antes de crear el primer tag.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           jq -r '.packages[] | "\(.tag) \(.package) \(.version)"' release-plan.json |
             while read -r tag package version; do
               if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
