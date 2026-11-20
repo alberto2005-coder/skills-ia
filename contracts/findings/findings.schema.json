@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skills-ia.local/contracts/findings/1.0.0/findings.schema.json",
+  "title": "findings.json — contrato común de auditores",
+  "description": "Un fichero de hallazgos válido para cualquier auditor del catálogo. La huella deduplica entre ejecuciones, la severidad y la confianza son escalas cerradas y la ubicación es híbrida: `file` puede llevar líneas, `url`, `resource` y `schema` no, para no inventar números de línea en hallazgos de SEO, FinOps o esquemas de base de datos.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tool", "summary", "findings"],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "description": "Versión del contrato. Cambia solo con cambios incompatibles."
+    },
+    "generated_at": {
+      "type": "string",
+      "description": "Fecha ISO 8601 de generación, en UTC cuando se pueda."
+    },
+    "target": {
+      "type": ["string", "null"],
+      "description": "Repositorio, sitio o artefacto auditado."
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package", "skill", "version"],
+      "properties": {
+        "package": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Paquete del catálogo que produjo el informe."
+        },
+        "skill": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Skill concreta dentro del paquete."
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Versión del paquete en el momento de la ejecución."
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "by_severity"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "by_severity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["critical", "high", "medium", "low", "info"],
+          "description": "Siempre las cinco claves, con 0 donde no haya hallazgos: así el diff entre ejecuciones es estable.",
+          "properties": {
+            "critical": { "type": "integer", "minimum": 0 },
+            "high": { "type": "integer", "minimum": 0 },
+            "medium": { "type": "integer", "minimum": 0 },
+            "low": { "type": "integer", "minimum": 0 },
+            "info": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "score": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Nota opcional cuando el auditor puntúa (SEO, cumplimiento)."
+        },
+        "note": {
+          "type": ["string", "null"],
+          "description": "Veredicto o matiz en una frase: «listo para producción», «perfil estándar»…"
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fingerprint",
+        "rule_id",
+        "severity",
+        "confidence",
+        "title",
+        "message",
+        "evidence",
+        "remediation",
+        "location"
+      ],
+      "properties": {
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{32}$",
+          "description": "sha256(rule_id|location.type|location.target|título normalizado), truncado a 32 hex. No incluye línea: la misma causa se deduplica aunque el código se mueva."
+        },
+        "rule_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,63}$",
+          "description": "Identificador de la regla en su auditor: `CWE-89`, `SRC-TITLE-001`, `llm-model-cost`…"
+        },
+        "severity": {
+          "enum": ["critical", "high", "medium", "low", "info"]
+        },
+        "confidence": {
+          "enum": ["high", "medium", "low"],
+          "description": "Cuánto respalda la evidencia al hallazgo; independiente de la severidad."
+        },
+        "title": { "type": "string", "minLength": 3, "maxLength": 160 },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Qué pasa y por qué importa, en una o dos frases."
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Dato observado: fragmento, cabecera, medición o recuento. Sin secretos."
+        },
+        "remediation": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Cómo se arregla, concreto y accionable."
+        },
+        "references": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/reference" },
+          "description": "CWE, OWASP, WCAG, documentación oficial…"
+        },
+        "location": { "$ref": "#/$defs/location" }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "description": "CWE-89, OWASP A03:2021, WCAG 1.1.1…" },
+        "url": { "type": "string", "pattern": "^https?://" }
+      }
+    },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "target"],
+      "properties": {
+        "type": {
+          "enum": ["file", "url", "resource", "schema"],
+          "description": "file: ruta de código; url: página o endpoint; resource: recurso de infraestructura; schema: tabla, columna o contrato."
+        },
+        "target": { "type": "string", "minLength": 1 },
+        "line": { "type": ["integer", "null"], "minimum": 1 },
+        "end_line": { "type": ["integer", "null"], "minimum": 1 }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "enum": ["url", "resource", "schema"] } }
+          },
+          "then": {
+            "properties": { "line": { "type": "null" }, "end_line": { "type": "null" } },
+            "description": "Solo `file` lleva líneas: en una URL o un recurso serían inventadas."
+          }
+        }
+      ]
+    }
+  }
+}
