@@ -8,6 +8,26 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · Contrato común en cinco auditores y release v5.2.0
+
+#### Añadido
+
+- **Adaptadores `db`, `api` y `finops`:** `emit.py` entiende ahora el `--json` de `db-architect` (`lock_audit`, `drift`, `schema_audit`, `migration_guard`, `sql_lint`, `query_trace`), de `api-contract-guard` (`contract_diff`, `auth_coverage`, `code_sync`) y de `finops-auditor` (`llm_cost_scan`, `infra_cost_scan`, `ci_cost_scan`). Los hallazgos con fichero y línea van a `file`; `drift` y sus tablas, a `schema`; las rutas y endpoints, a `url`. `major`/`minor`/`patch` de un contrato se leen como `high`/`medium`/`low`, y el `warning` de `migration_guard` como `medium`.
+- **Correcciones por regla:** el adaptador usa el `fix` que ya trae el hallazgo (el `CREATE INDEX` que propone `schema_audit`) o una tabla de 41 reglas con el arreglo concreto; una regla nueva remite a la guía del paquete en vez de improvisar un consejo.
+- **`tests/test_findings_contract.py`:** de 21 a 31 tests, con los tres adaptadores nuevos (ubicaciones `file`/`schema`/`url`, alias de severidad, `fix` propio, fusión de duplicados y CLI que lee la versión del manifiesto).
+- **v5.2.0:** el índice raíz y el marketplace pasan a 5.2.0. No hay versiones de paquete nuevas: la ola añade el contrato y su herramienta, no cambia el contenido de los paquetes, así que la release solo lleva el bundle.
+
+#### Corregido
+
+- **Dos sitios idénticos en el mismo fichero colapsaban en la huella:** dos llamadas sin `max_tokens` en las líneas 7 y 16 del mismo `assistant.py` comparten regla, fichero y título, así que el validador rechazaba la huella repetida. El emisor los fusiona y deja los dos sitios en `evidence`; no se pierde ninguno ni se debilita la deduplicación entre pasadas.
+- **`GET /users/{id}` acababa en `artifactLocation.uri`**, que no es una URI válida. Las `url` sin esquema (rutas y endpoints) van ahora a `logicalLocations`, y solo las absolutas ocupan `physicalLocation`.
+
+#### Notas
+
+- **Ejemplos reales:** `db-architect` sobre migraciones con bloqueos (7 hallazgos: 3 `high`), `drift` (5, con ubicaciones `schema` como `users.age`), `api-contract-guard` (`contract-diff-major` sobre `/legacy/export` y `GET /users/{id}`) y `finops-auditor` (5 en LLM con dos sitios fusionados, 3 en Terraform y 2 en CI). Los diez informes salen del CLI nativo de cada paquete, se convierten con `emit.py` y pasan el validador con exit 0.
+- **Huella:** se mantiene sin línea a propósito (el defecto sigue cuando el código se mueve); el precio son los duplicados del mismo mensaje, resueltos fusionando y listando sitios.
+- Verificación: 31 tests de contrato, `run_tests.py` en 3.13 y 3.9, `ruff`, `metrics_gate`, `lint_frontmatter`, `audit_docs` y `markdownlint-cli2` en verde.
+
 ### - 2026-11-20 · Contrato común de hallazgos (Ola 2, paso 1)
 
 #### Añadido
@@ -685,6 +705,26 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · Shared contract across five auditors and the v5.2.0 release
+
+#### Added
+
+- **`db`, `api` and `finops` adapters:** `emit.py` now reads the `--json` of `db-architect` (`lock_audit`, `drift`, `schema_audit`, `migration_guard`, `sql_lint`, `query_trace`), of `api-contract-guard` (`contract_diff`, `auth_coverage`, `code_sync`) and of `finops-auditor` (`llm_cost_scan`, `infra_cost_scan`, `ci_cost_scan`). Findings with a file and line go to `file`; `drift` and its tables go to `schema`; routes and endpoints go to `url`. Contract `major`/`minor`/`patch` reads as `high`/`medium`/`low`, and `migration_guard`'s `warning` as `medium`.
+- **Per-rule fixes:** the adapter uses the `fix` the finding already carries (the `CREATE INDEX` that `schema_audit` proposes) or a 41-rule table with the concrete fix; a new rule points at the package guide instead of inventing advice.
+- **`tests/test_findings_contract.py`:** 21 to 31 tests, covering the three new adapters (`file`/`schema`/`url` locations, severity aliases, own `fix`, duplicate merging and a CLI that reads the manifest version).
+- **v5.2.0:** the root index and the marketplace move to 5.2.0. No new package versions: the wave adds the contract and its tooling, not package content, so the release only ships the bundle.
+
+#### Fixed
+
+- **Two identical sites in the same file collapsed in the fingerprint:** two calls without `max_tokens` on lines 7 and 16 of the same `assistant.py` share rule, file and title, so the validator rejected the repeated fingerprint. The emitter merges them and keeps both sites in `evidence`; nothing is lost and cross-run deduplication stays intact.
+- **`GET /users/{id}` ended up in `artifactLocation.uri`**, which is not a valid URI. Schemeless `url` locations (routes and endpoints) now go to `logicalLocations`; only absolute ones take `physicalLocation`.
+
+#### Notes
+
+- **Real examples:** `db-architect` on migrations with locks (7 findings: 3 `high`), `drift` (5, with `schema` locations such as `users.age`), `api-contract-guard` (`contract-diff-major` on `/legacy/export` and `GET /users/{id}`) and `finops-auditor` (5 in LLM with two sites merged, 3 in Terraform and 2 in CI). All ten reports come from each package's native CLI, are converted with `emit.py` and pass the validator with exit 0.
+- **Fingerprint:** it stays line-free on purpose (the defect survives when the code moves); the price is duplicate messages, solved by merging and listing sites.
+- Verification: 31 contract tests, `run_tests.py` on 3.13 and 3.9, `ruff`, `metrics_gate`, `lint_frontmatter`, `audit_docs` and `markdownlint-cli2` green.
 
 ### - 2026-11-20 · Shared findings contract (Wave 2, step 1)
 
