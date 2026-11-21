@@ -10,7 +10,9 @@ paquete es la única fuente de verdad de la versión.
 
 `--bumped` imprime las subidas detectadas (`<paquete> <versión>`) y `--plan`
 devuelve el plan de publicación en JSON (paquetes con tag y bundle si cambia la
-versión del índice raíz), que es lo que consumen los workflows de tags.
+versión del índice raíz), que es lo que consumen los workflows de tags. Un
+paquete nuevo (sin manifiesto en la base) entra con su primera versión, para
+que su tag se cree sin intervención manual.
 
 Código de salida: 0 sin problemas · 1 paquetes sin subir · 2 entorno inválido.
 """
@@ -100,15 +102,24 @@ def package_changes(root: Path, base: str) -> dict[str, list[str]]:
     return changes
 
 
-def bumped_packages(root: Path, base: str) -> dict[str, tuple[str, str]]:
-    """{paquete: (versión anterior, nueva)} solo con subidas estrictas."""
-    bumps: dict[str, tuple[str, str]] = {}
+def bumped_packages(root: Path, base: str) -> dict[str, tuple[str | None, str]]:
+    """{paquete: (versión anterior, nueva)} con subidas y paquetes nuevos.
+
+    Un paquete presente en HEAD y ausente en `base` no tiene versión anterior:
+    entra con `None` para que el plan de publicación le cree su primer tag.
+    """
+    bumps: dict[str, tuple[str | None, str]] = {}
     for package in sorted(package_changes(root, base)):
         old = manifest_version(root, package, base)
         new = manifest_version(root, package)
-        old_key = version_key(old or "")
         new_key = version_key(new or "")
-        if old_key is not None and new_key is not None and new_key > old_key:
+        if new_key is None:
+            continue  # sin manifiesto actual o versión no semver: no se publica
+        if old is None:
+            bumps[package] = (None, new)
+            continue
+        old_key = version_key(old)
+        if old_key is not None and new_key > old_key:
             bumps[package] = (old, new)
     return bumps
 

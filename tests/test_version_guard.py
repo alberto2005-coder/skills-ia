@@ -98,6 +98,25 @@ class VersionGuardTests(unittest.TestCase):
 
         self.assertEqual(version_guard.lint_changes(self.root, "HEAD~1"), [])
 
+    def test_new_package_enters_the_release_plan(self):
+        package = self.root / "nuevo"
+        package.mkdir()
+        (package / "skills.json").write_text(
+            '{"name": "nuevo", "version": "0.1.0"}', encoding="utf-8"
+        )
+        run_git(self.root, "add", "-A")
+        run_git(self.root, "commit", "-qm", "nuevo")
+
+        self.assertEqual(
+            version_guard.bumped_packages(self.root, "HEAD~1"),
+            {"nuevo": (None, "0.1.0")},
+        )
+        self.assertEqual(version_guard.lint_changes(self.root, "HEAD~1"), [])
+        self.assertEqual(
+            version_guard.release_plan(self.root, "HEAD~1")["packages"],
+            [{"package": "nuevo", "version": "0.1.0", "tag": "nuevo-v0.1.0"}],
+        )
+
     def test_release_plan_lists_packages_and_tags(self):
         self.commit_change("demo/scripts/tool.py", "print('hola')\n", version="1.2.0")
 
