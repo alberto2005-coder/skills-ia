@@ -15,7 +15,7 @@ description: >
 license: MIT
 metadata:
   package: appsec-audit
-  version: "2.0.1"
+  version: "2.1.0"
   author: "Alberto Ortiz"
 ---
 
@@ -48,6 +48,19 @@ El hallazgo no es «usa `eval`»: es «este parámetro de la ruta llega a `eval`
 | Ficheros | Path traversal, subida sin validar tipo/tamaño, ejecución desde uploads |
 | Red saliente | SSRF, validación de destino, metadatos cloud |
 | Lógica | Límites, cupones, carrito, concurrencia, estados imposibles, idempotencia |
+
+## API Security Top 10
+
+Cuatro familias donde el fallo es de autorización, no de saneo. El detalle, con patrón vulnerable y patrón que lo cierra, está en `references/api-security-top10.md`.
+
+| Familia | Regla | Qué se busca |
+|---|---|---|
+| BOLA | `bola-sin-scope` | El id de la ruta llega al ORM sin filtro de propietario o tenant |
+| Mass assignment | `mass-assignment` | El cuerpo de la petición se vuelca entero en el modelo |
+| BFLA | `bfla-sin-rol` | Operación administrativa con autenticación pero sin comprobación de rol |
+| SSRF | `ssrf-sin-allowlist` | Una URL del usuario llega al cliente HTTP sin allowlist |
+
+La cobertura de rutas y el contrato OpenAPI son de `api-contract-guard`; aquí se juzga el código que implementa la autorización.
 
 ## Reglas de análisis
 

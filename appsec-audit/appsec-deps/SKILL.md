@@ -12,7 +12,7 @@ description: >
 license: MIT
 metadata:
   package: appsec-audit
-  version: "2.0.1"
+  version: "2.1.0"
   author: "Alberto Ortiz"
 ---
 

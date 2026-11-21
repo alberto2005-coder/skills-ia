@@ -2,7 +2,7 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "appsec-audit",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Auditoría integral de seguridad con trazado de fuentes a sumideros, tribunal de validación y nota A-F.",
   "skills": [
     {
@@ -18,7 +18,7 @@
     {
       "name": "appsec-code",
       "path": "appsec-code/SKILL.md",
-      "description": "Trazado fuente a sumidero en cualquier lenguaje, control de acceso, autenticación y lógica."
+      "description": "Trazado fuente a sumidero, control de acceso, API Security Top 10 (BOLA, mass assignment, BFLA, SSRF) y lógica de negocio."
     },
     {
       "name": "appsec-infra",
