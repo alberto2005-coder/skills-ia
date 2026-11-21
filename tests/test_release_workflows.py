@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import unittest
 from pathlib import Path
 
@@ -25,6 +26,18 @@ def plan_script() -> str:
         if step.get("id") == "plan":
             return step["run"]
     raise AssertionError("tag-release.yml no tiene un paso con id=plan")
+
+
+def publish_script(name: str) -> str:
+    steps = load(name)["jobs"]["release"]["steps"]
+    for step in steps:
+        if step.get("name") == "Publish the release":
+            return step["run"]
+    raise AssertionError(f"{name} no tiene un paso llamado «Publish the release»")
+
+
+def release_create_lines(script: str) -> list[str]:
+    return [line.strip() for line in script.splitlines() if "gh release create" in line]
 
 
 class TagReleaseContractTests(unittest.TestCase):
@@ -127,6 +140,39 @@ class TagReleaseContractTests(unittest.TestCase):
 
                 self.assertIn("scripts/release_notes.py", text)
                 self.assertNotIn("changelog_gen.py", text)
+
+    def test_package_releases_never_claim_latest(self):
+        script = publish_script("release-package.yml")
+        creates = release_create_lines(script)
+        edits = [line for line in script.splitlines() if "gh release edit" in line]
+
+        self.assertTrue(creates, "release-package.yml no publica la release")
+        self.assertTrue(edits, "release-package.yml no ajusta `Latest` al relanzar")
+        for line in creates + edits:
+            self.assertIn("--latest=false", line)
+
+    def test_bundle_release_claims_latest(self):
+        script = publish_script("release-bundle.yml")
+        creates = release_create_lines(script)
+        edits = [line for line in script.splitlines() if "gh release edit" in line]
+        latest = re.compile(r"--latest(?![=\w-])")
+
+        self.assertTrue(creates, "release-bundle.yml no publica la release")
+        self.assertTrue(edits, "release-bundle.yml no reafirma `Latest` al relanzar")
+        for line in creates + edits:
+            self.assertRegex(line, latest)
+            self.assertNotIn("--latest=false", line)
+
+    def test_every_release_create_declares_its_latest_policy(self):
+        # Sin política explícita GitHub elige por fecha y versión: un paquete
+        # puede quitarle `Latest` al bundle. Toda llamada debe declararla.
+        for name in ("release-package.yml", "release-bundle.yml"):
+            with self.subTest(workflow=name):
+                lines = release_create_lines(publish_script(name))
+
+                self.assertTrue(lines, f"{name} no publica releases")
+                for line in lines:
+                    self.assertTrue("--latest" in line, line)
 
 if __name__ == "__main__":
     unittest.main()

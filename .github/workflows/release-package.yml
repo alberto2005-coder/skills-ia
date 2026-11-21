@@ -108,6 +108,8 @@ jobs:
           cat dist/*.sha256 > SHA256SUMS
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" dist/*.zip SHA256SUMS --clobber
+            # Un relanzamiento nunca debe reclamar `Latest`: eso es del bundle.
+            gh release edit "$TAG" --latest=false
           else
-            gh release create "$TAG" dist/*.zip SHA256SUMS --title "$TAG" --notes-file notes.md
+            gh release create "$TAG" dist/*.zip SHA256SUMS --title "$TAG" --notes-file notes.md --latest=false
           fi

@@ -91,6 +91,8 @@ jobs:
           cat dist/*.sha256 > SHA256SUMS
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" dist/*.zip SHA256SUMS skills.json --clobber
+            # El bundle es siempre la release `Latest` del repositorio.
+            gh release edit "$TAG" --latest
           else
-            gh release create "$TAG" dist/*.zip SHA256SUMS skills.json --title "$TAG" --notes-file notes.md
+            gh release create "$TAG" dist/*.zip SHA256SUMS skills.json --title "$TAG" --notes-file notes.md --latest
           fi
