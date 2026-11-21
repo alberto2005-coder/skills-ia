@@ -8,6 +8,28 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-21 · Paquete pr-reviewer y bundle 6.0.0 (lote 3 de v6.0.0)
+
+#### Añadido
+
+- **Paquete `pr-reviewer` 1.0.0** con cinco skills: maestro, `pr-risk`, `pr-order`, `pr-routing` y `pr-findings`. Trabaja sobre el diff y no ejecuta agentes ni la suite del proyecto.
+- **`review_risk.py`**: severidad por fichero (dominio sensible, tamaño, claves expuestas, manifiestos y supresiones) con `--fail-on`.
+- **`review_order.py`**: oleadas de lectura por imports locales, con ciclos y ficheros sin grafo.
+- **`review_routing.py`**: reparto tipo CODEOWNERS con carga por revisor, rutas sin dueño y rutas sensibles sin respaldo.
+- **`review_findings.py`**: consolida informes, deduplica por fichero, línea y regla y conserva `not_run` para lo no ejecutado.
+- **`skill-evals` 1.1.0** con la sub-skill `eval-ab`: comparativa de dos corridas grabadas (eficacia, cumplimiento, coste, latencia y variabilidad).
+- **Bundle 6.0.0**: 14 paquetes y 92 skills en el índice, el marketplace, `run_tests.py`, `pyproject.toml`, README, índice y guías.
+- **`docs/pr-reviewer.md`**: guía bilingüe del paquete, con comandos, formatos y límites.
+
+#### Cambiado
+
+- `tests/phrases.json` añade dos frases positivas y una negativa por skill nueva; las evals pasan a 487 casos sin colisiones.
+- `tests/version_guard.py --plan` incluye los paquetes nuevos con su primera versión, para que su tag se cree solo.
+
+#### Validación
+
+- Suite completa en verde: 934 tests, más las puertas de lint, documentación, activación, métricas, `ruff` y `markdownlint`.
+
 ### - 2026-11-21 · Paquete test-architect (lote 2 de v6.0.0)
 
 #### Añadido
@@ -749,6 +771,28 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-21 · pr-reviewer package and bundle 6.0.0 (v6.0.0 batch 3)
+
+#### Added
+
+- **`pr-reviewer` 1.0.0 package** with five skills: master, `pr-risk`, `pr-order`, `pr-routing` and `pr-findings`. It works from the diff and runs neither agents nor the project's suite.
+- **`review_risk.py`**: per-file severity (sensitive domain, size, leaked keys, manifests and suppressions) with `--fail-on`.
+- **`review_order.py`**: reading waves by local imports, with cycles and files without a graph.
+- **`review_routing.py`**: CODEOWNERS-style routing with per-reviewer load, unowned files and sensitive paths without backup.
+- **`review_findings.py`**: merges reports, deduplicates by file, line and rule, and keeps `not_run` for anything that did not run.
+- **`skill-evals` 1.1.0** with the `eval-ab` sub-skill: comparison of two recorded runs (effectiveness, compliance, cost, latency and variability).
+- **Bundle 6.0.0**: 14 packages and 92 skills in the index, marketplace, `run_tests.py`, `pyproject.toml`, README, index and guides.
+- **`docs/pr-reviewer.md`**: bilingual guide for the package, with commands, formats and limits.
+
+#### Changed
+
+- `tests/phrases.json` adds two positive and one negative phrase per new skill; evals grow to 487 cases with no collisions.
+- `tests/version_guard.py --plan` includes new packages with their first version, so their tag is created automatically.
+
+#### Validation
+
+- Full suite green: 934 tests, plus the lint, docs, activation, metrics, `ruff` and `markdownlint` gates.
 
 ### - 2026-11-21 · test-architect package (v6.0.0 batch 2)
 

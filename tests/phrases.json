@@ -1,383 +1,15 @@
 {
-  "threshold": 0.3,
   "description": "Frases de activación por skill. 'positives' debe ganar la propia skill; 'negatives' es una frase que NO debe activarla y dice qué skill debe ganar; 'out_of_domain' no debe activar ninguna.",
+  "out_of_domain": [
+    "hazme una tortilla de patatas",
+    "traduce este párrafo al inglés",
+    "ordena esta lista de la compra",
+    "cuál es la capital de Australia",
+    "resume este artículo",
+    "resume este texto"
+  ],
   "skills": {
-    "replica": {
-      "positives": [
-        "ejecuta el pipeline replica completo con aprobación en cada fase",
-        "orquesta la réplica de una app de principio a fin y guarda el progreso",
-        "usa el comando maestro /replica para retomar donde lo dejamos",
-        "run the clean-room replica pipeline and continue it from progress.md",
-        "ask for approval before each phase of the replica pipeline"
-      ],
-      "negatives": [
-        {
-          "phrase": "escanea esta skill en busca de inyecciones de prompt",
-          "winner": "agent-red-team"
-        },
-        {
-          "phrase": "puntúa este texto y dime si parece escrito por IA",
-          "winner": "detector-ia"
-        }
-      ]
-    },
-    "replica-recon": {
-      "positives": [
-        "define el alcance y los límites legales antes de clonar la app",
-        "haz el inventario de funciones de esta app con evidencia y confianza",
-        "reconocimiento de una suite compleja como Word o Figma",
-        "set the legal scope and boundaries before cloning an app",
-        "inventory the app features with evidence and confidence",
-        "clone this app and list its features"
-      ],
-      "negatives": [
-        {
-          "phrase": "despliega la app en producción con backups y rollback",
-          "winner": "replica-deploy"
-        },
-        {
-          "phrase": "mide la paridad visual entre el original y el clon",
-          "winner": "replica-diff"
-        }
-      ]
-    },
-    "replica-architect": {
-      "positives": [
-        "decide el stack y el modelo de datos con invariantes testeables",
-        "define los contratos entre capas antes de programar",
-        "choose the stack and the data model with testable invariants",
-        "define the contracts between layers before coding"
-      ],
-      "negatives": [
-        {
-          "phrase": "define los tokens y componentes del sistema de diseño",
-          "winner": "replica-design"
-        },
-        {
-          "phrase": "configura la autenticación y los pagos del backend",
-          "winner": "replica-backend"
-        }
-      ]
-    },
-    "replica-design": {
-      "positives": [
-        "define tokens, tipografía y componentes con contraste WCAG",
-        "crea el sistema de diseño propio de la app clonada",
-        "define design tokens, typography and components with WCAG contrast",
-        "build the clone design system with accessible components"
-      ],
-      "negatives": [
-        {
-          "phrase": "prepara el listing de la App Store y sus límites",
-          "winner": "replica-launch"
-        },
-        {
-          "phrase": "escribe el plan de pruebas end-to-end",
-          "winner": "replica-test"
-        }
-      ]
-    },
-    "replica-build": {
-      "positives": [
-        "construye por incrementos los flujos must de features.csv",
-        "implementa las pantallas usando los tokens aprobados",
-        "implement the must flows from features.csv incrementally",
-        "implement the screens with the approved tokens"
-      ],
-      "negatives": [
-        {
-          "phrase": "mide la paridad funcional con parity.py",
-          "winner": "replica-diff"
-        },
-        {
-          "phrase": "haz el rebrand y deja el sweep a cero",
-          "winner": "replica-brand"
-        }
-      ]
-    },
-    "replica-backend": {
-      "positives": [
-        "añade autenticación, permisos por recurso y pagos al clon",
-        "esquema con migraciones versionadas, permisos por recurso y jobs idempotentes",
-        "add authentication and per-resource permissions to the clone",
-        "versioned migrations, payments and idempotent jobs"
-      ],
-      "negatives": [
-        {
-          "phrase": "lee las reseñas públicas y extrae temas con citas",
-          "winner": "replica-entrepreneur"
-        },
-        {
-          "phrase": "escribe tres guiones de Reels para Instagram",
-          "winner": "replica-redes"
-        }
-      ]
-    },
-    "replica-test": {
-      "positives": [
-        "escribe el plan de pruebas y ejecuta los casos end-to-end",
-        "registra los bugs con severidad S1 y S2",
-        "write the test plan and run end-to-end cases",
-        "log the bugs with S1 S2 S3 severity"
-      ],
-      "negatives": [
-        {
-          "phrase": "compara las capturas del original y del clon",
-          "winner": "replica-diff"
-        },
-        {
-          "phrase": "prepara el preflight del despliegue",
-          "winner": "replica-deploy"
-        }
-      ]
-    },
-    "replica-diff": {
-      "positives": [
-        "mide la paridad funcional y visual entre original y clon",
-        "compara las capturas con imgdiff y explica las diferencias",
-        "measure functional and visual parity between the original and the clone",
-        "compare the screenshots with imgdiff and explain the differences"
-      ],
-      "negatives": [
-        {
-          "phrase": "analiza reseñas reales de usuarios y saca temas",
-          "winner": "replica-entrepreneur"
-        },
-        {
-          "phrase": "define los límites legales y el alcance del clon",
-          "winner": "replica-recon"
-        }
-      ]
-    },
-    "replica-entrepreneur": {
-      "positives": [
-        "analiza reseñas públicas y saca temas con citas y URL",
-        "convierte la voz del usuario en un plan de mejoras",
-        "read the public reviews and extract themes with quotes and URLs",
-        "turn the user voice into a fix plan"
-      ],
-      "negatives": [
-        {
-          "phrase": "rebrandea el producto antes de publicar",
-          "winner": "replica-brand"
-        },
-        {
-          "phrase": "audita el módulo de schema y el inventario JSON-LD",
-          "winner": "seo-audit"
-        }
-      ]
-    },
-    "replica-brand": {
-      "positives": [
-        "haz el rebrand completo y deja el sweep a cero",
-        "cambia nombre, paleta, logo y copy por otros propios",
-        "rebrand the name, palette, logo and copy before publishing",
-        "drive sweep.py to zero brand leftovers"
-      ],
-      "negatives": [
-        {
-          "phrase": "prepara los precios por país para el lanzamiento",
-          "winner": "replica-launch"
-        },
-        {
-          "phrase": "mide la similitud de layout con imgdiff",
-          "winner": "replica-diff"
-        }
-      ]
-    },
-    "replica-launch": {
-      "positives": [
-        "prepara la landing, el listing de tiendas y los precios por país",
-        "valida el listing con listing.py y los límites de caracteres",
-        "write the landing and the store listing with character limits",
-        "set per-country pricing for the launch"
-      ],
-      "negatives": [
-        {
-          "phrase": "despliega con confirmación explícita y backups",
-          "winner": "replica-deploy"
-        },
-        {
-          "phrase": "escribe los guiones de Reels y los captions",
-          "winner": "replica-redes"
-        }
-      ]
-    },
-    "replica-deploy": {
-      "positives": [
-        "haz el preflight y despliega en producción con rollback",
-        "comprueba secretos, migraciones y restore de backup antes de publicar",
-        "run preflight checks with backups and rollback",
-        "verify the deployment is live after publishing"
-      ],
-      "negatives": [
-        {
-          "phrase": "escribe el copy de la landing y el listing",
-          "winner": "replica-launch"
-        },
-        {
-          "phrase": "haz análisis estático del APK con strings y rutas",
-          "winner": "replica-static"
-        }
-      ]
-    },
-    "replica-static": {
-      "positives": [
-        "análisis estático opt-in de un APK propio con strings y rutas",
-        "extrae endpoints del app.asar autorizado sin instalar nada",
-        "static analysis of an authorized artifact to extract strings and endpoints",
-        "extract routes and endpoints without installing tools"
-      ],
-      "negatives": [
-        {
-          "phrase": "escanea la skill por Unicode invisible",
-          "winner": "agent-red-team"
-        },
-        {
-          "phrase": "ejecuta el pipeline completo de réplica",
-          "winner": "replica"
-        }
-      ]
-    },
-    "replica-redes": {
-      "positives": [
-        "escribe tres guiones de Reels y captions para Instagram y TikTok",
-        "prepara el banco de ganchos y el sweep del copy social",
-        "write three Reels scripts and captions for social networks",
-        "prepare the hook bank for social networks"
-      ],
-      "negatives": [
-        {
-          "phrase": "prepara la landing y el listing de la tienda",
-          "winner": "replica-launch"
-        },
-        {
-          "phrase": "haz el análisis estático del binario",
-          "winner": "replica-static"
-        }
-      ]
-    },
-    "seo-auditor": {
-      "positives": [
-        "explícame los modos web, source, local, híbrido y page del auditor",
-        "elige el modo de auditoría correcto y aplica la rúbrica de 100 puntos",
-        "choose the audit mode and follow the audit plan execute flow",
-        "explain the rubric and the one-line verdict of the audit"
-      ],
-      "negatives": [
-        {
-          "phrase": "aplica el plan SEO con backup y verifica",
-          "winner": "seo-execute"
-        },
-        {
-          "phrase": "dime si esta skill de terceros es segura",
-          "winner": "agent-red-team"
-        }
-      ]
-    },
-    "seo-audit": {
-      "positives": [
-        "audita el SEO de example.com y dame el veredicto",
-        "auditoría técnica completa de indexación, canonical y hreflang",
-        "revisa las cabeceras de seguridad y el rendimiento de la página",
-        "run the full audit and collect reproducible evidence",
-        "rescore the audit offline without hitting the network",
-        "check the security headers of my site"
-      ],
-      "negatives": [
-        {
-          "phrase": "rewrite this text and remove the AI tone",
-          "winner": "humanizar"
-        },
-        {
-          "phrase": "genera el PLAN.md con borradores DRAFT",
-          "winner": "seo-plan"
-        },
-        {
-          "phrase": "simula cómo se ve el título en Google",
-          "winner": "seo-serp"
-        }
-      ]
-    },
-    "seo-plan": {
-      "positives": [
-        "convierte la auditoría en un plan priorizado con borradores DRAFT",
-        "prioriza los fallos must y should por esfuerzo e impacto",
-        "turn the audit into a prioritized SEO plan for the web with DRAFT files",
-        "prioritize the must and should failures by effort and impact"
-      ],
-      "negatives": [
-        {
-          "phrase": "aplica los cambios con --apply y deja backup",
-          "winner": "seo-execute"
-        },
-        {
-          "phrase": "compara las dos auditorías y dame el delta",
-          "winner": "seo-compare"
-        }
-      ]
-    },
-    "seo-execute": {
-      "positives": [
-        "aplica el plan con --apply y deja backups .bak",
-        "escribe robots.txt y llms.txt en el proyecto",
-        "apply the plan with --apply and keep .bak backups",
-        "write robots.txt and llms.txt into the project"
-      ],
-      "negatives": [
-        {
-          "phrase": "genera el plan sin tocar el sitio",
-          "winner": "seo-plan"
-        },
-        {
-          "phrase": "previsualiza la tarjeta OG en WhatsApp",
-          "winner": "seo-serp"
-        }
-      ]
-    },
-    "seo-serp": {
-      "positives": [
-        "simula el título en Google escritorio y móvil y la tarjeta OG",
-        "mira si la meta descripción se trunca en Bing",
-        "preview the title and description in Google desktop and mobile",
-        "check if the meta description is truncated in Bing"
-      ],
-      "negatives": [
-        {
-          "phrase": "audita el módulo de schema y el inventario JSON-LD",
-          "winner": "seo-audit"
-        },
-        {
-          "phrase": "aplica robots.txt con backup",
-          "winner": "seo-execute"
-        }
-      ]
-    },
-    "seo-compare": {
-      "positives": [
-        "compara dos auditorías y clasifica mejorado, empeorado y resuelto",
-        "mide el efecto del deploy con el delta de puntuación",
-        "diff two audits and classify improved worse new and resolved",
-        "measure the effect of the deploy with the score delta"
-      ],
-      "negatives": [
-        {
-          "phrase": "genera el plan de acciones SEO",
-          "winner": "seo-plan"
-        },
-        {
-          "phrase": "simula la tarjeta social en LinkedIn",
-          "winner": "seo-serp"
-        }
-      ]
-    },
     "agent-red-team": {
-      "positives": [
-        "audita la seguridad de esta skill antes de instalarla",
-        "revisa la cadena de suministro y el servidor MCP antes de instalarlo",
-        "audit the safety of a third-party skill before installing it",
-        "is this MCP server safe to install"
-      ],
       "negatives": [
         {
           "phrase": "escaneo rápido de este SKILL.md, solo el veredicto",
@@ -387,89 +19,440 @@
           "phrase": "haz el análisis estático de un APK",
           "winner": "replica-static"
         }
+      ],
+      "positives": [
+        "audita la seguridad de esta skill antes de instalarla",
+        "revisa la cadena de suministro y el servidor MCP antes de instalarlo",
+        "audit the safety of a third-party skill before installing it",
+        "is this MCP server safe to install"
       ]
     },
-    "red-scan": {
-      "positives": [
-        "escaneo rápido: dime si esta skill es segura sin generar informe",
-        "veredicto de esta skill en el chat y no crees ficheros",
-        "quick scan of this skill: verdict in chat, no files",
-        "quick scan, verdict in chat and create no files"
-      ],
+    "api-auth-coverage": {
       "negatives": [
         {
-          "phrase": "auditoría completa con ledger y JSON validable",
-          "winner": "red-audit"
+          "phrase": "compara dos contratos openapi y calcula el impacto semver",
+          "winner": "api-diff"
         },
         {
-          "phrase": "reescribe este email en modo Full y recorta el relleno",
-          "winner": "humanizar"
+          "phrase": "cruza las rutas del backend con las llamadas del frontend",
+          "winner": "api-code-sync"
         }
+      ],
+      "positives": [
+        "comprueba que las rutas protegidas tengan guarda de autenticación",
+        "cruza la seguridad del contrato openapi con el código"
       ]
     },
-    "red-audit": {
-      "positives": [
-        "auditoría completa con verificación independiente y ledger de cobertura",
-        "genera el informe JSON validable y el ledger de superficies",
-        "full audit with independent verification and coverage ledger",
-        "generate the validatable JSON report and the coverage ledger"
-      ],
+    "api-code-sync": {
       "negatives": [
         {
-          "phrase": "solo el veredicto rápido en el chat",
-          "winner": "red-scan"
-        },
-        {
-          "phrase": "prepara el plan SEO de la web",
-          "winner": "seo-plan"
-        }
-      ]
-    },
-    "humanizador-anti-ia": {
-      "positives": [
-        "qué patrones del catálogo de 40 se aplican a este texto",
-        "humaniza este post de LinkedIn",
-        "choose the anti-AI writing mode for this text",
-        "detect the register and apply the factual honesty policy"
-      ],
-      "negatives": [
-        {
-          "phrase": "dame el score de IA de este texto sin modificarlo",
-          "winner": "detector-ia"
-        },
-        {
-          "phrase": "mide la paridad del clon con el original",
+          "phrase": "revisa la paridad visual entre el original y el clon",
           "winner": "replica-diff"
-        }
-      ]
-    },
-    "humanizar": {
-      "positives": [
-        "quita el tono de IA de este texto y reescríbelo",
-        "reescribe este artículo en modo Full y recorta el relleno",
-        "imita mi voz con estos párrafos y reescribe el email",
-        "rewrite this text to remove the AI patterns",
-        "trim the filler and keep the user's voice"
-      ],
-      "negatives": [
-        {
-          "phrase": "solo dame el score sin tocar el texto",
-          "winner": "detector-ia"
         },
         {
-          "phrase": "audita el SEO de la web",
+          "phrase": "corrige los tests que fallan en el pipeline",
+          "winner": "eval-run"
+        }
+      ],
+      "positives": [
+        "cruza las rutas del backend con las llamadas del frontend",
+        "detecta llamadas del frontend a rutas que el backend no declara"
+      ]
+    },
+    "api-contract-guard": {
+      "negatives": [
+        {
+          "phrase": "revisa los permisos iam del rol de despliegue",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "revisa el sbom y las cves alcanzables",
+          "winner": "appsec-deps"
+        }
+      ],
+      "positives": [
+        "defiende el contrato de la api: diff semver, cruce de rutas y servidor mock",
+        "revisa el contrato de la api: impacto semver y rutas del frontend",
+        "revisa el contrato de la api antes de publicarlo: diff, cruce de rutas y mock"
+      ]
+    },
+    "api-diff": {
+      "negatives": [
+        {
+          "phrase": "publica la landing con precios por país y listing",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "audita el seo técnico de la web",
           "winner": "seo-audit"
         }
+      ],
+      "positives": [
+        "compara dos contratos openapi y calcula el impacto semver",
+        "compara dos contratos openapi y detecta el cambio major en el endpoint o en el tipo de respuesta",
+        "calcula el impacto semver del contrato: endpoint eliminado es major y lo aditivo minor"
+      ]
+    },
+    "api-mock-server": {
+      "negatives": [
+        {
+          "phrase": "calcula el coste mensual de la infraestructura cloud",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "genera el informe de evaluación en html",
+          "winner": "eval-report"
+        }
+      ],
+      "positives": [
+        "levanta un servidor http mock en 127.0.0.1 con los ejemplos del contrato openapi",
+        "responde los ejemplos del contrato sin tocar el backend real",
+        "monta un servidor http mock local que responde los ejemplos declarados en el contrato"
+      ]
+    },
+    "appsec-audit": {
+      "negatives": [
+        {
+          "phrase": "audita la seguridad de esta skill de terceros antes de instalarla",
+          "winner": "agent-red-team"
+        },
+        {
+          "phrase": "audita el SEO técnico de mi tienda online",
+          "winner": "seo-audit"
+        }
+      ],
+      "positives": [
+        "audita la seguridad de esta aplicación antes de publicarla",
+        "haz una auditoría de ciberseguridad completa del proyecto",
+        "revisa la seguridad de mi API y de la infraestructura",
+        "security audit of my web application before release"
+      ]
+    },
+    "appsec-ci": {
+      "negatives": [
+        {
+          "phrase": "aplica el parche con aprobación y verifica el cierre en sandbox",
+          "winner": "appsec-fix"
+        },
+        {
+          "phrase": "genera el SBOM CycloneDX del proyecto",
+          "winner": "appsec-deps"
+        }
+      ],
+      "positives": [
+        "audita el workflow de GitHub Actions con pull_request_target",
+        "normaliza el SARIF y déjalo listo para upload-sarif",
+        "endurece el agente revisor y detecta qué herramientas hay instaladas"
+      ]
+    },
+    "appsec-code": {
+      "negatives": [
+        {
+          "phrase": "audita los manifiestos de Kubernetes y Terraform",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "revisa si el agente puede invocar herramientas sin permiso",
+          "winner": "appsec-llm"
+        }
+      ],
+      "positives": [
+        "traza el flujo de datos desde la petición hasta la consulta SQL",
+        "busca IDOR y fallos de control de acceso en los endpoints",
+        "revisa el código en busca de inyecciones y deserialización insegura",
+        "source to sink analysis of the request handler"
+      ]
+    },
+    "appsec-deps": {
+      "negatives": [
+        {
+          "phrase": "define el alcance y los activos antes de auditar la seguridad",
+          "winner": "appsec-recon"
+        },
+        {
+          "phrase": "calcula la nota A-F y escribe el informe con parches en diff",
+          "winner": "appsec-report"
+        }
+      ],
+      "positives": [
+        "genera el SBOM CycloneDX del proyecto",
+        "cruza los CVEs con la alcanzabilidad de cada dependencia",
+        "generate a CycloneDX SBOM and check CVE reachability"
+      ]
+    },
+    "appsec-fix": {
+      "negatives": [
+        {
+          "phrase": "audita el workflow de GitHub Actions con pull_request_target",
+          "winner": "appsec-ci"
+        },
+        {
+          "phrase": "aplica el tribunal y descarta los falsos positivos de la auditoría",
+          "winner": "appsec-report"
+        }
+      ],
+      "positives": [
+        "aplica el parche con aprobación y verifica el cierre en sandbox",
+        "propón la remediación con dry-run y busca variantes del mismo fallo",
+        "apply the patch only after approval and verify it in a sandbox"
+      ]
+    },
+    "appsec-infra": {
+      "negatives": [
+        {
+          "phrase": "revisa la inyección de prompt del agente",
+          "winner": "appsec-llm"
+        },
+        {
+          "phrase": "busca secretos y dependencias en el repositorio",
+          "winner": "appsec-recon"
+        }
+      ],
+      "positives": [
+        "audita el Dockerfile y los permisos IAM del despliegue",
+        "revisa los manifiestos de Kubernetes y Terraform en busca de recursos públicos",
+        "check IAM overpermissions and public buckets in Terraform"
+      ]
+    },
+    "appsec-llm": {
+      "negatives": [
+        {
+          "phrase": "audita la seguridad de esta skill de terceros antes de instalarla",
+          "winner": "agent-red-team"
+        },
+        {
+          "phrase": "audita la seguridad de mi API y del código",
+          "winner": "appsec-code"
+        }
+      ],
+      "positives": [
+        "audita la seguridad de un agente con herramientas y RAG",
+        "revisa la inyección de prompt y los permisos del servidor MCP",
+        "evalúa si el contenido externo puede secuestrar al agente",
+        "audit prompt injection and excessive agency in my LLM agent"
+      ]
+    },
+    "appsec-recon": {
+      "negatives": [
+        {
+          "phrase": "traza si la entrada del usuario llega a la consulta SQL",
+          "winner": "appsec-code"
+        },
+        {
+          "phrase": "revisa los permisos IAM y el Dockerfile del despliegue",
+          "winner": "appsec-infra"
+        }
+      ],
+      "positives": [
+        "define el alcance y los activos antes de auditar la seguridad",
+        "inventaría la superficie de ataque y las dependencias del repositorio",
+        "scope the assets and the attack surface before the audit"
+      ]
+    },
+    "appsec-report": {
+      "negatives": [
+        {
+          "phrase": "define el alcance y los activos de la auditoría",
+          "winner": "appsec-recon"
+        },
+        {
+          "phrase": "revisa los permisos IAM del despliegue",
+          "winner": "appsec-infra"
+        }
+      ],
+      "positives": [
+        "aplica el tribunal y descarta los falsos positivos de la auditoría",
+        "calcula la nota A-F y escribe el informe con parches en diff",
+        "filter false positives with a confidence score and grade the project"
+      ]
+    },
+    "appsec-scale": {
+      "negatives": [
+        {
+          "phrase": "haz el modelo de amenazas con límites de confianza y actores",
+          "winner": "appsec-threat"
+        },
+        {
+          "phrase": "genera el SBOM CycloneDX del proyecto",
+          "winner": "appsec-deps"
+        }
+      ],
+      "positives": [
+        "audita varios repositorios y dibuja la topología del sistema",
+        "estima el coste por fase con el perfil deep y los terceros",
+        "multi-repo audit with vendor inventory and cost per phase"
+      ]
+    },
+    "appsec-threat": {
+      "negatives": [
+        {
+          "phrase": "inventaría la superficie de ataque y las dependencias del repositorio",
+          "winner": "appsec-recon"
+        },
+        {
+          "phrase": "busca IDOR y fallos de control de acceso en los endpoints",
+          "winner": "appsec-code"
+        }
+      ],
+      "positives": [
+        "haz el modelo de amenazas con límites de confianza y actores",
+        "mapea cada amenaza a OWASP 2025 y a los capítulos de ASVS 5.0",
+        "threat model with trust boundaries mapped to ASVS chapters"
+      ]
+    },
+    "db-architect": {
+      "negatives": [
+        {
+          "phrase": "revisa los permisos iam del rol de despliegue",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "revisa el sbom y las cves alcanzables",
+          "winner": "appsec-deps"
+        }
+      ],
+      "positives": [
+        "audita la base de datos de principio a fin: esquema, migraciones y consultas n+1",
+        "revisa la base de datos antes de publicar: esquema, migraciones y consultas n+1",
+        "audita el esquema y las migraciones de la base de datos con evidencia"
+      ]
+    },
+    "db-drift": {
+      "negatives": [
+        {
+          "phrase": "genera el seed de la base de datos de pruebas",
+          "winner": "db-seed-gen"
+        },
+        {
+          "phrase": "corrige los tests que fallan en el pipeline",
+          "winner": "eval-run"
+        }
+      ],
+      "positives": [
+        "compara el esquema declarado con las migraciones reproducidas",
+        "detecta deriva entre el esquema sql y las migraciones",
+        "compara lo que dice el esquema con lo que construyen las migraciones"
+      ]
+    },
+    "db-expand-contract": {
+      "negatives": [
+        {
+          "phrase": "detecta las migraciones que bloquean la tabla",
+          "winner": "db-lock-audit"
+        },
+        {
+          "phrase": "compara el esquema declarado con las migraciones reproducidas",
+          "winner": "db-drift"
+        }
+      ],
+      "positives": [
+        "divide la migración en dos fases expand y contract",
+        "planifica el despliegue en dos fases sin cortar la tabla",
+        "separa los cambios aditivos de los destructivos en dos despliegues"
+      ]
+    },
+    "db-lock-audit": {
+      "negatives": [
+        {
+          "phrase": "audita el esquema de la base de datos y sus índices",
+          "winner": "db-schema-audit"
+        },
+        {
+          "phrase": "revisa la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        }
+      ],
+      "positives": [
+        "detecta las migraciones que bloquean la tabla",
+        "audita el bloqueo de la tabla antes de desplegar la migración"
+      ]
+    },
+    "db-migration-guard": {
+      "negatives": [
+        {
+          "phrase": "corrige los tests que fallan en el pipeline",
+          "winner": "eval-run"
+        },
+        {
+          "phrase": "audita el seo técnico de la web",
+          "winner": "seo-audit"
+        }
+      ],
+      "positives": [
+        "clasifica el riesgo de la migración: drop column y truncate son críticos",
+        "comprueba que la migración tenga downgrade para poder revertir",
+        "revisa el riesgo de la migración y su plan de reversión"
+      ]
+    },
+    "db-query-trace": {
+      "negatives": [
+        {
+          "phrase": "calcula el coste mensual de la infraestructura cloud",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "genera el informe de evaluación en html",
+          "winner": "eval-report"
+        }
+      ],
+      "positives": [
+        "detecta consultas n+1 dentro de bucles en el código python",
+        "revisa si el orm consulta por cada fila del bucle sin selectinload",
+        "revisa las consultas del orm dentro de un bucle del código"
+      ]
+    },
+    "db-schema-audit": {
+      "negatives": [
+        {
+          "phrase": "publica la landing con precios por país y listing",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "revisa la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        }
+      ],
+      "positives": [
+        "audita el esquema sql: claves primarias ausentes y claves foráneas sin índice",
+        "revisa las tablas sin primary key y las claves foráneas sin índice",
+        "valida el esquema sql con sqlite en memoria antes de migrar"
+      ]
+    },
+    "db-seed-gen": {
+      "negatives": [
+        {
+          "phrase": "despliega la app en producción con backups y rollback",
+          "winner": "replica-deploy"
+        },
+        {
+          "phrase": "escanea esta skill en busca de inyecciones de prompt",
+          "winner": "agent-red-team"
+        }
+      ],
+      "positives": [
+        "genera datos de siembra deterministas desde el esquema sql",
+        "crea datos de siembra respetando las claves foráneas y la semilla fija",
+        "genera inserts de prueba en orden de dependencias desde el esquema"
+      ]
+    },
+    "db-sql-lint": {
+      "negatives": [
+        {
+          "phrase": "audita el esquema y las claves foráneas sin índice",
+          "winner": "db-schema-audit"
+        },
+        {
+          "phrase": "genera el seed de la base de datos de pruebas",
+          "winner": "db-seed-gen"
+        }
+      ],
+      "positives": [
+        "revisa el estilo de las sentencias sql",
+        "lint de estilo sobre las consultas y migraciones sql",
+        "comprueba mayúsculas de palabras clave y el select asterisco"
       ]
     },
     "detector-ia": {
-      "positives": [
-        "puntúa este texto y dime cuánta IA tiene sin modificarlo",
-        "detecta los datos sin fuente y las señales de IA",
-        "score this text for AI signals without editing it",
-        "list the unsourced data in this draft",
-        "does this text look AI generated"
-      ],
       "negatives": [
         {
           "phrase": "reescribe el texto para que suene humano",
@@ -479,18 +462,419 @@
           "phrase": "escanea la skill por inyecciones de prompt",
           "winner": "agent-red-team"
         }
+      ],
+      "positives": [
+        "puntúa este texto y dime cuánta IA tiene sin modificarlo",
+        "detecta los datos sin fuente y las señales de IA",
+        "score this text for AI signals without editing it",
+        "list the unsourced data in this draft",
+        "does this text look AI generated"
+      ]
+    },
+    "docs-arch-gen": {
+      "negatives": [
+        {
+          "phrase": "audita el esquema de la base de datos y sus índices",
+          "winner": "db-schema-audit"
+        },
+        {
+          "phrase": "calcula el coste de los tokens del modelo",
+          "winner": "finops-llm-scan"
+        }
+      ],
+      "positives": [
+        "genera un borrador de arquitectura con la estructura y las responsabilidades",
+        "genera la tabla de módulos y responsabilidades leyendo los docstrings"
+      ]
+    },
+    "docs-changelog": {
+      "negatives": [
+        {
+          "phrase": "refactoriza con red: mide y congela casos dorados",
+          "winner": "refactor-surgeon"
+        },
+        {
+          "phrase": "protege el contrato de la api antes de publicar",
+          "winner": "api-contract-guard"
+        }
+      ],
+      "positives": [
+        "genera el changelog a partir de los commits convencionales",
+        "agrupa los commits en un borrador de changelog por versión"
+      ]
+    },
+    "docs-drift-check": {
+      "negatives": [
+        {
+          "phrase": "revisa la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        },
+        {
+          "phrase": "corrige los tests que fallan en el pipeline",
+          "winner": "eval-run"
+        }
+      ],
+      "positives": [
+        "detecta referencias rotas en la documentación",
+        "detecta referencias rotas comparando las rutas y los enlaces contra el árbol real",
+        "comprueba las referencias de la documentación contra el árbol del repositorio"
+      ]
+    },
+    "docs-env": {
+      "negatives": [
+        {
+          "phrase": "regenera el documento de arquitectura desde los ast",
+          "winner": "docs-arch-gen"
+        },
+        {
+          "phrase": "detecta términos prohibidos en los documentos",
+          "winner": "docs-terms"
+        }
+      ],
+      "positives": [
+        "cruza las variables de entorno del código con el .env.example",
+        "detecta variables de entorno sin documentar",
+        "comprueba que el readme documente las variables de entorno"
+      ]
+    },
+    "docs-parity": {
+      "negatives": [
+        {
+          "phrase": "genera el changelog a partir de los commits convencionales",
+          "winner": "docs-changelog"
+        },
+        {
+          "phrase": "detecta referencias del código que ya no existen en la documentación",
+          "winner": "docs-drift-check"
+        }
+      ],
+      "positives": [
+        "comprueba que las dos mitades del documento dicen lo mismo en español y en inglés",
+        "verifica la paridad entre la documentación ES y EN antes de la release"
+      ]
+    },
+    "docs-sync-engine": {
+      "negatives": [
+        {
+          "phrase": "revisa los permisos iam del rol de despliegue",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "publica la landing con precios por país y listing",
+          "winner": "replica-launch"
+        }
+      ],
+      "positives": [
+        "sincroniza la documentación con el código: referencias, arquitectura y changelog",
+        "mantén la documentación pegada al código y al día",
+        "mantiene la documentación al día: referencias, arquitectura y changelog"
+      ]
+    },
+    "docs-terms": {
+      "negatives": [
+        {
+          "phrase": "agrupa los commits convencionales en el changelog",
+          "winner": "docs-changelog"
+        },
+        {
+          "phrase": "regenera el documento de arquitectura desde los ast",
+          "winner": "docs-arch-gen"
+        }
+      ],
+      "positives": [
+        "revisa la terminología de la documentación con el glosario",
+        "detecta términos prohibidos en los documentos",
+        "avisa cuando un término no usa la grafía canónica"
+      ]
+    },
+    "eval-ab": {
+      "negatives": [
+        {
+          "phrase": "disena los casos de evaluacion y reparte train y test antes de ejecutar",
+          "winner": "eval-design"
+        }
+      ],
+      "positives": [
+        "compara dos corridas de evaluacion y dime cual es mejor",
+        "mide coste latencia y variabilidad entre dos variantes"
+      ]
+    },
+    "eval-design": {
+      "negatives": [
+        {
+          "phrase": "ejecuta los casos contra el router y aplica las puertas",
+          "winner": "eval-run"
+        }
+      ],
+      "positives": [
+        "diseña los casos de evaluación y reparte train y test antes de ejecutar",
+        "genera casos límite y revisa que phrases.json cubra todo el catálogo",
+        "design eval cases and split them into train and test"
+      ]
+    },
+    "eval-report": {
+      "negatives": [
+        {
+          "phrase": "mide la precisión de activación y el recall del catálogo",
+          "winner": "eval-run"
+        }
+      ],
+      "positives": [
+        "renderiza el informe de evaluación en html autónomo con la tabla de fallos",
+        "genera el veredicto del informe y compara dos corridas contra la línea base",
+        "render the eval report as standalone html with failures and collisions"
+      ]
+    },
+    "eval-run": {
+      "negatives": [
+        {
+          "phrase": "diseña el conjunto de casos y reparte train y test",
+          "winner": "eval-design"
+        }
+      ],
+      "positives": [
+        "ejecuta las evaluaciones offline y mide precisión y recall de activación",
+        "corre los casos contra el router y detecta colisiones entre descripciones",
+        "run the eval cases and report precision, recall and per-case regressions"
+      ]
+    },
+    "finops-auditor": {
+      "negatives": [
+        {
+          "phrase": "detecta si este texto lo ha escrito una IA y reescríbelo",
+          "winner": "detector-ia"
+        },
+        {
+          "phrase": "audita la seguridad de esta api antes de publicarla",
+          "winner": "appsec-audit"
+        }
+      ],
+      "positives": [
+        "auditoría de costes cloud: recursos huérfanos y sobreaprovisionamiento de instancias",
+        "haz un informe de costes cloud con recomendaciones de optimización FinOps",
+        "cloud cost audit: orphaned resources, overprovisioning and FinOps optimization"
+      ]
+    },
+    "finops-ci-opt": {
+      "negatives": [
+        {
+          "phrase": "escanea este repositorio de skills en busca de inyecciones de prompt",
+          "winner": "agent-red-team"
+        },
+        {
+          "phrase": "publica la landing con precios por país y listing",
+          "winner": "replica-launch"
+        }
+      ],
+      "positives": [
+        "revisa los workflows de github actions y su caché de dependencias",
+        "detecta la ejecución duplicada de push y pull_request sin concurrencia",
+        "revisa el coste de los workflows de github actions: caché y concurrencia"
+      ]
+    },
+    "finops-diff": {
+      "negatives": [
+        {
+          "phrase": "detecta las migraciones que bloquean la tabla",
+          "winner": "db-lock-audit"
+        },
+        {
+          "phrase": "revisa los permisos iam del rol de despliegue",
+          "winner": "appsec-infra"
+        }
+      ],
+      "positives": [
+        "compara el coste de dos inventarios y aplica guardrails",
+        "compara el coste entre dos inventarios antes y después",
+        "rompe el pipeline si el coste sube más del límite con max-increase y budget"
+      ]
+    },
+    "finops-infra-scan": {
+      "negatives": [
+        {
+          "phrase": "despliega en producción con backups y rollback",
+          "winner": "replica-deploy"
+        },
+        {
+          "phrase": "audita el seo técnico de la web",
+          "winner": "seo-audit"
+        }
+      ],
+      "positives": [
+        "revisa los buckets sin ciclo de vida y los grupos de logs sin retención",
+        "comprueba que los contenedores de kubernetes tengan límites de cpu y memoria",
+        "detecta bases de datos sin autoscaling y contenedores sin límites en kubernetes"
+      ]
+    },
+    "finops-llm-scan": {
+      "negatives": [
+        {
+          "phrase": "revisa los permisos iam y los security groups",
+          "winner": "appsec-audit"
+        },
+        {
+          "phrase": "revisa las dependencias vulnerables del package.json",
+          "winner": "appsec-deps"
+        }
+      ],
+      "positives": [
+        "revisa las llamadas a la api del llm y marca las que no tienen max_tokens",
+        "detecta modelos caros usados como clasificador y bucles de agente sin tope",
+        "audita los prompts de sistema largos sin caché en el código python"
+      ]
+    },
+    "finops-rightsize": {
+      "negatives": [
+        {
+          "phrase": "estima horas y coste por fase de una auditoría de seguridad",
+          "winner": "appsec-scale"
+        },
+        {
+          "phrase": "revisa la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        }
+      ],
+      "positives": [
+        "recomienda el cambio de tamaño de instancias de cómputo y bases de datos según métricas de rendimiento real",
+        "propone recomendaciones de right-sizing para instancias de cómputo sobreaprovisionadas",
+        "cambio de tamaño de bases de datos e instancias de cómputo con métricas de rendimiento",
+        "rightsize compute instances and databases based on real performance metrics"
+      ]
+    },
+    "finops-scan": {
+      "negatives": [
+        {
+          "phrase": "revisa los permisos iam públicos del bucket",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "genera un sbom cyclonedx y revisa cves de dependencias",
+          "winner": "appsec-deps"
+        }
+      ],
+      "positives": [
+        "escanea el inventario de recursos cloud: instancias, bases de datos y almacenamiento, y detecta desperdicios y anomalías de coste",
+        "recopila el inventario completo de recursos cloud y detecta desperdicios de coste",
+        "inventario completo de instancias, bases de datos, almacenamiento e ips con sus desperdicios"
+      ]
+    },
+    "humanizador-anti-ia": {
+      "negatives": [
+        {
+          "phrase": "dame el score de IA de este texto sin modificarlo",
+          "winner": "detector-ia"
+        },
+        {
+          "phrase": "mide la paridad del clon con el original",
+          "winner": "replica-diff"
+        }
+      ],
+      "positives": [
+        "qué patrones del catálogo de 40 se aplican a este texto",
+        "humaniza este post de LinkedIn",
+        "choose the anti-AI writing mode for this text",
+        "detect the register and apply the factual honesty policy"
+      ]
+    },
+    "humanizar": {
+      "negatives": [
+        {
+          "phrase": "solo dame el score sin tocar el texto",
+          "winner": "detector-ia"
+        },
+        {
+          "phrase": "audita el SEO de la web",
+          "winner": "seo-audit"
+        }
+      ],
+      "positives": [
+        "quita el tono de IA de este texto y reescríbelo",
+        "reescribe este artículo en modo Full y recorta el relleno",
+        "imita mi voz con estos párrafos y reescribe el email",
+        "rewrite this text to remove the AI patterns",
+        "trim the filler and keep the user's voice"
+      ]
+    },
+    "pr-findings": {
+      "negatives": [
+        {
+          "phrase": "arregla los tests inestables que fallan solo en ci",
+          "winner": "test-flaky"
+        }
+      ],
+      "positives": [
+        "deduplica hallazgos por fichero linea y regla",
+        "une los informes de varias comprobaciones sin marcar limpio lo no ejecutado"
+      ]
+    },
+    "pr-order": {
+      "negatives": [
+        {
+          "phrase": "compara dos contratos openapi y calcula el impacto semver",
+          "winner": "api-diff"
+        }
+      ],
+      "positives": [
+        "en que secuencia leo los ficheros del pr segun sus imports",
+        "ordena la lectura del diff por dependencias"
+      ]
+    },
+    "pr-reviewer": {
+      "negatives": [
+        {
+          "phrase": "audita la seguridad de esta aplicacion antes de publicarla",
+          "winner": "appsec-audit"
+        }
+      ],
+      "positives": [
+        "revisa este pull request y dime por donde empiezo",
+        "prioriza la revision de un pr grande antes de aprobarlo"
+      ]
+    },
+    "pr-risk": {
+      "negatives": [
+        {
+          "phrase": "que modulos no tienen prueba y cuales tocan autenticacion o dinero",
+          "winner": "test-plan"
+        }
+      ],
+      "positives": [
+        "que ficheros del diff son mas peligrosos de revisar",
+        "puntua el riesgo de cada fichero del cambio"
+      ]
+    },
+    "pr-routing": {
+      "negatives": [
+        {
+          "phrase": "escanea el inventario de recursos cloud y detecta desperdicios de coste",
+          "winner": "finops-scan"
+        }
+      ],
+      "positives": [
+        "detecta ficheros del pr sin dueno y revisores sobrecargados",
+        "reparte los ficheros del diff entre revisores y mira la carga"
+      ]
+    },
+    "premium-qa": {
+      "negatives": [
+        {
+          "phrase": "crea una landing page premium para mi tienda online",
+          "winner": "premium-web-designer"
+        },
+        {
+          "phrase": "audita el SEO técnico de mi tienda online",
+          "winner": "seo-audit"
+        }
+      ],
+      "positives": [
+        "audita el diseño de mi web a 360 390 768 1024 y 1440 y dime qué se rompe",
+        "mide el desbordamiento y las líneas del titular en cada ancho",
+        "revisa el responsive de esta web y los objetivos táctiles",
+        "audit the responsive layout of my site at five widths and measure overflow",
+        "measure tap targets and check the sticky header anchor offset"
       ]
     },
     "premium-web-designer": {
-      "positives": [
-        "premium digital agency website design and development for a corporate website",
-        "create a distinctive accessible production-oriented ecommerce website using a hybrid multi-agent workflow",
-        "rediseña mi web corporativa con una dirección de arte propia",
-        "diseña una landing page premium para mi tienda online",
-        "hazme un portafolio con identidad visual y tipografía propia",
-        "hazme una tienda online con carrito y checkout",
-        "revisa la accesibilidad y la calidad visual del sitio"
-      ],
       "negatives": [
         {
           "phrase": "audit the technical SEO of my online store",
@@ -508,894 +892,36 @@
           "phrase": "define el alcance legal e inventaría funciones de una app existente antes de replicarla",
           "winner": "replica-recon"
         }
+      ],
+      "positives": [
+        "premium digital agency website design and development for a corporate website",
+        "create a distinctive accessible production-oriented ecommerce website using a hybrid multi-agent workflow",
+        "rediseña mi web corporativa con una dirección de arte propia",
+        "diseña una landing page premium para mi tienda online",
+        "hazme un portafolio con identidad visual y tipografía propia",
+        "hazme una tienda online con carrito y checkout",
+        "revisa la accesibilidad y la calidad visual del sitio"
       ]
     },
-    "premium-qa": {
-      "positives": [
-        "audita el diseño de mi web a 360 390 768 1024 y 1440 y dime qué se rompe",
-        "mide el desbordamiento y las líneas del titular en cada ancho",
-        "revisa el responsive de esta web y los objetivos táctiles",
-        "audit the responsive layout of my site at five widths and measure overflow",
-        "measure tap targets and check the sticky header anchor offset"
-      ],
+    "red-audit": {
       "negatives": [
         {
-          "phrase": "crea una landing page premium para mi tienda online",
-          "winner": "premium-web-designer"
+          "phrase": "solo el veredicto rápido en el chat",
+          "winner": "red-scan"
         },
         {
-          "phrase": "audita el SEO técnico de mi tienda online",
-          "winner": "seo-audit"
+          "phrase": "prepara el plan SEO de la web",
+          "winner": "seo-plan"
         }
-      ]
-    },
-    "appsec-audit": {
-      "positives": [
-        "audita la seguridad de esta aplicación antes de publicarla",
-        "haz una auditoría de ciberseguridad completa del proyecto",
-        "revisa la seguridad de mi API y de la infraestructura",
-        "security audit of my web application before release"
       ],
-      "negatives": [
-        {
-          "phrase": "audita la seguridad de esta skill de terceros antes de instalarla",
-          "winner": "agent-red-team"
-        },
-        {
-          "phrase": "audita el SEO técnico de mi tienda online",
-          "winner": "seo-audit"
-        }
-      ]
-    },
-    "appsec-recon": {
       "positives": [
-        "define el alcance y los activos antes de auditar la seguridad",
-        "inventaría la superficie de ataque y las dependencias del repositorio",
-        "scope the assets and the attack surface before the audit"
-      ],
-      "negatives": [
-        {
-          "phrase": "traza si la entrada del usuario llega a la consulta SQL",
-          "winner": "appsec-code"
-        },
-        {
-          "phrase": "revisa los permisos IAM y el Dockerfile del despliegue",
-          "winner": "appsec-infra"
-        }
-      ]
-    },
-    "appsec-code": {
-      "positives": [
-        "traza el flujo de datos desde la petición hasta la consulta SQL",
-        "busca IDOR y fallos de control de acceso en los endpoints",
-        "revisa el código en busca de inyecciones y deserialización insegura",
-        "source to sink analysis of the request handler"
-      ],
-      "negatives": [
-        {
-          "phrase": "audita los manifiestos de Kubernetes y Terraform",
-          "winner": "appsec-infra"
-        },
-        {
-          "phrase": "revisa si el agente puede invocar herramientas sin permiso",
-          "winner": "appsec-llm"
-        }
-      ]
-    },
-    "appsec-infra": {
-      "positives": [
-        "audita el Dockerfile y los permisos IAM del despliegue",
-        "revisa los manifiestos de Kubernetes y Terraform en busca de recursos públicos",
-        "check IAM overpermissions and public buckets in Terraform"
-      ],
-      "negatives": [
-        {
-          "phrase": "revisa la inyección de prompt del agente",
-          "winner": "appsec-llm"
-        },
-        {
-          "phrase": "busca secretos y dependencias en el repositorio",
-          "winner": "appsec-recon"
-        }
-      ]
-    },
-    "appsec-llm": {
-      "positives": [
-        "audita la seguridad de un agente con herramientas y RAG",
-        "revisa la inyección de prompt y los permisos del servidor MCP",
-        "evalúa si el contenido externo puede secuestrar al agente",
-        "audit prompt injection and excessive agency in my LLM agent"
-      ],
-      "negatives": [
-        {
-          "phrase": "audita la seguridad de esta skill de terceros antes de instalarla",
-          "winner": "agent-red-team"
-        },
-        {
-          "phrase": "audita la seguridad de mi API y del código",
-          "winner": "appsec-code"
-        }
-      ]
-    },
-    "appsec-report": {
-      "positives": [
-        "aplica el tribunal y descarta los falsos positivos de la auditoría",
-        "calcula la nota A-F y escribe el informe con parches en diff",
-        "filter false positives with a confidence score and grade the project"
-      ],
-      "negatives": [
-        {
-          "phrase": "define el alcance y los activos de la auditoría",
-          "winner": "appsec-recon"
-        },
-        {
-          "phrase": "revisa los permisos IAM del despliegue",
-          "winner": "appsec-infra"
-        }
-      ]
-    },
-    "appsec-threat": {
-      "positives": [
-        "haz el modelo de amenazas con límites de confianza y actores",
-        "mapea cada amenaza a OWASP 2025 y a los capítulos de ASVS 5.0",
-        "threat model with trust boundaries mapped to ASVS chapters"
-      ],
-      "negatives": [
-        {
-          "phrase": "inventaría la superficie de ataque y las dependencias del repositorio",
-          "winner": "appsec-recon"
-        },
-        {
-          "phrase": "busca IDOR y fallos de control de acceso en los endpoints",
-          "winner": "appsec-code"
-        }
-      ]
-    },
-    "appsec-deps": {
-      "positives": [
-        "genera el SBOM CycloneDX del proyecto",
-        "cruza los CVEs con la alcanzabilidad de cada dependencia",
-        "generate a CycloneDX SBOM and check CVE reachability"
-      ],
-      "negatives": [
-        {
-          "phrase": "define el alcance y los activos antes de auditar la seguridad",
-          "winner": "appsec-recon"
-        },
-        {
-          "phrase": "calcula la nota A-F y escribe el informe con parches en diff",
-          "winner": "appsec-report"
-        }
-      ]
-    },
-    "appsec-ci": {
-      "positives": [
-        "audita el workflow de GitHub Actions con pull_request_target",
-        "normaliza el SARIF y déjalo listo para upload-sarif",
-        "endurece el agente revisor y detecta qué herramientas hay instaladas"
-      ],
-      "negatives": [
-        {
-          "phrase": "aplica el parche con aprobación y verifica el cierre en sandbox",
-          "winner": "appsec-fix"
-        },
-        {
-          "phrase": "genera el SBOM CycloneDX del proyecto",
-          "winner": "appsec-deps"
-        }
-      ]
-    },
-    "appsec-fix": {
-      "positives": [
-        "aplica el parche con aprobación y verifica el cierre en sandbox",
-        "propón la remediación con dry-run y busca variantes del mismo fallo",
-        "apply the patch only after approval and verify it in a sandbox"
-      ],
-      "negatives": [
-        {
-          "phrase": "audita el workflow de GitHub Actions con pull_request_target",
-          "winner": "appsec-ci"
-        },
-        {
-          "phrase": "aplica el tribunal y descarta los falsos positivos de la auditoría",
-          "winner": "appsec-report"
-        }
-      ]
-    },
-    "appsec-scale": {
-      "positives": [
-        "audita varios repositorios y dibuja la topología del sistema",
-        "estima el coste por fase con el perfil deep y los terceros",
-        "multi-repo audit with vendor inventory and cost per phase"
-      ],
-      "negatives": [
-        {
-          "phrase": "haz el modelo de amenazas con límites de confianza y actores",
-          "winner": "appsec-threat"
-        },
-        {
-          "phrase": "genera el SBOM CycloneDX del proyecto",
-          "winner": "appsec-deps"
-        }
-      ]
-    },
-    "skill-evals": {
-      "positives": [
-        "evalúa el catálogo de skills de principio a fin y deja evidencia reproducible",
-        "monta el flujo completo de evaluación de skills con veredicto final",
-        "end-to-end offline evaluation of the whole skill catalog"
-      ],
-      "negatives": [
-        {
-          "phrase": "escanea esta skill en busca de inyecciones de prompt",
-          "winner": "agent-red-team"
-        }
-      ]
-    },
-    "eval-design": {
-      "positives": [
-        "diseña los casos de evaluación y reparte train y test antes de ejecutar",
-        "genera casos límite y revisa que phrases.json cubra todo el catálogo",
-        "design eval cases and split them into train and test"
-      ],
-      "negatives": [
-        {
-          "phrase": "ejecuta los casos contra el router y aplica las puertas",
-          "winner": "eval-run"
-        }
-      ]
-    },
-    "eval-run": {
-      "positives": [
-        "ejecuta las evaluaciones offline y mide precisión y recall de activación",
-        "corre los casos contra el router y detecta colisiones entre descripciones",
-        "run the eval cases and report precision, recall and per-case regressions"
-      ],
-      "negatives": [
-        {
-          "phrase": "diseña el conjunto de casos y reparte train y test",
-          "winner": "eval-design"
-        }
-      ]
-    },
-    "eval-report": {
-      "positives": [
-        "renderiza el informe de evaluación en html autónomo con la tabla de fallos",
-        "genera el veredicto del informe y compara dos corridas contra la línea base",
-        "render the eval report as standalone html with failures and collisions"
-      ],
-      "negatives": [
-        {
-          "phrase": "mide la precisión de activación y el recall del catálogo",
-          "winner": "eval-run"
-        }
-      ]
-    },
-    "finops-auditor": {
-      "positives": [
-        "auditoría de costes cloud: recursos huérfanos y sobreaprovisionamiento de instancias",
-        "haz un informe de costes cloud con recomendaciones de optimización FinOps",
-        "cloud cost audit: orphaned resources, overprovisioning and FinOps optimization"
-      ],
-      "negatives": [
-        {
-          "phrase": "detecta si este texto lo ha escrito una IA y reescríbelo",
-          "winner": "detector-ia"
-        },
-        {
-          "phrase": "audita la seguridad de esta api antes de publicarla",
-          "winner": "appsec-audit"
-        }
-      ]
-    },
-    "finops-scan": {
-      "positives": [
-        "escanea el inventario de recursos cloud: instancias, bases de datos y almacenamiento, y detecta desperdicios y anomalías de coste",
-        "recopila el inventario completo de recursos cloud y detecta desperdicios de coste",
-        "inventario completo de instancias, bases de datos, almacenamiento e ips con sus desperdicios"
-      ],
-      "negatives": [
-        {
-          "phrase": "revisa los permisos iam públicos del bucket",
-          "winner": "appsec-infra"
-        },
-        {
-          "phrase": "genera un sbom cyclonedx y revisa cves de dependencias",
-          "winner": "appsec-deps"
-        }
-      ]
-    },
-    "finops-rightsize": {
-      "positives": [
-        "recomienda el cambio de tamaño de instancias de cómputo y bases de datos según métricas de rendimiento real",
-        "propone recomendaciones de right-sizing para instancias de cómputo sobreaprovisionadas",
-        "cambio de tamaño de bases de datos e instancias de cómputo con métricas de rendimiento",
-        "rightsize compute instances and databases based on real performance metrics"
-      ],
-      "negatives": [
-        {
-          "phrase": "estima horas y coste por fase de una auditoría de seguridad",
-          "winner": "appsec-scale"
-        },
-        {
-          "phrase": "revisa la paridad visual entre el original y el clon",
-          "winner": "replica-diff"
-        }
-      ]
-    },
-    "finops-llm-scan": {
-      "positives": [
-        "revisa las llamadas a la api del llm y marca las que no tienen max_tokens",
-        "detecta modelos caros usados como clasificador y bucles de agente sin tope",
-        "audita los prompts de sistema largos sin caché en el código python"
-      ],
-      "negatives": [
-        {
-          "phrase": "revisa los permisos iam y los security groups",
-          "winner": "appsec-audit"
-        },
-        {
-          "phrase": "revisa las dependencias vulnerables del package.json",
-          "winner": "appsec-deps"
-        }
-      ]
-    },
-    "finops-infra-scan": {
-      "positives": [
-        "revisa los buckets sin ciclo de vida y los grupos de logs sin retención",
-        "comprueba que los contenedores de kubernetes tengan límites de cpu y memoria",
-        "detecta bases de datos sin autoscaling y contenedores sin límites en kubernetes"
-      ],
-      "negatives": [
-        {
-          "phrase": "despliega en producción con backups y rollback",
-          "winner": "replica-deploy"
-        },
-        {
-          "phrase": "audita el seo técnico de la web",
-          "winner": "seo-audit"
-        }
-      ]
-    },
-    "finops-ci-opt": {
-      "positives": [
-        "revisa los workflows de github actions y su caché de dependencias",
-        "detecta la ejecución duplicada de push y pull_request sin concurrencia",
-        "revisa el coste de los workflows de github actions: caché y concurrencia"
-      ],
-      "negatives": [
-        {
-          "phrase": "escanea este repositorio de skills en busca de inyecciones de prompt",
-          "winner": "agent-red-team"
-        },
-        {
-          "phrase": "publica la landing con precios por país y listing",
-          "winner": "replica-launch"
-        }
-      ]
-    },
-    "db-architect": {
-      "positives": [
-        "audita la base de datos de principio a fin: esquema, migraciones y consultas n+1",
-        "revisa la base de datos antes de publicar: esquema, migraciones y consultas n+1",
-        "audita el esquema y las migraciones de la base de datos con evidencia"
-      ],
-      "negatives": [
-        {
-          "phrase": "revisa los permisos iam del rol de despliegue",
-          "winner": "appsec-infra"
-        },
-        {
-          "phrase": "revisa el sbom y las cves alcanzables",
-          "winner": "appsec-deps"
-        }
-      ]
-    },
-    "db-schema-audit": {
-      "positives": [
-        "audita el esquema sql: claves primarias ausentes y claves foráneas sin índice",
-        "revisa las tablas sin primary key y las claves foráneas sin índice",
-        "valida el esquema sql con sqlite en memoria antes de migrar"
-      ],
-      "negatives": [
-        {
-          "phrase": "publica la landing con precios por país y listing",
-          "winner": "replica-launch"
-        },
-        {
-          "phrase": "revisa la paridad visual entre el original y el clon",
-          "winner": "replica-diff"
-        }
-      ]
-    },
-    "db-migration-guard": {
-      "positives": [
-        "clasifica el riesgo de la migración: drop column y truncate son críticos",
-        "comprueba que la migración tenga downgrade para poder revertir",
-        "revisa el riesgo de la migración y su plan de reversión"
-      ],
-      "negatives": [
-        {
-          "phrase": "corrige los tests que fallan en el pipeline",
-          "winner": "eval-run"
-        },
-        {
-          "phrase": "audita el seo técnico de la web",
-          "winner": "seo-audit"
-        }
-      ]
-    },
-    "db-query-trace": {
-      "positives": [
-        "detecta consultas n+1 dentro de bucles en el código python",
-        "revisa si el orm consulta por cada fila del bucle sin selectinload",
-        "revisa las consultas del orm dentro de un bucle del código"
-      ],
-      "negatives": [
-        {
-          "phrase": "calcula el coste mensual de la infraestructura cloud",
-          "winner": "appsec-infra"
-        },
-        {
-          "phrase": "genera el informe de evaluación en html",
-          "winner": "eval-report"
-        }
-      ]
-    },
-    "db-seed-gen": {
-      "positives": [
-        "genera datos de siembra deterministas desde el esquema sql",
-        "crea datos de siembra respetando las claves foráneas y la semilla fija",
-        "genera inserts de prueba en orden de dependencias desde el esquema"
-      ],
-      "negatives": [
-        {
-          "phrase": "despliega la app en producción con backups y rollback",
-          "winner": "replica-deploy"
-        },
-        {
-          "phrase": "escanea esta skill en busca de inyecciones de prompt",
-          "winner": "agent-red-team"
-        }
-      ]
-    },
-    "api-contract-guard": {
-      "positives": [
-        "defiende el contrato de la api: diff semver, cruce de rutas y servidor mock",
-        "revisa el contrato de la api: impacto semver y rutas del frontend",
-        "revisa el contrato de la api antes de publicarlo: diff, cruce de rutas y mock"
-      ],
-      "negatives": [
-        {
-          "phrase": "revisa los permisos iam del rol de despliegue",
-          "winner": "appsec-infra"
-        },
-        {
-          "phrase": "revisa el sbom y las cves alcanzables",
-          "winner": "appsec-deps"
-        }
-      ]
-    },
-    "api-diff": {
-      "positives": [
-        "compara dos contratos openapi y calcula el impacto semver",
-        "compara dos contratos openapi y detecta el cambio major en el endpoint o en el tipo de respuesta",
-        "calcula el impacto semver del contrato: endpoint eliminado es major y lo aditivo minor"
-      ],
-      "negatives": [
-        {
-          "phrase": "publica la landing con precios por país y listing",
-          "winner": "replica-launch"
-        },
-        {
-          "phrase": "audita el seo técnico de la web",
-          "winner": "seo-audit"
-        }
-      ]
-    },
-    "api-code-sync": {
-      "positives": [
-        "cruza las rutas del backend con las llamadas del frontend",
-        "detecta llamadas del frontend a rutas que el backend no declara"
-      ],
-      "negatives": [
-        {
-          "phrase": "revisa la paridad visual entre el original y el clon",
-          "winner": "replica-diff"
-        },
-        {
-          "phrase": "corrige los tests que fallan en el pipeline",
-          "winner": "eval-run"
-        }
-      ]
-    },
-    "api-mock-server": {
-      "positives": [
-        "levanta un servidor http mock en 127.0.0.1 con los ejemplos del contrato openapi",
-        "responde los ejemplos del contrato sin tocar el backend real",
-        "monta un servidor http mock local que responde los ejemplos declarados en el contrato"
-      ],
-      "negatives": [
-        {
-          "phrase": "calcula el coste mensual de la infraestructura cloud",
-          "winner": "appsec-infra"
-        },
-        {
-          "phrase": "genera el informe de evaluación en html",
-          "winner": "eval-report"
-        }
-      ]
-    },
-    "refactor-surgeon": {
-      "positives": [
-        "refactoriza con red: métricas, casos dorados, cortes y verificación",
-        "refactoriza con red: mide, congela casos dorados y verifica"
-      ],
-      "negatives": [
-        {
-          "phrase": "revisa los permisos iam del rol de despliegue",
-          "winner": "appsec-infra"
-        },
-        {
-          "phrase": "audita el seo técnico de la web",
-          "winner": "seo-audit"
-        }
-      ]
-    },
-    "refactor-metrics": {
-      "positives": [
-        "mide la complejidad ciclomática y el anidamiento de las funciones",
-        "mide la complejidad del módulo por función y su mantenibilidad",
-        "mide el anidamiento y los parámetros de cada función"
-      ],
-      "negatives": [
-        {
-          "phrase": "publica la landing con precios por país y listing",
-          "winner": "replica-launch"
-        },
-        {
-          "phrase": "calcula el coste de los tokens del modelo",
-          "winner": "finops-llm-scan"
-        }
-      ]
-    },
-    "refactor-harness": {
-      "positives": [
-        "graba casos dorados antes de refactorizar y reprodúcelos después",
-        "congela la conducta del módulo con casos antes de tocar el código"
-      ],
-      "negatives": [
-        {
-          "phrase": "genera el seed de la base de datos de pruebas",
-          "winner": "db-seed-gen"
-        },
-        {
-          "phrase": "revisa la paridad visual entre el original y el clon",
-          "winner": "replica-diff"
-        }
-      ]
-    },
-    "refactor-slice": {
-      "positives": [
-        "calcula el grafo de llamadas y propone cortar el fichero en módulos",
-        "propone cortes del fichero por componentes conexas del grafo de llamadas"
-      ],
-      "negatives": [
-        {
-          "phrase": "audita el esquema de la base de datos y sus índices",
-          "winner": "db-schema-audit"
-        },
-        {
-          "phrase": "corrige los tests que fallan en el pipeline",
-          "winner": "eval-run"
-        }
-      ]
-    },
-    "refactor-verify": {
-      "positives": [
-        "verifica que el refactor no cambió la conducta contra el snapshot",
-        "verifica que el refactor no cambió el comportamiento con los casos dorados",
-        "comprueba con el snapshot que el refactor no cambió la conducta"
-      ],
-      "negatives": [
-        {
-          "phrase": "revisa la paridad visual entre el original y el clon",
-          "winner": "replica-diff"
-        },
-        {
-          "phrase": "protege el contrato de la api antes de publicar",
-          "winner": "api-contract-guard"
-        }
-      ]
-    },
-    "docs-sync-engine": {
-      "positives": [
-        "sincroniza la documentación con el código: referencias, arquitectura y changelog",
-        "mantén la documentación pegada al código y al día",
-        "mantiene la documentación al día: referencias, arquitectura y changelog"
-      ],
-      "negatives": [
-        {
-          "phrase": "revisa los permisos iam del rol de despliegue",
-          "winner": "appsec-infra"
-        },
-        {
-          "phrase": "publica la landing con precios por país y listing",
-          "winner": "replica-launch"
-        }
-      ]
-    },
-    "docs-drift-check": {
-      "positives": [
-        "detecta referencias rotas en la documentación",
-        "detecta referencias rotas comparando las rutas y los enlaces contra el árbol real",
-        "comprueba las referencias de la documentación contra el árbol del repositorio"
-      ],
-      "negatives": [
-        {
-          "phrase": "revisa la paridad visual entre el original y el clon",
-          "winner": "replica-diff"
-        },
-        {
-          "phrase": "corrige los tests que fallan en el pipeline",
-          "winner": "eval-run"
-        }
-      ]
-    },
-    "docs-arch-gen": {
-      "positives": [
-        "genera un borrador de arquitectura con la estructura y las responsabilidades",
-        "genera la tabla de módulos y responsabilidades leyendo los docstrings"
-      ],
-      "negatives": [
-        {
-          "phrase": "audita el esquema de la base de datos y sus índices",
-          "winner": "db-schema-audit"
-        },
-        {
-          "phrase": "calcula el coste de los tokens del modelo",
-          "winner": "finops-llm-scan"
-        }
-      ]
-    },
-    "docs-changelog": {
-      "positives": [
-        "genera el changelog a partir de los commits convencionales",
-        "agrupa los commits en un borrador de changelog por versión"
-      ],
-      "negatives": [
-        {
-          "phrase": "refactoriza con red: mide y congela casos dorados",
-          "winner": "refactor-surgeon"
-        },
-        {
-          "phrase": "protege el contrato de la api antes de publicar",
-          "winner": "api-contract-guard"
-        }
-      ]
-    },
-    "refactor-clones": {
-      "positives": [
-        "detecta funciones duplicadas en el código",
-        "detecta duplicación entre funciones con shingles normalizados del ast",
-        "encuentra bloques duplicados que solo cambian los nombres de las variables"
-      ],
-      "negatives": [
-        {
-          "phrase": "mide la complejidad ciclomática y el anidamiento de las funciones",
-          "winner": "refactor-metrics"
-        },
-        {
-          "phrase": "graba casos dorados antes de refactorizar y reprodúcelos después",
-          "winner": "refactor-harness"
-        }
-      ]
-    },
-    "db-lock-audit": {
-      "positives": [
-        "detecta las migraciones que bloquean la tabla",
-        "audita el bloqueo de la tabla antes de desplegar la migración"
-      ],
-      "negatives": [
-        {
-          "phrase": "audita el esquema de la base de datos y sus índices",
-          "winner": "db-schema-audit"
-        },
-        {
-          "phrase": "revisa la paridad visual entre el original y el clon",
-          "winner": "replica-diff"
-        }
-      ]
-    },
-    "db-drift": {
-      "positives": [
-        "compara el esquema declarado con las migraciones reproducidas",
-        "detecta deriva entre el esquema sql y las migraciones",
-        "compara lo que dice el esquema con lo que construyen las migraciones"
-      ],
-      "negatives": [
-        {
-          "phrase": "genera el seed de la base de datos de pruebas",
-          "winner": "db-seed-gen"
-        },
-        {
-          "phrase": "corrige los tests que fallan en el pipeline",
-          "winner": "eval-run"
-        }
-      ]
-    },
-    "finops-diff": {
-      "positives": [
-        "compara el coste de dos inventarios y aplica guardrails",
-        "compara el coste entre dos inventarios antes y después",
-        "rompe el pipeline si el coste sube más del límite con max-increase y budget"
-      ],
-      "negatives": [
-        {
-          "phrase": "detecta las migraciones que bloquean la tabla",
-          "winner": "db-lock-audit"
-        },
-        {
-          "phrase": "revisa los permisos iam del rol de despliegue",
-          "winner": "appsec-infra"
-        }
-      ]
-    },
-    "refactor-deadcode": {
-      "positives": [
-        "busca imports y funciones que nadie usa en el código",
-        "encuentra código muerto antes de refactorizar",
-        "detecta funciones privadas sin referencias en el proyecto"
-      ],
-      "negatives": [
-        {
-          "phrase": "detecta funciones duplicadas por similitud del ast",
-          "winner": "refactor-clones"
-        },
-        {
-          "phrase": "mide la complejidad ciclomática de cada función",
-          "winner": "refactor-metrics"
-        }
-      ]
-    },
-    "refactor-cycles": {
-      "positives": [
-        "detecta ciclos de imports entre los módulos",
-        "encuentra módulos que se importan en círculo"
-      ],
-      "negatives": [
-        {
-          "phrase": "encuentra código muerto antes de refactorizar",
-          "winner": "refactor-deadcode"
-        },
-        {
-          "phrase": "propone cortes por componentes del grafo de llamadas",
-          "winner": "refactor-slice"
-        }
-      ]
-    },
-    "db-expand-contract": {
-      "positives": [
-        "divide la migración en dos fases expand y contract",
-        "planifica el despliegue en dos fases sin cortar la tabla",
-        "separa los cambios aditivos de los destructivos en dos despliegues"
-      ],
-      "negatives": [
-        {
-          "phrase": "detecta las migraciones que bloquean la tabla",
-          "winner": "db-lock-audit"
-        },
-        {
-          "phrase": "compara el esquema declarado con las migraciones reproducidas",
-          "winner": "db-drift"
-        }
-      ]
-    },
-    "db-sql-lint": {
-      "positives": [
-        "revisa el estilo de las sentencias sql",
-        "lint de estilo sobre las consultas y migraciones sql",
-        "comprueba mayúsculas de palabras clave y el select asterisco"
-      ],
-      "negatives": [
-        {
-          "phrase": "audita el esquema y las claves foráneas sin índice",
-          "winner": "db-schema-audit"
-        },
-        {
-          "phrase": "genera el seed de la base de datos de pruebas",
-          "winner": "db-seed-gen"
-        }
-      ]
-    },
-    "api-auth-coverage": {
-      "positives": [
-        "comprueba que las rutas protegidas tengan guarda de autenticación",
-        "cruza la seguridad del contrato openapi con el código"
-      ],
-      "negatives": [
-        {
-          "phrase": "compara dos contratos openapi y calcula el impacto semver",
-          "winner": "api-diff"
-        },
-        {
-          "phrase": "cruza las rutas del backend con las llamadas del frontend",
-          "winner": "api-code-sync"
-        }
-      ]
-    },
-    "docs-terms": {
-      "positives": [
-        "revisa la terminología de la documentación con el glosario",
-        "detecta términos prohibidos en los documentos",
-        "avisa cuando un término no usa la grafía canónica"
-      ],
-      "negatives": [
-        {
-          "phrase": "agrupa los commits convencionales en el changelog",
-          "winner": "docs-changelog"
-        },
-        {
-          "phrase": "regenera el documento de arquitectura desde los ast",
-          "winner": "docs-arch-gen"
-        }
-      ]
-    },
-    "docs-env": {
-      "positives": [
-        "cruza las variables de entorno del código con el .env.example",
-        "detecta variables de entorno sin documentar",
-        "comprueba que el readme documente las variables de entorno"
-      ],
-      "negatives": [
-        {
-          "phrase": "regenera el documento de arquitectura desde los ast",
-          "winner": "docs-arch-gen"
-        },
-        {
-          "phrase": "detecta términos prohibidos en los documentos",
-          "winner": "docs-terms"
-        }
-      ]
-    },
-    "refactor-hotspots": {
-      "positives": [
-        "ordena los ficheros que más cambian y más complejos son",
-        "detecta hotspots por churn y complejidad",
-        "cruza git log con la complejidad ciclomática"
-      ],
-      "negatives": [
-        {
-          "phrase": "detecta ciclos de imports entre los módulos",
-          "winner": "refactor-cycles"
-        },
-        {
-          "phrase": "encuentra código muerto antes de refactorizar",
-          "winner": "refactor-deadcode"
-        }
-      ]
-    },
-    "docs-parity": {
-      "positives": [
-        "comprueba que las dos mitades del documento dicen lo mismo en español y en inglés",
-        "verifica la paridad entre la documentación ES y EN antes de la release"
-      ],
-      "negatives": [
-        {
-          "phrase": "genera el changelog a partir de los commits convencionales",
-          "winner": "docs-changelog"
-        },
-        {
-          "phrase": "detecta referencias del código que ya no existen en la documentación",
-          "winner": "docs-drift-check"
-        }
+        "auditoría completa con verificación independiente y ledger de cobertura",
+        "genera el informe JSON validable y el ledger de superficies",
+        "full audit with independent verification and coverage ledger",
+        "generate the validatable JSON report and the coverage ledger"
       ]
     },
     "red-mcp": {
-      "positives": [
-        "audita la configuración de un servidor mcp antes de conectarlo",
-        "revisa las tools y los permisos que concede un mcp.json"
-      ],
       "negatives": [
         {
           "phrase": "protege el contrato de la api antes de publicar",
@@ -1405,14 +931,562 @@
           "phrase": "haz una auditoría de seguridad completa con verificación y ledger",
           "winner": "red-audit"
         }
+      ],
+      "positives": [
+        "audita la configuración de un servidor mcp antes de conectarlo",
+        "revisa las tools y los permisos que concede un mcp.json"
+      ]
+    },
+    "red-scan": {
+      "negatives": [
+        {
+          "phrase": "auditoría completa con ledger y JSON validable",
+          "winner": "red-audit"
+        },
+        {
+          "phrase": "reescribe este email en modo Full y recorta el relleno",
+          "winner": "humanizar"
+        }
+      ],
+      "positives": [
+        "escaneo rápido: dime si esta skill es segura sin generar informe",
+        "veredicto de esta skill en el chat y no crees ficheros",
+        "quick scan of this skill: verdict in chat, no files",
+        "quick scan, verdict in chat and create no files"
+      ]
+    },
+    "refactor-clones": {
+      "negatives": [
+        {
+          "phrase": "mide la complejidad ciclomática y el anidamiento de las funciones",
+          "winner": "refactor-metrics"
+        },
+        {
+          "phrase": "graba casos dorados antes de refactorizar y reprodúcelos después",
+          "winner": "refactor-harness"
+        }
+      ],
+      "positives": [
+        "detecta funciones duplicadas en el código",
+        "detecta duplicación entre funciones con shingles normalizados del ast",
+        "encuentra bloques duplicados que solo cambian los nombres de las variables"
+      ]
+    },
+    "refactor-cycles": {
+      "negatives": [
+        {
+          "phrase": "encuentra código muerto antes de refactorizar",
+          "winner": "refactor-deadcode"
+        },
+        {
+          "phrase": "propone cortes por componentes del grafo de llamadas",
+          "winner": "refactor-slice"
+        }
+      ],
+      "positives": [
+        "detecta ciclos de imports entre los módulos",
+        "encuentra módulos que se importan en círculo"
+      ]
+    },
+    "refactor-deadcode": {
+      "negatives": [
+        {
+          "phrase": "detecta funciones duplicadas por similitud del ast",
+          "winner": "refactor-clones"
+        },
+        {
+          "phrase": "mide la complejidad ciclomática de cada función",
+          "winner": "refactor-metrics"
+        }
+      ],
+      "positives": [
+        "busca imports y funciones que nadie usa en el código",
+        "encuentra código muerto antes de refactorizar",
+        "detecta funciones privadas sin referencias en el proyecto"
+      ]
+    },
+    "refactor-harness": {
+      "negatives": [
+        {
+          "phrase": "genera el seed de la base de datos de pruebas",
+          "winner": "db-seed-gen"
+        },
+        {
+          "phrase": "revisa la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        }
+      ],
+      "positives": [
+        "graba casos dorados antes de refactorizar y reprodúcelos después",
+        "congela la conducta del módulo con casos antes de tocar el código"
+      ]
+    },
+    "refactor-hotspots": {
+      "negatives": [
+        {
+          "phrase": "detecta ciclos de imports entre los módulos",
+          "winner": "refactor-cycles"
+        },
+        {
+          "phrase": "encuentra código muerto antes de refactorizar",
+          "winner": "refactor-deadcode"
+        }
+      ],
+      "positives": [
+        "ordena los ficheros que más cambian y más complejos son",
+        "detecta hotspots por churn y complejidad",
+        "cruza git log con la complejidad ciclomática"
+      ]
+    },
+    "refactor-metrics": {
+      "negatives": [
+        {
+          "phrase": "publica la landing con precios por país y listing",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "calcula el coste de los tokens del modelo",
+          "winner": "finops-llm-scan"
+        }
+      ],
+      "positives": [
+        "mide la complejidad ciclomática y el anidamiento de las funciones",
+        "mide la complejidad del módulo por función y su mantenibilidad",
+        "mide el anidamiento y los parámetros de cada función"
+      ]
+    },
+    "refactor-slice": {
+      "negatives": [
+        {
+          "phrase": "audita el esquema de la base de datos y sus índices",
+          "winner": "db-schema-audit"
+        },
+        {
+          "phrase": "corrige los tests que fallan en el pipeline",
+          "winner": "eval-run"
+        }
+      ],
+      "positives": [
+        "calcula el grafo de llamadas y propone cortar el fichero en módulos",
+        "propone cortes del fichero por componentes conexas del grafo de llamadas"
+      ]
+    },
+    "refactor-surgeon": {
+      "negatives": [
+        {
+          "phrase": "revisa los permisos iam del rol de despliegue",
+          "winner": "appsec-infra"
+        },
+        {
+          "phrase": "audita el seo técnico de la web",
+          "winner": "seo-audit"
+        }
+      ],
+      "positives": [
+        "refactoriza con red: métricas, casos dorados, cortes y verificación",
+        "refactoriza con red: mide, congela casos dorados y verifica"
+      ]
+    },
+    "refactor-verify": {
+      "negatives": [
+        {
+          "phrase": "revisa la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        },
+        {
+          "phrase": "protege el contrato de la api antes de publicar",
+          "winner": "api-contract-guard"
+        }
+      ],
+      "positives": [
+        "verifica que el refactor no cambió la conducta contra el snapshot",
+        "verifica que el refactor no cambió el comportamiento con los casos dorados",
+        "comprueba con el snapshot que el refactor no cambió la conducta"
+      ]
+    },
+    "replica": {
+      "negatives": [
+        {
+          "phrase": "escanea esta skill en busca de inyecciones de prompt",
+          "winner": "agent-red-team"
+        },
+        {
+          "phrase": "puntúa este texto y dime si parece escrito por IA",
+          "winner": "detector-ia"
+        }
+      ],
+      "positives": [
+        "ejecuta el pipeline replica completo con aprobación en cada fase",
+        "orquesta la réplica de una app de principio a fin y guarda el progreso",
+        "usa el comando maestro /replica para retomar donde lo dejamos",
+        "run the clean-room replica pipeline and continue it from progress.md",
+        "ask for approval before each phase of the replica pipeline"
+      ]
+    },
+    "replica-architect": {
+      "negatives": [
+        {
+          "phrase": "define los tokens y componentes del sistema de diseño",
+          "winner": "replica-design"
+        },
+        {
+          "phrase": "configura la autenticación y los pagos del backend",
+          "winner": "replica-backend"
+        }
+      ],
+      "positives": [
+        "decide el stack y el modelo de datos con invariantes testeables",
+        "define los contratos entre capas antes de programar",
+        "choose the stack and the data model with testable invariants",
+        "define the contracts between layers before coding"
+      ]
+    },
+    "replica-backend": {
+      "negatives": [
+        {
+          "phrase": "lee las reseñas públicas y extrae temas con citas",
+          "winner": "replica-entrepreneur"
+        },
+        {
+          "phrase": "escribe tres guiones de Reels para Instagram",
+          "winner": "replica-redes"
+        }
+      ],
+      "positives": [
+        "añade autenticación, permisos por recurso y pagos al clon",
+        "esquema con migraciones versionadas, permisos por recurso y jobs idempotentes",
+        "add authentication and per-resource permissions to the clone",
+        "versioned migrations, payments and idempotent jobs"
+      ]
+    },
+    "replica-brand": {
+      "negatives": [
+        {
+          "phrase": "prepara los precios por país para el lanzamiento",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "mide la similitud de layout con imgdiff",
+          "winner": "replica-diff"
+        }
+      ],
+      "positives": [
+        "haz el rebrand completo y deja el sweep a cero",
+        "cambia nombre, paleta, logo y copy por otros propios",
+        "rebrand the name, palette, logo and copy before publishing",
+        "drive sweep.py to zero brand leftovers"
+      ]
+    },
+    "replica-build": {
+      "negatives": [
+        {
+          "phrase": "mide la paridad funcional con parity.py",
+          "winner": "replica-diff"
+        },
+        {
+          "phrase": "haz el rebrand y deja el sweep a cero",
+          "winner": "replica-brand"
+        }
+      ],
+      "positives": [
+        "construye por incrementos los flujos must de features.csv",
+        "implementa las pantallas usando los tokens aprobados",
+        "implement the must flows from features.csv incrementally",
+        "implement the screens with the approved tokens"
+      ]
+    },
+    "replica-deploy": {
+      "negatives": [
+        {
+          "phrase": "escribe el copy de la landing y el listing",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "haz análisis estático del APK con strings y rutas",
+          "winner": "replica-static"
+        }
+      ],
+      "positives": [
+        "haz el preflight y despliega en producción con rollback",
+        "comprueba secretos, migraciones y restore de backup antes de publicar",
+        "run preflight checks with backups and rollback",
+        "verify the deployment is live after publishing"
+      ]
+    },
+    "replica-design": {
+      "negatives": [
+        {
+          "phrase": "prepara el listing de la App Store y sus límites",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "escribe el plan de pruebas end-to-end",
+          "winner": "replica-test"
+        }
+      ],
+      "positives": [
+        "define tokens, tipografía y componentes con contraste WCAG",
+        "crea el sistema de diseño propio de la app clonada",
+        "define design tokens, typography and components with WCAG contrast",
+        "build the clone design system with accessible components"
+      ]
+    },
+    "replica-diff": {
+      "negatives": [
+        {
+          "phrase": "analiza reseñas reales de usuarios y saca temas",
+          "winner": "replica-entrepreneur"
+        },
+        {
+          "phrase": "define los límites legales y el alcance del clon",
+          "winner": "replica-recon"
+        }
+      ],
+      "positives": [
+        "mide la paridad funcional y visual entre original y clon",
+        "compara las capturas con imgdiff y explica las diferencias",
+        "measure functional and visual parity between the original and the clone",
+        "compare the screenshots with imgdiff and explain the differences"
+      ]
+    },
+    "replica-entrepreneur": {
+      "negatives": [
+        {
+          "phrase": "rebrandea el producto antes de publicar",
+          "winner": "replica-brand"
+        },
+        {
+          "phrase": "audita el módulo de schema y el inventario JSON-LD",
+          "winner": "seo-audit"
+        }
+      ],
+      "positives": [
+        "analiza reseñas públicas y saca temas con citas y URL",
+        "convierte la voz del usuario en un plan de mejoras",
+        "read the public reviews and extract themes with quotes and URLs",
+        "turn the user voice into a fix plan"
+      ]
+    },
+    "replica-launch": {
+      "negatives": [
+        {
+          "phrase": "despliega con confirmación explícita y backups",
+          "winner": "replica-deploy"
+        },
+        {
+          "phrase": "escribe los guiones de Reels y los captions",
+          "winner": "replica-redes"
+        }
+      ],
+      "positives": [
+        "prepara la landing, el listing de tiendas y los precios por país",
+        "valida el listing con listing.py y los límites de caracteres",
+        "write the landing and the store listing with character limits",
+        "set per-country pricing for the launch"
+      ]
+    },
+    "replica-recon": {
+      "negatives": [
+        {
+          "phrase": "despliega la app en producción con backups y rollback",
+          "winner": "replica-deploy"
+        },
+        {
+          "phrase": "mide la paridad visual entre el original y el clon",
+          "winner": "replica-diff"
+        }
+      ],
+      "positives": [
+        "define el alcance y los límites legales antes de clonar la app",
+        "haz el inventario de funciones de esta app con evidencia y confianza",
+        "reconocimiento de una suite compleja como Word o Figma",
+        "set the legal scope and boundaries before cloning an app",
+        "inventory the app features with evidence and confidence",
+        "clone this app and list its features"
+      ]
+    },
+    "replica-redes": {
+      "negatives": [
+        {
+          "phrase": "prepara la landing y el listing de la tienda",
+          "winner": "replica-launch"
+        },
+        {
+          "phrase": "haz el análisis estático del binario",
+          "winner": "replica-static"
+        }
+      ],
+      "positives": [
+        "escribe tres guiones de Reels y captions para Instagram y TikTok",
+        "prepara el banco de ganchos y el sweep del copy social",
+        "write three Reels scripts and captions for social networks",
+        "prepare the hook bank for social networks"
+      ]
+    },
+    "replica-static": {
+      "negatives": [
+        {
+          "phrase": "escanea la skill por Unicode invisible",
+          "winner": "agent-red-team"
+        },
+        {
+          "phrase": "ejecuta el pipeline completo de réplica",
+          "winner": "replica"
+        }
+      ],
+      "positives": [
+        "análisis estático opt-in de un APK propio con strings y rutas",
+        "extrae endpoints del app.asar autorizado sin instalar nada",
+        "static analysis of an authorized artifact to extract strings and endpoints",
+        "extract routes and endpoints without installing tools"
+      ]
+    },
+    "replica-test": {
+      "negatives": [
+        {
+          "phrase": "compara las capturas del original y del clon",
+          "winner": "replica-diff"
+        },
+        {
+          "phrase": "prepara el preflight del despliegue",
+          "winner": "replica-deploy"
+        }
+      ],
+      "positives": [
+        "escribe el plan de pruebas y ejecuta los casos end-to-end",
+        "registra los bugs con severidad S1 y S2",
+        "write the test plan and run end-to-end cases",
+        "log the bugs with S1 S2 S3 severity"
+      ]
+    },
+    "seo-audit": {
+      "negatives": [
+        {
+          "phrase": "rewrite this text and remove the AI tone",
+          "winner": "humanizar"
+        },
+        {
+          "phrase": "genera el PLAN.md con borradores DRAFT",
+          "winner": "seo-plan"
+        },
+        {
+          "phrase": "simula cómo se ve el título en Google",
+          "winner": "seo-serp"
+        }
+      ],
+      "positives": [
+        "audita el SEO de example.com y dame el veredicto",
+        "auditoría técnica completa de indexación, canonical y hreflang",
+        "revisa las cabeceras de seguridad y el rendimiento de la página",
+        "run the full audit and collect reproducible evidence",
+        "rescore the audit offline without hitting the network",
+        "check the security headers of my site"
+      ]
+    },
+    "seo-auditor": {
+      "negatives": [
+        {
+          "phrase": "aplica el plan SEO con backup y verifica",
+          "winner": "seo-execute"
+        },
+        {
+          "phrase": "dime si esta skill de terceros es segura",
+          "winner": "agent-red-team"
+        }
+      ],
+      "positives": [
+        "explícame los modos web, source, local, híbrido y page del auditor",
+        "elige el modo de auditoría correcto y aplica la rúbrica de 100 puntos",
+        "choose the audit mode and follow the audit plan execute flow",
+        "explain the rubric and the one-line verdict of the audit"
+      ]
+    },
+    "seo-compare": {
+      "negatives": [
+        {
+          "phrase": "genera el plan de acciones SEO",
+          "winner": "seo-plan"
+        },
+        {
+          "phrase": "simula la tarjeta social en LinkedIn",
+          "winner": "seo-serp"
+        }
+      ],
+      "positives": [
+        "compara dos auditorías y clasifica mejorado, empeorado y resuelto",
+        "mide el efecto del deploy con el delta de puntuación",
+        "diff two audits and classify improved worse new and resolved",
+        "measure the effect of the deploy with the score delta"
+      ]
+    },
+    "seo-execute": {
+      "negatives": [
+        {
+          "phrase": "genera el plan sin tocar el sitio",
+          "winner": "seo-plan"
+        },
+        {
+          "phrase": "previsualiza la tarjeta OG en WhatsApp",
+          "winner": "seo-serp"
+        }
+      ],
+      "positives": [
+        "aplica el plan con --apply y deja backups .bak",
+        "escribe robots.txt y llms.txt en el proyecto",
+        "apply the plan with --apply and keep .bak backups",
+        "write robots.txt and llms.txt into the project"
+      ]
+    },
+    "seo-plan": {
+      "negatives": [
+        {
+          "phrase": "aplica los cambios con --apply y deja backup",
+          "winner": "seo-execute"
+        },
+        {
+          "phrase": "compara las dos auditorías y dame el delta",
+          "winner": "seo-compare"
+        }
+      ],
+      "positives": [
+        "convierte la auditoría en un plan priorizado con borradores DRAFT",
+        "prioriza los fallos must y should por esfuerzo e impacto",
+        "turn the audit into a prioritized SEO plan for the web with DRAFT files",
+        "prioritize the must and should failures by effort and impact"
+      ]
+    },
+    "seo-serp": {
+      "negatives": [
+        {
+          "phrase": "audita el módulo de schema y el inventario JSON-LD",
+          "winner": "seo-audit"
+        },
+        {
+          "phrase": "aplica robots.txt con backup",
+          "winner": "seo-execute"
+        }
+      ],
+      "positives": [
+        "simula el título en Google escritorio y móvil y la tarjeta OG",
+        "mira si la meta descripción se trunca en Bing",
+        "preview the title and description in Google desktop and mobile",
+        "check if the meta description is truncated in Bing"
+      ]
+    },
+    "skill-evals": {
+      "negatives": [
+        {
+          "phrase": "escanea esta skill en busca de inyecciones de prompt",
+          "winner": "agent-red-team"
+        }
+      ],
+      "positives": [
+        "evalúa el catálogo de skills de principio a fin y deja evidencia reproducible",
+        "monta el flujo completo de evaluación de skills con veredicto final",
+        "end-to-end offline evaluation of the whole skill catalog"
       ]
     },
     "test-architect": {
-      "positives": [
-        "disena la estrategia de pruebas del repositorio segun el riesgo",
-        "decide que probar primero, que estabilizar y que contratos fijar",
-        "design the test strategy from the source tree and its risk"
-      ],
       "negatives": [
         {
           "phrase": "compara dos contratos openapi y calcula el impacto semver",
@@ -1422,65 +1496,14 @@
           "phrase": "genera el changelog a partir de los commits convencionales",
           "winner": "docs-changelog"
         }
-      ]
-    },
-    "test-plan": {
-      "positives": [
-        "que modulos no tienen prueba y cuales tocan autenticacion o dinero",
-        "por donde empiezo a testear los modulos de autenticacion y cobro",
-        "prioritise the test plan for untested authentication and payment modules"
       ],
-      "negatives": [
-        {
-          "phrase": "escribe el plan de pruebas y ejecuta los casos end-to-end",
-          "winner": "replica-test"
-        },
-        {
-          "phrase": "detecta funciones duplicadas en el codigo",
-          "winner": "refactor-clones"
-        }
-      ]
-    },
-    "test-flaky": {
       "positives": [
-        "este test falla solo en ci y quiero saber por que es inestable",
-        "busca esperas fijas, reloj de pared y azar sin semilla en los tests",
-        "find intermittent failures from fixed sleeps and wall clock in tests"
-      ],
-      "negatives": [
-        {
-          "phrase": "levanta un servidor http mock en 127.0.0.1 con los ejemplos del contrato openapi",
-          "winner": "api-mock-server"
-        },
-        {
-          "phrase": "refactoriza con red: mide y congela casos dorados",
-          "winner": "refactor-surgeon"
-        }
-      ]
-    },
-    "test-mutation": {
-      "positives": [
-        "elige los objetivos de mutacion y el presupuesto por funcion",
-        "la cobertura es alta pero los tests no detectan regresiones, donde mutamos",
-        "pick mutation targets and operators from the ast without running mutants"
-      ],
-      "negatives": [
-        {
-          "phrase": "mide la complejidad ciclomatica y el anidamiento de las funciones",
-          "winner": "refactor-metrics"
-        },
-        {
-          "phrase": "busca imports y funciones que nadie usa en el codigo",
-          "winner": "refactor-deadcode"
-        }
+        "disena la estrategia de pruebas del repositorio segun el riesgo",
+        "decide que probar primero, que estabilizar y que contratos fijar",
+        "design the test strategy from the source tree and its risk"
       ]
     },
     "test-contract": {
-      "positives": [
-        "fija el contrato entre modulos comparando el fixture del proveedor con el payload",
-        "el consumidor se rompe cuando el proveedor cambia, quiero un test de contrato",
-        "pin the provider consumer contract over json fixtures"
-      ],
       "negatives": [
         {
           "phrase": "compara dos contratos openapi y calcula el impacto semver",
@@ -1490,15 +1513,64 @@
           "phrase": "levanta un servidor http mock local con los ejemplos del contrato",
           "winner": "api-mock-server"
         }
+      ],
+      "positives": [
+        "fija el contrato entre modulos comparando el fixture del proveedor con el payload",
+        "el consumidor se rompe cuando el proveedor cambia, quiero un test de contrato",
+        "pin the provider consumer contract over json fixtures"
+      ]
+    },
+    "test-flaky": {
+      "negatives": [
+        {
+          "phrase": "levanta un servidor http mock en 127.0.0.1 con los ejemplos del contrato openapi",
+          "winner": "api-mock-server"
+        },
+        {
+          "phrase": "refactoriza con red: mide y congela casos dorados",
+          "winner": "refactor-surgeon"
+        }
+      ],
+      "positives": [
+        "este test falla solo en ci y quiero saber por que es inestable",
+        "busca esperas fijas, reloj de pared y azar sin semilla en los tests",
+        "find intermittent failures from fixed sleeps and wall clock in tests"
+      ]
+    },
+    "test-mutation": {
+      "negatives": [
+        {
+          "phrase": "mide la complejidad ciclomatica y el anidamiento de las funciones",
+          "winner": "refactor-metrics"
+        },
+        {
+          "phrase": "busca imports y funciones que nadie usa en el codigo",
+          "winner": "refactor-deadcode"
+        }
+      ],
+      "positives": [
+        "elige los objetivos de mutacion y el presupuesto por funcion",
+        "la cobertura es alta pero los tests no detectan regresiones, donde mutamos",
+        "pick mutation targets and operators from the ast without running mutants"
+      ]
+    },
+    "test-plan": {
+      "negatives": [
+        {
+          "phrase": "escribe el plan de pruebas y ejecuta los casos end-to-end",
+          "winner": "replica-test"
+        },
+        {
+          "phrase": "detecta funciones duplicadas en el codigo",
+          "winner": "refactor-clones"
+        }
+      ],
+      "positives": [
+        "que modulos no tienen prueba y cuales tocan autenticacion o dinero",
+        "por donde empiezo a testear los modulos de autenticacion y cobro",
+        "prioritise the test plan for untested authentication and payment modules"
       ]
     }
   },
-  "out_of_domain": [
-    "hazme una tortilla de patatas",
-    "traduce este párrafo al inglés",
-    "ordena esta lista de la compra",
-    "cuál es la capital de Australia",
-    "resume este artículo",
-    "resume este texto"
-  ]
+  "threshold": 0.3
 }

@@ -2,9 +2,9 @@
   "format": "skills-ia-index",
   "format_version": "1.0",
   "updated": "2026-11-21",
-  "version": "5.4.0",
+  "version": "6.0.0",
   "description": "Índice vendor-neutral de los paquetes de Skills IA. Cualquier agente (Claude, Codex, Cursor, Gemini, OpenCode...) puede descubrir las skills escaneando **/SKILL.md; este índice da además el mapa de paquetes y permite varias skills por carpeta.",
-  "skills_total": 86,
+  "skills_total": 92,
   "packages": [
     {
       "name": "replica",
@@ -32,7 +32,7 @@
     {
       "name": "appsec-audit",
       "path": "appsec-audit",
-      "version": "2.1.0",
+      "version": "2.1.1",
       "manifest": "appsec-audit/skills.json",
       "skill_count": 11,
       "skills": [
@@ -92,7 +92,7 @@
     {
       "name": "premium-web-designer",
       "path": "premium-web-designer",
-      "version": "3.1.0",
+      "version": "3.1.1",
       "manifest": "premium-web-designer/skills.json",
       "skill_count": 2,
       "skills": [
@@ -103,20 +103,21 @@
     {
       "name": "skill-evals",
       "path": "skill-evals",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "manifest": "skill-evals/skills.json",
-      "skill_count": 4,
+      "skill_count": 5,
       "skills": [
         "skill-evals",
         "eval-design",
         "eval-run",
-        "eval-report"
+        "eval-report",
+        "eval-ab"
       ]
     },
     {
       "name": "finops-auditor",
       "path": "finops-auditor",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "manifest": "finops-auditor/skills.json",
       "skill_count": 7,
       "skills": [
@@ -132,7 +133,7 @@
     {
       "name": "db-architect",
       "path": "db-architect",
-      "version": "2.1.0",
+      "version": "2.1.1",
       "manifest": "db-architect/skills.json",
       "skill_count": 9,
       "skills": [
@@ -150,7 +151,7 @@
     {
       "name": "api-contract-guard",
       "path": "api-contract-guard",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "manifest": "api-contract-guard/skills.json",
       "skill_count": 5,
       "skills": [
@@ -164,7 +165,7 @@
     {
       "name": "refactor-surgeon",
       "path": "refactor-surgeon",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "manifest": "refactor-surgeon/skills.json",
       "skill_count": 9,
       "skills": [
@@ -182,7 +183,7 @@
     {
       "name": "docs-sync-engine",
       "path": "docs-sync-engine",
-      "version": "1.3.0",
+      "version": "1.3.1",
       "manifest": "docs-sync-engine/skills.json",
       "skill_count": 7,
       "skills": [
@@ -198,7 +199,7 @@
     {
       "name": "test-architect",
       "path": "test-architect",
-      "version": "1.0.0",
+      "version": "1.0.2",
       "manifest": "test-architect/skills.json",
       "skill_count": 5,
       "skills": [
@@ -208,7 +209,20 @@
         "test-mutation",
         "test-contract"
       ]
+    },
+    {
+      "name": "pr-reviewer",
+      "path": "pr-reviewer",
+      "version": "1.0.0",
+      "manifest": "pr-reviewer/skills.json",
+      "skill_count": 5,
+      "skills": [
+        "pr-reviewer",
+        "pr-risk",
+        "pr-order",
+        "pr-routing",
+        "pr-findings"
+      ]
     }
   ]
 }
-

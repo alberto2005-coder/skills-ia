@@ -37,7 +37,7 @@ El maestro no usa flags: el alcance de la petición fija las fases.
 
 ### Arquitectura
 
-Un maestro y tres sub-skills con scripts compartidos. Se instala la carpeta completa.
+Un maestro y cuatro sub-skills con scripts compartidos. Se instala la carpeta completa.
 
 | Sub-skill | Qué hace |
 |---|---|
@@ -45,6 +45,7 @@ Un maestro y tres sub-skills con scripts compartidos. Se instala la carpeta comp
 | `eval-design` | Casos desde `phrases.json`, casos límite, cobertura y split train/test |
 | `eval-run` | Métricas, colisiones entre hermanas, presupuesto de contexto, regresiones y puertas |
 | `eval-report` | Informe Markdown o HTML con tabla de fallos y diff contra la línea base |
+| `eval-ab` | Comparativa de dos corridas grabadas: eficacia, cumplimiento, coste, latencia y variabilidad |
 
 La librería común es [`evalkit.py`](../skill-evals/scripts/evalkit.py): rutas de casos, carga del router, métricas y formato de la corrida. Las referencias viven en [`metrics.md`](../skill-evals/references/metrics.md) y [`competitors.md`](../skill-evals/references/competitors.md), y las plantillas en [`eval-cases.json`](../skill-evals/templates/eval-cases.json) y [`report.md`](../skill-evals/templates/report.md).
 
@@ -100,7 +101,7 @@ Copia la carpeta `skill-evals/` completa. Ejemplos de petición:
 uv run python -m unittest discover -s skill-evals/tests -t skill-evals/tests
 ```
 
-42 pruebas: diseño de casos desde `phrases.json` y validación con `--check`, métricas y puertas de `run.py`, comparación con línea base y regresiones, colisiones y presupuesto de contexto, informe Markdown y HTML byte a byte, optimizador sin escritura y con `--apply`, y estructura del paquete (frontmatter, manifiesto, gates y handoff).
+56 tests: diseño de casos desde `phrases.json` y validación con `--check`, métricas y puertas de `run.py`, comparación con línea base y regresiones, colisiones y presupuesto de contexto, informe Markdown y HTML byte a byte, optimizador sin escritura y con `--apply`, y estructura del paquete (frontmatter, manifiesto, gates y handoff).
 
 ### Límites
 
@@ -138,7 +139,7 @@ The master takes no flags: the request's scope sets the phases.
 
 ### Architecture
 
-One master and three sub-skills with shared scripts. The whole folder is installed.
+One master and four sub-skills with shared scripts. The whole folder is installed.
 
 | Sub-skill | What it does |
 |---|---|
@@ -146,6 +147,7 @@ One master and three sub-skills with shared scripts. The whole folder is install
 | `eval-design` | Cases from `phrases.json`, boundary cases, coverage and train/test split |
 | `eval-run` | Metrics, sibling collisions, context budget, regressions and gates |
 | `eval-report` | Markdown or HTML report with a failure table and baseline diff |
+| `eval-ab` | Comparison of two recorded runs: effectiveness, compliance, cost, latency and variability |
 
 The shared library is [`evalkit.py`](../skill-evals/scripts/evalkit.py): case paths, router loading, metrics and run format. References live in [`metrics.md`](../skill-evals/references/metrics.md) and [`competitors.md`](../skill-evals/references/competitors.md), templates in [`eval-cases.json`](../skill-evals/templates/eval-cases.json) and [`report.md`](../skill-evals/templates/report.md).
 
@@ -201,7 +203,7 @@ Copy the whole `skill-evals/` folder. Example requests:
 uv run python -m unittest discover -s skill-evals/tests -t skill-evals/tests
 ```
 
-42 tests: case design from `phrases.json` and `--check` validation, `run.py` metrics and gates, baseline comparison and regressions, collisions and context budget, byte-identical Markdown and HTML reports, the optimiser with and without `--apply`, and package structure (frontmatter, manifest, gates and handoff).
+56 tests: case design from `phrases.json` and `--check` validation, `run.py` metrics and gates, baseline comparison and regressions, collisions and context budget, byte-identical Markdown and HTML reports, the optimiser with and without `--apply`, and package structure (frontmatter, manifest, gates and handoff).
 
 ### Limits
 

@@ -28,11 +28,12 @@
 - [**Refactor Surgeon**](refactor-surgeon.md): refactor con métricas, casos dorados, cortes por grafo de llamadas y verificación de conducta.
 - [**Docs Sync Engine**](docs-sync-engine.md): referencias de la documentación verificadas, arquitectura regenerable y CHANGELOG desde commits.
 - [**Test Architect**](test-architect.md): plan de pruebas por riesgo, tests inestables, objetivos de mutación y contratos entre módulos.
+- [**PR Reviewer**](pr-reviewer.md): riesgo por fichero, orden de lectura por dependencias, reparto entre revisores y consolidación con `not_run` explícito.
 - [**Skill Evals**](skill-evals.md): evaluación offline del catálogo con casos desde frases reales, puertas de precisión/recall/MRR, informe reproducible y optimización de descripciones.
 
 ### Paquetes y Sub-skills
 
-**13 paquetes, 86 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
+**14 paquetes, 92 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
 
 | Paquete | Skills | Maestro | Sub-skills |
 |---|---:|---|---|
@@ -42,15 +43,16 @@
 | `agent-red-team` | 4 | `agent-red-team` | `red-scan`, `red-audit`, `red-mcp` |
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
 | `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
-| `skill-evals` | 4 | `skill-evals` | `eval-design`, `eval-run`, `eval-report` |
+| `skill-evals` | 5 | `skill-evals` | `eval-design`, `eval-run`, `eval-report`, `eval-ab` |
 | `finops-auditor` | 7 | `finops-auditor` | `finops-scan`, `finops-rightsize`, `finops-llm-scan`, `finops-infra-scan`, `finops-ci-opt`, `finops-diff` |
 | `db-architect` | 9 | `db-architect` | `db-schema-audit`, `db-migration-guard`, `db-expand-contract`, `db-lock-audit`, `db-drift`, `db-sql-lint`, `db-query-trace`, `db-seed-gen` |
 | `api-contract-guard` | 5 | `api-contract-guard` | `api-diff`, `api-code-sync`, `api-auth-coverage`, `api-mock-server` |
 | `refactor-surgeon` | 9 | `refactor-surgeon` | `refactor-metrics`, `refactor-hotspots`, `refactor-harness`, `refactor-deadcode`, `refactor-clones`, `refactor-cycles`, `refactor-slice`, `refactor-verify` |
 | `docs-sync-engine` | 7 | `docs-sync-engine` | `docs-drift-check`, `docs-terms`, `docs-env`, `docs-arch-gen`, `docs-changelog`, `docs-parity` |
 | `test-architect` | 5 | `test-architect` | `test-plan`, `test-flaky`, `test-mutation`, `test-contract` |
+| `pr-reviewer` | 5 | `pr-reviewer` | `pr-risk`, `pr-order`, `pr-routing`, `pr-findings` |
 
-Cada maestro elige el modo, fija los límites y reparte el trabajo; `premium-web-designer` suma `premium-qa` para auditar webs ya construidas y `appsec-audit` reparte la auditoría entre reconocimiento, código, infraestructura, LLM, amenazas, dependencias, CI, remediación, informe y escala, y `skill-evals` reparte el ciclo entre diseño de casos, ejecución e informe.
+Cada maestro elige el modo, fija los límites y reparte el trabajo; `premium-web-designer` suma `premium-qa` para auditar webs ya construidas y `appsec-audit` reparte la auditoría entre reconocimiento, código, infraestructura, LLM, amenazas, dependencias, CI, remediación, informe y escala, y `skill-evals` reparte el ciclo entre diseño de casos, ejecución e informe, y `pr-reviewer` reparte la revisión entre riesgo, orden, reparto y consolidación.
 
 ### Estructura de un Paquete
 
@@ -119,7 +121,7 @@ La escala canónica de `severity` es **`critical` → `high` → `medium` → `l
 
 | Valores | Herramientas |
 |---|---|
-| `low \| medium \| high \| none` | `auth_coverage.py`, `env_check.py`, `terms_check.py`, `code_metrics.py`, `dead_code.py`, `llm_cost_scan.py`, `infra_cost_scan.py`, `ci_cost_scan.py`, `lock_audit.py`, `docs_parity.py`, `flaky_scan.py`, `contract_fixtures.py` |
+| `low \| medium \| high \| none` | `auth_coverage.py`, `env_check.py`, `terms_check.py`, `code_metrics.py`, `dead_code.py`, `llm_cost_scan.py`, `infra_cost_scan.py`, `ci_cost_scan.py`, `lock_audit.py`, `docs_parity.py`, `flaky_scan.py`, `contract_fixtures.py`, `review_risk.py`, `review_routing.py`, `review_findings.py` |
 | `low \| medium \| none` | `sql_lint.py` |
 | `medium \| none` | `query_trace.py` |
 | `medium \| high \| none` | `schema_audit.py` |
@@ -169,11 +171,12 @@ La escala canónica de `severity` es **`critical` → `high` → `medium` → `l
 - [**Refactor Surgeon**](refactor-surgeon.md): refactoring with metrics, golden cases, call-graph cuts and behaviour verification.
 - [**Docs Sync Engine**](docs-sync-engine.md): verified documentation references, regenerable architecture and a CHANGELOG from commits.
 - [**Test Architect**](test-architect.md): risk-based test plan, flaky tests, mutation targets and contracts between modules.
+- [**PR Reviewer**](pr-reviewer.md): per-file risk, dependency-based reading order, reviewer routing and consolidation with an explicit `not_run`.
 - [**Skill Evals**](skill-evals.md): offline catalog evaluation with cases from real phrases, precision/recall/MRR gates, a reproducible report and description optimisation.
 
 ### Packages and Sub-skills
 
-**13 packages, 86 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
+**14 packages, 92 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
 
 | Package | Skills | Master | Sub-skills |
 |---|---:|---|---|
@@ -183,15 +186,16 @@ La escala canónica de `severity` es **`critical` → `high` → `medium` → `l
 | `agent-red-team` | 4 | `agent-red-team` | `red-scan`, `red-audit`, `red-mcp` |
 | `humanizador-anti-ia` | 3 | `humanizador-anti-ia` | `humanizar`, `detector-ia` |
 | `premium-web-designer` | 2 | `premium-web-designer` | `premium-qa` |
-| `skill-evals` | 4 | `skill-evals` | `eval-design`, `eval-run`, `eval-report` |
+| `skill-evals` | 5 | `skill-evals` | `eval-design`, `eval-run`, `eval-report`, `eval-ab` |
 | `finops-auditor` | 7 | `finops-auditor` | `finops-scan`, `finops-rightsize`, `finops-llm-scan`, `finops-infra-scan`, `finops-ci-opt`, `finops-diff` |
 | `db-architect` | 9 | `db-architect` | `db-schema-audit`, `db-migration-guard`, `db-expand-contract`, `db-lock-audit`, `db-drift`, `db-sql-lint`, `db-query-trace`, `db-seed-gen` |
 | `api-contract-guard` | 5 | `api-contract-guard` | `api-diff`, `api-code-sync`, `api-auth-coverage`, `api-mock-server` |
 | `refactor-surgeon` | 9 | `refactor-surgeon` | `refactor-metrics`, `refactor-hotspots`, `refactor-harness`, `refactor-deadcode`, `refactor-clones`, `refactor-cycles`, `refactor-slice`, `refactor-verify` |
 | `docs-sync-engine` | 7 | `docs-sync-engine` | `docs-drift-check`, `docs-terms`, `docs-env`, `docs-arch-gen`, `docs-changelog`, `docs-parity` |
 | `test-architect` | 5 | `test-architect` | `test-plan`, `test-flaky`, `test-mutation`, `test-contract` |
+| `pr-reviewer` | 5 | `pr-reviewer` | `pr-risk`, `pr-order`, `pr-routing`, `pr-findings` |
 
-Each master picks the mode, sets boundaries and splits the work; `premium-web-designer` adds `premium-qa` to audit sites that already exist and `appsec-audit` splits the audit across recon, code, infrastructure, LLM, threats, dependencies, CI, remediation, report and scale, while `skill-evals` splits the loop across case design, run and report.
+Each master picks the mode, sets boundaries and splits the work; `premium-web-designer` adds `premium-qa` to audit sites that already exist and `appsec-audit` splits the audit across recon, code, infrastructure, LLM, threats, dependencies, CI, remediation, report and scale, while `skill-evals` splits the loop across case design, run and report, and `pr-reviewer` splits the review into risk, order, routing and consolidation.
 
 ### Package Structure
 
@@ -260,7 +264,7 @@ The canonical `severity` scale is **`critical` → `high` → `medium` → `low`
 
 | Values | Tools |
 |---|---|
-| `low \| medium \| high \| none` | `auth_coverage.py`, `env_check.py`, `terms_check.py`, `code_metrics.py`, `dead_code.py`, `llm_cost_scan.py`, `infra_cost_scan.py`, `ci_cost_scan.py`, `lock_audit.py`, `docs_parity.py`, `flaky_scan.py`, `contract_fixtures.py` |
+| `low \| medium \| high \| none` | `auth_coverage.py`, `env_check.py`, `terms_check.py`, `code_metrics.py`, `dead_code.py`, `llm_cost_scan.py`, `infra_cost_scan.py`, `ci_cost_scan.py`, `lock_audit.py`, `docs_parity.py`, `flaky_scan.py`, `contract_fixtures.py`, `review_risk.py`, `review_routing.py`, `review_findings.py` |
 | `low \| medium \| none` | `sql_lint.py` |
 | `medium \| none` | `query_trace.py` |
 | `medium \| high \| none` | `schema_audit.py` |
