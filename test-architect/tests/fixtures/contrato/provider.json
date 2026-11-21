@@ -1,0 +1,7 @@
+{
+  "id": "integer",
+  "email": "string",
+  "roles": "array<string>",
+  "nickname": "string?",
+  "active": "boolean"
+}

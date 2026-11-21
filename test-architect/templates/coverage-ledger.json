@@ -1,0 +1,31 @@
+{
+  "source": "plan_tests",
+  "project": "<proyecto>",
+  "generated_at": "YYYY-MM-DD",
+  "budget": {
+    "limit": 12,
+    "min_score": 0,
+    "planned": 0
+  },
+  "plan": [
+    {
+      "module": "<módulo>",
+      "file": "<ruta/módulo.py>",
+      "score": 0,
+      "risk": [],
+      "functions": 0,
+      "lines": 0,
+      "covered": false,
+      "test": "<ruta/test_módulo.py o null>",
+      "owner": "<responsable>"
+    }
+  ],
+  "ledger": [
+    {
+      "file": "<ruta/módulo.py>",
+      "score": 0,
+      "reason": "<por qué queda fuera>",
+      "review": "YYYY-MM-DD"
+    }
+  ]
+}

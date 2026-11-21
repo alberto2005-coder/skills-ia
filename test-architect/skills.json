@@ -1,0 +1,34 @@
+{
+  "format": "skills-ia-package",
+  "format_version": "1.0",
+  "name": "test-architect",
+  "version": "1.0.0",
+  "description": "Estrategia de pruebas desde el código: plan por riesgo, caza de tests inestables, objetivos de mutación y contratos entre módulos.",
+  "skills": [
+    {
+      "name": "test-architect",
+      "path": "SKILL.md",
+      "description": "Maestro: decidir qué probar, qué estabilizar y qué fijar."
+    },
+    {
+      "name": "test-plan",
+      "path": "test-plan/SKILL.md",
+      "description": "Plan de pruebas por riesgo desde el árbol y la cobertura real."
+    },
+    {
+      "name": "test-flaky",
+      "path": "test-flaky/SKILL.md",
+      "description": "Tests inestables: esperas fijas, reloj, azar y red real."
+    },
+    {
+      "name": "test-mutation",
+      "path": "test-mutation/SKILL.md",
+      "description": "Objetivos de mutación y presupuesto sin ejecutar mutantes."
+    },
+    {
+      "name": "test-contract",
+      "path": "test-contract/SKILL.md",
+      "description": "Contratos entre módulos: campos, tipos y obligatoriedad en fixtures."
+    }
+  ]
+}
