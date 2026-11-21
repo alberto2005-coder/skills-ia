@@ -1,0 +1,22 @@
+{
+  "check": "security",
+  "status": "ran",
+  "findings": [
+    {
+      "file": "src/auth.py",
+      "line": 42,
+      "rule": "secreto-expuesto",
+      "severity": "high",
+      "message": "clave en el código",
+      "fix": "mover a un secreto"
+    },
+    {
+      "file": "src/util.py",
+      "line": 10,
+      "rule": "check-desactivado",
+      "severity": "low",
+      "message": "noqa añadido",
+      "fix": "justificar o retirar"
+    }
+  ]
+}

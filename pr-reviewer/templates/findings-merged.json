@@ -1,0 +1,39 @@
+{
+  "source": "pr-findings",
+  "checks": [
+    {"check": "security", "status": "ran"},
+    {"check": "tests", "status": "ran"},
+    {"check": "coverage", "status": "not_run"}
+  ],
+  "not_run": ["coverage"],
+  "required": ["security"],
+  "summary": {
+    "total": 2,
+    "by_severity": {"low": 0, "medium": 1, "high": 1},
+    "by_rule": {"check-desactivado": 1, "secreto-expuesto": 1},
+    "checks_ran": 2,
+    "checks_not_run": 1
+  },
+  "findings": [
+    {
+      "file": "src/auth.py",
+      "line": 42,
+      "rule": "secreto-expuesto",
+      "severity": "high",
+      "message": "clave en el código",
+      "fix": "mover a un secreto",
+      "checks": ["security", "tests"],
+      "duplicates": 2
+    },
+    {
+      "file": "src/util.py",
+      "line": 10,
+      "rule": "check-desactivado",
+      "severity": "medium",
+      "message": "noqa añadido",
+      "fix": "justificar o retirar",
+      "checks": ["security"],
+      "duplicates": 1
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {"pattern": "**", "reviewers": ["equipo"]},
+    {"pattern": "src/auth/**", "reviewers": ["ana"]},
+    {"pattern": "src/tests/**", "reviewers": ["ana", "luis"]}
+  ],
+  "reviewers": {
+    "ana": {"capacity": 5},
+    "luis": {"capacity": 5},
+    "equipo": {"capacity": 5}
+  }
+}

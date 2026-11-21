@@ -1,0 +1,14 @@
+{
+  "check": "tests",
+  "status": "ran",
+  "findings": [
+    {
+      "file": "src/auth.py",
+      "line": 42,
+      "rule": "secreto-expuesto",
+      "severity": "medium",
+      "message": "la misma clave citada por el plan de pruebas",
+      "fix": "mover a un secreto"
+    }
+  ]
+}

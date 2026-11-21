@@ -1,0 +1,41 @@
+diff --git a/base.py b/base.py
+--- a/base.py
++++ b/base.py
+@@ -1,1 +1,2 @@
+ def algo():
++    return 1
+diff --git a/medio.py b/medio.py
+--- a/medio.py
++++ b/medio.py
+@@ -1,1 +1,2 @@
++from base import algo
+ def medio():
+diff --git a/alto.py b/alto.py
+--- a/alto.py
++++ b/alto.py
+@@ -1,1 +1,2 @@
++from medio import medio
+ def alto():
+diff --git a/ciclo_a.py b/ciclo_a.py
+--- a/ciclo_a.py
++++ b/ciclo_a.py
+@@ -1,1 +1,2 @@
++from ciclo_b import b
+ def a():
+diff --git a/ciclo_b.py b/ciclo_b.py
+--- a/ciclo_b.py
++++ b/ciclo_b.py
+@@ -1,1 +1,2 @@
++from ciclo_a import a
+ def b():
+diff --git a/suelto.py b/suelto.py
+--- a/suelto.py
++++ b/suelto.py
+@@ -1,1 +1,2 @@
++VALOR = 1
+diff --git a/notas.md b/notas.md
+--- a/notas.md
++++ b/notas.md
+@@ -1,1 +1,2 @@
+ # Notas
++Sin imports.

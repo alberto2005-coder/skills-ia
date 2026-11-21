@@ -1,0 +1,8 @@
+{
+  "routes": [
+    {"pattern": "**", "reviewers": ["solo"]}
+  ],
+  "reviewers": {
+    "solo": {"capacity": 2}
+  }
+}

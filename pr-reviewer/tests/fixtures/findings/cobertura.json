@@ -1,0 +1,5 @@
+{
+  "check": "coverage",
+  "status": "not_run",
+  "findings": []
+}

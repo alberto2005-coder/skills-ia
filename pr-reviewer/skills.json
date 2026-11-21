@@ -1,0 +1,35 @@
+{
+  "format": "skills-ia-package",
+  "format_version": "1.0",
+  "name": "pr-reviewer",
+  "version": "1.0.0",
+  "description": "Revisión de pull requests desde el diff: riesgo por fichero, orden de lectura, reparto entre revisores y consolidación de hallazgos sin marcar como limpio lo que no se ejecutó.",
+  "author": "Alberto Ortiz",
+  "skills": [
+    {
+      "name": "pr-reviewer",
+      "path": "SKILL.md",
+      "description": "Maestro: priorizar un PR, ordenar su lectura y consolidar lo revisado."
+    },
+    {
+      "name": "pr-risk",
+      "path": "pr-risk/SKILL.md",
+      "description": "Riesgo del diff: rutas sensibles, tamaño, secretos y dependencias."
+    },
+    {
+      "name": "pr-order",
+      "path": "pr-order/SKILL.md",
+      "description": "Orden de lectura por dependencias entre los ficheros cambiados."
+    },
+    {
+      "name": "pr-routing",
+      "path": "pr-routing/SKILL.md",
+      "description": "Reparto de la revisión por rutas, carga y respaldo."
+    },
+    {
+      "name": "pr-findings",
+      "path": "pr-findings/SKILL.md",
+      "description": "Consolidación de hallazgos con estado not_run explícito."
+    }
+  ]
+}
