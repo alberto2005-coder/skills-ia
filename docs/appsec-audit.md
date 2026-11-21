@@ -34,7 +34,7 @@ Un maestro y cinco sub-skills con assets compartidos (`references/`, `scripts/`,
 |---|---|
 | `appsec-audit` | Maestro: alcance, fases, reglas, severidad y entrega |
 | `appsec-recon` | Autorización, activos, superficie, dependencias y secretos |
-| `appsec-code` | Trazado fuente→sumidero, control de acceso, cripto y lógica |
+| `appsec-code` | Trazado fuente→sumidero, control de acceso, API Top 10, cripto y lógica |
 | `appsec-infra` | Docker, K8s, Terraform, cloud, IAM y CI/CD |
 | `appsec-llm` | OWASP LLM Top 10, agentes, MCP y RAG |
 | `appsec-report` | Tribunal, confianza 1–10, nota A–F y diffs |
@@ -115,7 +115,7 @@ Copia la carpeta `appsec-audit/` completa. Ejemplos de petición:
 uv run python run_tests.py
 ```
 
-El paquete aporta 127 tests propios (estructura, scripts con fixtures y códigos de salida) y está enganchado al iniciador global.
+El paquete aporta 137 tests propios (estructura, scripts con fixtures y códigos de salida) y está enganchado al iniciador global.
 
 ### Límites
 
@@ -218,7 +218,7 @@ Copy the whole `appsec-audit/` folder. Example requests:
 uv run python run_tests.py
 ```
 
-The package ships 127 tests of its own (structure, scripts with fixtures and exit codes) and is wired into the global runner.
+The package ships 137 tests of its own (structure, scripts with fixtures and exit codes) and is wired into the global runner.
 
 ### Limits
 

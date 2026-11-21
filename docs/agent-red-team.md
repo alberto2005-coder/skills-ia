@@ -25,7 +25,7 @@
 
 `agent-red-team` evalúa de forma estática paquetes de instrucciones, servidores MCP, carpetas de agentes (`SKILL.md`) y scripts auxiliares antes de instalarlos o ejecutarlos. Combina análisis determinista (AST de Python, entropía, Unicode invisible, patrones de inyección) con revisión semántica adversarial y verificación independiente de cada hallazgo.
 
-**Paquete de 3 skills:** el maestro elige el modo; `red-scan` y `red-audit` ejecutan cada uno.
+**Paquete de 4 skills:** el maestro elige el modo; `red-scan`, `red-audit` y `red-mcp` ejecutan cada uno.
 
 ### Modos de Operación
 
@@ -42,6 +42,7 @@ Si la petición es ambigua, se pregunta antes de crear archivos. Ninguno de los 
 |---|---|
 | `red-scan` | Escaneo rápido en modo guidance: veredicto, hallazgos y límites en el chat, sin crear ficheros. |
 | `red-audit` | Auditoría completa: superficies, escaneo estático, revisión adversarial, verificación independiente, ledger e informe JSON. |
+| `red-mcp` | Superficie MCP: transportes, tools/resources/prompts, permisos, tokens y autoaprobación. |
 
 ### Protocolo en 6 Fases (0–5)
 
@@ -60,7 +61,7 @@ Seis combinaciones fallan **siempre**, aunque cada señal por separado fuese med
 
 ### Componentes
 
-- `SKILL.md` (maestro) + `red-scan/SKILL.md` + `red-audit/SKILL.md`.
+- `SKILL.md` (maestro) + `red-scan/SKILL.md` + `red-audit/SKILL.md` + `red-mcp/SKILL.md`.
 - `references/threat-matrix.md`: OWASP LLM Top 10 / MITRE ATLAS.
 - `references/attack-catalog.md`: 15 ataques con qué hace, cómo se ve y checklist.
 - `scripts/scan_skill.py`: motor estático (`--target`, `--json`, `--rules`).
@@ -119,7 +120,7 @@ Severidades en JSON: `reject` → `critical` → `high` → `medium` → `low` (
 
 `agent-red-team` statically inspects instruction packages, MCP servers, agent folders (`SKILL.md`) and companion scripts before installation or execution. It combines deterministic analysis (Python AST, entropy, invisible Unicode, injection patterns) with adversarial semantic review and independent verification of every finding.
 
-**3-skill package:** the master picks the mode; `red-scan` and `red-audit` do the work.
+**4-skill package:** the master picks the mode; `red-scan`, `red-audit` and `red-mcp` do the work.
 
 ### Operating Modes
 
@@ -136,6 +137,7 @@ Ambiguous requests are clarified before creating files. Neither mode authorizes 
 |---|---|
 | `red-scan` | Quick guidance scan: verdict, findings and limits in chat, no files created. |
 | `red-audit` | Full audit: surfaces, static scan, adversarial review, independent verification, ledger and JSON report. |
+| `red-mcp` | MCP surface: transports, tools/resources/prompts, permissions, tokens and auto-approval. |
 
 ### 6-Phase Protocol (0–5)
 
@@ -154,7 +156,7 @@ Six combinations always fail, even when each signal alone would be medium (per f
 
 ### Components
 
-- `SKILL.md` (master) + `red-scan/SKILL.md` + `red-audit/SKILL.md`.
+- `SKILL.md` (master) + `red-scan/SKILL.md` + `red-audit/SKILL.md` + `red-mcp/SKILL.md`.
 - `references/threat-matrix.md`: OWASP LLM Top 10 / MITRE ATLAS.
 - `references/attack-catalog.md`: 15 attacks with behavior, appearance and checklist.
 - `scripts/scan_skill.py`: static engine (`--target`, `--json`, `--rules`).

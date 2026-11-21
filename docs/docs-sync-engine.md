@@ -38,7 +38,7 @@ El maestro no usa flags: el alcance de la petición fija las fases.
 
 ### Arquitectura
 
-Un maestro y cinco sub-skills con scripts compartidos. Se instala la carpeta completa.
+Un maestro y seis sub-skills con scripts compartidos. Se instala la carpeta completa.
 
 | Sub-skill | Qué hace |
 |---|---|
@@ -46,6 +46,7 @@ Un maestro y cinco sub-skills con scripts compartidos. Se instala la carpeta com
 | `docs-drift-check` | Rutas entre backticks y enlaces relativos contra el árbol |
 | `docs-terms` | Glosario accept/reject y grafía canónica |
 | `docs-env` | Variables de entorno frente a `.env.example` y los documentos |
+| `docs-parity` | Paridad ES/EN: encabezados, tablas, anclas, fences y cifras |
 | `docs-arch-gen` | Tabla de módulos desde docstrings y funciones de entrada |
 | `docs-changelog` | Agrupa commits convencionales por sección |
 
@@ -99,7 +100,7 @@ Copia la carpeta `docs-sync-engine/` completa. Ejemplos de petición:
 uv run python -m unittest discover -s docs-sync-engine/tests -t docs-sync-engine/tests
 ```
 
-27 pruebas: referencia existente limpia, referencia ausente detectada con su línea, enlaces externos ignorados, ruta de docs inexistente, tabla de arquitectura con docstring y entradas, módulos de `tests/` excluidos, escritura a fichero, commits agrupados por tipo, commits sin convención en `Otros`, entrada vacía, fichero de commits ausente, y dieciséis del glosario (documento limpio, término rechazado con su reemplazo, grafía no canónica, bloques y código en línea ignorados, `--fail-on none`, documento y glosario ausentes) y de entorno (variable consistente, sin ejemplo, sin documentar, ejemplo sin uso, `process.env`, `import.meta.env`, `--fail-on none` y ruta ausente).
+38 pruebas: referencia existente limpia, referencia ausente detectada con su línea, enlaces externos ignorados, ruta de docs inexistente, tabla de arquitectura con docstring y entradas, módulos de `tests/` excluidos, escritura a fichero, commits agrupados por tipo, commits sin convención en `Otros`, entrada vacía, fichero de commits ausente, y dieciséis del glosario (documento limpio, término rechazado con su reemplazo, grafía no canónica, bloques y código en línea ignorados, `--fail-on none`, documento y glosario ausentes) y de entorno (variable consistente, sin ejemplo, sin documentar, ejemplo sin uso, `process.env`, `import.meta.env`, `--fail-on none` y ruta ausente).
 
 ### Límites
 
@@ -138,7 +139,7 @@ The master takes no flags: the request's scope sets the phases.
 
 ### Architecture
 
-One master and five sub-skills with shared scripts. The whole folder is installed.
+One master and six sub-skills with shared scripts. The whole folder is installed.
 
 | Sub-skill | What it does |
 |---|---|
@@ -146,6 +147,7 @@ One master and five sub-skills with shared scripts. The whole folder is installe
 | `docs-drift-check` | Backticked paths and relative links against the tree |
 | `docs-terms` | Accept/reject glossary and canonical spelling |
 | `docs-env` | Environment variables against `.env.example` and the docs |
+| `docs-parity` | ES/EN parity: headings, tables, anchors, fences and counts |
 | `docs-arch-gen` | Module table from docstrings and entry functions |
 | `docs-changelog` | Groups conventional commits by section |
 
@@ -199,7 +201,7 @@ Copy the whole `docs-sync-engine/` folder. Example requests:
 uv run python -m unittest discover -s docs-sync-engine/tests -t docs-sync-engine/tests
 ```
 
-27 tests: existing reference clean, missing reference detected with its line, external links ignored, missing docs path, architecture table with docstring and entries, `tests/` modules excluded, writing to a file, commits grouped by type, commits without convention under `Otros`, empty entry, missing commits file, and sixteen for the glossary (clean document, rejected term with its replacement, non-canonical spelling, code fences and inline code ignored, `--fail-on none`, missing document and glossary) and for the environment check (consistent variable, missing example, missing docs, example without use, `process.env`, `import.meta.env`, `--fail-on none` and missing path).
+38 tests: existing reference clean, missing reference detected with its line, external links ignored, missing docs path, architecture table with docstring and entries, `tests/` modules excluded, writing to a file, commits grouped by type, commits without convention under `Otros`, empty entry, missing commits file, and sixteen for the glossary (clean document, rejected term with its replacement, non-canonical spelling, code fences and inline code ignored, `--fail-on none`, missing document and glossary) and for the environment check (consistent variable, missing example, missing docs, example without use, `process.env`, `import.meta.env`, `--fail-on none` and missing path).
 
 ### Limits
 

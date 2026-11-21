@@ -1374,6 +1374,38 @@
           "winner": "refactor-deadcode"
         }
       ]
+    },
+    "docs-parity": {
+      "positives": [
+        "comprueba que las dos mitades del documento dicen lo mismo en español y en inglés",
+        "verifica la paridad entre la documentación ES y EN antes de la release"
+      ],
+      "negatives": [
+        {
+          "phrase": "genera el changelog a partir de los commits convencionales",
+          "winner": "docs-changelog"
+        },
+        {
+          "phrase": "detecta referencias del código que ya no existen en la documentación",
+          "winner": "docs-drift-check"
+        }
+      ]
+    },
+    "red-mcp": {
+      "positives": [
+        "audita la configuración de un servidor mcp antes de conectarlo",
+        "revisa las tools y los permisos que concede un mcp.json"
+      ],
+      "negatives": [
+        {
+          "phrase": "protege el contrato de la api antes de publicar",
+          "winner": "api-contract-guard"
+        },
+        {
+          "phrase": "haz una auditoría de seguridad completa con verificación y ledger",
+          "winner": "red-audit"
+        }
+      ]
     }
   },
   "out_of_domain": [

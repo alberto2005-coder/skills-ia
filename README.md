@@ -23,7 +23,7 @@
 
 **Skills IA** es una colección de habilidades modulares, deterministas e independientes diseñadas para ser integradas en cualquier asistente de Inteligencia Artificial (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Cada habilidad es autosuficiente y opera sin alterar paquetes globales ni requerir dependencias complejas.
 
-Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica, varias sub-skills con un corte de uso real. Se instalan juntas y comparten assets sin duplicarlos. El índice máquina-legible está en [`skills.json`](skills.json): 12 paquetes, 79 skills.
+Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica, varias sub-skills con un corte de uso real. Se instalan juntas y comparten assets sin duplicarlos. El índice máquina-legible está en [`skills.json`](skills.json): 12 paquetes, 81 skills.
 
 ### Módulos y Sub-skills
 
@@ -32,7 +32,7 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | **[`replica`](replica/)** | Reconstrucción funcional *clean-room* de aplicaciones (desde SaaS hasta editores de alta complejidad). | 14 |
 | **[`seo-auditor`](seo-auditor/)** | Auditoría SEO técnica, de contenido, datos estructurados, sitemaps y GEO, con rúbrica 0–100 y evidencia reproducible. | 6 |
 | **[`appsec-audit`](appsec-audit/)** | Auditoría de ciberseguridad integral: código, APIs, infraestructura, cloud y LLM, con tribunal de validación, nota A–F, modelo de amenazas, dependencias, CI, remediación y escala. | 11 |
-| **[`agent-red-team`](agent-red-team/)** | Auditoría de seguridad de skills, MCP y carpetas de instrucciones antes de instalarlas. | 3 |
+| **[`agent-red-team`](agent-red-team/)** | Auditoría de seguridad de skills, MCP y carpetas de instrucciones antes de instalarlas. | 4 |
 | **[`humanizador-anti-ia`](humanizador-anti-ia/)** | Detección y reescritura de patrones de escritura de IA, con score 0–100 determinista. | 3 |
 | **[`premium-web-designer`](premium-web-designer/)** | Diseño y desarrollo de sitios web premium con dirección de arte, UX/UI y QA independiente medible. | 2 |
 | **[`skill-evals`](skill-evals/)** | Evaluación offline de skills: casos, triggers, colisiones, presupuesto de contexto y veredicto reproducible. | 4 |
@@ -40,7 +40,7 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | **[`db-architect`](db-architect/)** | Auditoría de bases de datos sin motor: esquema, riesgo y bloqueo de migraciones, plan de dos fases, deriva, estilo SQL, consultas N+1 y datos de siembra. | 9 |
 | **[`api-contract-guard`](api-contract-guard/)** | Defensa del contrato de API: impacto SemVer, cruce de rutas backend/frontend, cobertura de autenticación y mock local. | 5 |
 | **[`refactor-surgeon`](refactor-surgeon/)** | Refactor con red: métricas de complejidad, hotspots por churn, código muerto, detección de clones, ciclos de imports, casos dorados, cortes por grafo de llamadas y verificación. | 9 |
-| **[`docs-sync-engine`](docs-sync-engine/)** | Documentación sincronizada con el código: referencias, glosario, variables de entorno, arquitectura regenerable y CHANGELOG. | 6 |
+| **[`docs-sync-engine`](docs-sync-engine/)** | Documentación sincronizada con el código: referencias, glosario, variables de entorno, arquitectura regenerable y CHANGELOG. | 7 |
 
 #### `replica` — maestro + 13 fases
 
@@ -78,7 +78,7 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 |---|---|
 | `appsec-audit` | Maestro: alcance, dos fases, regla cero, severidad y entrega del informe. |
 | `appsec-recon` | Autorización, activos, superficie de ataque, dependencias y secretos. |
-| `appsec-code` | Trazado fuente→sumidero, control de acceso, cripto y lógica de negocio. |
+| `appsec-code` | Trazado fuente→sumidero, control de acceso, API Top 10, cripto y lógica. |
 | `appsec-infra` | Docker, Kubernetes, Terraform, cloud, IAM y CI/CD. |
 | `appsec-llm` | OWASP LLM Top 10, agentes, MCP y RAG. |
 | `appsec-report` | Tribunal con confianza 1–10, nota A–F, diffs y resumen ejecutivo. |
@@ -147,7 +147,7 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | `refactor-slice` | Componentes conexas del grafo de llamadas como cortes. |
 | `refactor-verify` | Conducta sin cambios contra el snapshot. |
 
-#### `docs-sync-engine` — maestro + 5 sub-skills
+#### `docs-sync-engine` — maestro + 6 sub-skills
 
 | Sub-skill | Qué hace |
 |---|---|
@@ -157,14 +157,16 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | `docs-env` | Variables de entorno frente a `.env.example` y los documentos. |
 | `docs-arch-gen` | Borrador de arquitectura desde docstrings y entradas. |
 | `docs-changelog` | CHANGELOG agrupado desde commits convencionales. |
+| `docs-parity` | Paridad ES/EN: forma, anclas y cifras de las dos mitades. |
 
-#### `agent-red-team` — maestro + 2 sub-skills
+#### `agent-red-team` — maestro + 3 sub-skills
 
 | Sub-skill | Qué hace | Escribe ficheros |
 |---|---|---|
 | `agent-red-team` | Maestro: modo, protocolo 0–5, REJECT, ledger y límites. | — |
 | `red-scan` | Escaneo rápido (guidance): veredicto en el chat. | No |
 | `red-audit` | Auditoría completa con verificación independiente y ledger. | Sí, los pedidos |
+| `red-mcp` | Superficie MCP: transportes, tools, permisos y tokens. | No |
 
 #### `humanizador-anti-ia` — maestro + 2 sub-skills
 
@@ -256,7 +258,7 @@ Las guías completas de cada módulo se encuentran en la carpeta [`docs/`](docs/
 - Los tests usan `unittest`; las herramientas de pruebas y calidad (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) están en el grupo `dev` de `pyproject.toml` y se gestionan con [`uv`](https://docs.astral.sh/uv/).
 - Para preparar el entorno `.venv` y ejecutar todos los tests desde la raíz: `uv sync` y `uv run python run_tests.py`.
 - GitHub Actions ejecuta todas las suites en cada `push` mediante `.github/workflows/tests.yml`, y además un gate de métricas (`tests/metrics_gate.py`) que falla si crecen los hallazgos `high` de `code_metrics` o los clones de `clone_detect`; el techo aceptado vive en `tests/metrics_baseline.json`. Una guardia de versiones (`tests/version_guard.py`) falla si cambia un paquete sin subir su `version` en el manifiesto, y una auditoría de documentación (`tests/audit_docs.py`) falla si los docs citan rutas, flags, recuentos o anclas que ya no cuadran.
-- Tests transversales en `tests/`: activación de las 79 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
+- Tests transversales en `tests/`: activación de las 81 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
 
 ### Licencia
 
@@ -280,7 +282,7 @@ Distribuido bajo la [Licencia MIT](LICENSE).
 
 **Skills IA** is a collection of modular, deterministic, and self-contained agent skills designed for integration with any AI assistant (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Each skill is independent and operates without modifying global packages or requiring third-party libraries.
 
-Each folder is a **package**: one master skill that orchestrates and, where applicable, sub-skills split by real usage boundaries. Packages share assets without duplication. The machine-readable index is [`skills.json`](skills.json): 12 packages, 79 skills.
+Each folder is a **package**: one master skill that orchestrates and, where applicable, sub-skills split by real usage boundaries. Packages share assets without duplication. The machine-readable index is [`skills.json`](skills.json): 12 packages, 81 skills.
 
 ### Modules and Sub-skills
 
@@ -289,7 +291,7 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | **[`replica`](replica/)** | Clean-room functional reverse-engineering of software (from SaaS to complex engines like word processors). | 14 |
 | **[`seo-auditor`](seo-auditor/)** | Technical, content, structured-data, sitemap and GEO audits with a 0–100 rubric and reproducible evidence. | 6 |
 | **[`appsec-audit`](appsec-audit/)** | End-to-end security audit of code, APIs, infrastructure, cloud and LLM systems, with a validation tribunal, an A–F grade, threat modelling, dependencies, CI, remediation and scale. | 11 |
-| **[`agent-red-team`](agent-red-team/)** | Security audit of skills, MCP servers and instruction folders before installing them. | 3 |
+| **[`agent-red-team`](agent-red-team/)** | Security audit of skills, MCP servers and instruction folders before installing them. | 4 |
 | **[`humanizador-anti-ia`](humanizador-anti-ia/)** | Detection and rewriting of AI writing patterns with a deterministic 0–100 score. | 3 |
 | **[`premium-web-designer`](premium-web-designer/)** | Premium website design and development with art direction, UX/UI and measurable independent QA. | 2 |
 | **[`skill-evals`](skill-evals/)** | Offline skill evaluation: cases, triggers, collisions, context budget and a reproducible verdict. | 4 |
@@ -297,7 +299,7 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | **[`db-architect`](db-architect/)** | Database audit without an engine: schema, migration risk and locking, two-phase plans, drift, SQL style, N+1 queries and seed data. | 9 |
 | **[`api-contract-guard`](api-contract-guard/)** | API contract defence: SemVer impact, backend/frontend route sync, authentication coverage and a local mock. | 5 |
 | **[`refactor-surgeon`](refactor-surgeon/)** | Refactoring with a safety net: complexity metrics, churn hotspots, dead code, clone detection, import cycles, golden cases, call-graph cuts and verification. | 9 |
-| **[`docs-sync-engine`](docs-sync-engine/)** | Documentation synced with the code: references, glossary, environment variables, regenerable architecture and CHANGELOG. | 6 |
+| **[`docs-sync-engine`](docs-sync-engine/)** | Documentation synced with the code: references, glossary, environment variables, regenerable architecture and CHANGELOG. | 7 |
 
 #### `replica` — master + 13 phases
 
@@ -335,7 +337,7 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 |---|---|
 | `appsec-audit` | Master: scope, two phases, zero rule, severity and report delivery. |
 | `appsec-recon` | Authorization, assets, attack surface, dependencies and secrets. |
-| `appsec-code` | Source-to-sink tracing, access control, crypto and business logic. |
+| `appsec-code` | Source-to-sink tracing, access control, API Top 10, crypto and business logic. |
 | `appsec-infra` | Docker, Kubernetes, Terraform, cloud, IAM and CI/CD. |
 | `appsec-llm` | OWASP LLM Top 10, agents, MCP and RAG. |
 | `appsec-report` | 1–10 confidence tribunal, A–F grade, diffs and executive summary. |
@@ -404,7 +406,7 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | `refactor-slice` | Connected components of the call graph as cuts. |
 | `refactor-verify` | Unchanged behaviour against the snapshot. |
 
-#### `docs-sync-engine` — master + 5 sub-skills
+#### `docs-sync-engine` — master + 6 sub-skills
 
 | Sub-skill | Purpose |
 |---|---|
@@ -414,14 +416,16 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | `docs-env` | Environment variables against `.env.example` and the docs. |
 | `docs-arch-gen` | Architecture draft from docstrings and entry functions. |
 | `docs-changelog` | CHANGELOG grouped from conventional commits. |
+| `docs-parity` | ES/EN parity: shape, anchors and counts across both halves. |
 
-#### `agent-red-team` — master + 2 sub-skills
+#### `agent-red-team` — master + 3 sub-skills
 
 | Sub-skill | Purpose | Writes files |
 |---|---|---|
 | `agent-red-team` | Master: mode, protocol 0–5, REJECT, ledger and limits. | — |
 | `red-scan` | Quick guidance scan: verdict in chat. | No |
 | `red-audit` | Full audit with independent verification and ledger. | Only requested ones |
+| `red-mcp` | MCP surface: transports, tools, permissions and tokens. | No |
 
 #### `humanizador-anti-ia` — master + 2 sub-skills
 
@@ -513,7 +517,7 @@ Comprehensive module documentation is available in the [`docs/`](docs/) director
 - Tests use `unittest`; test and quality tools (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) are in the `dev` group in `pyproject.toml` and managed by [`uv`](https://docs.astral.sh/uv/).
 - Prepare `.venv` and run every test from the repository root with `uv sync` and `uv run python run_tests.py`.
 - GitHub Actions runs all suites on every `push` via `.github/workflows/tests.yml`, plus a metrics gate (`tests/metrics_gate.py`) that fails when `code_metrics` `high` findings or `clone_detect` clones grow; the accepted ceiling lives in `tests/metrics_baseline.json`. A version guard (`tests/version_guard.py`) fails when a package changes without bumping its `version` in the manifest, and a documentation audit (`tests/audit_docs.py`) fails when the docs cite paths, flags, counts or anchors that no longer match.
-- Cross-cutting tests in `tests/`: activation for all 79 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
+- Cross-cutting tests in `tests/`: activation for all 81 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
 
 ### License
 

@@ -8,6 +8,20 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-20 · Paridad ES/EN, superficie MCP y API Top 10 (lote 1 de v6.0.0)
+
+#### Añadido
+
+- **`docs-parity`** (docs-sync-engine 1.3.0): compara la forma de las dos mitades de un documento (encabezados por nivel, filas de tabla, fences por lenguaje, anclas internas y cifras con unidad) y delega el desfase con el código en `tests/audit_docs.py` como subproceso, sin importar nada de la raíz del repo. Mismo contrato de salida que el resto: `--fail-on high|medium|low|none` (por defecto `high`), 0 limpio o por debajo del umbral, 1 umbral superado y 2 ruta ilegible; `--json` para el contrato de hallazgos.
+- **`red-mcp`** (agent-red-team 3.2.0): `scan_mcp.py` y `mcp_rules.json` revisan un `mcp.json` o la configuración de un servidor antes de conectarlo, con siete reglas pasivas (token en claro, transporte sin TLS, comando sin versión, shell por stdio, autoaprobación amplia, tool envenenada y permiso excesivo). `references/mcp-surfaces.md` fija la superficie (transportes, tools/resources/prompts, scopes, arranque) y remite a `appsec-llm` para la taxonomía de prompt injection en vez de repetirla.
+- **`appsec-code`** (appsec-audit 2.1.0): `references/api-security-top10.md` con BFLA, BOLA, mass assignment y SSRF, fixtures vulnerable/segura y `tests/test_api_top10.py`; el maestro solo enlaza la referencia.
+- **Contrato de hallazgos:** adaptador `docs` en `contracts/findings/emit.py`, con tabla de correcciones para `secciones-idioma`, `forma-encabezados`, `forma-tablas`, `forma-fences`, `cifras`, `ancla-rota` y `drift-codigo`; un hallazgo sin línea sale con `line: null`.
+- **v5.3.0:** el índice raíz y el marketplace pasan a 81 skills y 12 paquetes, con las filas de `docs-parity` y `red-mcp` en README (ES/EN), índice y guías.
+
+#### Verificado
+
+- `pytest` completo, `run_tests.py`, `lint_frontmatter`, `lint_module_names`, `audit_docs`, `metrics_gate`, `ruff` y `markdownlint-cli2`; `docs-parity` y `scan_mcp` con exit codes propios; triggers con dos frases positivas y dos negativas por skill nueva.
+
 ### - 2026-11-20 · Puerta contra basenames de módulos repetidos
 
 #### Añadido
@@ -719,6 +733,20 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-20 · ES/EN parity, MCP surface and API Top 10 (v6.0.0 batch 1)
+
+#### Added
+
+- **`docs-parity`** (docs-sync-engine 1.3.0): compares the shape of both halves of a document (headings per level, table rows, fences per language, internal anchors and numbers with units) and delegates code drift to `tests/audit_docs.py` as a subprocess, importing nothing from the repo root. Same output contract as the rest: `--fail-on high|medium|low|none` (default `high`), 0 when clean or below the threshold, 1 when the threshold is crossed and 2 for an unreadable path; `--json` for the findings contract.
+- **`red-mcp`** (agent-red-team 3.2.0): `scan_mcp.py` and `mcp_rules.json` review an `mcp.json` or a server config before it is connected, with seven passive rules (plaintext token, transport without TLS, unpinned command, shell over stdio, broad auto-approval, poisoned tool and excessive permission). `references/mcp-surfaces.md` fixes the surface (transports, tools/resources/prompts, scopes, launch) and points to `appsec-llm` for prompt-injection taxonomy instead of repeating it.
+- **`appsec-code`** (appsec-audit 2.1.0): `references/api-security-top10.md` with BFLA, BOLA, mass assignment and SSRF, vulnerable/safe fixtures and `tests/test_api_top10.py`; the master only links the reference.
+- **Findings contract:** `docs` adapter in `contracts/findings/emit.py`, with a fixes table for `secciones-idioma`, `forma-encabezados`, `forma-tablas`, `forma-fences`, `cifras`, `ancla-rota` and `drift-codigo`; a finding without a line emits `line: null`.
+- **v5.3.0:** the root index and the marketplace move to 81 skills and 12 packages, with `docs-parity` and `red-mcp` rows in README (ES/EN), index and guides.
+
+#### Verified
+
+- Full `pytest`, `run_tests.py`, `lint_frontmatter`, `lint_module_names`, `audit_docs`, `metrics_gate`, `ruff` and `markdownlint-cli2`; `docs-parity` and `scan_mcp` with their own exit codes; triggers with two positive and two negative phrases per new skill.
 
 ### - 2026-11-20 · Gate against repeated module basenames
 
