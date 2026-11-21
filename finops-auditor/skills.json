@@ -2,8 +2,9 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "finops-auditor",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Auditoría de costes cloud: recursos huérfanos, sobreaprovisionamiento, derechosizing, planes de ahorro y diff de coste con guardrails.",
+  "author": "Alberto Ortiz",
   "skills": [
     {
       "name": "finops-auditor",

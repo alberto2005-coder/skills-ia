@@ -2,8 +2,9 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "test-architect",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Estrategia de pruebas desde el código: plan por riesgo, caza de tests inestables, objetivos de mutación y contratos entre módulos.",
+  "author": "Alberto Ortiz",
   "skills": [
     {
       "name": "test-architect",

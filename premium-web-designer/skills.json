@@ -2,8 +2,9 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "premium-web-designer",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Sistema de diseño y desarrollo de webs premium con dirección de arte, UX/UI y QA independiente medible.",
+  "author": "Alberto Ortiz",
   "skills": [
     {
       "name": "premium-web-designer",

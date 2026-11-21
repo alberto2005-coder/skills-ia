@@ -37,7 +37,7 @@ El maestro no declara flags: el alcance de la petición fija la fase.
 
 ### Arquitectura
 
-Un maestro y cuatro sub-skills con scripts compartidos; la carpeta se instala completa. **5 skills** en total, todas en la versión 1.0.0.
+Un maestro y cuatro sub-skills con scripts compartidos; la carpeta se instala completa. **5 skills** en total, todas en la versión 1.0.2.
 
 | Sub-skill | Qué hace |
 |---|---|
@@ -122,7 +122,7 @@ The master declares no flags: the request's scope sets the phase.
 
 ### Architecture
 
-One master and four sub-skills with shared scripts; the folder is installed whole. **5 skills** in total, all on version 1.0.0.
+One master and four sub-skills with shared scripts; the folder is installed whole. **5 skills** in total, all on version 1.0.2.
 
 | Sub-skill | What it does |
 |---|---|

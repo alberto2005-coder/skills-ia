@@ -18,15 +18,16 @@ class StructureTests(unittest.TestCase):
         manifest = json.loads(read(PACKAGE / "skills.json"))
         names = [entry["name"] for entry in manifest["skills"]]
         self.assertEqual(names, ["test-architect", *SUB_SKILLS])
-        self.assertEqual(manifest["version"], "1.0.0")
+        self.assertRegex(manifest["version"], r"^\d+\.\d+\.\d+$")
         for entry in manifest["skills"]:
             self.assertTrue((PACKAGE / entry["path"]).is_file(), entry["path"])
 
-    def test_every_skill_declares_version_one(self):
+    def test_every_skill_declares_the_manifest_version(self):
+        version = json.loads(read(PACKAGE / "skills.json"))["version"]
         for path in [MASTER] + [PACKAGE / name / "SKILL.md" for name in SUB_SKILLS]:
             with self.subTest(skill=path.parent.name):
                 text = read(path)
-                self.assertRegex(text, r'(?m)^  version: "1\.0\.0"$')
+                self.assertRegex(text, r'(?m)^  version: "%s"$' % re.escape(version))
                 self.assertRegex(text, r"(?m)^  package: test-architect$")
 
     def test_sub_skills_declare_gate_and_handoff(self):

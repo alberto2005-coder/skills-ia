@@ -16,7 +16,7 @@ allowed-tools:
 license: MIT
 metadata:
   package: test-architect
-  version: "1.0.0"
+  version: "1.0.2"
   author: "Alberto Ortiz"
 ---
 

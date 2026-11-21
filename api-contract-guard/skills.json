@@ -2,8 +2,9 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "api-contract-guard",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Defensa de contratos de API: diff SemVer, cruce de rutas backend/frontend, cobertura de autenticación y mock local.",
+  "author": "Alberto Ortiz",
   "skills": [
     {
       "name": "api-contract-guard",

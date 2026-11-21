@@ -2,8 +2,9 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "refactor-surgeon",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Refactor con red: métricas, hotspots, código muerto, clones, ciclos de imports, casos dorados, cortes por grafo y verificación.",
+  "author": "Alberto Ortiz",
   "skills": [
     {
       "name": "refactor-surgeon",

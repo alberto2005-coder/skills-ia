@@ -8,7 +8,7 @@ description: >
 license: MIT
 metadata:
   package: api-contract-guard
-  version: "1.2.0"
+  version: "1.2.1"
   author: "Alberto Ortiz"
 ---
 
