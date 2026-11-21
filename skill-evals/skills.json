@@ -2,8 +2,9 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "skill-evals",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Evaluación offline de skills: casos versionables, precisión y recall de activación, colisiones, presupuesto de contexto e informes reproducibles.",
+  "author": "Alberto Ortiz",
   "skills": [
     {
       "name": "skill-evals",
@@ -24,6 +25,11 @@
       "name": "eval-report",
       "path": "eval-report/SKILL.md",
       "description": "Informe Markdown o HTML autónomo con fallos, colisiones, presupuesto, veredicto y diff contra la línea base."
+    },
+    {
+      "name": "eval-ab",
+      "path": "eval-ab/SKILL.md",
+      "description": "Comparativa A/B de dos corridas grabadas: eficacia, cumplimiento, coste, latencia y variabilidad."
     }
   ]
 }

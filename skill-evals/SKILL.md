@@ -15,7 +15,7 @@ description: >
 license: MIT
 metadata:
   package: skill-evals
-  version: "1.0.1"
+  version: "1.1.0"
   author: "Alberto Ortiz"
 ---
 
@@ -38,6 +38,7 @@ Evaluar una skill no es leerla: es medir si se activa cuando debe, si deja de ac
 | `eval-design` | Convierte `phrases.json` en casos versionables, añade límites, reparte train/test y comprueba cobertura |
 | `eval-run` | Ejecuta los casos contra el router, calcula precisión/recall/MRR, colisiones y presupuesto, y aplica puertas |
 | `eval-report` | Renderiza la corrida en Markdown o HTML autónomo, con tabla de fallos, colisiones y diff contra la línea base |
+| `eval-ab` | Compara dos corridas grabadas: eficacia, cumplimiento, coste, latencia y variabilidad |
 
 Comparten `scripts/`, `references/` y `templates/` de esta carpeta. Se instala el paquete completo.
 

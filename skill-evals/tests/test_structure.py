@@ -103,7 +103,7 @@ class TestStructure(unittest.TestCase):
 
         self.assertIsNotNone(entry, "skills.json raíz no declara skill-evals")
         self.assertEqual(entry["manifest"], "skill-evals/skills.json")
-        self.assertEqual(entry["skill_count"], 4)
+        self.assertEqual(entry["skill_count"], 5)
         self.assertEqual(index["skills_total"], sum(pkg["skill_count"] for pkg in index["packages"]))
 
 

@@ -1,0 +1,21 @@
+{
+  "label": "variante",
+  "cases": [
+    {
+      "id": "positiva-auth",
+      "kind": "positive",
+      "samples": [
+        {"passed": true, "score": 0.93, "latency_ms": 150, "cost_usd": 0.0040},
+        {"passed": true, "score": 0.95, "latency_ms": 160, "cost_usd": 0.0042}
+      ]
+    },
+    {
+      "id": "negativa-deploy",
+      "kind": "negative",
+      "samples": [
+        {"passed": true, "score": 0.90, "latency_ms": 140, "cost_usd": 0.0030},
+        {"passed": true, "score": 0.89, "latency_ms": 150, "cost_usd": 0.0031}
+      ]
+    }
+  ]
+}
