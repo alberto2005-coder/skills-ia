@@ -104,6 +104,10 @@ relativa si cae dentro de `target`); `url` → `artifactLocation.uri`; `resource
   `file`; una ruta o un endpoint (`GET /users/{id}`) va a `url`.
 - **`finops`**: `llm_cost_scan`, `infra_cost_scan` y `ci_cost_scan`, los tres con la
   misma forma `{file, line, rule, severity, message}`.
+- **`docs`**: el `--json` de `docs_parity`. Compara las mitades ES y EN de un
+  documento (encabezados, tablas, fences, anclas y cifras) y suma lo que devuelve
+  `tests/audit_docs.py` como `drift-codigo`; todo hallazgo lleva fichero, y la
+  línea es `null` cuando el desfase es de documento completo.
 
 **Duplicados.** La huella no lleva la línea, así que dos llamadas idénticas en el
 mismo fichero (por ejemplo `max_tokens` en las líneas 7 y 16) colapsarían en un solo
@@ -221,6 +225,10 @@ under `target`); `url` → `artifactLocation.uri`; `resource` and `schema` →
   go to `file`; a route or endpoint (`GET /users/{id}`) goes to `url`.
 - **`finops`**: `llm_cost_scan`, `infra_cost_scan` and `ci_cost_scan`, all three
   with the same `{file, line, rule, severity, message}` shape.
+- **`docs`**: the `--json` of `docs_parity`. Compares the ES and EN halves of a
+  document (headings, tables, fences, anchors and counts) and folds in whatever
+  `tests/audit_docs.py` reports as `drift-codigo`; every finding carries a file,
+  and the line is `null` when the drift is document-wide.
 
 **Duplicates.** The fingerprint leaves the line out, so two identical calls in the
 same file (say `max_tokens` on lines 7 and 16) would collapse into one finding. The

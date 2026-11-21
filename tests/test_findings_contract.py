@@ -414,6 +414,56 @@ class FinopsAdapterTests(unittest.TestCase):
         self.assertEqual(payload["findings"][1]["rule_id"], "bucle-sin-tope")
 
 
+DOCS_PARITY = {
+    "target": "skills-ia",
+    "findings": [
+        {"file": "README.md", "line": 0, "rule": "secciones-idioma", "severity": "high",
+         "message": "faltan las mitades «## 🇪🇸 Español» y «## 🇬🇧 English»",
+         "fix": "Añade ambas secciones antes de traducir nada."},
+        {"file": "docs/index.md", "line": 12, "rule": "ancla-rota", "severity": "medium",
+         "message": "EN: #no-existe no apunta a ningún encabezado"},
+        {"file": "docs/appsec-audit.md", "line": 3, "rule": "regla-sin-consejo", "severity": "low",
+         "message": "algo que aún no tiene consejo propio"},
+        {"file": "docs/a.md", "line": 4, "rule": "cifras", "severity": "warning",
+         "message": "ES declara 80 skills y EN 81"},
+        {"rule": "forma-tablas", "severity": "medium", "message": "sin fichero: no se puede ubicar"},
+    ],
+}
+
+
+class DocsAdapterTests(unittest.TestCase):
+    def setUp(self):
+        self.payload = emit.from_docs(DOCS_PARITY, "docs-parity", "1.3.0")
+
+    def test_parity_report_is_valid(self):
+        self.assertEqual(findings_validate.validate_payload(self.payload), [])
+        self.assertEqual(self.payload["tool"]["package"], emit.PACKAGES["docs"])
+        self.assertEqual(self.payload["tool"]["skill"], "docs-parity")
+        self.assertEqual(self.payload["summary"]["total"], 4)
+
+    def test_document_wide_drift_keeps_the_file_and_no_line(self):
+        first = self.payload["findings"][0]
+        self.assertEqual(first["rule_id"], "secciones-idioma")
+        self.assertEqual(first["location"], {"type": "file", "target": "README.md",
+                                             "line": None, "end_line": None})
+        self.assertEqual(first["evidence"], "Añade ambas secciones antes de traducir nada.")
+        self.assertEqual(self.payload["findings"][1]["location"]["line"], 12)
+
+    def test_own_fix_wins_then_the_rule_table_then_the_guide(self):
+        first, second, third = self.payload["findings"][:3]
+        self.assertEqual(first["remediation"], "Añade ambas secciones antes de traducir nada.")
+        self.assertEqual(second["remediation"], emit.DOCS_FIXES["ancla-rota"])
+        self.assertIn("docs/docs-sync-engine.md", third["remediation"])
+        self.assertIn("regla-sin-consejo", third["remediation"])
+
+    def test_warning_reads_as_medium_and_findings_need_a_file(self):
+        severities = [finding["severity"] for finding in self.payload["findings"]]
+        self.assertEqual(severities, ["high", "medium", "low", "medium"])
+        self.assertEqual(self.payload["findings"][1]["evidence"], "docs/index.md:12")
+        self.assertNotIn("forma-tablas", [finding["rule_id"] for finding in self.payload["findings"]])
+        self.assertIs(emit.ADAPTERS["docs"], emit.from_docs)
+
+
 class EmitCliTests(unittest.TestCase):
     def test_cli_reads_the_package_version_and_writes_a_valid_report(self):
         with tempfile.TemporaryDirectory() as tmp:

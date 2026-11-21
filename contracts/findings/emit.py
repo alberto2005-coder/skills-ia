@@ -42,6 +42,7 @@ PACKAGES = {
     "api": "api-contract-guard",
     "appsec": "appsec-audit",
     "db": "db-architect",
+    "docs": "docs-sync-engine",
     "finops": "finops-auditor",
     "seo": "seo-auditor",
 }
@@ -104,6 +105,16 @@ FINOPS_FIXES = {
     "rds-sin-autoscaling": "Activa `storage_autoscaling` con un máximo acotado.",
     "ci-doble-ejecucion": "Añade `concurrency` con `cancel-in-progress: true`.",
     "ci-sin-cache": "Activa la caché de dependencias (`setup-uv` o `actions/cache`).",
+}
+
+DOCS_FIXES = {
+    "secciones-idioma": "Añade la mitad que falta («## 🇪🇸 Español» / «## 🇬🇧 English») con su estructura.",
+    "forma-encabezados": "Iguala el número de encabezados por nivel entre las dos mitades.",
+    "forma-tablas": "Añade o retira la fila que sobra para que las dos tablas se lean en paralelo.",
+    "forma-fences": "Revisa el bloque de código que solo existe en una de las mitades.",
+    "cifras": "Corrige la cifra contra skills.json, el manifiesto o pytest, no contra el otro idioma.",
+    "ancla-rota": "Apunta el enlace al encabezado real de esa mitad.",
+    "drift-codigo": "Corrige el desfase que señala tests/audit_docs.py.",
 }
 
 
@@ -440,10 +451,24 @@ def from_finops(payload: dict, skill: str, version: str, target: str | None = No
     )
 
 
+def from_docs(payload: dict, skill: str, version: str, target: str | None = None) -> dict:
+    findings = []
+    for item in findings_from(payload, "findings"):
+        finding = generic_finding(item, DOCS_FIXES, PACKAGES["docs"])
+        if finding is not None:
+            findings.append(finding)
+    return contract.build_payload(
+        tool={"package": PACKAGES["docs"], "skill": skill, "version": version},
+        findings=merge_duplicates(findings),
+        target=target,
+    )
+
+
 ADAPTERS = {
     "api": from_api,
     "appsec": from_appsec,
     "db": from_db,
+    "docs": from_docs,
     "finops": from_finops,
     "seo": from_seo,
 }

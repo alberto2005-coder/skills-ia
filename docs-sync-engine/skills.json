@@ -2,7 +2,7 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "docs-sync-engine",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Documentación sincronizada con el código: referencias, glosario, variables de entorno, arquitectura y CHANGELOG.",
   "skills": [
     {
@@ -34,6 +34,11 @@
       "name": "docs-changelog",
       "path": "docs-changelog/SKILL.md",
       "description": "CHANGELOG desde commits convencionales."
+    },
+    {
+      "name": "docs-parity",
+      "path": "docs-parity/SKILL.md",
+      "description": "Paridad ES/EN: encabezados, tablas, anclas, fences y cifras; el código se cruza con audit_docs.py."
     }
   ]
 }
