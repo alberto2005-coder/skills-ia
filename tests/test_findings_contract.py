@@ -464,6 +464,57 @@ class DocsAdapterTests(unittest.TestCase):
         self.assertIs(emit.ADAPTERS["docs"], emit.from_docs)
 
 
+TEST_REPORT = {
+    "target": "demo",
+    "findings": [
+        {"file": "app/auth.py", "line": 1, "rule": "modulo-sin-tests", "severity": "high",
+         "message": "auth no tiene un test reconocible por nombre",
+         "fix": "Añade un test que ejercite la entrada pública."},
+        {"file": "app/tests/test_sesion.py", "line": 12, "rule": "espera-fija", "severity": "medium",
+         "message": "espera fija: el test duerme a la espera de que algo ocurra"},
+        {"file": "app/contrato.py", "line": 0, "rule": "campo-faltante", "severity": "high",
+         "message": "el consumidor no envía email, obligatorio"},
+        {"file": "app/pagos.py", "line": 4, "rule": "tipo-divergente", "severity": "warning",
+         "message": "el payload trae un string donde el contrato dice integer"},
+    ],
+}
+
+
+class TestAdapterTests(unittest.TestCase):
+    def setUp(self):
+        self.payload = emit.from_test(TEST_REPORT, "test-flaky", "1.0.0")
+
+    def test_report_is_valid(self):
+        self.assertEqual(findings_validate.validate_payload(self.payload), [])
+        self.assertEqual(self.payload["tool"]["package"], emit.PACKAGES["test"])
+        self.assertEqual(self.payload["tool"]["skill"], "test-flaky")
+        self.assertEqual(self.payload["summary"]["total"], 4)
+
+    def test_document_wide_finding_keeps_no_line(self):
+        third = self.payload["findings"][2]
+        self.assertEqual(third["location"], {"type": "file", "target": "app/contrato.py",
+                                             "line": None, "end_line": None})
+        self.assertEqual(third["evidence"], "app/contrato.py")
+
+    def test_fix_comes_from_the_finding_or_the_adapter_table(self):
+        first, second = self.payload["findings"][0], self.payload["findings"][1]
+        self.assertEqual(first["remediation"], "Añade un test que ejercite la entrada pública.")
+        self.assertEqual(second["remediation"], emit.TEST_FIXES["espera-fija"])
+
+    def test_unknown_rule_falls_back_to_the_package_guide(self):
+        finding = emit.from_test(
+            {"findings": [{"file": "app/x.py", "line": 2, "rule": "regla-nueva", "severity": "low",
+                           "message": "algo sin consejo propio"}]},
+            "test-plan", "1.0.0",
+        )["findings"][0]
+        self.assertIn("docs/test-architect.md", finding["remediation"])
+
+    def test_warning_reads_as_medium(self):
+        severities = [item["severity"] for item in self.payload["findings"]]
+        self.assertEqual(severities, ["high", "medium", "high", "medium"])
+        self.assertIs(emit.ADAPTERS["test"], emit.from_test)
+
+
 class EmitCliTests(unittest.TestCase):
     def test_cli_reads_the_package_version_and_writes_a_valid_report(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -108,6 +108,11 @@ relativa si cae dentro de `target`); `url` → `artifactLocation.uri`; `resource
   documento (encabezados, tablas, fences, anclas y cifras) y suma lo que devuelve
   `tests/audit_docs.py` como `drift-codigo`; todo hallazgo lleva fichero, y la
   línea es `null` cuando el desfase es de documento completo.
+- **`test`**: el `--json` de `plan_tests`, `flaky_scan`, `mutation_targets` y
+  `contract_fixtures`. Entran los hallazgos con fichero; el plan y los objetivos
+  de mutación son informativos, y `flaky_scan` y `contract_fixtures` conservan su
+  `--fail-on`. La severidad viaja tal cual y la corrección sale de la tabla del
+  adaptador.
 
 **Duplicados.** La huella no lleva la línea, así que dos llamadas idénticas en el
 mismo fichero (por ejemplo `max_tokens` en las líneas 7 y 16) colapsarían en un solo
@@ -229,6 +234,11 @@ under `target`); `url` → `artifactLocation.uri`; `resource` and `schema` →
   document (headings, tables, fences, anchors and counts) and folds in whatever
   `tests/audit_docs.py` reports as `drift-codigo`; every finding carries a file,
   and the line is `null` when the drift is document-wide.
+- **`test`**: the `--json` of `plan_tests`, `flaky_scan`, `mutation_targets` and
+  `contract_fixtures`. Findings with a file enter; the plan and the mutation
+  targets are informational, while `flaky_scan` and `contract_fixtures` keep their
+  own `--fail-on`. Severity travels unchanged and the fix comes from the adapter
+  table.
 
 **Duplicates.** The fingerprint leaves the line out, so two identical calls in the
 same file (say `max_tokens` on lines 7 and 16) would collapse into one finding. The

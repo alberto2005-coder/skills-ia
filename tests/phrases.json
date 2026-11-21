@@ -1406,6 +1406,91 @@
           "winner": "red-audit"
         }
       ]
+    },
+    "test-architect": {
+      "positives": [
+        "disena la estrategia de pruebas del repositorio segun el riesgo",
+        "decide que probar primero, que estabilizar y que contratos fijar",
+        "design the test strategy from the source tree and its risk"
+      ],
+      "negatives": [
+        {
+          "phrase": "compara dos contratos openapi y calcula el impacto semver",
+          "winner": "api-diff"
+        },
+        {
+          "phrase": "genera el changelog a partir de los commits convencionales",
+          "winner": "docs-changelog"
+        }
+      ]
+    },
+    "test-plan": {
+      "positives": [
+        "que modulos no tienen prueba y cuales tocan autenticacion o dinero",
+        "por donde empiezo a testear los modulos de autenticacion y cobro",
+        "prioritise the test plan for untested authentication and payment modules"
+      ],
+      "negatives": [
+        {
+          "phrase": "escribe el plan de pruebas y ejecuta los casos end-to-end",
+          "winner": "replica-test"
+        },
+        {
+          "phrase": "detecta funciones duplicadas en el codigo",
+          "winner": "refactor-clones"
+        }
+      ]
+    },
+    "test-flaky": {
+      "positives": [
+        "este test falla solo en ci y quiero saber por que es inestable",
+        "busca esperas fijas, reloj de pared y azar sin semilla en los tests",
+        "find intermittent failures from fixed sleeps and wall clock in tests"
+      ],
+      "negatives": [
+        {
+          "phrase": "levanta un servidor http mock en 127.0.0.1 con los ejemplos del contrato openapi",
+          "winner": "api-mock-server"
+        },
+        {
+          "phrase": "refactoriza con red: mide y congela casos dorados",
+          "winner": "refactor-surgeon"
+        }
+      ]
+    },
+    "test-mutation": {
+      "positives": [
+        "elige los objetivos de mutacion y el presupuesto por funcion",
+        "la cobertura es alta pero los tests no detectan regresiones, donde mutamos",
+        "pick mutation targets and operators from the ast without running mutants"
+      ],
+      "negatives": [
+        {
+          "phrase": "mide la complejidad ciclomatica y el anidamiento de las funciones",
+          "winner": "refactor-metrics"
+        },
+        {
+          "phrase": "busca imports y funciones que nadie usa en el codigo",
+          "winner": "refactor-deadcode"
+        }
+      ]
+    },
+    "test-contract": {
+      "positives": [
+        "fija el contrato entre modulos comparando el fixture del proveedor con el payload",
+        "el consumidor se rompe cuando el proveedor cambia, quiero un test de contrato",
+        "pin the provider consumer contract over json fixtures"
+      ],
+      "negatives": [
+        {
+          "phrase": "compara dos contratos openapi y calcula el impacto semver",
+          "winner": "api-diff"
+        },
+        {
+          "phrase": "levanta un servidor http mock local con los ejemplos del contrato",
+          "winner": "api-mock-server"
+        }
+      ]
     }
   },
   "out_of_domain": [

@@ -23,7 +23,7 @@
 
 **Skills IA** es una colección de habilidades modulares, deterministas e independientes diseñadas para ser integradas en cualquier asistente de Inteligencia Artificial (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Cada habilidad es autosuficiente y opera sin alterar paquetes globales ni requerir dependencias complejas.
 
-Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica, varias sub-skills con un corte de uso real. Se instalan juntas y comparten assets sin duplicarlos. El índice máquina-legible está en [`skills.json`](skills.json): 12 paquetes, 81 skills.
+Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica, varias sub-skills con un corte de uso real. Se instalan juntas y comparten assets sin duplicarlos. El índice máquina-legible está en [`skills.json`](skills.json): 13 paquetes, 86 skills.
 
 ### Módulos y Sub-skills
 
@@ -41,6 +41,7 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | **[`api-contract-guard`](api-contract-guard/)** | Defensa del contrato de API: impacto SemVer, cruce de rutas backend/frontend, cobertura de autenticación y mock local. | 5 |
 | **[`refactor-surgeon`](refactor-surgeon/)** | Refactor con red: métricas de complejidad, hotspots por churn, código muerto, detección de clones, ciclos de imports, casos dorados, cortes por grafo de llamadas y verificación. | 9 |
 | **[`docs-sync-engine`](docs-sync-engine/)** | Documentación sincronizada con el código: referencias, glosario, variables de entorno, arquitectura regenerable y CHANGELOG. | 7 |
+| **[`test-architect`](test-architect/)** | Estrategia de pruebas desde el código: plan por riesgo, tests inestables, objetivos de mutación y contratos entre módulos. | 5 |
 
 #### `replica` — maestro + 13 fases
 
@@ -159,6 +160,16 @@ Cada carpeta es un **paquete**: una skill maestra que orquesta y, cuando aplica,
 | `docs-changelog` | CHANGELOG agrupado desde commits convencionales. |
 | `docs-parity` | Paridad ES/EN: forma, anclas y cifras de las dos mitades. |
 
+#### `test-architect` — maestro + 4 sub-skills
+
+| Sub-skill | Qué hace |
+|---|---|
+| `test-architect` | Maestro: decidir qué probar, qué estabilizar y qué fijar. |
+| `test-plan` | Plan por riesgo: módulos sin test y dominios sensibles. |
+| `test-flaky` | Inestabilidad: esperas fijas, reloj, azar y red real. |
+| `test-mutation` | Objetivos de mutación y presupuesto, sin ejecutar mutantes. |
+| `test-contract` | Contrato proveedor/consumidor sobre fixtures. |
+
 #### `agent-red-team` — maestro + 3 sub-skills
 
 | Sub-skill | Qué hace | Escribe ficheros |
@@ -215,7 +226,7 @@ unzip db-architect-2.1.0.zip -d ~/.claude/skills
 rm ~/.claude/skills/manifest.json
 ```
 
-El zip trae `manifest.json` (paquete, versión, commit y skills) y un prefijo con el nombre del paquete; el `manifest.json` es solo para verificar, no se instala. La versión de los comandos es un ejemplo: sustituye `2.1.0` por la que declare [`db-architect/skills.json`](db-architect/skills.json). El bundle `bundle-v<versión>` publica los 12 paquetes, el `SHA256SUMS` global y el índice `skills.json`.
+El zip trae `manifest.json` (paquete, versión, commit y skills) y un prefijo con el nombre del paquete; el `manifest.json` es solo para verificar, no se instala. La versión de los comandos es un ejemplo: sustituye `2.1.0` por la que declare [`db-architect/skills.json`](db-architect/skills.json). El bundle `bundle-v<versión>` publica los 13 paquetes, el `SHA256SUMS` global y el índice `skills.json`.
 
 **Requisito:** Python 3.9+ en el agente que ejecute los `scripts/`. Los `SKILL.md` no necesitan nada.
 
@@ -250,6 +261,7 @@ Las guías completas de cada módulo se encuentran en la carpeta [`docs/`](docs/
 - [Guía de API Contract Guard](docs/api-contract-guard.md)
 - [Guía de Refactor Surgeon](docs/refactor-surgeon.md)
 - [Guía de Docs Sync Engine](docs/docs-sync-engine.md)
+- [Guía de Test Architect](docs/test-architect.md)
 - [Guía de Skill Evals](docs/skill-evals.md)
 
 ### Requisitos y Filosofía de Cero Dependencias
@@ -258,7 +270,7 @@ Las guías completas de cada módulo se encuentran en la carpeta [`docs/`](docs/
 - Los tests usan `unittest`; las herramientas de pruebas y calidad (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) están en el grupo `dev` de `pyproject.toml` y se gestionan con [`uv`](https://docs.astral.sh/uv/).
 - Para preparar el entorno `.venv` y ejecutar todos los tests desde la raíz: `uv sync` y `uv run python run_tests.py`.
 - GitHub Actions ejecuta todas las suites en cada `push` mediante `.github/workflows/tests.yml`, y además un gate de métricas (`tests/metrics_gate.py`) que falla si crecen los hallazgos `high` de `code_metrics` o los clones de `clone_detect`; el techo aceptado vive en `tests/metrics_baseline.json`. Una guardia de versiones (`tests/version_guard.py`) falla si cambia un paquete sin subir su `version` en el manifiesto, y una auditoría de documentación (`tests/audit_docs.py`) falla si los docs citan rutas, flags, recuentos o anclas que ya no cuadran.
-- Tests transversales en `tests/`: activación de las 81 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
+- Tests transversales en `tests/`: activación de las 86 skills (frases que deben y no deben activarlas, sin solapamientos entre hermanas) y coherencia maestro/sub-skill: `uv run python run_tests.py`.
 
 ### Licencia
 
@@ -282,7 +294,7 @@ Distribuido bajo la [Licencia MIT](LICENSE).
 
 **Skills IA** is a collection of modular, deterministic, and self-contained agent skills designed for integration with any AI assistant (Claude, Gemini, ChatGPT, Antigravity, Cursor, etc.). Each skill is independent and operates without modifying global packages or requiring third-party libraries.
 
-Each folder is a **package**: one master skill that orchestrates and, where applicable, sub-skills split by real usage boundaries. Packages share assets without duplication. The machine-readable index is [`skills.json`](skills.json): 12 packages, 81 skills.
+Each folder is a **package**: one master skill that orchestrates and, where applicable, sub-skills split by real usage boundaries. Packages share assets without duplication. The machine-readable index is [`skills.json`](skills.json): 13 packages, 86 skills.
 
 ### Modules and Sub-skills
 
@@ -300,6 +312,7 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | **[`api-contract-guard`](api-contract-guard/)** | API contract defence: SemVer impact, backend/frontend route sync, authentication coverage and a local mock. | 5 |
 | **[`refactor-surgeon`](refactor-surgeon/)** | Refactoring with a safety net: complexity metrics, churn hotspots, dead code, clone detection, import cycles, golden cases, call-graph cuts and verification. | 9 |
 | **[`docs-sync-engine`](docs-sync-engine/)** | Documentation synced with the code: references, glossary, environment variables, regenerable architecture and CHANGELOG. | 7 |
+| **[`test-architect`](test-architect/)** | Test strategy from the source: risk-based plan, flaky tests, mutation targets and contracts between modules. | 5 |
 
 #### `replica` — master + 13 phases
 
@@ -418,6 +431,16 @@ Each folder is a **package**: one master skill that orchestrates and, where appl
 | `docs-changelog` | CHANGELOG grouped from conventional commits. |
 | `docs-parity` | ES/EN parity: shape, anchors and counts across both halves. |
 
+#### `test-architect` — master + 4 sub-skills
+
+| Sub-skill | Purpose |
+|---|---|
+| `test-architect` | Master: decide what to test, what to stabilise and what to pin. |
+| `test-plan` | Risk plan: untested modules and sensitive domains. |
+| `test-flaky` | Instability: fixed sleeps, wall clock, randomness and real network. |
+| `test-mutation` | Mutation targets and budget, without running mutants. |
+| `test-contract` | Provider/consumer contract over fixtures. |
+
 #### `agent-red-team` — master + 3 sub-skills
 
 | Sub-skill | Purpose | Writes files |
@@ -474,7 +497,7 @@ unzip db-architect-2.1.0.zip -d ~/.claude/skills
 rm ~/.claude/skills/manifest.json
 ```
 
-The zip carries a `manifest.json` (package, version, commit and skills) and a prefix with the package name; `manifest.json` is only for verification, do not install it. The version in the commands is an example: replace `2.1.0` with the one declared in [`db-architect/skills.json`](db-architect/skills.json). The `bundle-v<version>` release publishes all 12 packages, the global `SHA256SUMS` and the `skills.json` index.
+The zip carries a `manifest.json` (package, version, commit and skills) and a prefix with the package name; `manifest.json` is only for verification, do not install it. The version in the commands is an example: replace `2.1.0` with the one declared in [`db-architect/skills.json`](db-architect/skills.json). The `bundle-v<version>` release publishes all 13 packages, the global `SHA256SUMS` and the `skills.json` index.
 
 **Requirement:** Python 3.9+ in the agent that runs the `scripts/`. The `SKILL.md` files need nothing.
 
@@ -509,6 +532,7 @@ Comprehensive module documentation is available in the [`docs/`](docs/) director
 - [API Contract Guard Guide](docs/api-contract-guard.md)
 - [Refactor Surgeon Guide](docs/refactor-surgeon.md)
 - [Docs Sync Engine Guide](docs/docs-sync-engine.md)
+- [Test Architect Guide](docs/test-architect.md)
 - [Skill Evals Guide](docs/skill-evals.md)
 
 ### Requirements and Zero-Dependency Philosophy
@@ -517,7 +541,7 @@ Comprehensive module documentation is available in the [`docs/`](docs/) director
 - Tests use `unittest`; test and quality tools (`pytest`, `PyYAML`, `pytest-json-report`, `ruff`) are in the `dev` group in `pyproject.toml` and managed by [`uv`](https://docs.astral.sh/uv/).
 - Prepare `.venv` and run every test from the repository root with `uv sync` and `uv run python run_tests.py`.
 - GitHub Actions runs all suites on every `push` via `.github/workflows/tests.yml`, plus a metrics gate (`tests/metrics_gate.py`) that fails when `code_metrics` `high` findings or `clone_detect` clones grow; the accepted ceiling lives in `tests/metrics_baseline.json`. A version guard (`tests/version_guard.py`) fails when a package changes without bumping its `version` in the manifest, and a documentation audit (`tests/audit_docs.py`) fails when the docs cite paths, flags, counts or anchors that no longer match.
-- Cross-cutting tests in `tests/`: activation for all 81 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
+- Cross-cutting tests in `tests/`: activation for all 86 skills (phrases that should and should not trigger them, no sibling overlaps) and master/sub-skill coherence: `uv run python run_tests.py`.
 
 ### License
 

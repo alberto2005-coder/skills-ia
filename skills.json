@@ -1,10 +1,10 @@
 {
   "format": "skills-ia-index",
   "format_version": "1.0",
-  "updated": "2026-11-20",
-  "version": "5.3.0",
+  "updated": "2026-11-21",
+  "version": "5.4.0",
   "description": "Índice vendor-neutral de los paquetes de Skills IA. Cualquier agente (Claude, Codex, Cursor, Gemini, OpenCode...) puede descubrir las skills escaneando **/SKILL.md; este índice da además el mapa de paquetes y permite varias skills por carpeta.",
-  "skills_total": 81,
+  "skills_total": 86,
   "packages": [
     {
       "name": "replica",
@@ -194,6 +194,21 @@
         "docs-changelog",
         "docs-parity"
       ]
+    },
+    {
+      "name": "test-architect",
+      "path": "test-architect",
+      "version": "1.0.0",
+      "manifest": "test-architect/skills.json",
+      "skill_count": 5,
+      "skills": [
+        "test-architect",
+        "test-plan",
+        "test-flaky",
+        "test-mutation",
+        "test-contract"
+      ]
     }
   ]
 }
+

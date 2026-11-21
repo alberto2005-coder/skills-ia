@@ -20,6 +20,7 @@ SUITES = (
     ("replica", "unittest"),
     ("seo-auditor", "unittest"),
     ("skill-evals", "unittest"),
+    ("test-architect", "unittest"),
     (".", "unittest"),
 )
 # Puertas sin tests: comprobaciones que no cuentan casos pero rompen la entrega.

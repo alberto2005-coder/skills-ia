@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "skills-ia",
   "description": "Skills modulares, deterministas y versionadas para agentes de código.",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "owner": {
     "name": "alberto2005-coder",
     "url": "https://github.com/alberto2005-coder"
@@ -184,6 +184,20 @@
         "./docs-changelog",
         "./docs-parity"
       ]
+    },
+    {
+      "name": "test-architect",
+      "source": "./test-architect",
+      "description": "Estrategia de pruebas desde el código: plan por riesgo, tests inestables, mutación y contratos entre módulos.",
+      "version": "1.0.0",
+      "skills": [
+        ".",
+        "./test-plan",
+        "./test-flaky",
+        "./test-mutation",
+        "./test-contract"
+      ]
     }
   ]
 }
+

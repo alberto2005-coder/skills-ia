@@ -45,6 +45,7 @@ PACKAGES = {
     "docs": "docs-sync-engine",
     "finops": "finops-auditor",
     "seo": "seo-auditor",
+    "test": "test-architect",
 }
 CWE_RE = re.compile(r"^CWE-([0-9]+)$")
 SEO_LEVELS = {"must": "high", "should": "medium", "nice": "low"}
@@ -115,6 +116,27 @@ DOCS_FIXES = {
     "cifras": "Corrige la cifra contra skills.json, el manifiesto o pytest, no contra el otro idioma.",
     "ancla-rota": "Apunta el enlace al encabezado real de esa mitad.",
     "drift-codigo": "Corrige el desfase que señala tests/audit_docs.py.",
+}
+
+# --- test-architect --------------------------------------------------------
+
+TEST_FIXES = {
+    "modulo-sin-tests": "Añade un test que ejercite la entrada pública y su caso de error, o anota la exclusión.",
+    "dominio-riesgoso": "Prueba el camino feliz y el de error del dominio antes que el resto del módulo.",
+    "superficie-grande": "Parte el módulo o empieza por sus funciones de entrada.",
+    "espera-fija": "Sondea con plazo máximo o espera el evento, no un tiempo fijo.",
+    "reloj-de-pared": "Inyecta un reloj o congela el tiempo en el test.",
+    "aleatorio-sin-semilla": "Fija la semilla en el test o usa un doble determinista.",
+    "red-real": "Usa un doble de red o declara la excepción con --allow-network.",
+    "ruta-compartida": "Usa TemporaryDirectory por test.",
+    "estado-global": "Reinicia el estado en setUp o inyecta el colaborador.",
+    "bucle-sin-salida": "Añade un plazo máximo y falla con un mensaje explícito.",
+    "skip-permanente": "Arregla la causa o borra el test; un skip sin fecha es deuda.",
+    "campo-faltante": "Añade el campo al payload o declara el contrato como opcional con su motivo.",
+    "tipo-divergente": "Corrige el dato en el origen o actualiza la especificación del fixture.",
+    "nulo-no-permitido": "Prohíbe el nulo en el proveedor o marca el campo como opcional.",
+    "campo-extra": "Declara el campo en el contrato o deja de enviarlo.",
+    "objetivo-sin-test": "Añade el caso que contradiga la condición; sin él, el mutante sobrevive.",
 }
 
 
@@ -464,6 +486,19 @@ def from_docs(payload: dict, skill: str, version: str, target: str | None = None
     )
 
 
+def from_test(payload: dict, skill: str, version: str, target: str | None = None) -> dict:
+    findings = []
+    for item in findings_from(payload, "findings"):
+        finding = generic_finding(item, TEST_FIXES, PACKAGES["test"])
+        if finding is not None:
+            findings.append(finding)
+    return contract.build_payload(
+        tool={"package": PACKAGES["test"], "skill": skill, "version": version},
+        findings=merge_duplicates(findings),
+        target=target,
+    )
+
+
 ADAPTERS = {
     "api": from_api,
     "appsec": from_appsec,
@@ -471,6 +506,7 @@ ADAPTERS = {
     "docs": from_docs,
     "finops": from_finops,
     "seo": from_seo,
+    "test": from_test,
 }
 
 

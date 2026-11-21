@@ -27,11 +27,12 @@
 - [**API Contract Guard**](api-contract-guard.md): impacto SemVer de un cambio de contrato, cruce de rutas backend/frontend y mock local.
 - [**Refactor Surgeon**](refactor-surgeon.md): refactor con métricas, casos dorados, cortes por grafo de llamadas y verificación de conducta.
 - [**Docs Sync Engine**](docs-sync-engine.md): referencias de la documentación verificadas, arquitectura regenerable y CHANGELOG desde commits.
+- [**Test Architect**](test-architect.md): plan de pruebas por riesgo, tests inestables, objetivos de mutación y contratos entre módulos.
 - [**Skill Evals**](skill-evals.md): evaluación offline del catálogo con casos desde frases reales, puertas de precisión/recall/MRR, informe reproducible y optimización de descripciones.
 
 ### Paquetes y Sub-skills
 
-**12 paquetes, 81 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
+**13 paquetes, 86 skills.** El índice máquina-legible está en [`skills.json`](../skills.json).
 
 | Paquete | Skills | Maestro | Sub-skills |
 |---|---:|---|---|
@@ -47,6 +48,7 @@
 | `api-contract-guard` | 5 | `api-contract-guard` | `api-diff`, `api-code-sync`, `api-auth-coverage`, `api-mock-server` |
 | `refactor-surgeon` | 9 | `refactor-surgeon` | `refactor-metrics`, `refactor-hotspots`, `refactor-harness`, `refactor-deadcode`, `refactor-clones`, `refactor-cycles`, `refactor-slice`, `refactor-verify` |
 | `docs-sync-engine` | 7 | `docs-sync-engine` | `docs-drift-check`, `docs-terms`, `docs-env`, `docs-arch-gen`, `docs-changelog`, `docs-parity` |
+| `test-architect` | 5 | `test-architect` | `test-plan`, `test-flaky`, `test-mutation`, `test-contract` |
 
 Cada maestro elige el modo, fija los límites y reparte el trabajo; `premium-web-designer` suma `premium-qa` para auditar webs ya construidas y `appsec-audit` reparte la auditoría entre reconocimiento, código, infraestructura, LLM, amenazas, dependencias, CI, remediación, informe y escala, y `skill-evals` reparte el ciclo entre diseño de casos, ejecución e informe.
 
@@ -78,7 +80,7 @@ uv run python tests/metrics_gate.py
 uv run python tests/audit_docs.py
 ```
 
-`tests/lint_frontmatter.py` valida el bloque de cada `SKILL.md` con un parser YAML real (PyYAML, del grupo `dev`), además de `name`, `description`, manifiestos, enlaces relativos, índice y marketplace. La versión de cada paquete sale de su manifiesto y `tests/version_guard.py` falla si un paquete cambia sin subirla, comparando contra el commit anterior. `tests/metrics_gate.py` falla si crecen los hallazgos `high` o los clones respecto al techo de `tests/metrics_baseline.json`. `tests/audit_docs.py` contrasta la documentación con el repo: rutas citadas, flags de cada paquete, tablas de paquetes, cabeceras «maestro + N», recuentos de skills y de tests, y anclas internas. `tests/lint_module_names.py` vigila la colisión contraria: dos módulos fuera de los tests con el mismo basename se resuelven por nombre, y con los dos en el mismo `sys.path` uno queda inalcanzable; solo permite las repeticiones declaradas de scripts de paquetes autocontenidos. `run_tests.py` ejecuta las dos como puerta local al terminar las suites («Resumen: N/M suites y N/M puertas»), así que el comando de siempre cubre el mismo contraste y los mismos basenames que el job de lint. El contrato común de hallazgos vive en `contracts/findings/`: `emit.py` adapta la salida nativa de `appsec-audit`, `seo-auditor`, `db-architect`, `api-contract-guard`, `finops-auditor` y `docs-sync-engine` al esquema `findings.schema.json` v1.0.0, `findings_validate.py` lo valida (con `--fail-on` para CI) y `findings_to_sarif.py` lo exporta a SARIF 2.1.0. GitHub Actions ejecuta las puertas de lint en Python 3.14 y las suites en la matriz 3.9/3.14 sobre Linux, macOS y Windows. El job de lint valida además los workflows con `actionlint` (versión fijada y verificada por checksum), que reproduce el rechazo de GitHub al cargarlos: un `matrix` en un `if` de job invalida el workflow entero. Cada descripción debe declarar su caso de uso («Úsala cuando…») y cubrir los dos idiomas, porque es la única señal de activación automática que leen los agentes. `markdownlint-cli2` es una comprobación local opcional.
+`tests/lint_frontmatter.py` valida el bloque de cada `SKILL.md` con un parser YAML real (PyYAML, del grupo `dev`), además de `name`, `description`, manifiestos, enlaces relativos, índice y marketplace. La versión de cada paquete sale de su manifiesto y `tests/version_guard.py` falla si un paquete cambia sin subirla, comparando contra el commit anterior. `tests/metrics_gate.py` falla si crecen los hallazgos `high` o los clones respecto al techo de `tests/metrics_baseline.json`. `tests/audit_docs.py` contrasta la documentación con el repo: rutas citadas, flags de cada paquete, tablas de paquetes, cabeceras «maestro + N», recuentos de skills y de tests, y anclas internas. `tests/lint_module_names.py` vigila la colisión contraria: dos módulos fuera de los tests con el mismo basename se resuelven por nombre, y con los dos en el mismo `sys.path` uno queda inalcanzable; solo permite las repeticiones declaradas de scripts de paquetes autocontenidos. `run_tests.py` ejecuta las dos como puerta local al terminar las suites («Resumen: N/M suites y N/M puertas»), así que el comando de siempre cubre el mismo contraste y los mismos basenames que el job de lint. El contrato común de hallazgos vive en `contracts/findings/`: `emit.py` adapta la salida nativa de `appsec-audit`, `seo-auditor`, `db-architect`, `api-contract-guard`, `finops-auditor`, `docs-sync-engine` y `test-architect` al esquema `findings.schema.json` v1.0.0, `findings_validate.py` lo valida (con `--fail-on` para CI) y `findings_to_sarif.py` lo exporta a SARIF 2.1.0. GitHub Actions ejecuta las puertas de lint en Python 3.14 y las suites en la matriz 3.9/3.14 sobre Linux, macOS y Windows. El job de lint valida además los workflows con `actionlint` (versión fijada y verificada por checksum), que reproduce el rechazo de GitHub al cargarlos: un `matrix` en un `if` de job invalida el workflow entero. Cada descripción debe declarar su caso de uso («Úsala cuando…») y cubrir los dos idiomas, porque es la única señal de activación automática que leen los agentes. `markdownlint-cli2` es una comprobación local opcional.
 
 ### Empaquetado
 
@@ -117,7 +119,7 @@ La escala canónica de `severity` es **`critical` → `high` → `medium` → `l
 
 | Valores | Herramientas |
 |---|---|
-| `low \| medium \| high \| none` | `auth_coverage.py`, `env_check.py`, `terms_check.py`, `code_metrics.py`, `dead_code.py`, `llm_cost_scan.py`, `infra_cost_scan.py`, `ci_cost_scan.py`, `lock_audit.py`, `docs_parity.py` |
+| `low \| medium \| high \| none` | `auth_coverage.py`, `env_check.py`, `terms_check.py`, `code_metrics.py`, `dead_code.py`, `llm_cost_scan.py`, `infra_cost_scan.py`, `ci_cost_scan.py`, `lock_audit.py`, `docs_parity.py`, `flaky_scan.py`, `contract_fixtures.py` |
 | `low \| medium \| none` | `sql_lint.py` |
 | `medium \| none` | `query_trace.py` |
 | `medium \| high \| none` | `schema_audit.py` |
@@ -166,11 +168,12 @@ La escala canónica de `severity` es **`critical` → `high` → `medium` → `l
 - [**API Contract Guard**](api-contract-guard.md): SemVer impact of a contract change, backend/frontend route sync and a local mock.
 - [**Refactor Surgeon**](refactor-surgeon.md): refactoring with metrics, golden cases, call-graph cuts and behaviour verification.
 - [**Docs Sync Engine**](docs-sync-engine.md): verified documentation references, regenerable architecture and a CHANGELOG from commits.
+- [**Test Architect**](test-architect.md): risk-based test plan, flaky tests, mutation targets and contracts between modules.
 - [**Skill Evals**](skill-evals.md): offline catalog evaluation with cases from real phrases, precision/recall/MRR gates, a reproducible report and description optimisation.
 
 ### Packages and Sub-skills
 
-**12 packages, 81 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
+**13 packages, 86 skills.** The machine-readable index lives in [`skills.json`](../skills.json).
 
 | Package | Skills | Master | Sub-skills |
 |---|---:|---|---|
@@ -186,6 +189,7 @@ La escala canónica de `severity` es **`critical` → `high` → `medium` → `l
 | `api-contract-guard` | 5 | `api-contract-guard` | `api-diff`, `api-code-sync`, `api-auth-coverage`, `api-mock-server` |
 | `refactor-surgeon` | 9 | `refactor-surgeon` | `refactor-metrics`, `refactor-hotspots`, `refactor-harness`, `refactor-deadcode`, `refactor-clones`, `refactor-cycles`, `refactor-slice`, `refactor-verify` |
 | `docs-sync-engine` | 7 | `docs-sync-engine` | `docs-drift-check`, `docs-terms`, `docs-env`, `docs-arch-gen`, `docs-changelog`, `docs-parity` |
+| `test-architect` | 5 | `test-architect` | `test-plan`, `test-flaky`, `test-mutation`, `test-contract` |
 
 Each master picks the mode, sets boundaries and splits the work; `premium-web-designer` adds `premium-qa` to audit sites that already exist and `appsec-audit` splits the audit across recon, code, infrastructure, LLM, threats, dependencies, CI, remediation, report and scale, while `skill-evals` splits the loop across case design, run and report.
 
@@ -217,7 +221,7 @@ uv run python tests/metrics_gate.py
 uv run python tests/audit_docs.py
 ```
 
-`tests/lint_frontmatter.py` validates every `SKILL.md` block with a real YAML parser (PyYAML, from the `dev` group), plus `name`, `description`, manifests, relative links, the index and the marketplace. Each package version comes from its manifest, and `tests/version_guard.py` fails when a package changes without bumping it, comparing against the previous commit. `tests/metrics_gate.py` fails when `high` findings or clones grow past the ceiling in `tests/metrics_baseline.json`. `tests/audit_docs.py` checks the documentation against the repo: cited paths, each package's flags, package tables, “master + N” headings, skill and test counts, and internal anchors. `tests/lint_module_names.py` guards the opposite collision: two modules outside the tests sharing a basename are resolved by name, so with both on the same `sys.path` one becomes unreachable; it only allows the declared repeats between self-contained packages' scripts. `run_tests.py` runs both as local gates after the suites (“Summary: N/M suites and N/M gates”), so the usual command covers the same comparison and the same basenames as the lint job. The shared findings contract lives in `contracts/findings/`: `emit.py` adapts the native output of `appsec-audit`, `seo-auditor`, `db-architect`, `api-contract-guard`, `finops-auditor` and `docs-sync-engine` to `findings.schema.json` v1.0.0, `findings_validate.py` validates it (with `--fail-on` for CI) and `findings_to_sarif.py` exports it to SARIF 2.1.0. GitHub Actions runs the lint gates on Python 3.14 and the suites on the 3.9/3.14 matrix across Linux, macOS and Windows. The lint job also validates the workflows with `actionlint` (pinned version, checksum-verified), which reproduces GitHub's refusal to load them: a `matrix` inside a job `if` invalidates the whole workflow. Every description must state its use case ("Use when…") and cover both languages, since that is the only automatic-activation signal agents read. `markdownlint-cli2` is an optional local check.
+`tests/lint_frontmatter.py` validates every `SKILL.md` block with a real YAML parser (PyYAML, from the `dev` group), plus `name`, `description`, manifests, relative links, the index and the marketplace. Each package version comes from its manifest, and `tests/version_guard.py` fails when a package changes without bumping it, comparing against the previous commit. `tests/metrics_gate.py` fails when `high` findings or clones grow past the ceiling in `tests/metrics_baseline.json`. `tests/audit_docs.py` checks the documentation against the repo: cited paths, each package's flags, package tables, “master + N” headings, skill and test counts, and internal anchors. `tests/lint_module_names.py` guards the opposite collision: two modules outside the tests sharing a basename are resolved by name, so with both on the same `sys.path` one becomes unreachable; it only allows the declared repeats between self-contained packages' scripts. `run_tests.py` runs both as local gates after the suites (“Summary: N/M suites and N/M gates”), so the usual command covers the same comparison and the same basenames as the lint job. The shared findings contract lives in `contracts/findings/`: `emit.py` adapts the native output of `appsec-audit`, `seo-auditor`, `db-architect`, `api-contract-guard`, `finops-auditor`, `docs-sync-engine` and `test-architect` to `findings.schema.json` v1.0.0, `findings_validate.py` validates it (with `--fail-on` for CI) and `findings_to_sarif.py` exports it to SARIF 2.1.0. GitHub Actions runs the lint gates on Python 3.14 and the suites on the 3.9/3.14 matrix across Linux, macOS and Windows. The lint job also validates the workflows with `actionlint` (pinned version, checksum-verified), which reproduces GitHub's refusal to load them: a `matrix` inside a job `if` invalidates the whole workflow. Every description must state its use case ("Use when…") and cover both languages, since that is the only automatic-activation signal agents read. `markdownlint-cli2` is an optional local check.
 
 ### Packaging
 
@@ -256,7 +260,7 @@ The canonical `severity` scale is **`critical` → `high` → `medium` → `low`
 
 | Values | Tools |
 |---|---|
-| `low \| medium \| high \| none` | `auth_coverage.py`, `env_check.py`, `terms_check.py`, `code_metrics.py`, `dead_code.py`, `llm_cost_scan.py`, `infra_cost_scan.py`, `ci_cost_scan.py`, `lock_audit.py`, `docs_parity.py` |
+| `low \| medium \| high \| none` | `auth_coverage.py`, `env_check.py`, `terms_check.py`, `code_metrics.py`, `dead_code.py`, `llm_cost_scan.py`, `infra_cost_scan.py`, `ci_cost_scan.py`, `lock_audit.py`, `docs_parity.py`, `flaky_scan.py`, `contract_fixtures.py` |
 | `low \| medium \| none` | `sql_lint.py` |
 | `medium \| none` | `query_trace.py` |
 | `medium \| high \| none` | `schema_audit.py` |

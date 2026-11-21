@@ -26,6 +26,7 @@ testpaths = [
     "replica/tests",
     "seo-auditor/tests",
     "skill-evals/tests",
+    "test-architect/tests",
 ]
 
 [tool.ruff]

@@ -8,6 +8,22 @@
 
 Todas las modificaciones notables de este proyecto están documentadas en este archivo.
 
+### - 2026-11-21 · Paquete test-architect (lote 2 de v6.0.0)
+
+#### Añadido
+
+- **Paquete `test-architect` 1.0.0** con cinco skills: maestro, `test-plan`, `test-flaky`, `test-mutation` y `test-contract`. Lee el árbol y los tests; no ejecuta suites ni mutantes.
+- **`plan_tests.py`**: cruza módulos con tests por nombre y puntúa el riesgo (sesión, cobro, permisos) con plan ordenado y ledger de exclusiones.
+- **`flaky_scan.py`**: ocho patrones de inestabilidad (espera fija, reloj, azar sin semilla, red real, ruta compartida, estado global, bucle sin salida y skip permanente) con `--fail-on` y `--allow-network`.
+- **`mutation_targets.py`**: operadores por función (condicional, booleano, límite y retorno) y presupuesto de mutantes sin ejecutar ninguno.
+- **`contract_fixtures.py`**: contrato proveedor/consumidor sobre fixtures JSON (campo faltante, tipo divergente, nulo no permitido y extra) con `--fail-on`.
+- **Contrato de hallazgos:** adaptador `test` en `contracts/findings/emit.py`, con tabla de correcciones para las dieciséis reglas del paquete.
+- **v5.4.0:** el índice raíz y el marketplace pasan a 86 skills y 13 paquetes, con las filas de `test-architect` en README (ES/EN), índice y guía.
+
+#### Verificado
+
+- Suite del paquete (49 tests) y suite completa, `run_tests.py`, `lint_frontmatter`, `audit_docs`, `lint_module_names`, `metrics_gate`, `ruff`, `markdownlint-cli2`, triggers de las cinco skills y evals regeneradas.
+
 ### - 2026-11-20 · Paridad ES/EN, superficie MCP y API Top 10 (lote 1 de v6.0.0)
 
 #### Añadido
@@ -733,6 +749,22 @@ Todas las modificaciones notables de este proyecto están documentadas en este a
 ## English
 
 All notable changes to this project are documented in this file.
+
+### - 2026-11-21 · test-architect package (v6.0.0 batch 2)
+
+#### Added
+
+- **`test-architect` package 1.0.0** with five skills: master, `test-plan`, `test-flaky`, `test-mutation` and `test-contract`. It reads the tree and the tests; it runs neither suites nor mutants.
+- **`plan_tests.py`**: crosses modules with tests by name and scores risk (session, money, permissions) into an ordered plan plus an exclusion ledger.
+- **`flaky_scan.py`**: eight instability patterns (fixed sleep, wall clock, unseeded randomness, real network, shared path, global state, endless loop and permanent skip) with `--fail-on` and `--allow-network`.
+- **`mutation_targets.py`**: per-function operators (conditional, boolean, boundary and return) and a mutant budget without running any.
+- **`contract_fixtures.py`**: provider/consumer contract over JSON fixtures (missing field, type drift, forbidden null and extras) with `--fail-on`.
+- **Findings contract:** `test` adapter in `contracts/findings/emit.py`, with a fix table for the package's sixteen rules.
+- **v5.4.0:** the root index and the marketplace move to 86 skills and 13 packages, with `test-architect` rows in README (ES/EN), index and guide.
+
+#### Verified
+
+- Package suite (49 tests) and full suite, `run_tests.py`, `lint_frontmatter`, `audit_docs`, `lint_module_names`, `metrics_gate`, `ruff`, `markdownlint-cli2`, triggers for the five skills and regenerated evals.
 
 ### - 2026-11-20 · ES/EN parity, MCP surface and API Top 10 (v6.0.0 batch 1)
 
