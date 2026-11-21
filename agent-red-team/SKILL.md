@@ -5,7 +5,7 @@ description: >
 license: MIT
 metadata:
   package: agent-red-team
-  version: "3.1.0"
+  version: "3.2.0"
   author: "Alberto Ortiz"
 ---
 
@@ -18,6 +18,7 @@ Evalúa de forma exhaustiva la seguridad de cualquier carpeta de Agent Skill, pa
 - Antes de instalar o copiar una carpeta de Skill descargada de GitHub, registros comunitarios o terceros.
 - Cuando el usuario pida auditar, revisar o hacer *red teaming* sobre un `SKILL.md`, `scripts/`, `references/` o repositorio de herramientas de IA.
 - Si se sospecha de inyección de prompts indirecta, exfiltración de secretos o comportamiento anómalo en una skill existente.
+- Cuando lo que se conecta es un **servidor MCP**: la configuración y sus tools las revisa `red-mcp`.
 
 ## Modos de operación: elige ANTES de empezar
 
@@ -42,6 +43,7 @@ El paquete se instala como una unidad: las sub-skills comparten `references/`, `
 |---|---|---|
 | `red-scan` | Escaneo rápido en modo guidance: veredicto y hallazgos en el chat | No |
 | `red-audit` | Auditoría completa: fases 0-5, verificación independiente, ledger e informe JSON | Sí, los que pida el usuario |
+| `red-mcp` | Superficie MCP: transportes, tools/resources/prompts, permisos, tokens y autoaprobación | No (salvo el informe que se pida) |
 
 Esta skill es el **maestro**: elige el modo y marca los límites. En caso de duda entre ambos, gana `red-scan` y se pregunta antes de crear archivos.
 

@@ -1,0 +1,14 @@
+{
+  "secret_keys": ["token", "api_key", "apikey", "api-key", "authorization", "bearer", "password", "secret"],
+  "placeholder_markers": ["${", "$(", "process.env", "os.environ", "env:", "<", "redacted", "changeme"],
+  "dangerous_tools": ["exec", "shell", "run", "run_command", "terminal", "write_file", "delete_file", "browser_eval", "eval"],
+  "approval_keys": ["autoApprove", "alwaysAllow", "autoApproveTools", "allowedTools"],
+  "hijack_patterns": [
+    ["ignore (all )?(the )?previous", "high", "la descripción pide ignorar instrucciones previas"],
+    ["always (use|call) this tool", "medium", "la descripción fuerza el uso de esta tool"],
+    ["do not (tell|inform|mention)", "medium", "la descripción pide ocultar información al usuario"],
+    ["before using any other tool", "medium", "la descripción se coloca por delante del resto de tools"]
+  ],
+  "permission_keys": ["filesystem", "network", "access", "scope", "mode"],
+  "permission_values": ["write", "delete", "network", "admin", "true", "*"]
+}

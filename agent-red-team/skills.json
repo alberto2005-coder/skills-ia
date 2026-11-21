@@ -2,7 +2,7 @@
   "format": "skills-ia-package",
   "format_version": "1.0",
   "name": "agent-red-team",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Auditoría de seguridad ofensiva de skills, MCP y carpetas de instrucciones: maestro + escaneo rápido (guidance) y auditoría completa con verificación.",
   "author": "Alberto Ortiz",
   "skills": [
@@ -20,6 +20,11 @@
       "name": "red-audit",
       "path": "red-audit/SKILL.md",
       "description": "Auditoría completa: superficies, escaneo estático, revisión adversarial, verificación independiente (confirmed/needs_validation/rejected), ledger e informe JSON validable."
+    },
+    {
+      "name": "red-mcp",
+      "path": "red-mcp/SKILL.md",
+      "description": "Superficie MCP: transportes, tools/resources/prompts, permisos, tokens y autoaprobación, sin duplicar appsec-llm."
     }
   ]
 }

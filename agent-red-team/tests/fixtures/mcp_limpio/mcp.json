@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "docs": {
+      "command": "npx docs-mcp-server@1.4.2",
+      "args": ["--root", "./docs"],
+      "env": {
+        "MCP_TOKEN": "${MCP_TOKEN}"
+      },
+      "autoApprove": [],
+      "permissions": {
+        "filesystem": "read",
+        "network": "false"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "read_doc",
+      "description": "Read a Markdown file under the configured docs directory."
+    }
+  ]
+}
